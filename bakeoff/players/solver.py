@@ -9,9 +9,10 @@ from bakeoff.senses import WINDOW
 _MOVES = (("stay", 1, 0), ("left", 1, -1), ("right", 1, 1), ("jump", 2, 0))  # tie-break order
 
 
-def solve(senses: dict) -> str:
-    """First action of the longest sequence known to survive. Tiles outside the visible
-    window count as gaps, so the solver only trusts what every contestant can see."""
+def solve_depths(senses: dict) -> dict[str, int]:
+    """For each action, the furthest visible row its best continuation reaches (0 if the first
+    move is not known-safe). Tiles outside the visible window count as gaps, so the solver only
+    trusts what every contestant can see."""
     gaps = {(e["row"], o) for e in senses["ahead"] for o in e["gaps_relative"]}
     horizon = len(senses["ahead"])
 
@@ -27,12 +28,14 @@ def solve(senses: dict) -> str:
                     break
         return best
 
-    best_action, best_depth = "stay", -1
-    for action, advance, shift in _MOVES:
-        reached = depth(advance, shift) if safe(advance, shift) else 0
-        if reached > best_depth:
-            best_action, best_depth = action, reached
-    return best_action
+    return {action: depth(advance, shift) if safe(advance, shift) else 0
+            for action, advance, shift in _MOVES}
+
+
+def solve(senses: dict) -> str:
+    """First action (in tie-break order) of the longest sequence known to survive."""
+    depths = solve_depths(senses)
+    return max(depths, key=depths.get)  # max returns the first maximum
 
 
 class SolverPlayer:

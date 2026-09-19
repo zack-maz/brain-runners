@@ -38,6 +38,12 @@ def _mean(values: list[float]) -> float | None:
     return sum(values) / len(values) if values else None
 
 
+def _agrees(step: dict) -> bool:
+    """The choice is as deep as the best move; ties with the solver's own pick count."""
+    depths = step["solver_depths"]
+    return step["chosen_action"] in depths and depths[step["chosen_action"]] == max(depths.values())
+
+
 def _summarize_player(player: str, steps: list[dict]) -> dict:
     runs = defaultdict(list)
     for s in steps:
@@ -57,7 +63,7 @@ def _summarize_player(player: str, steps: list[dict]) -> dict:
         "finished": sum(f["finished"] for f in complete),
         **{cause: sum(f["death_cause"] == cause for f in complete)
            for cause in ("ran_into_gap", "jumped_into_gap", "dodged_into_gap")},
-        "solver_agreement": _ratio(sum(s["chosen_action"] == s["solver_action"] for s in comparable), len(comparable)),
+        "solver_agreement": _ratio(sum(_agrees(s) for s in comparable), len(comparable)),
         "fallback_rate": _ratio(sum(s["executed_action"] != s["chosen_action"] for s in steps), len(steps)),
         "invalid_rate": _ratio(sum(s["invalid"] for s in steps), len(steps)),
         "error_rate": _ratio(sum(s["error"] is not None for s in steps), len(steps)),

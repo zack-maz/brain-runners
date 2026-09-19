@@ -7,7 +7,7 @@ from bakeoff.players.base import Decision
 from bakeoff.runner import BudgetExhausted, RunAborted, Runner
 
 KEYS = {"run_id", "player", "seed", "row", "lane", "senses", "looming", "questions", "answers",
-        "chosen_action", "executed_action", "solver_action", "gated", "invalid", "error",
+        "chosen_action", "executed_action", "solver_action", "solver_depths", "gated", "invalid", "error",
         "ground_truth", "alive", "finished", "death_cause", "rows_survived", "latency_ms",
         "usage", "cache_hit", "info", "track"}
 
@@ -35,6 +35,14 @@ def test_solver_run_records(tmp_path):
     assert set(records[0]["looming"]) == {"left_hz", "right_hz"}
     assert set(records[0]["ground_truth"]) == {"gap_ahead", "left_safe"}
     json.dumps(records)
+
+
+def test_solver_action_is_the_first_maximum_of_the_logged_depths(tmp_path):
+    records = Runner(tmp_path).run_seed(make_player("random"), seed=3, run_id="r", max_rows=40)
+    for r in records:
+        depths = r["solver_depths"]
+        assert list(depths) == ["stay", "left", "right", "jump"]
+        assert r["solver_action"] == max(depths, key=depths.get)
 
 
 def test_track_is_logged_once_per_seed(tmp_path):

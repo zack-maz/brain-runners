@@ -4,7 +4,7 @@ from bakeoff.game.engine import ACTIONS, Game
 from bakeoff.game.track import generate_track
 from bakeoff.players import REGISTRY, make_player
 from bakeoff.players.base import Decision
-from bakeoff.players.solver import solve
+from bakeoff.players.solver import solve, solve_depths
 from bakeoff.senses import compute_senses
 
 
@@ -59,6 +59,26 @@ def test_random_player_is_reproducible_per_seed_and_uses_every_action(make_track
 
 def test_solver_runs_straight_on_open_floor(make_track):
     assert solve(compute_senses(Game(make_track({})))) == "stay"
+
+
+def test_solve_depths_reports_the_furthest_row_each_first_move_reaches(make_track):
+    open_floor = solve_depths(compute_senses(Game(make_track({}))))
+    assert list(open_floor) == ["stay", "left", "right", "jump"]
+    assert set(open_floor.values()) == {6}
+    depths = solve_depths(compute_senses(Game(make_track({1: [6]}))))
+    assert depths["stay"] == 0  # the first move is not known-safe
+    assert depths["left"] == depths["right"] == depths["jump"] == 6
+
+
+def test_solve_depths_stops_where_the_visible_floor_ends(make_track):
+    wall = list(range(12))
+    depths = solve_depths(compute_senses(Game(make_track({3: wall, 4: wall}))))
+    assert depths == {"stay": 2, "left": 2, "right": 2, "jump": 2}
+
+
+def test_solve_is_the_first_action_with_the_maximum_depth(make_track):
+    senses = compute_senses(Game(make_track({1: [6]})))
+    assert solve(senses) == "left"  # left, right and jump tie at 6; left comes first
 
 
 def test_solver_dodges_a_gap_ahead(make_track):

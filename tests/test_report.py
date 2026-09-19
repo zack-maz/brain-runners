@@ -8,9 +8,10 @@ from bakeoff.runner import Runner
 
 
 def step(player="p", seed=0, row=0, chosen="stay", executed=None, solver="stay", alive=True,
-         finished=False, death_cause=None, rows_survived=0, **extra):
+         finished=False, death_cause=None, rows_survived=0, depths=None, **extra):
     record = {"player": player, "seed": seed, "row": row, "chosen_action": chosen,
               "executed_action": chosen if executed is None else executed, "solver_action": solver,
+              "solver_depths": depths or {"stay": 0, "left": 0, "right": 0, "jump": 0, solver: 6},
               "alive": alive, "finished": finished, "death_cause": death_cause,
               "rows_survived": rows_survived, "gated": False, "invalid": False, "error": None,
               "latency_ms": None, "usage": None, "cache_hit": False}
@@ -44,6 +45,14 @@ def test_solver_agreement_ignores_steps_without_a_choice():
     assert row["solver_agreement"] == 0.5
     assert row["error_rate"] == pytest.approx(1 / 3)
     assert row["fallback_rate"] == pytest.approx(1 / 3)
+
+
+def test_a_tied_best_choice_counts_as_agreement_even_if_it_is_not_the_solvers_pick():
+    tied = {"stay": 6, "left": 6, "right": 0, "jump": 3}
+    steps = [step(chosen="left", solver="stay", depths=tied), step(row=1, chosen="jump", solver="stay", depths=tied),
+             step(row=2, chosen="teleport", solver="stay", depths=tied)]
+    (row,) = summarize(steps)
+    assert row["solver_agreement"] == pytest.approx(1 / 3)  # left ties stay; jump is worse; teleport is no key
 
 
 def test_invalid_rate_and_fallback_rate():

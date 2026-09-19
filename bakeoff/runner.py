@@ -13,7 +13,7 @@ from typing import Callable, Sequence
 from bakeoff.game.engine import ACTIONS, Game
 from bakeoff.game.track import LANES, LOOKAHEAD, MAX_ROWS, generate_track
 from bakeoff.players.base import Player
-from bakeoff.players.solver import solve
+from bakeoff.players.solver import solve_depths
 from bakeoff.senses import compute_senses, ground_truth, looming_rates
 
 SCHEMA_VERSION = 1
@@ -76,6 +76,7 @@ class Runner:
             senses = compute_senses(game)
             left_hz, right_hz = looming_rates(senses)
             truth = ground_truth(game)
+            depths = solve_depths(senses)
             row, lane = game.row, game.lane
             decision = player.act(senses)
             invalid = decision.invalid or (
@@ -88,9 +89,9 @@ class Runner:
                 "senses": senses, "looming": {"left_hz": left_hz, "right_hz": right_hz},
                 "questions": decision.questions, "answers": decision.answers,
                 "chosen_action": decision.chosen_action, "executed_action": executed,
-                "solver_action": solve(senses), "gated": decision.gated, "invalid": invalid,
-                "error": decision.error, "ground_truth": truth, "alive": game.alive,
-                "finished": game.finished, "death_cause": game.death_cause,
+                "solver_action": max(depths, key=depths.get), "solver_depths": depths,
+                "gated": decision.gated, "invalid": invalid, "error": decision.error,
+                "ground_truth": truth, "alive": game.alive, "finished": game.finished, "death_cause": game.death_cause,
                 "rows_survived": game.rows_survived, "latency_ms": decision.latency_ms,
                 "usage": decision.usage, "cache_hit": decision.cache_hit, "info": decision.info,
                 "track": track.to_json() if not records else None,
