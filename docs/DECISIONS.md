@@ -13,12 +13,26 @@
 4. **Budget:** limited. The fly runs locally for free; Jev and the LLM are paid per step,
    so runs need a request cap and a response cache from day one.
 
+5. **Fly route: pure fly, test first.** A throwaway spike (branch `spike/fly-steering`,
+   `spikes/01-fly-steering/REPORT.md`) showed the untrained model steers *away from threats*
+   reliably (36 of 36 one-sided trials, graded, cancels when both eyes are stimulated) and its
+   Giant Fiber escape neuron fires graded with threat, but it cannot steer toward food: smell
+   carries no side information and food input locks the left steering neuron on. About
+   0.6–0.7 s wall-clock per 100 ms decision on the user's M1.
+6. **Flagship game: a "Run"-style tunnel runner** (https://www.coolmathgames.com/0-run), not a
+   slither-style food arena. Left/right = the fly's steering neurons, jump = its Giant Fiber.
+7. **Design approved 2026-09-19:** `docs/superpowers/specs/2026-09-19-tunnel-run-design.md`.
+   LLM is Claude Haiku 4.5. Turn-based, one decision per row, same seeded tracks for everyone.
+
 ## Open
 
-- Which fly circuits the public models let us stimulate and read (research in progress);
-  the game list follows from that.
-- Which games, and how each is presented fairly to all three contestants.
-- LLM choice (Claude Haiku 4.5 was picked for the predecessor project).
+- Jev pricing and latency (first measured in phase 3, on one capped track).
+- The fly's looming weighting and its two thresholds (fixed in phase 2 on practice seeds).
+
+## Next step
+
+Write the phase 1 implementation plan (game engine, track generator, senses, `random` and
+`solver` players, runner, report, CLI) from the spec, then build it.
 
 ## Prior art to reuse
 
