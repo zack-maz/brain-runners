@@ -25,3 +25,13 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "slow" in item.keywords:
             item.add_marker(skip)
+
+
+@pytest.fixture(scope="session")
+def brain():
+    """The real fly brain, built once per test session (about 1 GB, half a minute). Slow tests only."""
+    from bakeoff.fly.brain import Brain
+
+    brain = Brain()
+    yield brain
+    brain.close()
