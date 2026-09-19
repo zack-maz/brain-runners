@@ -1,7 +1,7 @@
 import json
 
 from bakeoff.game.engine import Game
-from bakeoff.senses import MAX_HZ, compute_senses, ground_truth, looming_rates
+from bakeoff.senses import LOOMING_STEP_HZ, MAX_HZ, compute_senses, ground_truth, looming_rates
 
 
 def test_senses_shape_matches_the_spec(make_track):
@@ -55,9 +55,29 @@ def test_gap_in_own_lane_drives_both_eyes_equally(make_track):
 
 
 def test_nearer_gaps_loom_larger(make_track):
-    near, _ = looming_rates(compute_senses(Game(make_track({1: [5]}))))
-    far, _ = looming_rates(compute_senses(Game(make_track({4: [5]}))))
-    assert near > far > 0
+    near, _ = looming_rates(compute_senses(Game(make_track({1: [5]}))), gain_hz=100.0, falloff=1.0)
+    far, _ = looming_rates(compute_senses(Game(make_track({4: [5]}))), gain_hz=100.0, falloff=1.0)
+    assert (near, far) == (100.0, 25.0)
+
+
+def test_falloff_is_the_power_of_the_distance(make_track):
+    senses = compute_senses(Game(make_track({2: [5]})))
+    assert looming_rates(senses, gain_hz=200.0, falloff=1.0) == (100.0, 0.0)
+    assert looming_rates(senses, gain_hz=200.0, falloff=2.0) == (50.0, 0.0)
+    assert looming_rates(senses, gain_hz=200.0, falloff=3.0) == (25.0, 0.0)
+
+
+def test_gaps_in_one_eye_add_up(make_track):
+    senses = compute_senses(Game(make_track({1: [4, 5], 2: [7]})))
+    assert looming_rates(senses, gain_hz=100.0, falloff=1.0) == (200.0, 50.0)
+
+
+def test_rates_are_rounded_to_the_nearest_input_level(make_track):
+    assert LOOMING_STEP_HZ == 25.0
+    senses = compute_senses(Game(make_track({3: [5], 6: [7]})))
+    assert looming_rates(senses, gain_hz=100.0, falloff=1.0) == (25.0, 25.0)  # 33.3 and 16.7
+    assert looming_rates(senses, gain_hz=70.0, falloff=1.0) == (25.0, 0.0)  # 23.3 and 11.7
+    assert looming_rates(senses, gain_hz=112.5, falloff=1.0) == (50.0, 25.0)  # 37.5 rounds up, 18.75 up
 
 
 def test_rates_are_capped_at_250_hz(make_track):

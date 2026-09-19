@@ -35,7 +35,7 @@ use the next record's `row`/`lane`, or derive the landing tile as below.
 | `row` | int | row the runner stands on at decision time (starts at 0) |
 | `lane` | int | lane at decision time, `0 .. lanes-1` (starts at `lanes // 2`, i.e. 6) |
 | `senses` | object | exactly what the player was shown, see below |
-| `looming` | `{left_hz, right_hz}` | floats, the same senses as the fly's eye rates, capped at `max_hz`. Provisional and ours, not the fly's biology |
+| `looming` | `{left_hz, right_hz}` | floats, the fly's eye rates for these senses: each visible gap adds `gain_hz / row ** falloff` to its eye (own lane: both eyes), the sum is capped at `max_hz` and rounded to the nearest `step_hz` (so 11 levels, 0 to 250). Ours, not the fly's biology |
 | `questions` | object or null | questions put to the player (Jev / LLM), else null |
 | `answers` | object or null | the player's answers, else null |
 | `chosen_action` | string or null | what the player asked for. May be an invalid string, or null if it gave none |
@@ -105,7 +105,7 @@ A track's identity is its seed: the difficulty ramp is fixed at 300 rows, so a r
 | `status` | string | `running`, then `completed`, `aborted`, `budget_exhausted` or `interrupted` |
 | `players` | string[] | the players planned for this run, in order |
 | `seeds` | int[] | the seeds planned for this run |
-| `game` | object | `lanes`, `max_rows`, `lookahead`, `window` (visible lanes each side), `looming: {gain_hz, max_hz, provisional}` |
+| `game` | object | `lanes`, `max_rows`, `lookahead`, `window` (visible lanes each side), `looming: {gain_hz, falloff, step_hz, max_hz, provisional}` |
 | `args` | object | the CLI arguments |
 | `python` | string | interpreter version |
 | `versions` | object | `brian2`, `typesafe-sdk`, `anthropic` versions or null |

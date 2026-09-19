@@ -97,7 +97,8 @@ def test_run_writes_one_jsonl_per_player_and_meta(tmp_path):
     meta = json.loads((run_dir / "meta.json").read_text())
     assert meta["players"] == ["solver", "random"] and meta["seeds"] == [0, 1]
     assert meta["game"] == {"lanes": 12, "max_rows": 40, "lookahead": 6, "window": 3,
-                            "looming": {"gain_hz": 100.0, "max_hz": 250.0, "provisional": True}}
+                            "looming": {"gain_hz": 100.0, "falloff": 1.0, "step_hz": 25.0, "max_hz": 250.0,
+                                        "provisional": True}}
     assert meta["args"] == {"players": "solver,random"}
     assert meta["status"] == "completed" and meta["schema_version"] == 1
     assert "git_sha" in meta and "anthropic" in meta["versions"]

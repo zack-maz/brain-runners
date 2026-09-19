@@ -15,7 +15,8 @@ from bakeoff.game.engine import ACTIONS, Game
 from bakeoff.game.track import LANES, LOOKAHEAD, MAX_ROWS, generate_track
 from bakeoff.players.base import Player
 from bakeoff.players.solver import solve_depths
-from bakeoff.senses import LOOMING_GAIN_HZ, MAX_HZ, WINDOW, compute_senses, ground_truth, looming_rates
+from bakeoff.senses import (LOOMING_FALLOFF, LOOMING_GAIN_HZ, LOOMING_STEP_HZ, MAX_HZ, WINDOW, compute_senses,
+                            ground_truth, looming_rates)
 
 SCHEMA_VERSION = 1
 FALLBACK_ACTION = "stay"  # never the solver's move: a rescue would hide what we want to see
@@ -133,7 +134,8 @@ class Runner:
             "started_at": _now(), "finished_at": None, "status": "running",
             "players": names, "seeds": list(seeds),
             "game": {"lanes": LANES, "max_rows": max_rows, "lookahead": LOOKAHEAD, "window": WINDOW,
-                     "looming": {"gain_hz": LOOMING_GAIN_HZ, "max_hz": MAX_HZ, "provisional": True}},
+                     "looming": {"gain_hz": LOOMING_GAIN_HZ, "falloff": LOOMING_FALLOFF, "step_hz": LOOMING_STEP_HZ,
+                                 "max_hz": MAX_HZ, "provisional": True}},
             "args": args or {}, "python": platform.python_version(),
             "versions": {pkg: _version(pkg) for pkg in ("brian2", "typesafe-sdk", "anthropic")},
         }
