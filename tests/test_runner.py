@@ -68,7 +68,7 @@ def test_sink_is_called_as_each_record_is_produced(tmp_path):
 ])
 def test_fallback_is_stay_never_the_solver(tmp_path, decision):
     player = Scripted(decision)
-    records = Runner(tmp_path).run_seed(player, seed=3, run_id="r", max_rows=40)
+    records = Runner(tmp_path).run_seed(player, seed=1, run_id="r", max_rows=40)  # always-stay dies on seed 1
     assert all(r["executed_action"] == "stay" for r in records)
     assert all(r["chosen_action"] == decision.chosen_action for r in records)
     assert player.observed == ["stay"] * len(records)

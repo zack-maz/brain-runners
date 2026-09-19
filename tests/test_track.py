@@ -1,10 +1,20 @@
-from bakeoff.game.track import (LANES, LOOKAHEAD, MAX_ROWS, RUNWAY_ROWS, generate_track,
+from bakeoff.game.track import (DIFFICULTY_ROWS, LANES, LOOKAHEAD, MAX_ROWS, RUNWAY_ROWS, generate_track,
                                 start_lane, survivable)
 
 
 def test_same_seed_same_track_and_different_seed_differs():
     assert generate_track(7) == generate_track(7)
     assert generate_track(7).gaps != generate_track(8).gaps
+
+
+def test_a_shorter_track_is_a_prefix_of_the_same_seeds_longer_track():
+    for seed in (0, 3, 7, 42):
+        short = generate_track(seed, max_rows=50)
+        assert short.gaps == generate_track(seed).gaps[:len(short.gaps)]
+
+
+def test_difficulty_ramps_on_a_fixed_scale_not_on_max_rows():
+    assert DIFFICULTY_ROWS == MAX_ROWS == 300
 
 
 def test_shape_and_defaults():

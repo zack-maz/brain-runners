@@ -7,6 +7,7 @@ from dataclasses import dataclass
 
 LANES = 12
 MAX_ROWS = 300
+DIFFICULTY_ROWS = 300  # gap density ramps over this many rows whatever max_rows is, so tracks are prefix-stable
 LOOKAHEAD = 6
 RUNWAY_ROWS = 4  # rows 0..RUNWAY_ROWS are all floor so nobody dies before seeing a gap
 START_GAP_RATE = 0.04  # chance that a lane starts a gap run, at row 0
@@ -50,19 +51,21 @@ def _safe_path(rng: random.Random, lanes: int, length: int) -> set[tuple[int, in
 
 
 def generate_track(seed: int, lanes: int = LANES, max_rows: int = MAX_ROWS) -> Track:
-    rng = random.Random(seed)
+    # Two independent streams (string seeds hash the same in every process): a longer track
+    # extends the path without shifting the gap scatter, so any max_rows plays a prefix.
+    path_rng, gap_rng = random.Random(f"{seed}:path"), random.Random(f"{seed}:gaps")
     length = max_rows + LOOKAHEAD + 2  # so look-ahead and a last jump never leave the track
-    protected = _safe_path(rng, lanes, length)
+    protected = _safe_path(path_rng, lanes, length)
     gaps: list[tuple[int, ...]] = []
     for row in range(length):
         row_gaps: set[int] = set()
         if row > RUNWAY_ROWS:
-            progress = min(1.0, row / max_rows)
+            progress = min(1.0, row / DIFFICULTY_ROWS)
             rate = START_GAP_RATE + (END_GAP_RATE - START_GAP_RATE) * progress
             widest = 1 + min(MAX_GAP_WIDTH - 1, int(progress * MAX_GAP_WIDTH))
             for lane in range(lanes):
-                if rng.random() < rate:
-                    width = rng.randint(1, widest)
+                if gap_rng.random() < rate:
+                    width = gap_rng.randint(1, widest)
                     row_gaps.update((lane + i) % lanes for i in range(width))
         gaps.append(tuple(sorted(l for l in row_gaps if (row, l) not in protected)))
     return Track(seed=seed, lanes=lanes, max_rows=max_rows, gaps=tuple(gaps))
