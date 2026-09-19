@@ -12,7 +12,7 @@ calibration predicted 118.70 (ratio 0.99).
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | fly | 20 | 0 | 0 | 117.95 | 113.00 | 0 | 0 | 20 | 0 | 0.08 | 0.99 | 0.00 | 0.00 | 0.00 | 0 | - | 0 | 0 |
 
-Run runs/20260919-151934, code a130a28, clean tree.
+Run runs/20260919-151934, code a130aa2, clean tree.
 
 ## First scoreboard, seeds 0-19
 
@@ -23,7 +23,7 @@ Run runs/20260919-151934, code a130a28, clean tree.
 | random | 20 | 0 | 0 | 34.70 | 30.00 | 0 | 8 | 4 | 8 | 0.26 | 0.96 | 0.00 | 0.00 | 0.00 | 0 | - | 0 | 0 |
 | solver | 20 | 0 | 0 | 299.70 | 300.00 | 19 | 1 | 0 | 0 | 0.02 | 1.00 | 0.00 | 0.00 | 0.00 | 0 | - | 0 | 0 |
 
-Run runs/20260919-154809, code a130a28, clean tree.
+Run runs/20260919-154809, code a130aa2, clean tree.
 
 `always_jump` is the floor for a jump-heavy player, `random` the floor for everything else, `solver`
 the reference (same 6-row, ±3-lane view; not a contestant).
