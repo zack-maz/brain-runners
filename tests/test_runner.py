@@ -99,9 +99,12 @@ def test_run_writes_one_jsonl_per_player_and_meta(tmp_path):
     assert meta["game"] == {"lanes": 12, "max_rows": 40, "lookahead": 6, "window": 3,
                             "looming": {"gain_hz": 100.0, "falloff": 1.0, "step_hz": 25.0, "max_hz": 250.0,
                                         "provisional": True}}
+    assert meta["fly"] == {"turn_threshold_hz": 20.0, "jump_threshold_hz": 150.0, "window_ms": 100.0,
+                           "provisional": True, "model_commit": "91bdd1e7dcf193f3e7ca5a8933497fcef63b7960",
+                           "annotations_commit": "17fc57722002e1a7d38cdd0c89ac382bf92718da"}
     assert meta["args"] == {"players": "solver,random"}
     assert meta["status"] == "completed" and meta["schema_version"] == 1
-    assert "git_sha" in meta and "anthropic" in meta["versions"]
+    assert "git_sha" in meta and {"anthropic", "brian2", "numpy"} <= set(meta["versions"])
 
 
 def test_every_player_gets_the_same_track(tmp_path):

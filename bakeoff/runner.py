@@ -11,8 +11,11 @@ from importlib import metadata
 from pathlib import Path
 from typing import Callable, Sequence
 
+from bakeoff.fly import data as fly_data
+from bakeoff.fly.reading import WINDOW_MS
 from bakeoff.game.engine import ACTIONS, Game
 from bakeoff.game.track import LANES, LOOKAHEAD, MAX_ROWS, generate_track
+from bakeoff.players import fly
 from bakeoff.players.base import Player
 from bakeoff.players.solver import solve_depths
 from bakeoff.senses import (LOOMING_FALLOFF, LOOMING_GAIN_HZ, LOOMING_STEP_HZ, MAX_HZ, WINDOW, compute_senses,
@@ -135,9 +138,12 @@ class Runner:
             "players": names, "seeds": list(seeds),
             "game": {"lanes": LANES, "max_rows": max_rows, "lookahead": LOOKAHEAD, "window": WINDOW,
                      "looming": {"gain_hz": LOOMING_GAIN_HZ, "falloff": LOOMING_FALLOFF, "step_hz": LOOMING_STEP_HZ,
-                                 "max_hz": MAX_HZ, "provisional": True}},
+                                 "max_hz": MAX_HZ, "provisional": not fly.CALIBRATED}},
+            "fly": {"turn_threshold_hz": fly.TURN_THRESHOLD_HZ, "jump_threshold_hz": fly.JUMP_THRESHOLD_HZ,
+                    "window_ms": WINDOW_MS, "provisional": not fly.CALIBRATED,
+                    "model_commit": fly_data.MODEL_REPO_COMMIT, "annotations_commit": fly_data.ANNOTATIONS_COMMIT},
             "args": args or {}, "python": platform.python_version(),
-            "versions": {pkg: _version(pkg) for pkg in ("brian2", "typesafe-sdk", "anthropic")},
+            "versions": {pkg: _version(pkg) for pkg in ("brian2", "cython", "numpy", "typesafe-sdk", "anthropic")},
         }
         meta_path.write_text(json.dumps(meta, indent=2))
         self._error_streak = 0

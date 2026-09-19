@@ -29,7 +29,7 @@ def test_decision_defaults_and_fallback_rule():
 
 
 def test_factory_knows_the_baselines_and_rejects_unknown_names():
-    assert set(REGISTRY) == {"random", "always_jump", "solver"}
+    assert set(REGISTRY) == {"random", "always_jump", "solver", "fly"}
     assert all(make_player(name).name == name for name in REGISTRY)
     with pytest.raises(KeyError, match="unknown player 'nope'"):
         make_player("nope")

@@ -66,6 +66,25 @@ runner executes `stay`. It is never the solver's move.
 the gap lanes `row` rows ahead as offsets from the runner's lane, only within 3 lanes either side
 (`-3..3`), lane wrap already applied. `actions` maps each action to a description.
 
+### `info` of the fly
+
+One object per decision, everything the viewer needs to draw the fly's "mind". Neuron-group keys
+are `<cell type>_<side>`: `DNa01`, `DNb01` (steering), `DNp01` (Giant Fiber) and `DNa02` (logged
+only, never decides), each `_left` and `_right`; every group is a single neuron.
+
+| key | type | meaning |
+| --- | --- | --- |
+| `left_hz`, `right_hz` | float | Poisson rate given to the LPLC2 + LC4 looming detectors of each eye (equals `looming`) |
+| `noise_seed` | int | seed of this decision's input noise, `crc32("fly:{seed}:{row}")`; the same seed repeats the window exactly |
+| `rates_hz` | object | firing rate of each group over the window |
+| `spike_counts` | object | spikes of each group in the window |
+| `spike_times_ms` | object | spike times of each group, ms from the start of the window |
+| `total_spikes` | int | spikes in the whole brain during the window |
+| `turn_signal_hz` | float | (DNa01 + DNb01, right) − (DNa01 + DNb01, left); above `turn_threshold_hz` → `right`, below its negative → `left` |
+| `jump_signal_hz` | float | Giant Fiber mean over both sides; above `jump_threshold_hz` → `jump`, which wins over a turn |
+| `turn_threshold_hz`, `jump_threshold_hz` | float | the fly's only tuning (ours), as used for this decision |
+| `wall_ms` | float | wall-clock time of the simulated window |
+
 ## The landing tile
 
 Given `row`, `lane` and `executed_action` (`lanes` from `track.lanes`):
@@ -106,9 +125,10 @@ A track's identity is its seed: the difficulty ramp is fixed at 300 rows, so a r
 | `players` | string[] | the players planned for this run, in order |
 | `seeds` | int[] | the seeds planned for this run |
 | `game` | object | `lanes`, `max_rows`, `lookahead`, `window` (visible lanes each side), `looming: {gain_hz, falloff, step_hz, max_hz, provisional}` |
+| `fly` | object | `turn_threshold_hz`, `jump_threshold_hz`, `window_ms`, `provisional` (true until calibrated), `model_commit`, `annotations_commit` |
 | `args` | object | the CLI arguments |
 | `python` | string | interpreter version |
-| `versions` | object | `brian2`, `typesafe-sdk`, `anthropic` versions or null |
+| `versions` | object | `brian2`, `cython`, `numpy`, `typesafe-sdk`, `anthropic` versions or null |
 
 A run that is not `completed` may lack records for some players or seeds; compare `players` and
 `seeds` with the files to see what is missing.
