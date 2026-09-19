@@ -31,8 +31,9 @@
 
 ## Next step
 
-Write the phase 1 implementation plan (game engine, track generator, senses, `random` and
-`solver` players, runner, report, CLI) from the spec, then build it.
+Phase 1 is built (game, senses, `random` and `solver`, runner, report, CLI). Write the phase 2
+plan (fly player: data fetch, brain wrapper, neuron selection, looming weighting and the two
+thresholds fixed on practice seeds via `--seed-start`, first fly-vs-baselines scoreboard).
 
 ## Prior art to reuse
 

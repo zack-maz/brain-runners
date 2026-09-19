@@ -12,4 +12,10 @@ Every contestant plays the same seeded rounds. The output is a watchable tournam
 replays with each player's "mind" shown next to the game (Jev's probabilities, the LLM's
 answer, the fly's neurons firing) and a scoreboard across games.
 
-Status: design in progress. See `docs/DECISIONS.md`.
+Status: phase 1 of 5 built (game, senses, `random` and `solver` baselines, runner, report).
+
+    uv run pytest
+    uv run python -m bakeoff run --players random,solver --seeds 20
+    uv run python -m bakeoff report runs/<run_id>
+
+See `docs/DECISIONS.md` for what has been decided and what comes next.
