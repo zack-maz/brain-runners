@@ -28,6 +28,11 @@
 
 - Jev pricing and latency (first measured in phase 3, on one capped track).
 - The fly's looming weighting and its two thresholds (fixed in phase 2 on practice seeds).
+- `random` is not the floor: over seeds 0–199 always-`jump` averages 45.5 rows against random's
+  30.8 (always-stay 25.5), because a jump lands on only every other row. The Giant Fiber fires in
+  every threat trial, so a jump-heavy fly could beat `random` for a reason unrelated to steering.
+  Decide in phase 2 whether to add an `always_jump` baseline so a jump-heavy fly is judged
+  against the right floor.
 
 ## Next step
 

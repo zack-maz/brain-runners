@@ -34,6 +34,22 @@
 6. **`--seed-start`** on the CLI so that phase 2's practice seeds cannot overlap tournament seeds.
 7. **Deferred to phase 3, where the data first exists:** Noul calibration (Brier) and cost per run in the report; model ids in `meta.json`. Fly thresholds in `meta.json` arrive in phase 2. `BudgetExhausted` is defined now because the runner's status handling is built and tested here.
 
+## Post-review amendments (code differs from the task blocks below)
+
+The whole-branch review changed the code after these tasks were written. Where a task block below disagrees with this section, this section wins. Schema details are in `docs/STEP_RECORD.md`.
+
+- **F1** `solver.solve_depths(senses)` returns the reach of each first move (order `stay, left, right, jump`); `solve()` is the first maximum. Records gain `solver_depths`; `solver_agreement` is the share of steps whose chosen action is as deep as the best move, so a tied-best choice agrees.
+- **F2** `report.load_meta()`; `summarize(steps, meta)` adds `missing` (planned seeds with no record, right after `incomplete`) and a row for every planned player; `run` and `report` print `status: ...` first.
+- **F3** The safe path and the gap scatter use separate string-seeded streams (`"{seed}:path"`, `"{seed}:gaps"`) and difficulty ramps over `DIFFICULTY_ROWS = 300`, so any `max_rows` plays a prefix of the same track. Every track changed; the runner fallback test uses seed 1 (always-stay dies within 40 rows there; seed 3 no longer does).
+- **F4** `Runner.run` raises `ValueError("duplicate player names: [...]")` before creating the directory; the CLI strips spaces around `--players` names and exits 2 on that error.
+- **M1** A jump from `max_rows - 1` lands past the finish line and finishes the run (`Game.step`, `survivable`). **M2** `fallback_rate` counts gated, invalid, errored and choice-less steps (a gated `stay` included). **M3** `random` seeds `Random(f"random:{seed}")`. **M4** `meta.json` gains `git_dirty`, `started_at`, `finished_at`, `game.window` and `game.looming`; git runs in the package directory. **M5** `docs/STEP_RECORD.md`.
+- **New measured numbers** (replace those in "Decisions this plan makes beyond the spec" items 3 and 4 and in Task 7 step 5). Seeds 0–199: `solver` finishes 194 tracks (worst run 203 rows); `random` averages 30.8 rows, always-`stay` 25.5, always-`jump` 45.5 (none of them finishes); gap fraction about 5 % / 13 % / 24 % in the first / middle / last hundred rows. The "reflex stand-in about 99" figure was not re-measured. Seeds 0–19 (Task 7 step 5, with the new `missing` column):
+
+```
+| random | 20 | 0 | 0 | 34.70 | 30.00 | 0 | 8 | 4 | 8 | 0.96 | ...
+| solver | 20 | 0 | 0 | 299.70 | 300.00 | 19 | 1 | 0 | 0 | 1.00 | ...
+```
+
 ## File Structure
 
 | File | Responsibility | Task |
@@ -1690,3 +1706,6 @@ git commit -m "feat: bakeoff CLI with run and report; phase 1 status in docs"
 - A 300-row fly run takes about 3.5 minutes; lines are flushed per step, so an interrupted run keeps its rows and is reported as `incomplete`.
 - The solver dies on about 4 % of tracks in late dead ends. If that is unwanted for the tournament seeds, pick tournament seeds the solver finishes, and say so in the write-up.
 - Phase 3 adds to the report: Noul calibration (Brier) from `answers` against `ground_truth`, and cost per run; and to `meta.json`: model ids and the request cap.
+- `random` is not the floor: always-`jump` averages 45.5 rows against random's 30.8 (seeds 0–199), because a jump lands on only every other row, and the Giant Fiber fires in every threat trial. Decide whether to add an `always_jump` baseline so a jump-heavy fly is judged against the right floor.
+- The fly brain needs about 1 GB: build it lazily in `reset()`, not in `__init__`, because the CLI constructs every player before the run starts.
+- Phase 3 report column: separate deaths on a fallback `stay` from deaths on a chosen `stay`.

@@ -13,7 +13,7 @@ tournament. Read these before doing anything:
 
 Design approved 2026-09-19. Phase 1 built (plan:
 `docs/superpowers/plans/2026-09-19-phase1-game-and-baselines.md`): game, senses, `random` and
-`solver`, runner, report, CLI. Baseline on seeds 0–19: random 39 rows, solver 297 (19 of 20
+`solver`, runner, report, CLI. Baseline on seeds 0–19: random 35 rows, solver 300 (19 of 20
 finished). Next: write the phase 2 plan (fly player), then build it. Each phase gets its own plan.
 
 ## How we work here
