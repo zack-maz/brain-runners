@@ -36,9 +36,10 @@
 
 ## Next step
 
-Phase 1 is built (game, senses, `random` and `solver`, runner, report, CLI). Write the phase 2
-plan (fly player: data fetch, brain wrapper, neuron selection, looming weighting and the two
-thresholds fixed on practice seeds via `--seed-start`, first fly-vs-baselines scoreboard).
+Phase 1 is built (game, senses, `random` and `solver`, runner, report, CLI). The phase 2 plan is
+written: `docs/superpowers/plans/2026-09-19-phase2-fly-player.md` (branch `phase2-fly-player`;
+every code block was run in a prototype). Read its "Decisions this plan makes beyond the spec",
+then build it task by task with subagent-driven-development.
 
 ## Prior art to reuse
 
