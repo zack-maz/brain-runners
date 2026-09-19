@@ -57,6 +57,16 @@ def test_random_player_is_reproducible_per_seed_and_uses_every_action(make_track
     assert set(choices(1)) == set(ACTIONS)
 
 
+def test_random_player_stream_is_not_the_tracks_integer_seed(make_track):
+    import random
+
+    player = make_player("random")
+    player.reset(Game(make_track({})), 5)
+    mine = [player.act({}).chosen_action for _ in range(50)]
+    track_stream = random.Random(5)
+    assert mine != [track_stream.choice(ACTIONS) for _ in range(50)]
+
+
 def test_solver_runs_straight_on_open_floor(make_track):
     assert solve(compute_senses(Game(make_track({})))) == "stay"
 
