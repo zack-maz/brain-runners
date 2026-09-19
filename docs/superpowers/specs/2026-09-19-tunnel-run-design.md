@@ -20,7 +20,8 @@ Output: replays showing the three runners side by side with each one's "mind" vi
 ## Non-goals
 
 - No training or fine-tuning of anything, and no learned readout on the fly. The fly's only
-  tuning is two fixed thresholds (see "Fly player").
+  tuning is four fixed numbers of ours: the looming weighting (gain, falloff) that turns gaps
+  into eye input, and two thresholds on its read-out neurons (see "Fly player").
 - No real-time play. The game is turn-based so slow API calls and the slow fly simulation
   cost nobody anything; replays are what people watch.
 - No food-seeking game. The spike showed the pure fly cannot steer toward food in this model.
@@ -114,8 +115,10 @@ Per decision:
 5. Log into `Decision.info`: the two input rates, every read-out rate, and the spike counts, so
    the viewer can draw the neurons firing.
 
-The two thresholds are the fly's only tuning. They are set once on practice seeds that are not
-in the tournament, committed, and displayed on screen.
+Four numbers are tuned, all ours and none of them the fly's biology: the looming gain and falloff
+(our sensor encoding) and the two thresholds. They were chosen together, once, by a rule fixed
+beforehand, on practice seeds 1000–1199 that are not in the tournament (768 candidates;
+`calibration/REPORT.md`), then committed and frozen, and they are displayed on screen.
 
 What the spike measured (36 of 36 one-sided trials): steering neurons fired only on the side
 opposite the stimulated eye, graded with intensity (DNa01 ipsi − contra −27 / −39 / −47 Hz at
@@ -127,6 +130,12 @@ Known weaknesses, to be stated in the viewer and write-up:
 - The fly does not plan. It flees gaps reflexively and may dodge into another gap.
 - Input is crude: whole-eye stimulation was what the spike tested; partial-field input was not.
 - The wiring has a mild built-in left bias (left DNa02 responds more than right).
+- Measured in phase 2: on symmetric input the deciding read-out (DNa01 + DNb01) leans right, mean
+  turn signal 0 to +20 Hz and never negative across all equal-eye inputs (`calibration/RESULTS.md`).
+  The model's left eye has 162 looming cells and its right eye 152. With the calibrated turn
+  threshold of 0 Hz this lean decides moves: a gap straight ahead that does not trigger a jump
+  usually becomes a step to the right. It is the fly's own asymmetry, not ours; the threshold that
+  exposes it is ours.
 - The model has no spontaneous activity and no state between decisions, so trial-to-trial
   spread comes only from input noise.
 - The ipsilateral-turn role of DNa01/DNa02/DNb01 comes from published steering studies, not

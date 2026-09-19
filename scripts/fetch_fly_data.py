@@ -27,7 +27,7 @@ def fetch(data_dir: Path = data.DATA_DIR, run=subprocess.run, download=urllib.re
         run(["git", "clone", data.MODEL_REPO_URL, str(model_dir)], check=True)
     run(["git", "-C", str(model_dir), "checkout", "--quiet", data.MODEL_REPO_COMMIT], check=True)
     annotations = data_dir / data.ANNOTATIONS.name
-    if not annotations.is_file():
+    if not annotations.is_file() or data.sha256_of(annotations) != expected.get(data.ANNOTATIONS.name):
         download(data.ANNOTATIONS_URL, annotations)
     return data.problems(data_dir, check_hashes=True, expected=expected)
 

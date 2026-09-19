@@ -69,6 +69,8 @@ class FlyPlayer:
 
     def act(self, senses: dict) -> Decision:
         left_hz, right_hz = looming_rates(senses, self.gain_hz, self.falloff)
+        # senses["rows_survived"] is the runner's row at decision time (Game._cleared == row while alive), so this is the
+        # documented crc32("fly:{seed}:{row}"). If the engine ever changes that, pass the row in explicitly.
         seed = noise_seed(self._seed, senses["rows_survived"])
         reading = self._brain.window(left_hz, right_hz, noise_seed=seed)
         action = choose(reading.rates_hz, self.turn_threshold_hz, self.jump_threshold_hz)

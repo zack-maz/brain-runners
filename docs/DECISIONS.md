@@ -30,11 +30,13 @@
    brain, confirmed with the real brain. Frozen: `calibration/REPORT.md`, `calibration/RESULTS.md`.
 9. **`always_jump` is a second floor** and the report shows `jump_share`, so a jump-heavy player
    is judged against the right baseline.
-10. **Tournament seeds must be below 1000**; 1000–1399 were used for calibration.
+10. **Tournament seeds must be below 1000**; 1000–1399 were used for calibration. The fly has
+    played seeds 0–19 once, after the freeze (first scoreboard); nothing was tuned on them.
 
 ## Open
 
 - Jev pricing and latency (first measured in phase 3, on one capped track).
+- Whether the tournament reuses seeds 0–19 or takes fresh seeds below 1000.
 
 ## Next step
 

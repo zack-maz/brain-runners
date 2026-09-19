@@ -1,6 +1,8 @@
 import hashlib
 
-from bakeoff.fly import data
+import pytest
+
+from bakeoff.fly import brain, data
 from scripts.fetch_fly_data import fetch
 
 FILES = {"Drosophila_brain_model/model.py": b"model", "neuron_annotations.tsv": b"annotations"}
@@ -70,3 +72,31 @@ def test_fetch_reports_a_download_that_does_not_match_its_hash(tmp_path):
 
     remaining = fetch(tmp_path, run=lambda command, check: None, download=download, expected=EXPECTED)
     assert remaining == [f"wrong sha256: {tmp_path / 'neuron_annotations.tsv'}"]
+
+
+def test_brain_checks_the_data_hashes_not_only_presence(monkeypatch):
+    calls = []
+
+    def fake_problems(**kwargs):
+        calls.append(kwargs)
+        return ["wrong sha256: /x/model.py"]
+
+    monkeypatch.setattr(brain.data, "problems", fake_problems)
+    with pytest.raises(FileNotFoundError, match="wrong sha256: /x/model.py"):
+        brain.Brain()
+    assert calls == [{"check_hashes": True}]
+
+
+def test_fetch_replaces_an_annotations_file_whose_hash_is_wrong(tmp_path):
+    write(tmp_path, "Drosophila_brain_model/model.py")
+    (tmp_path / "Drosophila_brain_model" / ".git").mkdir()
+    (tmp_path / "neuron_annotations.tsv").write_bytes(b"tampered")
+    downloads = []
+
+    def download(url, target):
+        downloads.append(url)
+        write(tmp_path, "neuron_annotations.tsv")
+
+    remaining = fetch(tmp_path, run=lambda command, check: None, download=download, expected=EXPECTED)
+    assert remaining == []
+    assert downloads == [data.ANNOTATIONS_URL]

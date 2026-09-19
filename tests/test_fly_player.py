@@ -104,6 +104,18 @@ def test_the_noise_seed_follows_the_row(make_track):
     assert [call[2] for call in brain.calls] == [noise_seed(9, 0), noise_seed(9, 1)]
 
 
+def test_senses_rows_survived_matches_the_game_row_at_decision_time(make_track):
+    brain = FakeBrain()
+    player = FlyPlayer(brain_factory=lambda: brain)
+    game = Game(make_track({}, max_rows=10))
+    player.reset(game, 0)
+    for action in ["stay", "jump", "left", "stay", "left"]:
+        senses = compute_senses(game)
+        assert senses["rows_survived"] == game.row
+        player.act(senses)
+        game.step(action)
+
+
 def test_close_releases_the_brain_and_is_safe_to_repeat(make_track):
     brain = FakeBrain()
     player = FlyPlayer(brain_factory=lambda: brain)

@@ -130,5 +130,11 @@ A track's identity is its seed: the difficulty ramp is fixed at 300 rows, so a r
 | `python` | string | interpreter version |
 | `versions` | object | `brian2`, `cython`, `numpy`, `typesafe-sdk`, `anthropic` versions or null |
 
+Added in phase 2 without a version bump (additions only): `fly`, `game.looming.falloff`,
+`game.looming.step_hz`, and the `cython` / `numpy` entries of `versions`. Runs made before phase 2
+lack them, and their `looming` values were computed with the old weighting (`100 / row`, not
+rounded), so a reader must treat these keys as optional and read the weighting from
+`game.looming`, not assume it.
+
 A run that is not `completed` may lack records for some players or seeds; compare `players` and
 `seeds` with the files to see what is missing.
