@@ -12,9 +12,9 @@ MAX_HZ = 250.0
 # OURS, not the fly's biology: a gap `row` rows ahead adds LOOMING_GAIN_HZ / row ** LOOMING_FALLOFF
 # to its eye; each eye's sum is capped at MAX_HZ and rounded to the nearest LOOMING_STEP_HZ, so
 # an eye has 11 input levels and the measured response surface covers every input the fly can get.
-# PROVISIONAL until the calibration task fixes gain and falloff on practice seeds.
-LOOMING_GAIN_HZ = 100.0
-LOOMING_FALLOFF = 1.0
+# Gain and falloff were fixed on practice seeds 1000-1199 (calibration/REPORT.md); do not retune.
+LOOMING_GAIN_HZ = 250.0
+LOOMING_FALLOFF = 3.0
 LOOMING_STEP_HZ = 25.0
 ACTION_DESCRIPTIONS = {
     "left": "move one lane left", "right": "move one lane right",

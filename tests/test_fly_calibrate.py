@@ -1,8 +1,11 @@
+from pathlib import Path
+
 from bakeoff.fly.calibrate import CONFIG_COLUMNS, play, report, score, search
 from bakeoff.fly.reading import Reading
 from bakeoff.fly.surface import LEVELS_HZ, measure_surface
 from bakeoff.game.track import generate_track
-from bakeoff.players import make_player
+from bakeoff.players import fly, make_player
+from bakeoff.senses import LOOMING_FALLOFF, LOOMING_GAIN_HZ
 
 NAMES = ("DNa01_left", "DNa01_right", "DNb01_left", "DNb01_right", "DNp01_left", "DNp01_right")
 
@@ -62,3 +65,11 @@ def test_report_names_the_winner_and_says_whose_tuning_it_is():
     assert "| " + " | ".join(CONFIG_COLUMNS) in text and "## Winner" in text and "| random |" in text
     assert "2 candidates" in text and "121 inputs x 1 trials" in text
     assert "--players fly --seeds 20 --seed-start 1000" in text
+
+
+def test_the_committed_constants_are_the_calibration_winner():
+    text = (Path(__file__).resolve().parents[1] / "calibration" / "REPORT.md").read_text()
+    winner_row = text.split("## Winner\n\n")[1].splitlines()[2]
+    winner = tuple(float(cell) for cell in winner_row.strip("| ").split(" | ")[:4])
+    assert winner == (LOOMING_GAIN_HZ, LOOMING_FALLOFF, fly.TURN_THRESHOLD_HZ, fly.JUMP_THRESHOLD_HZ)
+    assert fly.CALIBRATED

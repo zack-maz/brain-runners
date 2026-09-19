@@ -97,10 +97,10 @@ def test_run_writes_one_jsonl_per_player_and_meta(tmp_path):
     meta = json.loads((run_dir / "meta.json").read_text())
     assert meta["players"] == ["solver", "random"] and meta["seeds"] == [0, 1]
     assert meta["game"] == {"lanes": 12, "max_rows": 40, "lookahead": 6, "window": 3,
-                            "looming": {"gain_hz": 100.0, "falloff": 1.0, "step_hz": 25.0, "max_hz": 250.0,
-                                        "provisional": True}}
-    assert meta["fly"] == {"turn_threshold_hz": 20.0, "jump_threshold_hz": 150.0, "window_ms": 100.0,
-                           "provisional": True, "model_commit": "91bdd1e7dcf193f3e7ca5a8933497fcef63b7960",
+                            "looming": {"gain_hz": 250.0, "falloff": 3.0, "step_hz": 25.0, "max_hz": 250.0,
+                                        "provisional": False}}
+    assert meta["fly"] == {"turn_threshold_hz": 0.0, "jump_threshold_hz": 200.0, "window_ms": 100.0,
+                           "provisional": False, "model_commit": "91bdd1e7dcf193f3e7ca5a8933497fcef63b7960",
                            "annotations_commit": "17fc57722002e1a7d38cdd0c89ac382bf92718da"}
     assert meta["args"] == {"players": "solver,random"}
     assert meta["status"] == "completed" and meta["schema_version"] == 1
