@@ -68,3 +68,21 @@ def test_step_rejects_unknown_actions_and_finished_runs(make_track):
     game.step("stay")
     with pytest.raises(RuntimeError, match="over"):
         game.step("stay")
+
+
+def test_a_jump_from_the_last_but_one_row_finishes_whatever_lies_past_the_line(make_track):
+    wall = list(range(12))
+    game = Game(make_track({4: wall}, max_rows=3))  # row 4 is past max_rows
+    game.step("stay")
+    game.step("stay")
+    game.step("jump")  # lands on row 4
+    assert game.finished and game.alive and game.death_cause is None
+    assert game.rows_survived == 3
+
+
+def test_a_gap_on_the_finish_row_itself_still_kills(make_track):
+    game = Game(make_track({3: [6]}, max_rows=3))
+    game.step("stay")
+    game.step("stay")
+    game.step("stay")
+    assert not game.alive and game.death_cause == "ran_into_gap"

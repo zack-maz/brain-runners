@@ -77,6 +77,6 @@ def survivable(track: Track) -> bool:
     for row in range(track.max_rows):
         for lane in reachable.get(row, ()):
             for target_row, target_lane in ((row + 1, lane - 1), (row + 1, lane), (row + 1, lane + 1), (row + 2, lane)):
-                if not track.is_gap(target_row, target_lane):
+                if target_row > track.max_rows or not track.is_gap(target_row, target_lane):
                     reachable.setdefault(target_row, set()).add(target_lane % track.lanes)
     return bool(reachable.get(track.max_rows) or reachable.get(track.max_rows + 1))

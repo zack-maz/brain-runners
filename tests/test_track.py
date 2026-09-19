@@ -67,3 +67,9 @@ def test_to_json_round_trips_through_json():
     data = json.loads(json.dumps(track.to_json()))
     assert data["seed"] == 1 and data["lanes"] == 12 and data["max_rows"] == 20
     assert data["gaps"] == [list(row) for row in track.gaps]
+
+
+def test_survivable_agrees_that_a_jump_past_the_finish_line_is_safe(make_track):
+    wall = list(range(12))
+    assert survivable(make_track({3: wall, 4: wall}, max_rows=3))  # jump from row 2 over the wall to row 4
+    assert not survivable(make_track({2: wall, 3: wall, 4: wall}, max_rows=3))

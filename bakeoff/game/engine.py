@@ -38,7 +38,8 @@ class Game:
         advance = 2 if action == "jump" else 1
         lane = (self.lane + {"left": -1, "right": 1}.get(action, 0)) % self.track.lanes
         row = self.row + advance
-        if self.track.is_gap(row, lane):
+        # a jump from max_rows - 1 lands past the finish line, where nothing can kill the runner
+        if row <= self.track.max_rows and self.track.is_gap(row, lane):
             self.alive = False
             self.death_cause = DEATH_CAUSES[action]
             self._cleared = row - 1  # a fatal jump still cleared the row it flew over
