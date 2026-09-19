@@ -1,0 +1,409 @@
+{
+ "set": "sugar",
+ "n_left": 67,
+ "n_right": 62,
+ "dur_ms": 400.0,
+ "n_trials": 6,
+ "rates": [
+  50,
+  150,
+  250
+ ],
+ "coverage": {
+  "orn_left": [
+   118,
+   119
+  ],
+  "orn_right": [
+   111,
+   111
+  ],
+  "sugar_left": [
+   67,
+   67
+  ],
+  "sugar_right": [
+   62,
+   62
+  ],
+  "lplc2_left": [
+   108,
+   108
+  ],
+  "lplc2_right": [
+   102,
+   102
+  ],
+  "lc4_left": [
+   54,
+   54
+  ],
+  "lc4_right": [
+   50,
+   50
+  ],
+  "jo_ce_left": [
+   229,
+   229
+  ],
+  "jo_ce_right": [
+   204,
+   204
+  ]
+ },
+ "wall_total_s": 312.3271481990814,
+ "trials": [
+  {
+   "cond": "none",
+   "trial": 0,
+   "wall_s": 7.6979429721832275,
+   "total_spikes": 0,
+   "active_neurons": 0,
+   "mean_stim_neuron_hz": 0.0
+  },
+  {
+   "cond": "none",
+   "trial": 1,
+   "wall_s": 8.227686166763306,
+   "total_spikes": 0,
+   "active_neurons": 0,
+   "mean_stim_neuron_hz": 0.0
+  },
+  {
+   "cond": "L50",
+   "trial": 0,
+   "wall_s": 7.809590101242065,
+   "total_spikes": 4552,
+   "active_neurons": 411,
+   "mean_stim_neuron_hz": 26.33720930232558
+  },
+  {
+   "cond": "L50",
+   "trial": 1,
+   "wall_s": 7.344418048858643,
+   "total_spikes": 4746,
+   "active_neurons": 419,
+   "mean_stim_neuron_hz": 25.63953488372093
+  },
+  {
+   "cond": "L50",
+   "trial": 2,
+   "wall_s": 6.444252014160156,
+   "total_spikes": 4671,
+   "active_neurons": 411,
+   "mean_stim_neuron_hz": 26.22093023255814
+  },
+  {
+   "cond": "L50",
+   "trial": 3,
+   "wall_s": 8.526951789855957,
+   "total_spikes": 4255,
+   "active_neurons": 411,
+   "mean_stim_neuron_hz": 25.63953488372093
+  },
+  {
+   "cond": "L50",
+   "trial": 4,
+   "wall_s": 7.852416038513184,
+   "total_spikes": 4505,
+   "active_neurons": 396,
+   "mean_stim_neuron_hz": 25.930232558139537
+  },
+  {
+   "cond": "L50",
+   "trial": 5,
+   "wall_s": 7.3957602977752686,
+   "total_spikes": 4447,
+   "active_neurons": 402,
+   "mean_stim_neuron_hz": 25.63953488372093
+  },
+  {
+   "cond": "R50",
+   "trial": 0,
+   "wall_s": 7.870630264282227,
+   "total_spikes": 1729,
+   "active_neurons": 151,
+   "mean_stim_neuron_hz": 24.786821705426355
+  },
+  {
+   "cond": "R50",
+   "trial": 1,
+   "wall_s": 9.805696964263916,
+   "total_spikes": 1566,
+   "active_neurons": 122,
+   "mean_stim_neuron_hz": 23.527131782945737
+  },
+  {
+   "cond": "R50",
+   "trial": 2,
+   "wall_s": 7.331194162368774,
+   "total_spikes": 1594,
+   "active_neurons": 149,
+   "mean_stim_neuron_hz": 23.352713178294575
+  },
+  {
+   "cond": "R50",
+   "trial": 3,
+   "wall_s": 4.451624155044556,
+   "total_spikes": 1732,
+   "active_neurons": 213,
+   "mean_stim_neuron_hz": 23.6046511627907
+  },
+  {
+   "cond": "R50",
+   "trial": 4,
+   "wall_s": 2.131732940673828,
+   "total_spikes": 1565,
+   "active_neurons": 139,
+   "mean_stim_neuron_hz": 23.372093023255815
+  },
+  {
+   "cond": "R50",
+   "trial": 5,
+   "wall_s": 2.1035678386688232,
+   "total_spikes": 1827,
+   "active_neurons": 217,
+   "mean_stim_neuron_hz": 23.468992248062015
+  },
+  {
+   "cond": "L150",
+   "trial": 0,
+   "wall_s": 2.1878299713134766,
+   "total_spikes": 10763,
+   "active_neurons": 491,
+   "mean_stim_neuron_hz": 78.60465116279069
+  },
+  {
+   "cond": "L150",
+   "trial": 1,
+   "wall_s": 2.0245561599731445,
+   "total_spikes": 10130,
+   "active_neurons": 473,
+   "mean_stim_neuron_hz": 75.1937984496124
+  },
+  {
+   "cond": "L150",
+   "trial": 2,
+   "wall_s": 2.074676036834717,
+   "total_spikes": 10909,
+   "active_neurons": 493,
+   "mean_stim_neuron_hz": 75.21317829457364
+  },
+  {
+   "cond": "L150",
+   "trial": 3,
+   "wall_s": 4.178927898406982,
+   "total_spikes": 10542,
+   "active_neurons": 475,
+   "mean_stim_neuron_hz": 77.55813953488371
+  },
+  {
+   "cond": "L150",
+   "trial": 4,
+   "wall_s": 7.815639019012451,
+   "total_spikes": 10661,
+   "active_neurons": 475,
+   "mean_stim_neuron_hz": 77.38372093023256
+  },
+  {
+   "cond": "L150",
+   "trial": 5,
+   "wall_s": 6.57585883140564,
+   "total_spikes": 10616,
+   "active_neurons": 459,
+   "mean_stim_neuron_hz": 77.3062015503876
+  },
+  {
+   "cond": "R150",
+   "trial": 0,
+   "wall_s": 7.708961725234985,
+   "total_spikes": 150542,
+   "active_neurons": 8539,
+   "mean_stim_neuron_hz": 70.50387596899225
+  },
+  {
+   "cond": "R150",
+   "trial": 1,
+   "wall_s": 7.388066053390503,
+   "total_spikes": 165496,
+   "active_neurons": 8485,
+   "mean_stim_neuron_hz": 69.8062015503876
+  },
+  {
+   "cond": "R150",
+   "trial": 2,
+   "wall_s": 8.357278108596802,
+   "total_spikes": 146216,
+   "active_neurons": 8518,
+   "mean_stim_neuron_hz": 72.13178294573643
+  },
+  {
+   "cond": "R150",
+   "trial": 3,
+   "wall_s": 9.385600090026855,
+   "total_spikes": 171361,
+   "active_neurons": 8511,
+   "mean_stim_neuron_hz": 71.25968992248062
+  },
+  {
+   "cond": "R150",
+   "trial": 4,
+   "wall_s": 9.10563588142395,
+   "total_spikes": 175139,
+   "active_neurons": 8527,
+   "mean_stim_neuron_hz": 71.3953488372093
+  },
+  {
+   "cond": "R150",
+   "trial": 5,
+   "wall_s": 8.849277019500732,
+   "total_spikes": 168470,
+   "active_neurons": 8465,
+   "mean_stim_neuron_hz": 70.8720930232558
+  },
+  {
+   "cond": "L250",
+   "trial": 0,
+   "wall_s": 8.0637047290802,
+   "total_spikes": 15188,
+   "active_neurons": 524,
+   "mean_stim_neuron_hz": 128.0813953488372
+  },
+  {
+   "cond": "L250",
+   "trial": 1,
+   "wall_s": 7.2525317668914795,
+   "total_spikes": 15058,
+   "active_neurons": 526,
+   "mean_stim_neuron_hz": 127.13178294573642
+  },
+  {
+   "cond": "L250",
+   "trial": 2,
+   "wall_s": 7.990414142608643,
+   "total_spikes": 15074,
+   "active_neurons": 525,
+   "mean_stim_neuron_hz": 127.92635658914728
+  },
+  {
+   "cond": "L250",
+   "trial": 3,
+   "wall_s": 7.512424945831299,
+   "total_spikes": 15197,
+   "active_neurons": 524,
+   "mean_stim_neuron_hz": 127.20930232558139
+  },
+  {
+   "cond": "L250",
+   "trial": 4,
+   "wall_s": 6.533768892288208,
+   "total_spikes": 14966,
+   "active_neurons": 515,
+   "mean_stim_neuron_hz": 126.51162790697673
+  },
+  {
+   "cond": "L250",
+   "trial": 5,
+   "wall_s": 6.846238851547241,
+   "total_spikes": 14708,
+   "active_neurons": 518,
+   "mean_stim_neuron_hz": 123.44961240310077
+  },
+  {
+   "cond": "R250",
+   "trial": 0,
+   "wall_s": 10.193748235702515,
+   "total_spikes": 178435,
+   "active_neurons": 8542,
+   "mean_stim_neuron_hz": 116.51162790697673
+  },
+  {
+   "cond": "R250",
+   "trial": 1,
+   "wall_s": 8.669471979141235,
+   "total_spikes": 183025,
+   "active_neurons": 8573,
+   "mean_stim_neuron_hz": 115.52325581395348
+  },
+  {
+   "cond": "R250",
+   "trial": 2,
+   "wall_s": 8.415400981903076,
+   "total_spikes": 179330,
+   "active_neurons": 8530,
+   "mean_stim_neuron_hz": 115.7751937984496
+  },
+  {
+   "cond": "R250",
+   "trial": 3,
+   "wall_s": 8.929763078689575,
+   "total_spikes": 174591,
+   "active_neurons": 8516,
+   "mean_stim_neuron_hz": 117.24806201550388
+  },
+  {
+   "cond": "R250",
+   "trial": 4,
+   "wall_s": 8.779460906982422,
+   "total_spikes": 183613,
+   "active_neurons": 8587,
+   "mean_stim_neuron_hz": 119.20542635658914
+  },
+  {
+   "cond": "R250",
+   "trial": 5,
+   "wall_s": 7.271360158920288,
+   "total_spikes": 180788,
+   "active_neurons": 8519,
+   "mean_stim_neuron_hz": 117.18992248062015
+  },
+  {
+   "cond": "both150",
+   "trial": 0,
+   "wall_s": 8.777742147445679,
+   "total_spikes": 177694,
+   "active_neurons": 8715,
+   "mean_stim_neuron_hz": 151.2984496124031
+  },
+  {
+   "cond": "both150",
+   "trial": 1,
+   "wall_s": 7.584300756454468,
+   "total_spikes": 154139,
+   "active_neurons": 8690,
+   "mean_stim_neuron_hz": 145.60077519379846
+  },
+  {
+   "cond": "both150",
+   "trial": 2,
+   "wall_s": 7.00510311126709,
+   "total_spikes": 168361,
+   "active_neurons": 8676,
+   "mean_stim_neuron_hz": 145.968992248062
+  },
+  {
+   "cond": "both150",
+   "trial": 3,
+   "wall_s": 8.203107118606567,
+   "total_spikes": 177711,
+   "active_neurons": 8709,
+   "mean_stim_neuron_hz": 149.10852713178295
+  },
+  {
+   "cond": "both150",
+   "trial": 4,
+   "wall_s": 5.700776815414429,
+   "total_spikes": 177030,
+   "active_neurons": 8729,
+   "mean_stim_neuron_hz": 149.2441860465116
+  },
+  {
+   "cond": "both150",
+   "trial": 5,
+   "wall_s": 6.933654069900513,
+   "total_spikes": 165012,
+   "active_neurons": 8694,
+   "mean_stim_neuron_hz": 149.68992248062014
+  }
+ ]
+}

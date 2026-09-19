@@ -1,0 +1,27 @@
+50 ms -> 0.54 s wall, spikes 1260
+100 ms -> 0.59 s wall, spikes 2434
+200 ms -> 1.14 s wall, spikes 5417
+1000 ms -> 4.17 s wall, spikes 26673
+{
+ "target": "cython",
+ "n_neurons": 138639,
+ "build_s": 8.439243078231812,
+ "first_run_compile_s": 15.239090919494629,
+ "restore_s": 0.03945016860961914,
+ "win_50ms_wall_s": 0.5415570735931396,
+ "win_50ms_total_spikes": 1260,
+ "win_100ms_wall_s": 0.5852720737457275,
+ "win_100ms_total_spikes": 2434,
+ "win_200ms_wall_s": 1.139031171798706,
+ "win_200ms_total_spikes": 5417,
+ "win_1000ms_wall_s": 4.165859699249268,
+ "win_1000ms_total_spikes": 26673,
+ "continuous_100ms_walls_s": [
+  0.6484332084655762,
+  0.5457909107208252,
+  0.523413896560669,
+  0.5167858600616455,
+  0.5672168731689453
+ ]
+}
+uv run python bench.py cython  23.33s user 5.07s system 79% cpu 35.506 total
