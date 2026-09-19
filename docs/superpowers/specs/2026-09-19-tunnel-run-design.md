@@ -208,7 +208,8 @@ thresholding is tested with a fake brain. One opt-in `live` test per provider.
 ## Open items
 
 - Jev pricing and per-request latency (measured in phase 3).
-- The looming weighting function and the two fly thresholds (fixed in phase 2 on practice seeds).
+- Resolved in phase 2: looming weighting and fly thresholds, see `calibration/REPORT.md`
+  (input in 25 Hz steps; `always_jump` added as a second floor).
 - Whether partial-field looming stimulation (a subset of LPLC2/LC4 cells by position) improves
   the fly's play; out of scope unless phase 2 shows whole-eye input is too blunt.
 - A recent community port of the model to Apple MLX claims a large speed-up (unverified); only

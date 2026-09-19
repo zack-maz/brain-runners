@@ -23,23 +23,24 @@
    slither-style food arena. Left/right = the fly's steering neurons, jump = its Giant Fiber.
 7. **Design approved 2026-09-19:** `docs/superpowers/specs/2026-09-19-tunnel-run-design.md`.
    LLM is Claude Haiku 4.5. Turn-based, one decision per row, same seeded tracks for everyone.
+8. **Fly input and tuning (phase 2, ours, not the fly's biology):** each visible gap adds
+   `250 / row³` Hz to its eye, capped at 250 Hz and rounded to 25 Hz steps; any net steering
+   spike turns (threshold 0 Hz); Giant Fiber mean above 200 Hz jumps. Chosen by a fixed rule from
+   768 candidates on practice seeds 1000–1199 using a measured response surface as a stand-in
+   brain, confirmed with the real brain. Frozen: `calibration/REPORT.md`, `calibration/RESULTS.md`.
+9. **`always_jump` is a second floor** and the report shows `jump_share`, so a jump-heavy player
+   is judged against the right baseline.
+10. **Tournament seeds must be below 1000**; 1000–1399 were used for calibration.
 
 ## Open
 
 - Jev pricing and latency (first measured in phase 3, on one capped track).
-- The fly's looming weighting and its two thresholds (fixed in phase 2 on practice seeds).
-- `random` is not the floor: over seeds 0–199 always-`jump` averages 45.5 rows against random's
-  30.8 (always-stay 25.5), because a jump lands on only every other row. The Giant Fiber fires in
-  every threat trial, so a jump-heavy fly could beat `random` for a reason unrelated to steering.
-  Decide in phase 2 whether to add an `always_jump` baseline so a jump-heavy fly is judged
-  against the right floor.
 
 ## Next step
 
-Phase 1 is built (game, senses, `random` and `solver`, runner, report, CLI). The phase 2 plan is
-written: `docs/superpowers/plans/2026-09-19-phase2-fly-player.md` (branch `phase2-fly-player`;
-every code block was run in a prototype). Read its "Decisions this plan makes beyond the spec",
-then build it task by task with subagent-driven-development.
+Phases 1 and 2 are built. Write the phase 3 plan (Jev and LLM players: thin clients sharing a disk
+cache and a hard `--max-requests` cap, keys loaded inside the program, first cost numbers from one
+capped track).
 
 ## Prior art to reuse
 
