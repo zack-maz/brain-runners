@@ -106,13 +106,17 @@ class Runner:
 
     def run(self, players: list[Player], seeds: Sequence[int], max_rows: int = MAX_ROWS,
             run_id: str | None = None, args: dict | None = None) -> Path:
+        names = [p.name for p in players]
+        duplicates = sorted({n for n in names if names.count(n) > 1})
+        if duplicates:  # two players would write the same <name>.jsonl
+            raise ValueError(f"duplicate player names: {duplicates}")
         run_id = run_id or time.strftime("%Y%m%d-%H%M%S")
         run_dir = self.out_root / run_id
         run_dir.mkdir(parents=True, exist_ok=False)
         meta_path = run_dir / "meta.json"
         meta = {
             "run_id": run_id, "schema_version": SCHEMA_VERSION, "git_sha": _git_sha(), "status": "running",
-            "players": [p.name for p in players], "seeds": list(seeds),
+            "players": names, "seeds": list(seeds),
             "game": {"lanes": LANES, "max_rows": max_rows, "lookahead": LOOKAHEAD},
             "args": args or {}, "python": platform.python_version(),
             "versions": {pkg: _version(pkg) for pkg in ("brian2", "typesafe-sdk", "anthropic")},

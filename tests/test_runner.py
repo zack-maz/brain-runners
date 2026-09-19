@@ -167,3 +167,10 @@ def test_second_run_with_the_same_run_id_raises(tmp_path):
     Runner(tmp_path).run([make_player("solver")], range(1), max_rows=20, run_id="dup")
     with pytest.raises(FileExistsError):
         Runner(tmp_path).run([make_player("solver")], range(1), max_rows=20, run_id="dup")
+
+
+def test_duplicate_player_names_raise_before_the_run_directory_is_created(tmp_path):
+    with pytest.raises(ValueError, match=r"duplicate player names: \['solver'\]"):
+        Runner(tmp_path).run([make_player("solver"), make_player("random"), make_player("solver")], range(1),
+                             max_rows=20, run_id="d")
+    assert list(tmp_path.iterdir()) == []

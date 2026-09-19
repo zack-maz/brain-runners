@@ -71,3 +71,15 @@ def test_report_says_status_unknown_without_a_meta_file(tmp_path, capsys):
     capsys.readouterr()
     assert main(["report", str(run_dir)]) == 0
     assert "status: unknown" in capsys.readouterr().out
+
+
+def test_duplicate_players_are_a_usage_error(tmp_path, capsys):
+    assert main(["run", "--players", "solver,solver", "--out", str(tmp_path)]) == 2
+    assert "duplicate player names: ['solver']" in capsys.readouterr().err
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_spaces_around_player_names_are_ignored(tmp_path, capsys):
+    assert main(["run", "--players", "random, solver", "--seeds", "1", "--max-rows", "20", "--out", str(tmp_path)]) == 0
+    out = capsys.readouterr().out
+    assert "| random |" in out and "| solver |" in out

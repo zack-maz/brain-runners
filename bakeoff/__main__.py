@@ -43,7 +43,7 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         return 0
     try:
-        players = [make_player(name) for name in args.players.split(",")]
+        players = [make_player(name.strip()) for name in args.players.split(",")]
     except KeyError as e:
         print(e.args[0], file=sys.stderr)
         return 2
@@ -58,6 +58,9 @@ def main(argv: list[str] | None = None) -> int:
         runner.run(players, seeds, max_rows=args.max_rows, run_id=run_id, args=run_args)
     except FileExistsError:
         print(f"run directory already exists: {run_dir}", file=sys.stderr)
+        return 2
+    except ValueError as e:
+        print(e, file=sys.stderr)
         return 2
     except RunAborted as e:
         print(f"run {e.status}: {e}", file=sys.stderr)
