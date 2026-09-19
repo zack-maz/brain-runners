@@ -170,6 +170,9 @@ logged once per run in the first record of each seed. `meta.json`: `schema_versi
 `git_sha`, `status` (`running → completed | aborted | budget_exhausted | interrupted`), run
 arguments, package versions, model ids, fly thresholds.
 
+The exact schema is in `docs/STEP_RECORD.md`. Keys added beyond the list above: `finished`,
+`death_cause`, `track`, `solver_depths`.
+
 ## Report
 
 Per player: mean and median rows survived, deaths by cause (ran into gap, jumped into gap,
