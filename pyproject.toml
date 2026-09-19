@@ -1,0 +1,19 @@
+[project]
+name = "brain-bakeoff"
+version = "0.1.0"
+description = "An LLM, Jev and a fruit-fly connectome play the same seeded tunnel runs"
+requires-python = ">=3.13"
+dependencies = []
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+markers = [
+    "slow: needs the fly data in data/ (skipped when absent)",
+    "live: makes real API requests (opt-in)",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

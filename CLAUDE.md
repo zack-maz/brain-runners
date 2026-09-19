@@ -11,8 +11,10 @@ tournament. Read these before doing anything:
 
 ## Status
 
-Design approved 2026-09-19. No implementation yet. Next: write the phase 1 plan
-(`docs/superpowers/plans/`), then build phase 1. Each of the 5 phases gets its own plan.
+Design approved 2026-09-19. Phase 1 built (plan:
+`docs/superpowers/plans/2026-09-19-phase1-game-and-baselines.md`): game, senses, `random` and
+`solver`, runner, report, CLI. Baseline on seeds 0–19: random 35 rows, solver 300 (19 of 20
+finished). Next: write the phase 2 plan (fly player), then build it. Each phase gets its own plan.
 
 ## How we work here
 
