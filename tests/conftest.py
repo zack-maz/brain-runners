@@ -13,3 +13,15 @@ def make_track():
         return Track(seed=0, lanes=lanes, max_rows=max_rows, gaps=gaps)
 
     return _make
+
+
+def pytest_collection_modifyitems(config, items):
+    """`slow` tests run the real fly brain; they are skipped when its data has not been fetched."""
+    from bakeoff.fly.data import data_available
+
+    if data_available():
+        return
+    skip = pytest.mark.skip(reason="fly data absent: uv run python -m scripts.fetch_fly_data")
+    for item in items:
+        if "slow" in item.keywords:
+            item.add_marker(skip)
