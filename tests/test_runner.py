@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timedelta
 
 import pytest
 
@@ -95,7 +96,8 @@ def test_run_writes_one_jsonl_per_player_and_meta(tmp_path):
     assert (run_dir / "random.jsonl").exists()
     meta = json.loads((run_dir / "meta.json").read_text())
     assert meta["players"] == ["solver", "random"] and meta["seeds"] == [0, 1]
-    assert meta["game"] == {"lanes": 12, "max_rows": 40, "lookahead": 6}
+    assert meta["game"] == {"lanes": 12, "max_rows": 40, "lookahead": 6, "window": 3,
+                            "looming": {"gain_hz": 100.0, "max_hz": 250.0, "provisional": True}}
     assert meta["args"] == {"players": "solver,random"}
     assert meta["status"] == "completed" and meta["schema_version"] == 1
     assert "git_sha" in meta and "anthropic" in meta["versions"]
@@ -174,3 +176,20 @@ def test_duplicate_player_names_raise_before_the_run_directory_is_created(tmp_pa
         Runner(tmp_path).run([make_player("solver"), make_player("random"), make_player("solver")], range(1),
                              max_rows=20, run_id="d")
     assert list(tmp_path.iterdir()) == []
+
+
+def test_meta_records_the_code_version_and_when_the_run_started_and_finished(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)  # git_sha must not depend on where the CLI was started
+    Runner(tmp_path).run([make_player("solver")], range(1), max_rows=20, run_id="m")
+    meta = json.loads((tmp_path / "m" / "meta.json").read_text())
+    assert isinstance(meta["git_sha"], str) and len(meta["git_sha"]) == 40
+    assert isinstance(meta["git_dirty"], bool)
+    started, finished = (datetime.fromisoformat(meta[k]) for k in ("started_at", "finished_at"))
+    assert started.utcoffset() == timedelta(0) and started <= finished
+
+
+def test_finished_at_is_written_even_when_the_run_aborts(tmp_path):
+    with pytest.raises(RunAborted):
+        Runner(tmp_path).run([Scripted(Decision(None, error="boom"), name="errs")], range(10), run_id="a")
+    meta = json.loads((tmp_path / "a" / "meta.json").read_text())
+    assert meta["status"] == "aborted" and meta["finished_at"] is not None

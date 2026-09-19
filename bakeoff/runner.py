@@ -6,6 +6,7 @@ import json
 import platform
 import subprocess
 import time
+from datetime import datetime, timezone
 from importlib import metadata
 from pathlib import Path
 from typing import Callable, Sequence
@@ -14,7 +15,7 @@ from bakeoff.game.engine import ACTIONS, Game
 from bakeoff.game.track import LANES, LOOKAHEAD, MAX_ROWS, generate_track
 from bakeoff.players.base import Player
 from bakeoff.players.solver import solve_depths
-from bakeoff.senses import compute_senses, ground_truth, looming_rates
+from bakeoff.senses import LOOMING_GAIN_HZ, MAX_HZ, WINDOW, compute_senses, ground_truth, looming_rates
 
 SCHEMA_VERSION = 1
 FALLBACK_ACTION = "stay"  # never the solver's move: a rescue would hide what we want to see
@@ -37,13 +38,26 @@ def _version(package: str) -> str | None:
         return None
 
 
-def _git_sha() -> str | None:
+def _git(*args: str) -> str | None:
+    """Run git in the package's directory, so the answer does not depend on where the CLI started."""
     try:
-        return subprocess.run(
-            ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True,
-        ).stdout.strip()
+        return subprocess.run(["git", *args], capture_output=True, text=True, check=True,
+                              cwd=Path(__file__).resolve().parent).stdout.strip()
     except Exception:
         return None
+
+
+def _git_sha() -> str | None:
+    return _git("rev-parse", "HEAD")
+
+
+def _git_dirty() -> bool | None:
+    status = _git("status", "--porcelain")
+    return None if status is None else bool(status)
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
 def _close(player: Player) -> None:
@@ -115,9 +129,11 @@ class Runner:
         run_dir.mkdir(parents=True, exist_ok=False)
         meta_path = run_dir / "meta.json"
         meta = {
-            "run_id": run_id, "schema_version": SCHEMA_VERSION, "git_sha": _git_sha(), "status": "running",
+            "run_id": run_id, "schema_version": SCHEMA_VERSION, "git_sha": _git_sha(), "git_dirty": _git_dirty(),
+            "started_at": _now(), "finished_at": None, "status": "running",
             "players": names, "seeds": list(seeds),
-            "game": {"lanes": LANES, "max_rows": max_rows, "lookahead": LOOKAHEAD},
+            "game": {"lanes": LANES, "max_rows": max_rows, "lookahead": LOOKAHEAD, "window": WINDOW,
+                     "looming": {"gain_hz": LOOMING_GAIN_HZ, "max_hz": MAX_HZ, "provisional": True}},
             "args": args or {}, "python": platform.python_version(),
             "versions": {pkg: _version(pkg) for pkg in ("brian2", "typesafe-sdk", "anthropic")},
         }
@@ -144,5 +160,6 @@ class Runner:
         else:
             meta["status"] = "completed"
         finally:
+            meta["finished_at"] = _now()
             meta_path.write_text(json.dumps(meta, indent=2))
         return run_dir
