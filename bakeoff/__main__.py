@@ -8,7 +8,7 @@ import time
 
 from bakeoff.game.track import MAX_ROWS
 from bakeoff.players import REGISTRY, make_player
-from bakeoff.report import format_table, load_steps, summarize
+from bakeoff.report import format_table, load_meta, load_steps, summarize
 from bakeoff.runner import RunAborted, Runner
 
 
@@ -27,11 +27,17 @@ def _parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _print_report(run_dir) -> None:
+    meta = load_meta(run_dir)
+    print(f"status: {meta.get('status', 'unknown') if meta else 'unknown'}")
+    print(format_table(summarize(load_steps(run_dir), meta)))
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == "report":
         try:
-            print(format_table(summarize(load_steps(args.run_dir))))
+            _print_report(args.run_dir)
         except FileNotFoundError as e:
             print(e, file=sys.stderr)
             return 2
@@ -57,7 +63,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"run {e.status}: {e}", file=sys.stderr)
         status = 1
     print(f"run directory: {run_dir}")
-    print(format_table(summarize(load_steps(run_dir))))
+    _print_report(run_dir)
     return status
 
 

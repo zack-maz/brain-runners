@@ -3,7 +3,7 @@ import json
 import pytest
 
 from bakeoff.players import make_player
-from bakeoff.report import COLUMNS, format_table, load_steps, summarize
+from bakeoff.report import COLUMNS, format_table, load_meta, load_steps, summarize
 from bakeoff.runner import Runner
 
 
@@ -104,3 +104,39 @@ def test_load_steps_tolerates_a_truncated_last_line_only(tmp_path):
 def test_load_steps_rejects_a_missing_directory(tmp_path):
     with pytest.raises(FileNotFoundError, match="no such run directory"):
         load_steps(tmp_path / "nope")
+
+
+def test_columns_put_missing_right_after_incomplete():
+    assert COLUMNS[COLUMNS.index("incomplete") + 1] == "missing"
+
+
+def test_missing_counts_seeds_with_no_record_and_is_none_without_meta():
+    steps = [step(seed=0, alive=False, death_cause="ran_into_gap"), step(seed=1, row=0)]
+    meta = {"players": ["p"], "seeds": [0, 1, 2, 3]}
+    (row,) = summarize(steps, meta)
+    assert row["missing"] == 2 and row["incomplete"] == 1 and row["runs"] == 1
+    assert summarize(steps)[0]["missing"] is None
+
+
+def test_a_player_that_never_started_still_gets_a_row():
+    meta = {"players": ["p", "late"], "seeds": [0, 1]}
+    rows = summarize([step(alive=False, death_cause="ran_into_gap")], meta)
+    late = next(r for r in rows if r["player"] == "late")
+    assert late["runs"] == 0 and late["missing"] == 2 and late["incomplete"] == 0
+    assert late["mean_rows"] is None and late["solver_agreement"] is None and late["fallback_rate"] is None
+    assert "| late |" in format_table(rows)
+
+
+def test_load_meta_returns_none_when_absent_or_unparseable(tmp_path):
+    assert load_meta(tmp_path) is None
+    (tmp_path / "meta.json").write_text("{not json")
+    assert load_meta(tmp_path) is None
+    (tmp_path / "meta.json").write_text(json.dumps({"status": "completed"}))
+    assert load_meta(tmp_path) == {"status": "completed"}
+
+
+def test_a_gated_stay_is_a_fallback_even_though_executed_equals_chosen():
+    # M2
+    steps = [step(chosen="stay", gated=True), step(row=1, chosen="stay"), step(row=2, chosen=None, executed="stay")]
+    (row,) = summarize(steps)
+    assert row["fallback_rate"] == pytest.approx(2 / 3)

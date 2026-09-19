@@ -7,7 +7,7 @@ import statistics
 from collections import defaultdict
 from pathlib import Path
 
-COLUMNS = ("player", "runs", "incomplete", "mean_rows", "median_rows", "finished",
+COLUMNS = ("player", "runs", "incomplete", "missing", "mean_rows", "median_rows", "finished",
            "ran_into_gap", "jumped_into_gap", "dodged_into_gap", "solver_agreement",
            "fallback_rate", "invalid_rate", "error_rate",
            "requests", "mean_latency_ms", "input_tokens", "output_tokens")
@@ -30,6 +30,15 @@ def load_steps(run_dir: Path | str) -> list[dict]:
     return steps
 
 
+def load_meta(run_dir: Path | str) -> dict | None:
+    """meta.json of a run, or None if it is absent or unreadable."""
+    try:
+        meta = json.loads((Path(run_dir) / "meta.json").read_text())
+    except (OSError, ValueError):
+        return None
+    return meta if isinstance(meta, dict) else None
+
+
 def _ratio(numerator: int, denominator: int) -> float | None:
     return numerator / denominator if denominator else None
 
@@ -42,6 +51,11 @@ def _agrees(step: dict) -> bool:
     """The choice is as deep as the best move; ties with the solver's own pick count."""
     depths = step["solver_depths"]
     return step["chosen_action"] in depths and depths[step["chosen_action"]] == max(depths.values())
+
+
+def _is_fallback(step: dict) -> bool:
+    """A gated `stay` is a fallback even though executed equals chosen."""
+    return bool(step["gated"] or step["invalid"] or step["error"] is not None or step["chosen_action"] is None)
 
 
 def _summarize_player(player: str, steps: list[dict]) -> dict:
@@ -64,9 +78,10 @@ def _summarize_player(player: str, steps: list[dict]) -> dict:
         **{cause: sum(f["death_cause"] == cause for f in complete)
            for cause in ("ran_into_gap", "jumped_into_gap", "dodged_into_gap")},
         "solver_agreement": _ratio(sum(_agrees(s) for s in comparable), len(comparable)),
-        "fallback_rate": _ratio(sum(s["executed_action"] != s["chosen_action"] for s in steps), len(steps)),
+        "fallback_rate": _ratio(sum(_is_fallback(s) for s in steps), len(steps)),
         "invalid_rate": _ratio(sum(s["invalid"] for s in steps), len(steps)),
         "error_rate": _ratio(sum(s["error"] is not None for s in steps), len(steps)),
+        "missing": None,  # filled in by summarize() when meta.json says which seeds were planned
         "requests": len(live),
         "mean_latency_ms": _mean([s["latency_ms"] for s in live]),
         "input_tokens": sum(u.get("input_tokens") or 0 for u in usage),
@@ -74,11 +89,19 @@ def _summarize_player(player: str, steps: list[dict]) -> dict:
     }
 
 
-def summarize(steps: list[dict]) -> list[dict]:
+def summarize(steps: list[dict], meta: dict | None = None) -> list[dict]:
     groups = defaultdict(list)
     for s in steps:
         groups[s["player"]].append(s)
-    return [_summarize_player(player, group) for player, group in sorted(groups.items())]
+    for player in (meta or {}).get("players", ()):
+        groups.setdefault(player, [])  # a player that never started still gets a row
+    rows = []
+    for player, group in sorted(groups.items()):
+        row = _summarize_player(player, group)
+        if meta is not None:
+            row["missing"] = len(set(meta.get("seeds", ())) - {s["seed"] for s in group})
+        rows.append(row)
+    return rows
 
 
 def _fmt(value) -> str:
