@@ -41,6 +41,11 @@
   ignore per-player overrides of the fly constants; `calibrate.play` duplicates the game loop without the fallback
   rule; `fetch_fly_data` cannot repair an existing clone; `Network.restore` copies static synapse arrays every
   decision (measure before optimising).
+- Left from the second PR #2 review, for the phase 3 plan: `preflight()` is called only by the CLI, so a direct
+  `Runner.run` without fly data still leaves an `interrupted` run directory, and it catches only
+  `FileNotFoundError`; `FlyPlayer.act` lets a brain exception end the whole run instead of returning
+  `Decision(error=...)` with the `stay` fallback; the fly data is hashed twice per CLI run (preflight, then
+  `Brain`); `SurrogateBrain` raises a bare `KeyError` on a surface file missing a pin field.
 
 ## Next step
 
