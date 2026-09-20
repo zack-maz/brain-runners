@@ -2,11 +2,14 @@ from __future__ import annotations
 
 from typing import Callable
 
+from bakeoff.players.always_jump import AlwaysJumpPlayer
 from bakeoff.players.base import Player
+from bakeoff.players.fly import FlyPlayer
 from bakeoff.players.random_player import RandomPlayer
 from bakeoff.players.solver import SolverPlayer
 
-REGISTRY: dict[str, Callable[..., Player]] = {"random": RandomPlayer, "solver": SolverPlayer}
+REGISTRY: dict[str, Callable[..., Player]] = {
+    "random": RandomPlayer, "always_jump": AlwaysJumpPlayer, "solver": SolverPlayer, "fly": FlyPlayer}
 
 
 def make_player(name: str, **options) -> Player:

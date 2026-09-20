@@ -73,6 +73,16 @@ def test_report_says_status_unknown_without_a_meta_file(tmp_path, capsys):
     assert "status: unknown" in capsys.readouterr().out
 
 
+def test_missing_fly_data_is_a_usage_error_before_the_run_directory_exists(tmp_path, capsys, monkeypatch):
+    from bakeoff.fly import data
+
+    monkeypatch.setattr(data, "problems", lambda **kwargs: ["missing: /x/model.py"])
+    assert main(["run", "--players", "fly,solver", "--seeds", "1", "--out", str(tmp_path)]) == 2
+    err = capsys.readouterr().err
+    assert "fly data unusable" in err and "missing: /x/model.py" in err
+    assert list(tmp_path.iterdir()) == []
+
+
 def test_duplicate_players_are_a_usage_error(tmp_path, capsys):
     assert main(["run", "--players", "solver,solver", "--out", str(tmp_path)]) == 2
     assert "duplicate player names: ['solver']" in capsys.readouterr().err

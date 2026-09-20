@@ -29,8 +29,8 @@ def test_decision_defaults_and_fallback_rule():
 
 
 def test_factory_knows_the_baselines_and_rejects_unknown_names():
-    assert set(REGISTRY) == {"random", "solver"}
-    assert make_player("random").name == "random" and make_player("solver").name == "solver"
+    assert set(REGISTRY) == {"random", "always_jump", "solver", "fly"}
+    assert all(make_player(name).name == name for name in REGISTRY)
     with pytest.raises(KeyError, match="unknown player 'nope'"):
         make_player("nope")
 
@@ -65,6 +65,14 @@ def test_random_player_stream_is_not_the_tracks_integer_seed(make_track):
     mine = [player.act({}).chosen_action for _ in range(50)]
     track_stream = random.Random(5)
     assert mine != [track_stream.choice(ACTIONS) for _ in range(50)]
+
+
+def test_always_jump_is_the_floor_for_a_jump_heavy_player():
+    # Measured over seeds 0-199: always-jump averages 45.5 rows, random 30.8.
+    jump_rows = [play(generate_track(seed), make_player("always_jump"), seed).rows_survived for seed in range(50)]
+    random_rows = [play(generate_track(seed), make_player("random"), seed).rows_survived for seed in range(50)]
+    assert sum(jump_rows) > sum(random_rows)
+    assert max(jump_rows) < 300
 
 
 def test_solver_runs_straight_on_open_floor(make_track):

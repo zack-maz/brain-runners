@@ -55,6 +55,14 @@ def test_a_tied_best_choice_counts_as_agreement_even_if_it_is_not_the_solvers_pi
     assert row["solver_agreement"] == pytest.approx(1 / 3)  # left ties stay; jump is worse; teleport is no key
 
 
+def test_jump_share_is_the_share_of_executed_jumps():
+    steps = [step(chosen="jump"), step(row=2, chosen="jump", executed="stay", gated=True),
+             step(row=3, chosen="left"), step(row=4, chosen="jump", alive=False, death_cause="jumped_into_gap")]
+    (row,) = summarize(steps)
+    assert row["jump_share"] == 0.5
+    assert COLUMNS[COLUMNS.index("dodged_into_gap") + 1] == "jump_share"
+
+
 def test_invalid_rate_and_fallback_rate():
     steps = [step(chosen="teleport", executed="stay", invalid=True), step(row=1, alive=False)]
     (row,) = summarize(steps)

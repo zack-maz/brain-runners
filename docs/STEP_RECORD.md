@@ -35,7 +35,7 @@ use the next record's `row`/`lane`, or derive the landing tile as below.
 | `row` | int | row the runner stands on at decision time (starts at 0) |
 | `lane` | int | lane at decision time, `0 .. lanes-1` (starts at `lanes // 2`, i.e. 6) |
 | `senses` | object | exactly what the player was shown, see below |
-| `looming` | `{left_hz, right_hz}` | floats, the same senses as the fly's eye rates, capped at `max_hz`. Provisional and ours, not the fly's biology |
+| `looming` | `{left_hz, right_hz}` | floats, the fly's eye rates for these senses: each visible gap adds `gain_hz / row ** falloff` to its eye (own lane: both eyes), the sum is capped at `max_hz` and rounded to the nearest `step_hz` (so 11 levels, 0 to 250). Ours, not the fly's biology |
 | `questions` | object or null | questions put to the player (Jev / LLM), else null |
 | `answers` | object or null | the player's answers, else null |
 | `chosen_action` | string or null | what the player asked for. May be an invalid string, or null if it gave none |
@@ -65,6 +65,25 @@ runner executes `stay`. It is never the solver's move.
 (so `senses.lane == lane`). `lanes` is 12. `ahead` has 6 entries, `{row: 1..6, gaps_relative: [...]}`:
 the gap lanes `row` rows ahead as offsets from the runner's lane, only within 3 lanes either side
 (`-3..3`), lane wrap already applied. `actions` maps each action to a description.
+
+### `info` of the fly
+
+One object per decision, everything the viewer needs to draw the fly's "mind". Neuron-group keys
+are `<cell type>_<side>`: `DNa01`, `DNb01` (steering), `DNp01` (Giant Fiber) and `DNa02` (logged
+only, never decides), each `_left` and `_right`; every group is a single neuron.
+
+| key | type | meaning |
+| --- | --- | --- |
+| `left_hz`, `right_hz` | float | Poisson rate given to the LPLC2 + LC4 looming detectors of each eye (equals `looming`) |
+| `noise_seed` | int | seed of this decision's input noise, `crc32("fly:{seed}:{row}")`; the same seed repeats the window exactly |
+| `rates_hz` | object | firing rate of each group over the window |
+| `spike_counts` | object | spikes of each group in the window |
+| `spike_times_ms` | object | spike times of each group, ms from the start of the window |
+| `total_spikes` | int | spikes in the whole brain during the window |
+| `turn_signal_hz` | float | (DNa01 + DNb01, right) − (DNa01 + DNb01, left); above `turn_threshold_hz` → `right`, below its negative → `left` |
+| `jump_signal_hz` | float | Giant Fiber mean over both sides; above `jump_threshold_hz` → `jump`, which wins over a turn |
+| `turn_threshold_hz`, `jump_threshold_hz` | float | the fly's only tuning (ours), as used for this decision |
+| `wall_ms` | float | wall-clock time of the simulated window |
 
 ## The landing tile
 
@@ -105,10 +124,17 @@ A track's identity is its seed: the difficulty ramp is fixed at 300 rows, so a r
 | `status` | string | `running`, then `completed`, `aborted`, `budget_exhausted` or `interrupted` |
 | `players` | string[] | the players planned for this run, in order |
 | `seeds` | int[] | the seeds planned for this run |
-| `game` | object | `lanes`, `max_rows`, `lookahead`, `window` (visible lanes each side), `looming: {gain_hz, max_hz, provisional}` |
+| `game` | object | `lanes`, `max_rows`, `lookahead`, `window` (visible lanes each side), `looming: {gain_hz, falloff, step_hz, max_hz, provisional}` |
+| `fly` | object | `turn_threshold_hz`, `jump_threshold_hz`, `window_ms`, `provisional` (true until calibrated), `model_commit`, `annotations_commit` |
 | `args` | object | the CLI arguments |
 | `python` | string | interpreter version |
-| `versions` | object | `brian2`, `typesafe-sdk`, `anthropic` versions or null |
+| `versions` | object | `brian2`, `cython`, `numpy`, `typesafe-sdk`, `anthropic` versions or null |
+
+Added in phase 2 without a version bump (additions only): `fly`, `game.looming.falloff`,
+`game.looming.step_hz`, and the `cython` / `numpy` entries of `versions`. Runs made before phase 2
+lack them, and their `looming` values were computed with the old weighting (`100 / row`, not
+rounded), so a reader must treat these keys as optional and read the weighting from
+`game.looming`, not assume it.
 
 A run that is not `completed` may lack records for some players or seeds; compare `players` and
 `seeds` with the files to see what is missing.

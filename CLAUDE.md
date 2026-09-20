@@ -11,10 +11,12 @@ tournament. Read these before doing anything:
 
 ## Status
 
-Design approved 2026-09-19. Phase 1 built (plan:
-`docs/superpowers/plans/2026-09-19-phase1-game-and-baselines.md`): game, senses, `random` and
-`solver`, runner, report, CLI. Baseline on seeds 0–19: random 35 rows, solver 300 (19 of 20
-finished). Next: write the phase 2 plan (fly player), then build it. Each phase gets its own plan.
+Design approved 2026-09-19. Phase 1 built (game, senses, baselines, runner, report, CLI). Phase 2
+built (plan: `docs/superpowers/plans/2026-09-19-phase2-fly-player.md`): fly player on the real
+Brian2 model, looming weighting and two thresholds fixed on practice seeds 1000–1199 and frozen
+(`calibration/REPORT.md`; never retune, never let seeds below 1000 influence them). First
+scoreboard in `calibration/RESULTS.md`. Next: write the phase 3 plan (Jev and LLM players with
+cache and request cap), then build it. Each phase gets its own plan.
 
 ## How we work here
 
@@ -32,3 +34,5 @@ finished). Next: write the phase 2 plan (fly player), then build it. Each phase 
 - The fly simulation needs about 1 GB and must run one process at a time on this 8 GB Mac.
 - Honesty rule for the fly: untrained, innate wiring only; any mapping that is ours rather than
   the fly's biology is labelled as such on screen and in the write-up.
+- `uv run pytest` runs the fast tests only. `uv run pytest -m slow` builds the real fly brain (about 1 GB,
+  one minute); never run two fly processes at once.

@@ -8,7 +8,7 @@ from collections import defaultdict
 from pathlib import Path
 
 COLUMNS = ("player", "runs", "incomplete", "missing", "mean_rows", "median_rows", "finished",
-           "ran_into_gap", "jumped_into_gap", "dodged_into_gap", "solver_agreement",
+           "ran_into_gap", "jumped_into_gap", "dodged_into_gap", "jump_share", "solver_agreement",
            "fallback_rate", "invalid_rate", "error_rate",
            "requests", "mean_latency_ms", "input_tokens", "output_tokens")
 
@@ -77,6 +77,7 @@ def _summarize_player(player: str, steps: list[dict]) -> dict:
         "finished": sum(f["finished"] for f in complete),
         **{cause: sum(f["death_cause"] == cause for f in complete)
            for cause in ("ran_into_gap", "jumped_into_gap", "dodged_into_gap")},
+        "jump_share": _ratio(sum(s["executed_action"] == "jump" for s in steps), len(steps)),
         "solver_agreement": _ratio(sum(_agrees(s) for s in comparable), len(comparable)),
         "fallback_rate": _ratio(sum(_is_fallback(s) for s in steps), len(steps)),
         "invalid_rate": _ratio(sum(s["invalid"] for s in steps), len(steps)),
