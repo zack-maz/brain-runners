@@ -10,11 +10,11 @@ from pathlib import Path
 COLUMNS = ("player", "runs", "incomplete", "missing", "mean_rows", "median_rows", "finished",
            "ran_into_gap", "jumped_into_gap", "dodged_into_gap", "jump_share", "solver_agreement",
            "fallback_rate", "invalid_rate", "error_rate",
-           "requests", "cache_hits", "mean_latency_ms", "input_tokens", "output_tokens", "cost_usd",
+           "requests", "spent", "cache_hits", "mean_latency_ms", "input_tokens", "output_tokens", "cost_usd",
            "brier_gap_ahead", "brier_left_safe")
 
 # USD per million tokens (input, output), by the model id in meta.json. Jev is absent until its
-# price is known (docs/COSTS.md): its cost then shows as "-", never as 0.
+# price has been measured (phase 3 plan, Task 8): its cost then shows as "-", never as 0.
 PRICES_USD_PER_MTOK = {"claude-haiku-4-5-20251001": (1.00, 5.00)}
 
 
@@ -109,10 +109,11 @@ def _summarize_player(player: str, steps: list[dict], model: str | None = None) 
         "invalid_rate": _ratio(sum(s["invalid"] for s in steps), len(steps)),
         "error_rate": _ratio(sum(s["error"] is not None for s in steps), len(steps)),
         "missing": None,  # filled in by summarize() when meta.json says which seeds were planned
+        "spent": None,  # filled in by summarize() from meta.json's requests[player].used, when present
         "requests": len(live), "cache_hits": sum(bool(s["cache_hit"]) for s in steps),
         "mean_latency_ms": _mean([s["latency_ms"] for s in live]),
         "input_tokens": input_tokens, "output_tokens": output_tokens,
-        "cost_usd": _cost_usd(model, input_tokens, output_tokens) if live else None,
+        "cost_usd": _cost_usd(model, input_tokens, output_tokens),
         "brier_gap_ahead": _brier(steps, "gap_ahead"), "brier_left_safe": _brier(steps, "left_safe"),
     }
 
@@ -128,6 +129,7 @@ def summarize(steps: list[dict], meta: dict | None = None) -> list[dict]:
         row = _summarize_player(player, group, ((meta or {}).get("models") or {}).get(player))
         if meta is not None:
             row["missing"] = len(set(meta.get("seeds", ())) - {s["seed"] for s in group})
+            row["spent"] = (meta.get("requests") or {}).get(player, {}).get("used")
         rows.append(row)
     return rows
 

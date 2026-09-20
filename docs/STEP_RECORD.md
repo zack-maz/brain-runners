@@ -136,7 +136,7 @@ A track's identity is its seed: the difficulty ramp is fixed at 300 rows, so a r
 | `game` | object | `lanes`, `max_rows`, `lookahead`, `window` (visible lanes each side), `looming: {gain_hz, falloff, step_hz, max_hz, provisional}` |
 | `fly` | object | `turn_threshold_hz`, `jump_threshold_hz`, `window_ms`, `provisional` (true until calibrated), `model_commit`, `annotations_commit` |
 | `models` | object | `{player: model id}` for paid players in the run, e.g. `{"jev": "jev-latest", "llm": "claude-haiku-4-5-20251001"}` |
-| `requests` | object | `{player: {max, used}}` for paid players: the `--max-requests` cap and the live requests spent against it, failed ones included. Written when the run ends |
+| `requests` | object | `{player: {max, used}}` for paid players: the `--max-requests` cap and the live requests spent against it, failed ones included. Written at the start with `used: 0` and rewritten when the run ends, so a crashed run may show a stale count |
 | `args` | object | the CLI arguments |
 | `python` | string | interpreter version |
 | `versions` | object | `brian2`, `cython`, `numpy`, `typesafe-sdk`, `anthropic`, `python-dotenv` versions or null |
@@ -148,7 +148,8 @@ rounded), so a reader must treat these keys as optional and read the weighting f
 `game.looming`, not assume it.
 
 Added in phase 3 without a version bump (additions only): `models`, `requests`, `args.max_requests`,
-`args.cache` and the `python-dotenv` entry of `versions`. Readers must treat them as optional.
+`args.cache`, `args.tournament` and the `python-dotenv` entry of `versions`. Readers must treat them
+as optional.
 
 A run that is not `completed` may lack records for some players or seeds; compare `players` and
 `seeds` with the files to see what is missing.

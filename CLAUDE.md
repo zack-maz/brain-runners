@@ -41,4 +41,5 @@ gets its own plan.
   one minute); never run two fly processes at once.
 - Paid players spend nothing without `--max-requests` (default 0 replays `.cache/responses`). Never
   raise a cap, rerun a paid command or run `pytest -m live` without the user's go-ahead. No paid
-  request on a seed below 1000 before the tournament.
+  request on a seed below 1000 before the tournament; the CLI refuses a live paid run on seeds
+  below 1000 without `--tournament`.

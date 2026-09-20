@@ -107,6 +107,7 @@ def test_a_paid_client_asks_through_the_cache_and_the_cap(tmp_path):
 
 
 def test_paid_client_preflight_wants_the_key_only_when_it_may_go_live_with_its_own_sdk(tmp_path, monkeypatch):
+    monkeypatch.setattr("bakeoff.clients.keys.ENV_FILE", tmp_path / "absent")
     monkeypatch.delenv("ECHO_KEY", raising=False)
     Echo(DiskCache(tmp_path), RequestBudget(0)).preflight()
     Echo(DiskCache(tmp_path), RequestBudget(3), sdk=object()).preflight()

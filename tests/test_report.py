@@ -156,6 +156,18 @@ def test_cache_hits_are_counted_apart_from_requests():
     assert row["requests"] == 1 and row["cache_hits"] == 2
 
 
+def test_spent_comes_from_meta_requests_used_while_requests_counts_only_live_calls():
+    steps = [step(player="jev", row=i, latency_ms=50.0, usage={"input_tokens": 10, "output_tokens": 1})
+             for i in range(5)]
+    steps.append(step(player="solver", alive=False))
+    meta = {"requests": {"jev": {"max": 300, "used": 7}}}
+    rows = {r["player"]: r for r in summarize(steps, meta)}
+    assert rows["jev"]["spent"] == 7 and rows["jev"]["requests"] == 5
+    assert rows["solver"]["spent"] is None
+    assert {r["spent"] for r in summarize(steps)} == {None}  # no meta, no spent count
+    assert COLUMNS[COLUMNS.index("requests") + 1] == "spent"
+
+
 def test_cost_comes_from_live_tokens_and_the_price_of_the_model_in_meta():
     steps = [step(player="llm", latency_ms=100.0, usage={"input_tokens": 500_000, "output_tokens": 10_000}),
              step(player="llm", row=1, cache_hit=True, usage={"input_tokens": 9_000_000, "output_tokens": 0}),
@@ -167,6 +179,13 @@ def test_cost_comes_from_live_tokens_and_the_price_of_the_model_in_meta():
     assert rows["jev"]["cost_usd"] is None  # price not known: never shown as free
     assert rows["solver"]["cost_usd"] is None
     assert {r["cost_usd"] for r in summarize(steps)} == {None}  # no meta, no model, no price
+
+
+def test_a_fully_cached_run_of_a_priced_model_costs_zero_not_unknown():
+    steps = [step(player="llm", cache_hit=True), step(player="llm", row=1, cache_hit=True)]
+    meta = {"models": {"llm": "claude-haiku-4-5-20251001"}}
+    (row,) = summarize(steps, meta)
+    assert row["cost_usd"] == 0.0
 
 
 def test_brier_scores_the_logged_nouls_against_the_engine_truth():

@@ -12,6 +12,9 @@ from bakeoff.players import PAID, REGISTRY, make_player
 from bakeoff.report import format_table, load_meta, load_steps, summarize
 from bakeoff.runner import RunAborted, Runner
 
+# tournament seeds are below this and must not be paid for, or shape prompts, before the tournament
+FIRST_PRACTICE_SEED = 1000
+
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="bakeoff")
@@ -27,6 +30,8 @@ def _parser() -> argparse.ArgumentParser:
                      help="hard cap on live requests for EACH paid player (jev, llm); the default 0 only replays "
                           "the cache. Worst case a run spends this many requests per paid player")
     run.add_argument("--cache", default=str(DEFAULT_CACHE_DIR), help="response cache directory")
+    run.add_argument("--tournament", action="store_true",
+                     help="allows live paid requests on seeds below 1000; for the phase 5 tournament only")
     report = sub.add_parser("report", help="summarize an existing run directory")
     report.add_argument("run_dir")
     return parser
@@ -58,12 +63,18 @@ def main(argv: list[str] | None = None) -> int:
     except ValueError as e:
         print(e, file=sys.stderr)
         return 2
+    if (args.max_requests > 0 and any(name in PAID for name in (p.name for p in players))
+            and args.seed_start < FIRST_PRACTICE_SEED and not args.tournament):
+        print("paid players may not spend requests on seeds below 1000 (tournament seeds); "
+              "use --seed-start 1000 or higher, or pass --tournament", file=sys.stderr)
+        return 2
     runner = Runner(args.out)
     run_id = time.strftime("%Y%m%d-%H%M%S")
     run_dir = runner.out_root / run_id
     seeds = range(args.seed_start, args.seed_start + args.seeds)
     run_args = {"players": args.players, "seeds": args.seeds, "seed_start": args.seed_start,
-                "max_rows": args.max_rows, "max_requests": args.max_requests, "cache": args.cache}
+                "max_rows": args.max_rows, "max_requests": args.max_requests, "cache": args.cache,
+                "tournament": args.tournament}
     status = 0
     try:
         runner.run(players, seeds, max_rows=args.max_rows, run_id=run_id, args=run_args)

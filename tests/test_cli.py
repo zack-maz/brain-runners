@@ -14,7 +14,7 @@ def test_run_then_report(tmp_path, capsys):
     meta = json.loads((run_dir / "meta.json").read_text())
     assert meta["status"] == "completed" and meta["seeds"] == [0, 1]
     assert meta["args"] == {"players": "solver,random", "seeds": 2, "seed_start": 0, "max_rows": 30,
-                            "max_requests": 0, "cache": ".cache/responses"}
+                            "max_requests": 0, "cache": ".cache/responses", "tournament": False}
     assert meta["models"] == {} and meta["requests"] == {}
 
     assert main(["report", str(run_dir)]) == 0
@@ -152,7 +152,7 @@ def test_a_missing_key_is_a_usage_error_before_the_run_directory_exists(tmp_path
         raise ValueError(f"{name} is not set")
 
     monkeypatch.setattr(core, "require_key", no_key)
-    args = ["run", "--players", "solver,llm", "--seeds", "1", "--max-requests", "3",
+    args = ["run", "--players", "solver,llm", "--seeds", "1", "--seed-start", "1000", "--max-requests", "3",
             "--out", str(tmp_path / "runs"), "--cache", str(tmp_path / "cache")]
     assert main(args) == 2
     assert "llm: ANTHROPIC_API_KEY is not set" in capsys.readouterr().err
@@ -162,3 +162,36 @@ def test_a_missing_key_is_a_usage_error_before_the_run_directory_exists(tmp_path
 def test_a_negative_cap_is_a_usage_error(tmp_path, capsys):
     assert main(paid_args(tmp_path, "--max-requests", "-1")) == 2
     assert "must not be negative" in capsys.readouterr().err
+
+
+def low_seed_paid_args(tmp_path, *extra):
+    return ["run", "--players", "jev", "--seeds", "1", "--max-rows", "12",
+            "--out", str(tmp_path / "runs"), "--cache", str(tmp_path / "cache"), *extra]
+
+
+def test_a_paid_cap_on_seeds_below_1000_without_tournament_is_a_usage_error(tmp_path, capsys, monkeypatch):
+    sdks = fake_paid(monkeypatch)
+    assert main(low_seed_paid_args(tmp_path, "--max-requests", "5")) == 2
+    assert "--tournament" in capsys.readouterr().err
+    assert sdks[0].calls == []
+    assert not (tmp_path / "runs").exists()
+
+
+def test_the_tournament_flag_allows_a_paid_cap_on_seeds_below_1000(tmp_path, monkeypatch):
+    sdks = fake_paid(monkeypatch, action="jump")
+    assert main(low_seed_paid_args(tmp_path, "--max-requests", "2", "--tournament")) in (0, 1)
+    assert sdks[0].calls != []
+    (run_dir,) = (tmp_path / "runs").iterdir()
+    meta = json.loads((run_dir / "meta.json").read_text())
+    assert meta["args"]["tournament"] is True
+
+
+def test_max_requests_0_on_low_seeds_is_not_refused_by_the_guard(tmp_path, capsys, monkeypatch):
+    fake_paid(monkeypatch)
+    assert main(low_seed_paid_args(tmp_path)) == 1
+    assert "run budget_exhausted: request cap of 0 reached" in capsys.readouterr().err
+
+
+def test_a_free_player_with_a_cap_on_low_seeds_is_not_refused_by_the_guard(tmp_path):
+    assert main(["run", "--players", "solver", "--max-requests", "5", "--seeds", "1", "--max-rows", "20",
+                "--out", str(tmp_path)]) == 0

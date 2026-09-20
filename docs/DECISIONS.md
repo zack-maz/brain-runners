@@ -37,6 +37,11 @@
     SDK retries are off so the cap is exact; a provider failure is a logged error and a `stay`.
     Jev and the LLM are told the same rules in the same words (`bakeoff/players/briefing.py`, ours,
     written before any paid request). No paid request on a seed below 1000 before the tournament.
+    The CLI refuses a live paid run on seeds below 1000 unless `--tournament` is passed. Jev's
+    request carries the Choice and the two calibration Nouls the spec asks for, while the LLM
+    answers one question; TypeSafe documents that questions in one request run in parallel and
+    cannot see one another's answers, so the Nouls are not scaffolding for the Choice, and this
+    asymmetry is named in the write-up.
 
 ## Open
 
