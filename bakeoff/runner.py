@@ -80,6 +80,12 @@ def _preflight(players: list[Player]) -> None:
             raise PreflightError(f"{player.name}: {e}") from e
 
 
+def _requests(players: list[Player]) -> dict:
+    """Live requests spent against each paid player's cap (failed requests included)."""
+    return {p.name: {"max": p.budget.max_requests, "used": p.budget.used}
+            for p in players if getattr(p, "budget", None) is not None}
+
+
 class Runner:
     def __init__(self, out_root: Path | str = "runs", max_consecutive_errors: int = 5):
         self.out_root = Path(out_root)
@@ -147,8 +153,11 @@ class Runner:
             "fly": {"turn_threshold_hz": fly.TURN_THRESHOLD_HZ, "jump_threshold_hz": fly.JUMP_THRESHOLD_HZ,
                     "window_ms": WINDOW_MS, "provisional": not fly.CALIBRATED,
                     "model_commit": fly_data.MODEL_REPO_COMMIT, "annotations_commit": fly_data.ANNOTATIONS_COMMIT},
+            "models": {p.name: p.model for p in players if getattr(p, "model", None)},
+            "requests": _requests(players),
             "args": args or {}, "python": platform.python_version(),
-            "versions": {pkg: _version(pkg) for pkg in ("brian2", "cython", "numpy", "typesafe-sdk", "anthropic")},
+            "versions": {pkg: _version(pkg) for pkg in ("brian2", "cython", "numpy", "typesafe-sdk", "anthropic",
+                                                         "python-dotenv")},
         }
         meta_path.write_text(json.dumps(meta, indent=2))
         self._error_streak = 0
@@ -174,5 +183,6 @@ class Runner:
             meta["status"] = "completed"
         finally:
             meta["finished_at"] = _now()
+            meta["requests"] = _requests(players)
             meta_path.write_text(json.dumps(meta, indent=2))
         return run_dir

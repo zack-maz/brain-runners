@@ -6,8 +6,9 @@ import argparse
 import sys
 import time
 
+from bakeoff.clients.core import DEFAULT_CACHE_DIR, DiskCache, RequestBudget
 from bakeoff.game.track import MAX_ROWS
-from bakeoff.players import REGISTRY, make_player
+from bakeoff.players import PAID, REGISTRY, make_player
 from bakeoff.report import format_table, load_meta, load_steps, summarize
 from bakeoff.runner import RunAborted, Runner
 
@@ -22,6 +23,10 @@ def _parser() -> argparse.ArgumentParser:
                      help="first seed; practice seeds must not overlap tournament seeds")
     run.add_argument("--max-rows", type=int, default=MAX_ROWS)
     run.add_argument("--out", default="runs")
+    run.add_argument("--max-requests", type=int, default=0,
+                     help="hard cap on live requests for EACH paid player (jev, llm); the default 0 only replays "
+                          "the cache. Worst case a run spends this many requests per paid player")
+    run.add_argument("--cache", default=str(DEFAULT_CACHE_DIR), help="response cache directory")
     report = sub.add_parser("report", help="summarize an existing run directory")
     report.add_argument("run_dir")
     return parser
@@ -42,17 +47,23 @@ def main(argv: list[str] | None = None) -> int:
             print(e, file=sys.stderr)
             return 2
         return 0
+    cache = DiskCache(args.cache)
     try:
-        players = [make_player(name.strip()) for name in args.players.split(",")]
+        # one budget per paid player: the providers bill separately, and one must not starve the other
+        players = [make_player(name, cache=cache, budget=RequestBudget(args.max_requests)) if name in PAID
+                   else make_player(name) for name in (n.strip() for n in args.players.split(","))]
     except KeyError as e:
         print(e.args[0], file=sys.stderr)
+        return 2
+    except ValueError as e:
+        print(e, file=sys.stderr)
         return 2
     runner = Runner(args.out)
     run_id = time.strftime("%Y%m%d-%H%M%S")
     run_dir = runner.out_root / run_id
     seeds = range(args.seed_start, args.seed_start + args.seeds)
     run_args = {"players": args.players, "seeds": args.seeds, "seed_start": args.seed_start,
-                "max_rows": args.max_rows}
+                "max_rows": args.max_rows, "max_requests": args.max_requests, "cache": args.cache}
     status = 0
     try:
         runner.run(players, seeds, max_rows=args.max_rows, run_id=run_id, args=run_args)
