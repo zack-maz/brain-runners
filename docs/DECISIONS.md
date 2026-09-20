@@ -32,6 +32,11 @@
    is judged against the right baseline.
 10. **Tournament seeds must be below 1000**; 1000–1399 were used for calibration. The fly has
     played seeds 0–19 once, after the freeze (first scoreboard); nothing was tuned on them.
+11. **Paid players (phase 3):** one request per row through a disk cache (sha256 of provider, model,
+    senses, questions) and a hard cap per paid player (`--max-requests`, default 0 = replay only).
+    SDK retries are off so the cap is exact; a provider failure is a logged error and a `stay`.
+    Jev and the LLM are told the same rules in the same words (`bakeoff/players/briefing.py`, ours,
+    written before any paid request). No paid request on a seed below 1000 before the tournament.
 
 ## Open
 
@@ -41,17 +46,16 @@
   ignore per-player overrides of the fly constants; `calibrate.play` duplicates the game loop without the fallback
   rule; `fetch_fly_data` cannot repair an existing clone; `Network.restore` copies static synapse arrays every
   decision (measure before optimising).
-- Left from the second PR #2 review, for the phase 3 plan: `preflight()` is called only by the CLI, so a direct
-  `Runner.run` without fly data still leaves an `interrupted` run directory, and it catches only
-  `FileNotFoundError`; `FlyPlayer.act` lets a brain exception end the whole run instead of returning
-  `Decision(error=...)` with the `stay` fallback; the fly data is hashed twice per CLI run (preflight, then
-  `Brain`); `SurrogateBrain` raises a bare `KeyError` on a surface file missing a pin field.
+- Left from the second PR #2 review: the fly data is hashed twice per CLI run (preflight, then
+  `Brain`); `SurrogateBrain` raises a bare `KeyError` on a surface file missing a pin field. Done in
+  phase 3: `preflight()` runs inside `Runner.run`. Declined: turning a brain exception into a `stay`
+  fallback; phase 2 decided a simulator failure must end the run, because a silent `stay` would
+  change the fly's score.
 
 ## Next step
 
-Phases 1 and 2 are built. Write the phase 3 plan (Jev and LLM players: thin clients sharing a disk
-cache and a hard `--max-requests` cap, keys loaded inside the program, first cost numbers from one
-capped track).
+Phases 1 to 3 are built. Run the first capped track for each paid player (phase 3 plan, Task 8,
+needs the user's go-ahead), then write the phase 4 plan (replay viewer).
 
 ## Prior art to reuse
 

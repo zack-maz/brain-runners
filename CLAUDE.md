@@ -15,8 +15,11 @@ Design approved 2026-09-19. Phase 1 built (game, senses, baselines, runner, repo
 built (plan: `docs/superpowers/plans/2026-09-19-phase2-fly-player.md`): fly player on the real
 Brian2 model, looming weighting and two thresholds fixed on practice seeds 1000–1199 and frozen
 (`calibration/REPORT.md`; never retune, never let seeds below 1000 influence them). First
-scoreboard in `calibration/RESULTS.md`. Next: write the phase 3 plan (Jev and LLM players with
-cache and request cap), then build it. Each phase gets its own plan.
+scoreboard in `calibration/RESULTS.md`. Phase 3 built (plan:
+`docs/superpowers/plans/2026-09-20-phase3-paid-players.md`): `jev` and `llm` players behind
+`bakeoff/clients/core.py` (disk cache, hard cap per paid player, no SDK retries). Next: the first
+capped track (Task 8 of that plan, needs the user's go-ahead), then the phase 4 plan. Each phase
+gets its own plan.
 
 ## How we work here
 
@@ -36,3 +39,6 @@ cache and request cap), then build it. Each phase gets its own plan.
   the fly's biology is labelled as such on screen and in the write-up.
 - `uv run pytest` runs the fast tests only. `uv run pytest -m slow` builds the real fly brain (about 1 GB,
   one minute); never run two fly processes at once.
+- Paid players spend nothing without `--max-requests` (default 0 replays `.cache/responses`). Never
+  raise a cap, rerun a paid command or run `pytest -m live` without the user's go-ahead. No paid
+  request on a seed below 1000 before the tournament.
