@@ -63,7 +63,7 @@ class FlyPlayer:
         self.gain_hz, self.falloff = gain_hz, falloff
 
     def preflight(self) -> None:
-        """Called by the CLI before the run directory exists: a fly without its data is a usage error."""
+        """Called by Runner.run before the run directory exists: a fly without its data is a usage error."""
         if self._brain_factory is _real_brain:
             from bakeoff.fly import data  # light: no brian2 import until a fly actually plays
 

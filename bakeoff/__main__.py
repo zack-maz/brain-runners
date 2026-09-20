@@ -47,14 +47,6 @@ def main(argv: list[str] | None = None) -> int:
     except KeyError as e:
         print(e.args[0], file=sys.stderr)
         return 2
-    for player in players:
-        preflight = getattr(player, "preflight", None)
-        if preflight is not None:
-            try:
-                preflight()
-            except FileNotFoundError as e:
-                print(e, file=sys.stderr)
-                return 2
     runner = Runner(args.out)
     run_id = time.strftime("%Y%m%d-%H%M%S")
     run_dir = runner.out_root / run_id

@@ -11,6 +11,7 @@ from importlib import metadata
 from pathlib import Path
 from typing import Callable, Sequence
 
+from bakeoff.errors import BudgetExhausted, PreflightError, RunAborted  # noqa: F401  (re-exported)
 from bakeoff.fly import data as fly_data
 from bakeoff.fly.reading import WINDOW_MS
 from bakeoff.game.engine import ACTIONS, Game
@@ -23,16 +24,6 @@ from bakeoff.senses import (LOOMING_FALLOFF, LOOMING_GAIN_HZ, LOOMING_STEP_HZ, M
 
 SCHEMA_VERSION = 1
 FALLBACK_ACTION = "stay"  # never the solver's move: a rescue would hide what we want to see
-
-
-class RunAborted(Exception):
-    status = "aborted"  # a subclass may set a more specific status
-
-
-class BudgetExhausted(RunAborted):
-    """Raised by a paid client when the hard request cap is reached (phase 3)."""
-
-    status = "budget_exhausted"
 
 
 def _version(package: str) -> str | None:
@@ -74,6 +65,19 @@ def _close(player: Player) -> None:
         close()
     except Exception:
         pass
+
+
+def _preflight(players: list[Player]) -> None:
+    """Players may define preflight(): a check that they can start at all. It runs before the run
+    directory exists, so a usage error (no fly data, no key) leaves nothing behind."""
+    for player in players:
+        check = getattr(player, "preflight", None)
+        if check is None:
+            continue
+        try:
+            check()
+        except (OSError, ValueError) as e:
+            raise PreflightError(f"{player.name}: {e}") from e
 
 
 class Runner:
@@ -128,6 +132,7 @@ class Runner:
         duplicates = sorted({n for n in names if names.count(n) > 1})
         if duplicates:  # two players would write the same <name>.jsonl
             raise ValueError(f"duplicate player names: {duplicates}")
+        _preflight(players)
         run_id = run_id or time.strftime("%Y%m%d-%H%M%S")
         run_dir = self.out_root / run_id
         run_dir.mkdir(parents=True, exist_ok=False)
