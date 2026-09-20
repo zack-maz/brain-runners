@@ -1,0 +1,73 @@
+import json
+import re
+
+import pytest
+
+from bakeoff.__main__ import main
+from bakeoff.view import DATA_SLOT, VIEWER_DIR, embed_json, render_html
+
+DATA = re.compile(r'<script type="application/json" id="replay-data">(.*?)</script>', re.S)
+
+
+def test_embedded_json_cannot_close_its_script_element():
+    value = {"text": "</script><script>alert(1)</script><!--", "n": 1}
+    embedded = embed_json(value)
+    assert "<" not in embedded
+    assert json.loads(embedded) == value
+
+
+def test_render_inlines_every_file_and_the_data():
+    replay = {"replay_version": 1, "episodes": [], "note": "</script>"}
+    page = render_html(replay)
+    assert "<link" not in page and "<script src" not in page  # one file: nothing left to fetch
+    for name in ("timeline.js", "tunnel.js", "minds.js", "app.js", "viewer.css"):
+        assert (VIEWER_DIR / name).read_text() in page
+    (data,) = DATA.findall(page)
+    assert json.loads(data) == replay
+    assert DATA_SLOT not in page
+
+
+def test_the_page_makes_no_network_request():
+    page = render_html({"episodes": []})
+    assert not re.search(r"""(src|href)=["']?(https?:)?//""", page)
+    assert "@import" not in page and "url(" not in page
+
+
+def test_a_backslash_in_a_viewer_file_survives(tmp_path):
+    (tmp_path / "index.html").write_text('<link rel="stylesheet" href="a.css"><script src="a.js"></script>' + DATA_SLOT)
+    (tmp_path / "a.css").write_text('i::before { content: "\\1F41D"; }')
+    (tmp_path / "a.js").write_text('const s = "\\n\\1";')
+    page = render_html({}, tmp_path)
+    assert 'content: "\\1F41D"' in page and 'const s = "\\n\\1";' in page
+
+
+def test_a_page_without_the_data_slot_is_an_error(tmp_path):
+    (tmp_path / "index.html").write_text("<html></html>")
+    with pytest.raises(ValueError, match="replay data slot"):
+        render_html({}, tmp_path)
+
+
+def test_view_writes_one_html_file_with_the_runs_in_it(tmp_path, capsys):
+    assert main(["run", "--players", "solver,random", "--seeds", "2", "--max-rows", "30", "--out", str(tmp_path)]) == 0
+    (run_dir,) = tmp_path.iterdir()
+    output = tmp_path / "out.html"
+    capsys.readouterr()
+    assert main(["view", str(run_dir), "--output", str(output)]) == 0
+    assert f"replay: {output} (4 episodes" in capsys.readouterr().out
+    (data,) = DATA.findall(output.read_text())
+    replay = json.loads(data)
+    assert replay["players"] == ["solver", "random"] and replay["seeds"] == [0, 1]
+    assert replay["runs"][0]["run_id"] == run_dir.name
+
+
+def test_view_usage_errors(tmp_path, capsys):
+    assert main(["view", str(tmp_path / "nope"), "--output", str(tmp_path / "out.html")]) == 2
+    assert "no such run directory" in capsys.readouterr().err
+    (tmp_path / "empty").mkdir()
+    assert main(["view", str(tmp_path / "empty"), "--output", str(tmp_path / "out.html")]) == 2
+    assert "no step records" in capsys.readouterr().err
+    assert main(["run", "--players", "solver", "--seeds", "1", "--max-rows", "20", "--out", str(tmp_path / "runs")]) == 0
+    (run_dir,) = (tmp_path / "runs").iterdir()
+    assert main(["view", str(run_dir), str(run_dir), "--output", str(tmp_path / "out.html")]) == 2
+    assert "solver on seed 0 is in both" in capsys.readouterr().err
+    assert not (tmp_path / "out.html").exists()

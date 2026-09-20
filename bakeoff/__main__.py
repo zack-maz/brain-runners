@@ -1,16 +1,19 @@
-"""uv run python -m bakeoff run|report"""
+"""uv run python -m bakeoff run|report|view"""
 
 from __future__ import annotations
 
 import argparse
 import sys
 import time
+from pathlib import Path
 
 from bakeoff.clients.core import DEFAULT_CACHE_DIR, DiskCache, RequestBudget
 from bakeoff.game.track import MAX_ROWS
 from bakeoff.players import PAID, REGISTRY, make_player
+from bakeoff.replay import build_replay
 from bakeoff.report import format_table, load_meta, load_steps, summarize
 from bakeoff.runner import RunAborted, Runner
+from bakeoff.view import render_html
 
 # tournament seeds are below this and must not be paid for, or shape prompts, before the tournament
 FIRST_PRACTICE_SEED = 1000
@@ -34,6 +37,9 @@ def _parser() -> argparse.ArgumentParser:
                      help="allows live paid requests on seeds below 1000; for the phase 5 tournament only")
     report = sub.add_parser("report", help="summarize an existing run directory")
     report.add_argument("run_dir")
+    view = sub.add_parser("view", help="write a replay of one or more run directories as one HTML file")
+    view.add_argument("run_dirs", nargs="+", help="run directories; one (player, seed) may appear only once")
+    view.add_argument("--output", default="replay.html", help="the file to write (default replay.html)")
     return parser
 
 
@@ -51,6 +57,19 @@ def main(argv: list[str] | None = None) -> int:
         except FileNotFoundError as e:
             print(e, file=sys.stderr)
             return 2
+        return 0
+    if args.command == "view":
+        try:
+            replay = build_replay(args.run_dirs)
+        except (FileNotFoundError, ValueError) as e:
+            print(e, file=sys.stderr)
+            return 2
+        if not replay["episodes"]:
+            print("no step records in " + ", ".join(args.run_dirs), file=sys.stderr)
+            return 2
+        output = Path(args.output)
+        output.write_text(render_html(replay))
+        print(f"replay: {output} ({len(replay['episodes'])} episodes, {output.stat().st_size / 1e6:.1f} MB)")
         return 0
     cache = DiskCache(args.cache)
     try:
