@@ -17,9 +17,8 @@ Brian2 model, looming weighting and two thresholds fixed on practice seeds 1000â
 (`calibration/REPORT.md`; never retune, never let seeds below 1000 influence them). First
 scoreboard in `calibration/RESULTS.md`. Phase 3 built (plan:
 `docs/superpowers/plans/2026-09-20-phase3-paid-players.md`): `jev` and `llm` players behind
-`bakeoff/clients/core.py` (disk cache, hard cap per paid player, no SDK retries). Next: the first
-capped track (Task 8 of that plan, needs the user's go-ahead), then the phase 4 plan. Each phase
-gets its own plan.
+`bakeoff/clients/core.py` (disk cache, hard cap per paid player, no SDK retries). First costs in
+`docs/COSTS.md`. Next: write the phase 4 plan (replay viewer). Each phase gets its own plan.
 
 ## How we work here
 
@@ -33,7 +32,8 @@ gets its own plan.
 - Keys live in a git-ignored `.env`. A guard blocks every shell command that mentions `.env`,
   so programs must load it themselves (python-dotenv) and never print values.
 - Budget is limited: paid players need a response cache and a hard request cap from their
-  first commit; start paid runs with one capped track. Jev's price is still unknown.
+  first commit; start paid runs with one capped track. Measured: the LLM about 0.0006 USD per request, Jev about
+  0.00003 USD (an estimate, `docs/COSTS.md`).
 - The fly simulation needs about 1 GB and must run one process at a time on this 8 GB Mac.
 - Honesty rule for the fly: untrained, innate wiring only; any mapping that is ours rather than
   the fly's biology is labelled as such on screen and in the write-up.

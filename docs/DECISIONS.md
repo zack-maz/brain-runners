@@ -42,10 +42,15 @@
     answers one question; TypeSafe documents that questions in one request run in parallel and
     cannot see one another's answers, so the Nouls are not scaffolding for the Choice, and this
     asymmetry is named in the write-up.
+12. **First measured costs (2026-09-20, practice seed 1000, `docs/COSTS.md`):** the LLM costs
+    0.00059 USD per request at 806 ms (survived 199 rows); Jev about 0.00003 USD per request at
+    159 ms (survived 23 rows), an estimate from one console reading (29,457 tokens for 0.0011 USD,
+    blended, no reading before the run). A 20-seed tournament costs at most about 3.56 USD for the
+    LLM and about 0.20 USD for Jev. Neither player jumped and both died stepping sideways into a
+    gap; the prompts stay as written, because tuning them on a track is what the seed rule forbids.
 
 ## Open
 
-- Jev pricing and latency (first measured in phase 3, on one capped track).
 - Whether the tournament reuses seeds 0–19 or takes fresh seeds below 1000.
 - Left from the PR #2 review for phase 3 or later (details in the PR comments): `meta.json` and the logged `looming`
   ignore per-player overrides of the fly constants; `calibrate.play` duplicates the game loop without the fallback
@@ -59,8 +64,7 @@
 
 ## Next step
 
-Phases 1 to 3 are built. Run the first capped track for each paid player (phase 3 plan, Task 8,
-needs the user's go-ahead), then write the phase 4 plan (replay viewer).
+Phases 1 to 3 are built and the first costs are measured. Write the phase 4 plan (replay viewer).
 
 ## Prior art to reuse
 

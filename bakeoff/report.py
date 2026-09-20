@@ -13,8 +13,9 @@ COLUMNS = ("player", "runs", "incomplete", "missing", "mean_rows", "median_rows"
            "requests", "spent", "cache_hits", "mean_latency_ms", "input_tokens", "output_tokens", "cost_usd",
            "brier_gap_ahead", "brier_left_safe")
 
-# USD per million tokens (input, output), by the model id in meta.json. Jev is absent until its
-# price has been measured (phase 3 plan, Task 8): its cost then shows as "-", never as 0.
+# USD per million tokens (input, output), by the model id in meta.json. Jev is absent: only a blended
+# figure from its console is known (docs/COSTS.md), not an input and an output price, so its cost
+# shows as "-", never as 0.
 PRICES_USD_PER_MTOK = {"claude-haiku-4-5-20251001": (1.00, 5.00)}
 
 

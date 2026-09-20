@@ -15,7 +15,7 @@ answer, the fly's neurons firing) and a scoreboard across games.
 Status: phase 3 of 5 built. The untrained fly plays: on seeds 0–19 it survives 127 rows
 on average (random 35, always-jump 48, solver 300; `calibration/RESULTS.md`). Jev and the LLM
 (Claude Haiku 4.5) play behind a response cache and a hard request cap; first measured costs
-will be recorded in `docs/COSTS.md` (not run yet).
+are in `docs/COSTS.md`.
 
     uv run pytest                                    # fast tests, 5 s; `-m slow` runs the real brain (1 GB)
     uv run python -m scripts.fetch_fly_data          # once: 400 MB into data/
