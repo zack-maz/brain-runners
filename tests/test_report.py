@@ -148,3 +148,65 @@ def test_a_gated_stay_is_a_fallback_even_though_executed_equals_chosen():
     steps = [step(chosen="stay", gated=True), step(row=1, chosen="stay"), step(row=2, chosen=None, executed="stay")]
     (row,) = summarize(steps)
     assert row["fallback_rate"] == pytest.approx(2 / 3)
+
+
+def test_cache_hits_are_counted_apart_from_requests():
+    steps = [step(latency_ms=100.0), step(row=1, cache_hit=True), step(row=2, cache_hit=True, alive=False)]
+    (row,) = summarize(steps)
+    assert row["requests"] == 1 and row["cache_hits"] == 2
+
+
+def test_spent_comes_from_meta_requests_used_while_requests_counts_only_live_calls():
+    steps = [step(player="jev", row=i, latency_ms=50.0, usage={"input_tokens": 10, "output_tokens": 1})
+             for i in range(5)]
+    steps.append(step(player="solver", alive=False))
+    meta = {"requests": {"jev": {"max": 300, "used": 7}}}
+    rows = {r["player"]: r for r in summarize(steps, meta)}
+    assert rows["jev"]["spent"] == 7 and rows["jev"]["requests"] == 5
+    assert rows["solver"]["spent"] is None
+    assert {r["spent"] for r in summarize(steps)} == {None}  # no meta, no spent count
+    assert COLUMNS[COLUMNS.index("requests") + 1] == "spent"
+
+
+def test_cost_comes_from_live_tokens_and_the_price_of_the_model_in_meta():
+    steps = [step(player="llm", latency_ms=100.0, usage={"input_tokens": 500_000, "output_tokens": 10_000}),
+             step(player="llm", row=1, cache_hit=True, usage={"input_tokens": 9_000_000, "output_tokens": 0}),
+             step(player="jev", latency_ms=50.0, usage={"input_tokens": 400, "output_tokens": 3}),
+             step(player="solver")]
+    meta = {"models": {"llm": "claude-haiku-4-5-20251001", "jev": "jev-latest"}}
+    rows = {r["player"]: r for r in summarize(steps, meta)}
+    assert rows["llm"]["cost_usd"] == pytest.approx(0.5 * 1.00 + 0.01 * 5.00)
+    assert rows["jev"]["cost_usd"] is None  # price not known: never shown as free
+    assert rows["solver"]["cost_usd"] is None
+    assert {r["cost_usd"] for r in summarize(steps)} == {None}  # no meta, no model, no price
+
+
+def test_a_fully_cached_run_of_a_priced_model_costs_zero_not_unknown():
+    steps = [step(player="llm", cache_hit=True), step(player="llm", row=1, cache_hit=True)]
+    meta = {"models": {"llm": "claude-haiku-4-5-20251001"}}
+    (row,) = summarize(steps, meta)
+    assert row["cost_usd"] == 0.0
+
+
+def test_brier_scores_the_logged_nouls_against_the_engine_truth():
+    def noul_step(row, gap, left, truth_gap, truth_left, **extra):
+        return step(row=row, answers={"action": {"choice": "stay"}, "gap_ahead": {"type": "noul", "noul": gap},
+                                      "left_safe": {"type": "noul", "noul": left}},
+                    ground_truth={"gap_ahead": truth_gap, "left_safe": truth_left}, **extra)
+
+    steps = [noul_step(0, 0.9, 0.5, True, True), noul_step(1, 0.2, 0.5, False, False, cache_hit=True),
+             step(row=2, answers=None, ground_truth={"gap_ahead": True, "left_safe": True}, alive=False)]
+    (row,) = summarize(steps)
+    assert row["brier_gap_ahead"] == pytest.approx((0.1 ** 2 + 0.2 ** 2) / 2)
+    assert row["brier_left_safe"] == pytest.approx(0.25)
+
+
+def test_brier_is_none_for_a_player_that_answers_no_nouls():
+    (row,) = summarize([step(answers={"text": "{}"}, ground_truth={"gap_ahead": True, "left_safe": True})])
+    assert row["brier_gap_ahead"] is None and row["brier_left_safe"] is None
+
+
+def test_small_amounts_keep_four_decimals_in_the_table():
+    steps = [step(player="llm", latency_ms=100.0, usage={"input_tokens": 5200, "output_tokens": 90}, alive=False)]
+    table = format_table(summarize(steps, {"models": {"llm": "claude-haiku-4-5-20251001"}}))
+    assert "| 0.0056 |" in table

@@ -13,7 +13,9 @@ def test_run_then_report(tmp_path, capsys):
     (run_dir,) = tmp_path.iterdir()
     meta = json.loads((run_dir / "meta.json").read_text())
     assert meta["status"] == "completed" and meta["seeds"] == [0, 1]
-    assert meta["args"] == {"players": "solver,random", "seeds": 2, "seed_start": 0, "max_rows": 30}
+    assert meta["args"] == {"players": "solver,random", "seeds": 2, "seed_start": 0, "max_rows": 30,
+                            "max_requests": 0, "cache": ".cache/responses", "tournament": False}
+    assert meta["models"] == {} and meta["requests"] == {}
 
     assert main(["report", str(run_dir)]) == 0
     assert "| solver |" in capsys.readouterr().out
@@ -93,3 +95,103 @@ def test_spaces_around_player_names_are_ignored(tmp_path, capsys):
     assert main(["run", "--players", "random, solver", "--seeds", "1", "--max-rows", "20", "--out", str(tmp_path)]) == 0
     out = capsys.readouterr().out
     assert "| random |" in out and "| solver |" in out
+
+
+def fake_paid(monkeypatch, action="stay"):
+    """Put a JevPlayer with a fake SDK in the registry; returns the list of SDKs the CLI built."""
+    from bakeoff.players.jev import JevPlayer
+    from tests.fakes import FakeTypeSafe, jev_reply
+
+    sdks = []
+
+    def factory(cache, budget):
+        sdks.append(FakeTypeSafe(jev_reply(action)))
+        return JevPlayer(cache=cache, budget=budget, sdk=sdks[-1])
+
+    monkeypatch.setitem(REGISTRY, "jev", factory)
+    return sdks
+
+
+def paid_args(tmp_path, *extra):
+    return ["run", "--players", "jev", "--seeds", "1", "--seed-start", "1000", "--max-rows", "12",
+            "--out", str(tmp_path / "runs"), "--cache", str(tmp_path / "cache"), *extra]
+
+
+def test_without_max_requests_a_paid_player_cannot_spend_anything(tmp_path, capsys, monkeypatch):
+    sdks = fake_paid(monkeypatch)
+    assert main(paid_args(tmp_path)) == 1
+    assert "run budget_exhausted: request cap of 0 reached" in capsys.readouterr().err
+    assert sdks[0].calls == []
+    (run_dir,) = (tmp_path / "runs").iterdir()
+    meta = json.loads((run_dir / "meta.json").read_text())
+    assert meta["status"] == "budget_exhausted" and meta["requests"] == {"jev": {"max": 0, "used": 0}}
+    assert meta["models"] == {"jev": "jev-latest"}
+
+
+def test_the_cap_stops_the_run_and_the_next_run_continues_from_the_cache(tmp_path, capsys, monkeypatch):
+    sdks = fake_paid(monkeypatch, action="jump")  # always_jump survives the 12 rows of seed 1000
+    assert main(paid_args(tmp_path, "--max-requests", "2")) == 1
+    assert len(sdks[0].calls) == 2
+    time.sleep(1.1)  # run ids have one-second resolution
+    assert main(paid_args(tmp_path, "--max-requests", "50")) == 0
+    first, second = sorted((tmp_path / "runs").iterdir())
+    assert json.loads((first / "meta.json").read_text())["requests"] == {"jev": {"max": 2, "used": 2}}
+    steps = [json.loads(line) for line in (second / "jev.jsonl").read_text().splitlines()]
+    assert [s["cache_hit"] for s in steps[:2]] == [True, True] and not any(s["cache_hit"] for s in steps[2:])
+    meta = json.loads((second / "meta.json").read_text())
+    assert meta["status"] == "completed" and meta["requests"]["jev"]["used"] == len(steps) - 2
+    time.sleep(1.1)
+    assert main(paid_args(tmp_path)) == 0  # a full replay needs no budget at all
+    assert len(sdks[2].calls) == 0
+
+
+def test_a_missing_key_is_a_usage_error_before_the_run_directory_exists(tmp_path, capsys, monkeypatch):
+    import bakeoff.clients.core as core
+
+    def no_key(name):
+        raise ValueError(f"{name} is not set")
+
+    monkeypatch.setattr(core, "require_key", no_key)
+    args = ["run", "--players", "solver,llm", "--seeds", "1", "--seed-start", "1000", "--max-requests", "3",
+            "--out", str(tmp_path / "runs"), "--cache", str(tmp_path / "cache")]
+    assert main(args) == 2
+    assert "llm: ANTHROPIC_API_KEY is not set" in capsys.readouterr().err
+    assert not (tmp_path / "runs").exists()
+
+
+def test_a_negative_cap_is_a_usage_error(tmp_path, capsys):
+    assert main(paid_args(tmp_path, "--max-requests", "-1")) == 2
+    assert "must not be negative" in capsys.readouterr().err
+
+
+def low_seed_paid_args(tmp_path, *extra):
+    return ["run", "--players", "jev", "--seeds", "1", "--max-rows", "12",
+            "--out", str(tmp_path / "runs"), "--cache", str(tmp_path / "cache"), *extra]
+
+
+def test_a_paid_cap_on_seeds_below_1000_without_tournament_is_a_usage_error(tmp_path, capsys, monkeypatch):
+    sdks = fake_paid(monkeypatch)
+    assert main(low_seed_paid_args(tmp_path, "--max-requests", "5")) == 2
+    assert "--tournament" in capsys.readouterr().err
+    assert sdks[0].calls == []
+    assert not (tmp_path / "runs").exists()
+
+
+def test_the_tournament_flag_allows_a_paid_cap_on_seeds_below_1000(tmp_path, monkeypatch):
+    sdks = fake_paid(monkeypatch, action="jump")
+    assert main(low_seed_paid_args(tmp_path, "--max-requests", "2", "--tournament")) in (0, 1)
+    assert sdks[0].calls != []
+    (run_dir,) = (tmp_path / "runs").iterdir()
+    meta = json.loads((run_dir / "meta.json").read_text())
+    assert meta["args"]["tournament"] is True
+
+
+def test_max_requests_0_on_low_seeds_is_not_refused_by_the_guard(tmp_path, capsys, monkeypatch):
+    fake_paid(monkeypatch)
+    assert main(low_seed_paid_args(tmp_path)) == 1
+    assert "run budget_exhausted: request cap of 0 reached" in capsys.readouterr().err
+
+
+def test_a_free_player_with_a_cap_on_low_seeds_is_not_refused_by_the_guard(tmp_path):
+    assert main(["run", "--players", "solver", "--max-requests", "5", "--seeds", "1", "--max-rows", "20",
+                "--out", str(tmp_path)]) == 0

@@ -10,7 +10,13 @@ from pathlib import Path
 COLUMNS = ("player", "runs", "incomplete", "missing", "mean_rows", "median_rows", "finished",
            "ran_into_gap", "jumped_into_gap", "dodged_into_gap", "jump_share", "solver_agreement",
            "fallback_rate", "invalid_rate", "error_rate",
-           "requests", "mean_latency_ms", "input_tokens", "output_tokens")
+           "requests", "spent", "cache_hits", "mean_latency_ms", "input_tokens", "output_tokens", "cost_usd",
+           "brier_gap_ahead", "brier_left_safe")
+
+# USD per million tokens (input, output), by the model id in meta.json. Jev is absent: only a blended
+# figure from its console is known (docs/COSTS.md), not an input and an output price, so its cost
+# shows as "-", never as 0.
+PRICES_USD_PER_MTOK = {"claude-haiku-4-5-20251001": (1.00, 5.00)}
 
 
 def load_steps(run_dir: Path | str) -> list[dict]:
@@ -58,7 +64,26 @@ def _is_fallback(step: dict) -> bool:
     return bool(step["gated"] or step["invalid"] or step["error"] is not None or step["chosen_action"] is None)
 
 
-def _summarize_player(player: str, steps: list[dict]) -> dict:
+def _cost_usd(model: str | None, input_tokens: int, output_tokens: int) -> float | None:
+    if model not in PRICES_USD_PER_MTOK:
+        return None
+    per_input, per_output = PRICES_USD_PER_MTOK[model]
+    return (input_tokens * per_input + output_tokens * per_output) / 1_000_000
+
+
+def _brier(steps: list[dict], noul: str) -> float | None:
+    """Mean squared gap between a logged Noul probability and the engine's truth (0 is perfect,
+    0.25 is what always answering 0.5 scores). Cached answers count: a judgment is a judgment."""
+    errors = []
+    for s in steps:
+        answer = (s.get("answers") or {}).get(noul)
+        truth = (s.get("ground_truth") or {}).get(noul)
+        if isinstance(answer, dict) and isinstance(answer.get("noul"), (int, float)) and truth is not None:
+            errors.append((answer["noul"] - float(truth)) ** 2)
+    return _mean(errors)
+
+
+def _summarize_player(player: str, steps: list[dict], model: str | None = None) -> dict:
     runs = defaultdict(list)
     for s in steps:
         runs[s["seed"]].append(s)
@@ -70,6 +95,8 @@ def _summarize_player(player: str, steps: list[dict]) -> dict:
     comparable = [s for s in steps if s["chosen_action"] is not None]
     live = [s for s in steps if s["latency_ms"] is not None and not s["cache_hit"]]
     usage = [s["usage"] or {} for s in live]
+    input_tokens = sum(u.get("input_tokens") or 0 for u in usage)
+    output_tokens = sum(u.get("output_tokens") or 0 for u in usage)
 
     return {
         "player": player, "runs": len(complete), "incomplete": len(finals) - len(complete),
@@ -83,10 +110,12 @@ def _summarize_player(player: str, steps: list[dict]) -> dict:
         "invalid_rate": _ratio(sum(s["invalid"] for s in steps), len(steps)),
         "error_rate": _ratio(sum(s["error"] is not None for s in steps), len(steps)),
         "missing": None,  # filled in by summarize() when meta.json says which seeds were planned
-        "requests": len(live),
+        "spent": None,  # filled in by summarize() from meta.json's requests[player].used, when present
+        "requests": len(live), "cache_hits": sum(bool(s["cache_hit"]) for s in steps),
         "mean_latency_ms": _mean([s["latency_ms"] for s in live]),
-        "input_tokens": sum(u.get("input_tokens") or 0 for u in usage),
-        "output_tokens": sum(u.get("output_tokens") or 0 for u in usage),
+        "input_tokens": input_tokens, "output_tokens": output_tokens,
+        "cost_usd": _cost_usd(model, input_tokens, output_tokens),
+        "brier_gap_ahead": _brier(steps, "gap_ahead"), "brier_left_safe": _brier(steps, "left_safe"),
     }
 
 
@@ -98,9 +127,10 @@ def summarize(steps: list[dict], meta: dict | None = None) -> list[dict]:
         groups.setdefault(player, [])  # a player that never started still gets a row
     rows = []
     for player, group in sorted(groups.items()):
-        row = _summarize_player(player, group)
+        row = _summarize_player(player, group, ((meta or {}).get("models") or {}).get(player))
         if meta is not None:
             row["missing"] = len(set(meta.get("seeds", ())) - {s["seed"] for s in group})
+            row["spent"] = (meta.get("requests") or {}).get(player, {}).get("used")
         rows.append(row)
     return rows
 
@@ -109,7 +139,7 @@ def _fmt(value) -> str:
     if value is None:
         return "-"
     if isinstance(value, float):
-        return f"{value:.2f}"
+        return f"{value:.4f}" if 0 < abs(value) < 0.1 else f"{value:.2f}"  # a track costs cents
     return str(value)
 
 

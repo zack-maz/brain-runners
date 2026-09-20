@@ -5,6 +5,7 @@ import pytest
 
 from bakeoff.players import make_player
 from bakeoff.players.base import Decision
+from bakeoff.errors import PreflightError
 from bakeoff.runner import BudgetExhausted, RunAborted, Runner
 
 KEYS = {"run_id", "player", "seed", "row", "lane", "senses", "looming", "questions", "answers",
@@ -197,3 +198,47 @@ def test_finished_at_is_written_even_when_the_run_aborts(tmp_path):
         Runner(tmp_path).run([Scripted(Decision(None, error="boom"), name="errs")], range(10), run_id="a")
     meta = json.loads((tmp_path / "a" / "meta.json").read_text())
     assert meta["status"] == "aborted" and meta["finished_at"] is not None
+
+
+class Unready(Scripted):
+    def __init__(self, error, name="unready"):
+        super().__init__(Decision("stay"), name=name)
+        self.error = error
+
+    def preflight(self): raise self.error
+
+
+@pytest.mark.parametrize("error", [FileNotFoundError("fly data unusable"), PermissionError("cannot read"),
+                                   ValueError("TYPESAFE_API_KEY is not set")])
+def test_a_failing_preflight_raises_before_the_run_directory_is_created(tmp_path, error):
+    with pytest.raises(PreflightError, match=f"unready: {error}"):
+        Runner(tmp_path).run([make_player("solver"), Unready(error)], range(1), max_rows=20, run_id="p")
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_preflight_error_is_a_value_error_so_the_cli_reports_it_as_usage():
+    assert issubclass(PreflightError, ValueError)
+
+
+def test_a_passing_preflight_lets_the_run_happen(tmp_path):
+    class Ready(Scripted):
+        checked = False
+
+        def preflight(self): self.checked = True
+
+    ready = Ready(Decision("stay"), name="ready")
+    Runner(tmp_path).run([ready], range(1), max_rows=20, run_id="p2")
+    assert ready.checked and (tmp_path / "p2" / "ready.jsonl").exists()
+
+
+def test_a_bug_in_preflight_is_not_dressed_up_as_a_usage_error(tmp_path):
+    with pytest.raises(RuntimeError, match="bug"):
+        Runner(tmp_path).run([Unready(RuntimeError("bug"))], range(1), run_id="p3")
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_run_ending_exceptions_live_in_errors_and_are_re_exported_by_the_runner():
+    from bakeoff import errors, runner
+
+    assert runner.RunAborted is errors.RunAborted and runner.BudgetExhausted is errors.BudgetExhausted
+    assert errors.BudgetExhausted.status == "budget_exhausted" and errors.RunAborted.status == "aborted"

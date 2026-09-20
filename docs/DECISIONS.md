@@ -32,26 +32,39 @@
    is judged against the right baseline.
 10. **Tournament seeds must be below 1000**; 1000–1399 were used for calibration. The fly has
     played seeds 0–19 once, after the freeze (first scoreboard); nothing was tuned on them.
+11. **Paid players (phase 3):** one request per row through a disk cache (sha256 of provider, model,
+    senses, questions) and a hard cap per paid player (`--max-requests`, default 0 = replay only).
+    SDK retries are off so the cap is exact; a provider failure is a logged error and a `stay`.
+    Jev and the LLM are told the same rules in the same words (`bakeoff/players/briefing.py`, ours,
+    written before any paid request). No paid request on a seed below 1000 before the tournament.
+    The CLI refuses a live paid run on seeds below 1000 unless `--tournament` is passed. Jev's
+    request carries the Choice and the two calibration Nouls the spec asks for, while the LLM
+    answers one question; TypeSafe documents that questions in one request run in parallel and
+    cannot see one another's answers, so the Nouls are not scaffolding for the Choice, and this
+    asymmetry is named in the write-up.
+12. **First measured costs (2026-09-20, practice seed 1000, `docs/COSTS.md`):** the LLM costs
+    0.00059 USD per request at 806 ms (survived 199 rows); Jev about 0.00003 USD per request at
+    159 ms (survived 23 rows), an estimate from one console reading (29,457 tokens for 0.0011 USD,
+    blended, no reading before the run). A 20-seed tournament costs at most about 3.56 USD for the
+    LLM and about 0.20 USD for Jev. Neither player jumped and both died stepping sideways into a
+    gap; the prompts stay as written, because tuning them on a track is what the seed rule forbids.
 
 ## Open
 
-- Jev pricing and latency (first measured in phase 3, on one capped track).
 - Whether the tournament reuses seeds 0–19 or takes fresh seeds below 1000.
 - Left from the PR #2 review for phase 3 or later (details in the PR comments): `meta.json` and the logged `looming`
   ignore per-player overrides of the fly constants; `calibrate.play` duplicates the game loop without the fallback
   rule; `fetch_fly_data` cannot repair an existing clone; `Network.restore` copies static synapse arrays every
   decision (measure before optimising).
-- Left from the second PR #2 review, for the phase 3 plan: `preflight()` is called only by the CLI, so a direct
-  `Runner.run` without fly data still leaves an `interrupted` run directory, and it catches only
-  `FileNotFoundError`; `FlyPlayer.act` lets a brain exception end the whole run instead of returning
-  `Decision(error=...)` with the `stay` fallback; the fly data is hashed twice per CLI run (preflight, then
-  `Brain`); `SurrogateBrain` raises a bare `KeyError` on a surface file missing a pin field.
+- Left from the second PR #2 review: the fly data is hashed twice per CLI run (preflight, then
+  `Brain`); `SurrogateBrain` raises a bare `KeyError` on a surface file missing a pin field. Done in
+  phase 3: `preflight()` runs inside `Runner.run`. Declined: turning a brain exception into a `stay`
+  fallback; phase 2 decided a simulator failure must end the run, because a silent `stay` would
+  change the fly's score.
 
 ## Next step
 
-Phases 1 and 2 are built. Write the phase 3 plan (Jev and LLM players: thin clients sharing a disk
-cache and a hard `--max-requests` cap, keys loaded inside the program, first cost numbers from one
-capped track).
+Phases 1 to 3 are built and the first costs are measured. Write the phase 4 plan (replay viewer).
 
 ## Prior art to reuse
 
