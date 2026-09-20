@@ -83,7 +83,7 @@
       });
     });
     const height = FLY_GROUPS.length * (2 * rowHeight + 4);
-    const label = "spikes of the read-out neurons" + (windowMs == null ? "" : " over the " + windowMs + " ms window");
+    const label = "spikes of the read-out neurons" + (windowMs == null ? "" : " over the " + esc(windowMs) + " ms window");
     return '<svg class="raster" viewBox="0 0 256 ' + height + '" role="img" aria-label="' + label + '">' + rows + "</svg>";
   }
 
@@ -108,8 +108,8 @@
       "<span>right eye " + hz(info.right_hz) + bar(info.right_hz / eyeScale) + "</span></div>" +
       '<p class="muted">Looming input to the LPLC2 and LC4 cells of each eye. The weighting of gaps is ours.</p>' +
       spikeRaster(info, windowMs) +
-      '<p class="muted">' + info.total_spikes + " spikes in the whole brain" +
-      (windowMs == null ? "" : " in " + windowMs + " ms") + "</p>" +
+      '<p class="muted">' + esc(info.total_spikes) + " spikes in the whole brain" +
+      (windowMs == null ? "" : " in " + esc(windowMs) + " ms") + "</p>" +
       '<div class="signal">turn signal ' + hz(turn) + ' <span class="muted">(right minus left steering; turns beyond ±' +
       Math.round(threshold) + " Hz, our threshold)</span>" +
       '<span class="bar centred"><i class="fill" style="left:' + (Math.min(turnShare, 0.5) * 100).toFixed(1) + "%;width:" +

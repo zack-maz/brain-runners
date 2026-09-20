@@ -90,6 +90,17 @@ test("an unknown window leaves the milliseconds out of the spikes line", () => {
   assert.match(html, /7 spikes in the whole brain<\/p>/);
 });
 
+test("the fly panel escapes its numbers like every other log value", () => {
+  const info = {
+    left_hz: 0, right_hz: 0, total_spikes: "<script>x</script>", turn_signal_hz: 0, jump_signal_hz: 0, jump_threshold_hz: 200,
+    turn_threshold_hz: 0, spike_times_ms: {},
+  };
+  const html = Minds.mind({ player: "fly", questions: [] }, frame({ info }), context({ windowMs: "<b>1</b>" }));
+  assert.equal(html.includes("<script>"), false);
+  assert.equal(html.includes("<b>"), false);
+  assert.match(html, /&#60;script&#62;/);
+});
+
 test("Jev's panel shows the four probabilities and scores the two questions against the truth", () => {
   const answers = {
     action: { choice: "left", confidence: 0.09, probabilities: { left: 0.33, stay: 0.21, right: 0.21, jump: 0.25 } },
