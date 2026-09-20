@@ -28,3 +28,28 @@ def jev_reply(action="stay", gap_ahead=0.1, left_safe=0.9):
                                                      for a in ("left", "right", "jump", "stay")}},
                         "gap_ahead": {"type": "noul", "noul": gap_ahead},
                         "left_safe": {"type": "noul", "noul": left_safe}}}
+
+
+class FakeAnthropic:
+    """Looks like anthropic.Anthropic. `reply` is a Message-shaped dict, or an exception to raise."""
+
+    def __init__(self, reply):
+        self.reply, self.calls, self.closed = reply, [], False
+        self.messages = self
+
+    def create(self, **kwargs):
+        import anthropic
+
+        self.calls.append(kwargs)
+        if isinstance(self.reply, Exception):
+            raise self.reply
+        return anthropic.types.Message.model_validate(self.reply)
+
+    def close(self):
+        self.closed = True
+
+
+def llm_reply(text='{"action": "stay"}', stop_reason="end_turn"):
+    return {"id": "msg_1", "type": "message", "role": "assistant", "model": "claude-haiku-4-5-20251001",
+            "content": [{"type": "text", "text": text}], "stop_reason": stop_reason, "stop_sequence": None,
+            "usage": {"input_tokens": 520, "output_tokens": 9}}
