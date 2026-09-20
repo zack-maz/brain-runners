@@ -10,6 +10,7 @@
 
   const $ = (id) => document.getElementById(id);
   const esc = Minds.esc;
+  const cell = Minds.cell;
   const CONTESTANTS = ["fly", "jev", "llm"];
   const COLOURS = { fly: [176, 116, 0], jev: [11, 134, 128], llm: [94, 82, 204] };
   const BASELINE = [96, 108, 116];
@@ -43,18 +44,27 @@
     return "run " + esc(run.run_id) + " (" + status + ", " + esc(sha) + ")";
   }).join("; ");
 
+  const gameRun = replay.runs.find((run) => run.game);
+  $("sight").innerHTML = gameRun
+    ? "Every player gets the same track and sees the same " + esc(gameRun.game.lookahead) + " rows ahead, " +
+      esc(gameRun.game.window) + " lanes either side (the brighter tiles)."
+    : "Every player gets the same track and sees the same rows ahead (the brighter tiles).";
+
   // ---- track table --------------------------------------------------------------------------
   function renderMatrix() {
     let html = "<thead><tr><th>track</th>" + replay.seeds.map((seed) =>
-      '<th><button type="button" data-seed="' + seed + '"' + (seed === view.seed ? ' aria-current="true"' : "") + ">" + seed +
+      '<th><button type="button" data-seed="' + esc(seed) + '"' + (seed === view.seed ? ' aria-current="true"' : "") + ">" + esc(seed) +
       "</button></th>").join("") + "</tr></thead><tbody>";
     for (const player of replay.players) {
       html += '<tr style="--player:rgb(' + colourOf(player).join(",") + ')"><th><button type="button" data-player="' + esc(player) +
         '" aria-pressed="' + view.shown.has(player) + '">' + esc(player) + "</button></th>";
       for (const seed of replay.seeds) {
         const episode = episodeOf(player, seed);
+        const track = replay.tracks[String(seed)];
         const mark = !episode ? "" : !episode.complete ? " …" : episode.finished ? " ✓" : "";
-        html += "<td" + (seed === view.seed ? ' class="current"' : "") + ">" + (episode ? episode.rows_survived + mark : "") + "</td>";
+        const shorter = episode && track && episode.max_rows !== track.max_rows ? " /" + esc(episode.max_rows) : "";
+        const shown = episode ? esc(episode.rows_survived) + mark + shorter : "";
+        html += "<td" + (seed === view.seed ? ' class="current"' : "") + ">" + shown + "</td>";
       }
       html += "</tr>";
     }
@@ -99,17 +109,22 @@
       const ctx = canvas.getContext("2d");
       ctx.scale(ratio, ratio);
       const game = run.game || {};
+      const lanesEitherSide = run.game ? game.window : 3; // default 3 only when the run has no game block at all
       view.columns.push({
         episode, track, ctx, size, index: -1,
         status: column.querySelector(".status"), mind: column.querySelector(".mind"),
-        lookahead: game.lookahead || 6, window: game.window || 3, windowMs: (run.fly || {}).window_ms || 100,
+        lookahead: game.lookahead || 6, window: lanesEitherSide,
+        context: { windowMs: run.fly ? run.fly.window_ms : null, window: lanesEitherSide,
+                   maxHz: game.looming ? game.looming.max_hz : null },
         colours: { space: [14, 24, 34], floor: [104, 120, 130], finish: [236, 224, 180],
                    seen: blend([214, 224, 226], colour, 0.3), runner: blend(colour, [255, 255, 255], 0.35) },
       });
     }
     view.duration = Math.max(1, ...episodes.map(Timeline.endRow)) + TAIL;
-    // a jump over the finish line lands one row past it; the clock stops at the line
-    view.lastRow = Math.min(view.duration - TAIL, track ? track.max_rows : 1);
+    // the scrubber still ends where the last shown runner ends; the clock's "of N" is the length
+    // of the track being played, not wherever a runner that died early happened to stop
+    const rowsShown = episodes.map((e) => e.max_rows).filter((n) => n != null);
+    view.lastRow = rowsShown.length ? Math.max(...rowsShown) : (track ? track.max_rows : 1);
     $("scrub").max = view.duration;
     draw();
   }
@@ -125,7 +140,7 @@
       if (column.status.innerHTML !== status) column.status.innerHTML = status;
       if (state.index !== column.index) {
         const open = !!(column.mind.querySelector("details") || {}).open;
-        column.mind.innerHTML = Minds.mind(episode, state.frame, column.windowMs);
+        column.mind.innerHTML = Minds.mind(episode, state.frame, column.context);
         if (open && column.mind.querySelector("details")) column.mind.querySelector("details").open = true;
         column.index = state.index;
       }
@@ -174,11 +189,6 @@
   });
 
   // ---- scoreboard ---------------------------------------------------------------------------
-  function cell(value) {
-    if (value == null) return "–";
-    if (typeof value !== "number" || Number.isInteger(value)) return esc(value);
-    return Math.abs(value) > 0 && Math.abs(value) < 0.1 ? value.toFixed(4) : value.toFixed(2);
-  }
   const board = replay.scoreboard;
   $("scoreboard").innerHTML = "<thead><tr>" + board.columns.map((c) => "<th>" + esc(c.replace(/_/g, " ")) + "</th>").join("") +
     "</tr></thead><tbody>" + board.rows.map((row) => "<tr>" + board.columns.map((c) =>
@@ -187,19 +197,7 @@
 
   // ---- what is ours -------------------------------------------------------------------------
   const flyRun = replay.runs.find((run) => run.fly && (run.players || []).includes("fly")) || replay.runs.find((run) => run.fly);
-  const looming = flyRun && flyRun.game && flyRun.game.looming;
-  $("ours").innerHTML = !flyRun || !looming || looming.falloff == null
-    ? "<li>The runs in this replay did not record the fly's constants.</li>"
-    : "<li>Each gap the fly can see adds " + cell(looming.gain_hz) + " / row<sup>" + cell(looming.falloff) + "</sup> Hz to the eye on its side " +
-      "(a gap in the runner's own lane: both eyes), capped at " + cell(looming.max_hz) + " Hz and rounded to " + cell(looming.step_hz) +
-      " Hz steps. A gap one row away counts " + Math.pow(2, looming.falloff) + " times as much as one two rows away.</li>" +
-      "<li>A turn signal beyond " + cell(flyRun.fly.turn_threshold_hz) + " Hz turns; a Giant Fiber mean above " +
-      cell(flyRun.fly.jump_threshold_hz) + " Hz jumps, and a jump wins over a turn. Each decision simulates " +
-      cell(flyRun.fly.window_ms) + " ms from a clean brain.</li>" +
-      (flyRun.fly.provisional
-        ? '<li class="warn">These values were provisional when this run was made: not yet calibrated.</li>'
-        : "<li>All four numbers were chosen once, by a rule fixed beforehand, on practice tracks 1000 to 1199 that are not in " +
-          "the tournament, then frozen (calibration/REPORT.md).</li>");
+  $("ours").innerHTML = Minds.ours(flyRun);
 
   renderMatrix();
   renderStage();

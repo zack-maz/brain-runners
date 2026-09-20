@@ -40,8 +40,11 @@
     const first = Math.floor(cam.row);
     for (let row = first + DEPTH; row >= first; row--) {
       const near = Math.max(row - cam.row, -1), far = row + 1 - cam.row;
+      // mirrors Game.step (bakeoff/game/engine.py): only row <= maxRows can ever be a fatal gap, so a
+      // row past the finish line is never a hole, whatever `gaps` lists there
+      const neverKills = row > maxRows;
       for (let lane = 0; lane < track.lanes; lane++) {
-        if (isGap(track, row, lane)) continue;
+        if (!neverKills && isGap(track, row, lane)) continue;
         // canvas y points down, so the bottom of the tube is angle pi/2 and "right" is a smaller angle
         const angle = Math.PI / 2 - offset(lane, cam.lane, track.lanes) * step;
         const a = angle + step / 2, b = angle - step / 2;

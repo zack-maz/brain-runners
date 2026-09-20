@@ -58,7 +58,9 @@ def test_every_landing_matches_the_engine(tmp_path):
         for frame, following in zip(frames, frames[1:]):
             assert frame["landing"] == [following["row"], following["lane"]]
         row, lane = frames[-1]["landing"]
-        assert (row < len(gaps) and lane in gaps[row]) == (not frames[-1]["alive"])  # only a gap kills
+        # mirroring the engine's own condition (Game.step): a landing past max_rows can never kill
+        would_kill = row <= episode["max_rows"] and row < len(gaps) and lane in gaps[row]
+        assert would_kill == (not frames[-1]["alive"])
         assert episode["complete"] and episode["max_rows"] == 40
         assert episode["rows_survived"] == frames[-1]["rows_survived"]
 
@@ -125,11 +127,24 @@ def test_same_seeds_is_true_when_everyone_played_the_same_tracks(tmp_path):
     assert build_replay([run_dir])["scoreboard"]["same_seeds"] is True
 
 
+def test_same_seeds_is_false_when_one_player_is_split_across_runs(tmp_path):
+    a = write_run(tmp_path, "a", [record("fly", seed=0, track=TRACK)])
+    b = write_run(tmp_path, "b", [record("fly", seed=1, track=TRACK)])
+    c = write_run(tmp_path, "c", [record("jev", seed=0, track=TRACK), record("jev", seed=1, track=TRACK)])
+    assert build_replay([a, b, c])["scoreboard"]["same_seeds"] is False
+
+
 def test_the_same_episode_in_two_runs_is_an_error(tmp_path):
     a = write_run(tmp_path, "a", [record("jev", track=TRACK)])
     b = write_run(tmp_path, "b", [record("jev", track=TRACK)])
     with pytest.raises(ValueError, match="jev on seed 0 is in both a and b"):
         build_replay([a, b])
+
+
+def test_the_same_row_twice_in_one_run_is_an_error(tmp_path):
+    run_dir = write_run(tmp_path, "a", [record(track=TRACK), record(row=0)])
+    with pytest.raises(ValueError, match="p on seed 0 appears more than once in a"):
+        build_replay([run_dir])
 
 
 def test_the_longest_track_of_a_seed_is_kept(tmp_path):

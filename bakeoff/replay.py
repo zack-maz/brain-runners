@@ -29,6 +29,9 @@ def landing(row: int, lane: int, executed_action: str, lanes: int) -> list[int]:
 
 def _episode(player: str, seed: int, run_id: str, steps: list[dict]) -> tuple[dict, dict | None]:
     steps = sorted(steps, key=lambda s: s["row"])
+    for prev, cur in zip(steps, steps[1:]):
+        if cur["row"] <= prev["row"]:
+            raise ValueError(f"{player} on seed {seed} appears more than once in {run_id}")
     track = next((s["track"] for s in steps if s.get("track")), None)
     lanes = track["lanes"] if track else steps[0]["senses"]["lanes"]
     questions: list[dict] = []
@@ -85,11 +88,14 @@ def build_replay(run_dirs: list[Path | str]) -> dict:
     players = [p for p in CONTESTANTS if p in seen] + [p for p in seen if p not in CONTESTANTS]
     episodes.sort(key=lambda e: (e["seed"], players.index(e["player"])))
     scoreboard.sort(key=lambda r: players.index(r["player"]) if r["player"] in players else len(players))
-    seeds_of = {p: {e["seed"] for e in episodes if e["player"] == p} for p in players}
+    seeds_of: dict[tuple[str, str], set[int]] = {}
+    for e in episodes:
+        seeds_of.setdefault((e["run_id"], e["player"]), set()).add(e["seed"])
     return {
         "replay_version": REPLAY_VERSION, "runs": runs, "players": players,
         "seeds": sorted({e["seed"] for e in episodes}), "tracks": tracks, "episodes": episodes,
         "scoreboard": {"columns": ["run_id", *COLUMNS], "rows": scoreboard,
-                       # means over different seeds are not a fair comparison; the viewer says so
+                       # true only when every scoreboard row (one per run, player) covers the same seeds;
+                       # means over different seeds are not a fair comparison, and the viewer says so
                        "same_seeds": len({frozenset(s) for s in seeds_of.values()}) <= 1},
     }

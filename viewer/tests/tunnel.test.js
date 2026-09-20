@@ -57,3 +57,13 @@ test("tiles are marked as seen, floor or finish", () => {
   assert.equal(kind(0, 6), "floor");
   assert.equal(kind(4, 6), "finish");
 });
+
+test("a gap the engine can never kill on past the finish line is drawn as finish floor, not a hole", () => {
+  // maxRows 2: row 2 is at the finish (the engine can still kill there); row 3 is past it (never kills)
+  const pastFinish = { lanes: 12, max_rows: 300, gaps: [[], [], [5], [3]] };
+  const cam = { row: 0, lane: 6 };
+  const all = quads(pastFinish, cam, seen, SIZE, 2);
+  const tile = (row, lane) => all.find((q) => q.row === row && q.lane === lane);
+  assert.equal(tile(3, 3).kind, "finish"); // gaps[3] lists lane 3, but row 3 > max_rows 2: drawn anyway
+  assert.equal(tile(2, 5), undefined); // row 2 <= max_rows 2: the engine could still kill there, so it's a real hole
+});
