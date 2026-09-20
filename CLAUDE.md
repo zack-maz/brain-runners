@@ -34,5 +34,5 @@ cache and request cap), then build it. Each phase gets its own plan.
 - The fly simulation needs about 1 GB and must run one process at a time on this 8 GB Mac.
 - Honesty rule for the fly: untrained, innate wiring only; any mapping that is ours rather than
   the fly's biology is labelled as such on screen and in the write-up.
-- Fast tests: `uv run pytest -m "not slow"`. `-m slow` builds the real fly brain (about 1 GB,
+- `uv run pytest` runs the fast tests only. `uv run pytest -m slow` builds the real fly brain (about 1 GB,
   one minute); never run two fly processes at once.

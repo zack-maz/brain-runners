@@ -15,7 +15,7 @@ answer, the fly's neurons firing) and a scoreboard across games.
 Status: phase 2 of 5 built. The untrained fly plays: on seeds 0–19 it survives 127 rows
 on average (random 35, always-jump 48, solver 300; `calibration/RESULTS.md`).
 
-    uv run pytest -m "not slow"                      # 2 s; `-m slow` runs the real brain (1 GB)
+    uv run pytest                                    # fast tests, 2 s; `-m slow` runs the real brain (1 GB)
     uv run python -m scripts.fetch_fly_data          # once: 400 MB into data/
     uv run python -m bakeoff run --players fly,always_jump,random,solver --seeds 20
     uv run python -m bakeoff report runs/<run_id>

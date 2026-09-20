@@ -15,6 +15,7 @@ dependencies = [
 ]
 
 [tool.pytest.ini_options]
+addopts = "-m 'not slow'"
 pythonpath = ["."]
 testpaths = ["tests"]
 markers = [

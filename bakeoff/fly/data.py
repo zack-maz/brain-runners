@@ -49,3 +49,11 @@ def problems(data_dir: Path = DATA_DIR, check_hashes: bool = False,
 
 def data_available(data_dir: Path = DATA_DIR) -> bool:
     return not problems(data_dir)
+
+
+def require() -> None:
+    """Usage-error check for the default data dir: raise before a run starts, not mid-run."""
+    found = problems(check_hashes=True)
+    if found:
+        raise FileNotFoundError("fly data unusable (run `uv run python -m scripts.fetch_fly_data`): "
+                                + "; ".join(found))

@@ -17,7 +17,7 @@ import zlib
 from pathlib import Path
 
 from bakeoff.fly import data
-from bakeoff.fly.reading import Reading
+from bakeoff.fly.reading import WINDOW_MS, Reading
 from bakeoff.senses import LOOMING_STEP_HZ, MAX_HZ
 
 SURFACE_SCHEMA = 1
@@ -30,6 +30,12 @@ def _trial_seed(left_hz: float, right_hz: float, trial: int) -> int:
 
 
 def measure_surface(brain, levels_hz=LEVELS_HZ, trials: int = TRIALS, progress=None) -> dict:
+    selection = getattr(brain, "selection", None)
+    if selection is not None:
+        for name, members in selection.readouts.items():
+            if len(members) != 1:
+                raise ValueError("the surface stores spike counts and assumes one neuron per read-out group; "
+                                 f"{name} has {len(members)}")
     cells = []
     for left_hz in levels_hz:
         for right_hz in levels_hz:
@@ -51,10 +57,18 @@ class SurrogateBrain:
     def __init__(self, surface: dict):
         if surface.get("schema") != SURFACE_SCHEMA:
             raise ValueError(f"unknown response surface schema: {surface.get('schema')!r}")
+        for key, current in (("model_commit", data.MODEL_REPO_COMMIT),
+                             ("annotations_commit", data.ANNOTATIONS_COMMIT), ("window_ms", WINDOW_MS)):
+            if surface[key] != current:
+                raise ValueError(f"response surface was measured on a different fly "
+                                 f"({key}: {surface[key]} != {current}); "
+                                 "measure it again with python -m bakeoff.fly.surface")
         self.window_ms = surface["window_ms"]
         self._cells = {(c["left_hz"], c["right_hz"]): c["spike_counts"] for c in surface["cells"]}
 
     def window(self, left_hz: float, right_hz: float, noise_seed: int | None = None) -> Reading:
+        # count / window == count / len(members) / window only when every read-out group has one
+        # neuron; measure_surface's guard enforces that when the surface is written.
         trials = self._cells.get((left_hz, right_hz))
         if trials is None:
             raise KeyError(f"input ({left_hz}, {right_hz}) Hz was not measured; levels are steps of {LOOMING_STEP_HZ} Hz")

@@ -1,4 +1,5 @@
 import json
+import types
 from pathlib import Path
 
 import pytest
@@ -41,6 +42,14 @@ def test_measure_surface_runs_every_input_pair_with_distinct_repeatable_noise():
     json.dumps(surface)
 
 
+def test_measure_surface_refuses_a_read_out_group_with_more_than_one_neuron():
+    brain = CountingBrain()
+    brain.selection = types.SimpleNamespace(readouts={"DNa01_left": (1, 2), "DNa01_right": (3,)})
+    with pytest.raises(ValueError, match="one neuron per read-out group"):
+        measure_surface(brain, levels_hz=(0.0,), trials=1)
+    assert brain.calls == []
+
+
 def test_the_surrogate_replays_a_measured_trial_chosen_by_the_noise_seed(tmp_path):
     surface = measure_surface(CountingBrain(), levels_hz=(0.0, 25.0), trials=4)
     path = tmp_path / "surface.json"
@@ -65,9 +74,27 @@ def test_the_surrogate_refuses_an_unknown_schema():
         SurrogateBrain({"schema": 99})
 
 
+@pytest.mark.parametrize("key, wrong", [
+    ("model_commit", "0" * 40),
+    ("annotations_commit", "0" * 40),
+    ("window_ms", 999.0),
+])
+def test_the_surrogate_refuses_a_surface_measured_on_a_different_fly(key, wrong):
+    surface = measure_surface(CountingBrain(), levels_hz=(0.0, 25.0), trials=1)
+    surface[key] = wrong
+    with pytest.raises(ValueError, match="measured on a different fly"):
+        SurrogateBrain(surface)
+
+
+def test_an_unchanged_surface_still_loads():
+    surface = measure_surface(CountingBrain(), levels_hz=(0.0, 25.0), trials=1)
+    SurrogateBrain(surface)  # does not raise
+
+
 @pytest.mark.slow
 def test_the_committed_surface_is_what_the_brain_does_today(brain):
     """Guards the calibration against drift (a Brian2 upgrade, different data, a changed wrapper)."""
+    assert all(len(members) == 1 for members in brain.selection.readouts.values())
     committed = load_surface(SURFACE_FILE)
     assert (committed["schema"], committed["trials"], committed["levels_hz"]) == (1, 8, list(LEVELS_HZ))
     assert len(committed["cells"]) == 121

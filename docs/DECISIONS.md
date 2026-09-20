@@ -37,6 +37,10 @@
 
 - Jev pricing and latency (first measured in phase 3, on one capped track).
 - Whether the tournament reuses seeds 0–19 or takes fresh seeds below 1000.
+- Left from the PR #2 review for phase 3 or later (details in the PR comments): `meta.json` and the logged `looming`
+  ignore per-player overrides of the fly constants; `calibrate.play` duplicates the game loop without the fallback
+  rule; `fetch_fly_data` cannot repair an existing clone; `Network.restore` copies static synapse arrays every
+  decision (measure before optimising).
 
 ## Next step
 

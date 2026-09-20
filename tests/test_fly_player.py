@@ -116,6 +116,21 @@ def test_senses_rows_survived_matches_the_game_row_at_decision_time(make_track):
         game.step(action)
 
 
+def test_preflight_checks_the_fly_data_when_using_the_real_brain(monkeypatch):
+    from bakeoff.fly import data
+
+    monkeypatch.setattr(data, "problems", lambda **kwargs: ["missing: /x/model.py"])
+    with pytest.raises(FileNotFoundError, match="missing: /x/model.py"):
+        FlyPlayer().preflight()
+
+
+def test_preflight_is_a_no_op_with_an_injected_brain_factory(monkeypatch):
+    from bakeoff.fly import data
+
+    monkeypatch.setattr(data, "problems", lambda **kwargs: ["missing: /x/model.py"])
+    FlyPlayer(brain_factory=lambda: FakeBrain()).preflight()  # no data needed, must not raise
+
+
 def test_close_releases_the_brain_and_is_safe_to_repeat(make_track):
     brain = FakeBrain()
     player = FlyPlayer(brain_factory=lambda: brain)

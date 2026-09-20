@@ -27,6 +27,19 @@ def test_problems_lists_missing_files_and_wrong_hashes(tmp_path):
         f"wrong sha256: {tmp_path / 'neuron_annotations.tsv'}"]
 
 
+def test_require_raises_with_the_fetch_hint_when_problems_are_found(monkeypatch):
+    monkeypatch.setattr(data, "problems", lambda **kwargs: ["missing: /x/model.py"])
+    with pytest.raises(FileNotFoundError) as exc_info:
+        data.require()
+    assert str(exc_info.value) == ("fly data unusable (run `uv run python -m scripts.fetch_fly_data`): "
+                                    "missing: /x/model.py")
+
+
+def test_require_returns_none_when_there_are_no_problems(monkeypatch):
+    monkeypatch.setattr(data, "problems", lambda **kwargs: [])
+    assert data.require() is None
+
+
 def test_the_pinned_sources_name_a_commit_not_a_branch():
     assert len(data.MODEL_REPO_COMMIT) == 40 and data.ANNOTATIONS_COMMIT in data.ANNOTATIONS_URL
     assert set(data.SHA256) == {"Drosophila_brain_model/model.py", "Drosophila_brain_model/Completeness_783.csv",

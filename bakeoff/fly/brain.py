@@ -27,10 +27,7 @@ def _upstream_model():
 
 class Brain:
     def __init__(self, selection: Selection | None = None, window_ms: float = WINDOW_MS, target: str = "cython"):
-        found = data.problems(check_hashes=True)
-        if found:
-            raise FileNotFoundError("fly data unusable (run `uv run python -m scripts.fetch_fly_data`): "
-                                    + "; ".join(found))
+        data.require()
         import brian2 as b2
 
         self._b2 = b2
