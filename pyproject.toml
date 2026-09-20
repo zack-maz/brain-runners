@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "An LLM, Jev and a fruit-fly connectome play the same seeded tunnel runs"
 requires-python = ">=3.13"
 dependencies = [
+    "anthropic>=1.7.0",
     "brian2>=2.10.1",
     "cython>=3.1.3",
     # joblib: imported at module scope by the authors' pinned model.py, not by our code
@@ -11,7 +12,9 @@ dependencies = [
     "numpy>=2.5.3",
     "pandas>=3.0.6",
     "pyarrow>=25.0.1",
+    "python-dotenv>=1.2.3",
     "setuptools>=84.0.0",
+    "typesafe-sdk>=0.7.0",
 ]
 
 [tool.pytest.ini_options]
