@@ -49,6 +49,16 @@
     LLM and about 0.20 USD for Jev. Neither player jumped and both died stepping sideways into a
     gap; the prompts stay as written, because tuning them on a track is what the seed rule forbids.
 
+13. **Replay viewer (phase 4):** `python -m bakeoff view <run_dir>...` writes one self-contained HTML
+    file, so a replay opens from disk, works offline and can be sent to someone. Python
+    (`bakeoff/replay.py`) merges the run directories and applies the rules of the game (landing
+    tiles, complete or cut off, scoreboard); the JavaScript only draws (`docs/REPLAY_DATA.md`). Players
+    are lined up by row, not by decision, so every column shows the same stretch of track and a jump
+    takes two ticks. The tiles a player was shown are drawn brighter. The same (player, seed) in two
+    run directories is an error. When the players did not all play the same seeds, the scoreboard
+    says its means are not a fair comparison. The fly's four numbers, the looming formula and the
+    known weaknesses are on the page, with what is ours labelled as ours.
+
 ## Open
 
 - Whether the tournament reuses seeds 0–19 or takes fresh seeds below 1000.
@@ -64,7 +74,8 @@
 
 ## Next step
 
-Phases 1 to 3 are built and the first costs are measured. Write the phase 4 plan (replay viewer).
+Phases 1 to 4 are built. Write the phase 5 plan (tournament run and write-up); it starts by settling
+the first open item above (which seeds).
 
 ## Prior art to reuse
 
