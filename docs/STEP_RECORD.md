@@ -1,8 +1,10 @@
 # Step record and `meta.json` (schema version 1)
 
-The contract between the runner (Python) and the phase 4 replay viewer (JavaScript, which cannot
-import Python). The code that writes it is `bakeoff/runner.py`; the spec's "Step record" section
-is the short version and points here.
+The contract between the runner and everything that reads a run: the report and
+`bakeoff/replay.py`, which turns run directories into the replay viewer's data
+(`docs/REPLAY_DATA.md`; the viewer is JavaScript and cannot import Python, so the rules below are
+applied once, in Python). The code that writes it is `bakeoff/runner.py`; the spec's "Step record"
+section is the short version and points here.
 
 ## Files in a run directory
 

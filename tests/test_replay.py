@@ -1,0 +1,152 @@
+import json
+
+import pytest
+
+from bakeoff.players import make_player
+from bakeoff.replay import build_replay, landing
+from bakeoff.report import COLUMNS
+from bakeoff.runner import Runner
+
+
+def record(player="p", seed=0, row=0, lane=6, executed="stay", alive=True, finished=False, death_cause=None,
+           track=None, **extra):
+    """A hand-made step record with every key the runner writes."""
+    senses = {"lane": lane, "lanes": 12, "rows_survived": row,
+              "ahead": [{"row": r, "gaps_relative": [r] if r < 3 else []} for r in range(1, 7)], "actions": {}}
+    rec = {"run_id": "r", "player": player, "seed": seed, "row": row, "lane": lane, "senses": senses,
+           "looming": {"left_hz": 0.0, "right_hz": 25.0}, "questions": None, "answers": None,
+           "chosen_action": executed, "executed_action": executed, "solver_action": "stay",
+           "solver_depths": {"stay": 6, "left": 6, "right": 6, "jump": 6}, "gated": False, "invalid": False,
+           "error": None, "ground_truth": {"gap_ahead": False, "left_safe": True}, "alive": alive,
+           "finished": finished, "death_cause": death_cause, "rows_survived": row + 1, "latency_ms": None,
+           "usage": None, "cache_hit": False, "info": None, "track": track}
+    rec.update(extra)
+    return rec
+
+
+def write_run(root, run_id, records, meta=None):
+    run_dir = root / run_id
+    run_dir.mkdir()
+    by_player = {}
+    for rec in records:
+        by_player.setdefault(rec["player"], []).append(rec)
+    for player, recs in by_player.items():
+        (run_dir / f"{player}.jsonl").write_text("".join(json.dumps(r) + "\n" for r in recs))
+    if meta is not None:
+        (run_dir / "meta.json").write_text(json.dumps({"run_id": run_id, **meta}))
+    return run_dir
+
+
+TRACK = {"seed": 0, "lanes": 12, "max_rows": 10, "gaps": [[] for _ in range(18)]}
+
+
+def test_landing_follows_the_step_record_rules():
+    assert landing(4, 6, "stay", 12) == [5, 6]
+    assert landing(4, 6, "jump", 12) == [6, 6]
+    assert landing(4, 0, "left", 12) == [5, 11]  # lanes wrap
+    assert landing(4, 11, "right", 12) == [5, 0]
+
+
+def test_every_landing_matches_the_engine(tmp_path):
+    run_dir = Runner(tmp_path).run([make_player("random"), make_player("always_jump"), make_player("solver")],
+                                   range(3), max_rows=40, run_id="real")
+    replay = build_replay([run_dir])
+    assert len(replay["episodes"]) == 9
+    for episode in replay["episodes"]:
+        gaps = replay["tracks"][str(episode["seed"])]["gaps"]
+        frames = episode["frames"]
+        for frame, following in zip(frames, frames[1:]):
+            assert frame["landing"] == [following["row"], following["lane"]]
+        row, lane = frames[-1]["landing"]
+        assert (row < len(gaps) and lane in gaps[row]) == (not frames[-1]["alive"])  # only a gap kills
+        assert episode["complete"] and episode["max_rows"] == 40
+        assert episode["rows_survived"] == frames[-1]["rows_survived"]
+
+
+def test_a_frame_is_the_record_without_the_bulky_keys(tmp_path):
+    run_dir = write_run(tmp_path, "a", [record(track=TRACK), record(row=1, executed="left")])
+    (episode,) = build_replay([run_dir])["episodes"]
+    first, second = episode["frames"]
+    for dropped in ("run_id", "player", "seed", "senses", "questions", "track"):
+        assert dropped not in first
+    assert first["ahead"] == [[1], [2], [], [], [], []]
+    assert first["looming"] == {"left_hz": 0.0, "right_hz": 25.0} and first["q"] is None
+    assert second["landing"] == [2, 5] and second["solver_depths"]["jump"] == 6
+    assert (episode["player"], episode["seed"], episode["run_id"]) == ("p", 0, "a")
+
+
+def test_questions_are_stored_once_per_episode(tmp_path):
+    ask, other = {"system": "rules"}, {"system": "edited rules"}
+    run_dir = write_run(tmp_path, "a", [record(track=TRACK, questions=ask), record(row=1, questions=ask),
+                                        record(row=2, questions=other), record(row=3)])
+    (episode,) = build_replay([run_dir])["episodes"]
+    assert episode["questions"] == [ask, other]
+    assert [f["q"] for f in episode["frames"]] == [0, 0, 1, None]
+
+
+def test_a_run_cut_off_midway_is_incomplete_not_a_death(tmp_path):
+    run_dir = write_run(tmp_path, "a", [
+        record(seed=0, track=TRACK), record(seed=0, row=1, alive=False, death_cause="ran_into_gap"),
+        record(seed=1, track=TRACK), record(seed=1, row=1)])
+    dead, cut = build_replay([run_dir])["episodes"]
+    assert dead["complete"] and dead["death_cause"] == "ran_into_gap"
+    assert not cut["complete"] and cut["death_cause"] is None
+
+
+def test_runs_are_merged_with_the_contestants_first(tmp_path):
+    a = write_run(tmp_path, "a", [record("solver", track=TRACK), record("llm", track=TRACK)],
+                  meta={"status": "completed", "players": ["solver", "llm"], "seeds": [0],
+                        "models": {"llm": "claude-haiku-4-5-20251001"}})
+    b = write_run(tmp_path, "b", [record("fly", seed=0, track=TRACK), record("fly", seed=1, track=TRACK)],
+                  meta={"status": "interrupted", "players": ["fly"], "seeds": [0, 1],
+                        "fly": {"turn_threshold_hz": 0.0, "jump_threshold_hz": 200.0}})
+    replay = build_replay([a, b])
+    assert replay["replay_version"] == 1
+    assert replay["players"] == ["fly", "llm", "solver"] and replay["seeds"] == [0, 1]
+    assert [(e["seed"], e["player"]) for e in replay["episodes"]] == [(0, "fly"), (0, "llm"), (0, "solver"), (1, "fly")]
+    assert [r["run_id"] for r in replay["runs"]] == ["a", "b"]
+    assert replay["runs"][1]["status"] == "interrupted" and replay["runs"][1]["fly"]["jump_threshold_hz"] == 200.0
+    assert replay["runs"][0]["fly"] is None  # a run from before phase 2 has no fly block
+    board = replay["scoreboard"]
+    assert board["columns"] == ["run_id", *COLUMNS]
+    assert [(r["player"], r["run_id"]) for r in board["rows"]] == [("fly", "b"), ("llm", "a"), ("solver", "a")]
+    assert board["same_seeds"] is False  # the fly played a seed the others did not
+
+
+def test_other_players_keep_the_order_the_run_planned(tmp_path):
+    run_dir = write_run(tmp_path, "a", [record("solver", track=TRACK), record("always_jump", track=TRACK),
+                                        record("fly", track=TRACK)],
+                        meta={"players": ["solver", "never_started", "fly", "always_jump"], "seeds": [0]})
+    assert build_replay([run_dir])["players"] == ["fly", "solver", "always_jump"]
+
+
+def test_same_seeds_is_true_when_everyone_played_the_same_tracks(tmp_path):
+    run_dir = write_run(tmp_path, "a", [record("fly", track=TRACK), record("llm", track=TRACK)])
+    assert build_replay([run_dir])["scoreboard"]["same_seeds"] is True
+
+
+def test_the_same_episode_in_two_runs_is_an_error(tmp_path):
+    a = write_run(tmp_path, "a", [record("jev", track=TRACK)])
+    b = write_run(tmp_path, "b", [record("jev", track=TRACK)])
+    with pytest.raises(ValueError, match="jev on seed 0 is in both a and b"):
+        build_replay([a, b])
+
+
+def test_the_longest_track_of_a_seed_is_kept(tmp_path):
+    short = {**TRACK, "max_rows": 4, "gaps": [[] for _ in range(12)]}
+    a = write_run(tmp_path, "a", [record("fly", track=short)])
+    b = write_run(tmp_path, "b", [record("llm", track=TRACK)])
+    replay = build_replay([a, b])
+    assert len(replay["tracks"]["0"]["gaps"]) == 18
+    assert [e["max_rows"] for e in replay["episodes"]] == [4, 10]
+
+
+def test_a_run_without_meta_is_named_after_its_directory(tmp_path):
+    run_dir = write_run(tmp_path, "nometa", [record(track=TRACK)])
+    (run,) = build_replay([run_dir])["runs"]
+    assert run["run_id"] == "nometa" and run["status"] is None
+
+
+def test_a_missing_run_directory_raises(tmp_path):
+    with pytest.raises(FileNotFoundError, match="no such run directory"):
+        build_replay([tmp_path / "nope"])
