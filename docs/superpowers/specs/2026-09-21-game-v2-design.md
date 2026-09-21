@@ -67,32 +67,43 @@ A frozen dataclass `Rules`, everything that defines a game:
 
 - `RULES = {"v1": V1, "v2": V2}`, `DEFAULT = "v2"`. `rules_for(version)` looks one up and names the known versions
   in its error.
-- `Rules.with_vision(lookahead=None, window=None)` returns a copy for experiments; a changed field shows in the
-  version, e.g. `v2+look3`, `v2+look8+win4`. Unchanged values leave the version alone.
+- `Rules.variant(max_rows=None, lookahead=None, window=None)` returns a copy for tests and experiments. A changed
+  vision shows in the version, e.g. `v2+look3`, `v2+look8+win4`; unchanged values leave the version alone. A
+  different length keeps the version: within one version tracks are prefix-stable (the ramp does not depend on
+  `max_rows`), so a shorter run plays the first rows of the same tracks, and `max_rows` is recorded beside it.
+- `Rules` refuses a vision in which some action's landing tile is out of sight: `lookahead` at least 2 (a jump
+  lands two rows on), `window` from 1 (a dodge lands one lane over) to 5 (half of 12 lanes, less the runner's own).
 - `Rules.to_json()` / `Rules.from_json(d)`: the dict recorded in `meta.json`. `from_json` of a `game` block without
   `version` (every run before this change) gives v1 with that block's `max_rows`, `lookahead` and `window`.
 - `generate_track(seed, rules)` replaces the module constants of `track.py`. The algorithm is unchanged: two
   independent random streams, the protected safe path, the same gap-rate and gap-width formulas with the numbers
   read from `rules`, track length `max_rows + lookahead + 2`.
-- `Track` carries its `rules`. `compute_senses`, the solver's window and `survivable` read vision and length from the
-  track, never from module globals, so vision can never disagree with the track it is played on.
+- `Track` carries its `rules`. `compute_senses` and `survivable` read vision and length from the track, never from
+  module globals, so vision can never disagree with the track it is played on. The solver works from the senses
+  alone, so it takes the window as an argument (`solve_depths(senses, window)`); the runner passes the track's, and
+  the `solver` player reads it from the game at `reset`. The senses themselves do not change shape, so paid answers
+  cached for v1 still replay.
 - A test pins v1: for a sample of seeds, the v1 track is identical tile for tile to the generator as it is before
   this change (expected gaps written into the test from the current code). Old runs therefore still replay exactly.
-- `--max-rows` goes away: a different length is a different game and needs its own version name. Fast tests still
-  build small `Rules` (and `make_track`) directly.
+- `--max-rows` stays, as a prefix of the chosen version's tracks (default: the version's full length). Amended while
+  prototyping: the approved text removed it, but within a version a shorter track is a prefix of the same game, not a
+  different one, and it keeps the fast CLI tests fast.
 
 ## Section 2: how the version flows through the code
 
 - CLI: `run` and `live` take `--game` (default `v2`; `v1` stays playable) and `--lookahead N`, `--window N`, which
-  apply `with_vision`. `--max-rows` is removed from both.
+  apply `variant`; an impossible vision is a usage error (exit 2) before anything is written. `meta.json` `args`
+  records all three.
 - The record: the `game` block of `meta.json` becomes `rules.to_json()` plus the looming block it carries today.
   `schema_version` stays 1: the step record does not change and old runs still open.
 - The runner and `live` take a `Rules` instead of `max_rows`; tracks come from `generate_track(seed, rules)`. Records
   still come from `runner.play_row` and frames from `replay.frame_of`.
-- Replay and view: `build_replay` refuses runs whose `game` blocks (read through `Rules.from_json`, so an old run
-  compares as v1) differ, with an error naming both runs and both versions. The replay object gets a top-level
-  `game` (the shared rules). Tracks stay keyed by seed, which is safe because one replay holds one version; the
-  "keep the longest prefix" rule goes (all runs of one version have the same length).
+- Replay and view: `build_replay` refuses runs whose games (read through `Rules.from_json`, so an old run compares as
+  v1) differ in anything but length, with an error naming both runs and both versions. A run without `meta.json`
+  has nothing to compare and is let through. The replay object gets a top-level `game` (the first recorded run's
+  rules; null when no run has a meta), handed to the page by `Feed` in `onMeta`, and the live page's empty replay
+  carries it too. Tracks stay keyed by seed, safe because one replay holds one game; the "keep the longest prefix"
+  rule stays for runs of different lengths.
 - Viewer: `minds.js`'s hard-coded "six rows" (comment and aria label) reads the lookahead from the data. The page
   shows the version next to the track number (e.g. "track 1001 · v2").
 - Seeds: unchanged rule. Practice seeds are 1000 and up, no paid request below 1000 without `--tournament`. A seed
