@@ -1,14 +1,17 @@
-// The tunnel as seen from behind the runner. `quads` is pure geometry (tested under node);
-// `draw` paints it on a canvas.
+// The tunnel: one tube of poured concrete seen from a fixed camera. `quads`, `seenOutline` and `place`
+// are pure geometry (tested under node); `draw` paints the tube on a canvas.
 //
-// The track is a ring of lanes, so it is drawn as a tube: the runner's lane is at the bottom, the
-// lane to its right is to the right, and changing lane turns the tube. A gap is a missing tile.
+// The track is a ring of lanes, so it is drawn as a tube. The camera never turns: the start lane
+// (lanes / 2) is at the bottom, the lane to its right is to the right, lane 0 is the ceiling. The
+// camera moves along the tube with the clock, so every runner still running is on the nearest row.
+// A gap is a missing tile.
 (function (root) {
   "use strict";
 
-  const DEPTH = 20; // rows drawn ahead of the runner
-  const PERSPECTIVE = 0.32; // a tile d rows away is drawn at scale 1 / (1 + PERSPECTIVE * d)
-  const RADIUS = 0.43; // tube radius at the runner, as a share of the canvas size
+  const DEPTH = 26; // rows drawn ahead of the camera
+  const PERSPECTIVE = 0.3; // a tile d rows away is drawn at scale 1 / (1 + PERSPECTIVE * d)
+  const RADIUS = 0.47; // tube radius at the camera, as a share of the canvas size
+  const STANDS = 0.35; // how far into its tile a runner stands, in rows
 
   const wrap = (lane, lanes) => ((lane % lanes) + lanes) % lanes;
 
@@ -16,99 +19,113 @@
     return row >= 0 && row < track.gaps.length && track.gaps[row].includes(wrap(lane, track.lanes));
   }
 
-  // lane offset from the runner, -lanes/2 .. lanes/2 - 1, the way the senses wrap it
+  // lane offset from `from`, -lanes/2 .. lanes/2 - 1, the way the senses wrap it
   function offset(lane, from, lanes) {
     return wrap(lane - from + lanes / 2, lanes) - lanes / 2;
   }
 
-  // Was tile (row, lane) in the senses of the decision taken at `seen` = {row, lane, lookahead, window}?
-  function wasSeen(row, lane, seen, lanes) {
-    const ahead = row - seen.row;
-    return ahead >= 1 && ahead <= seen.lookahead && Math.abs(offset(lane, seen.lane, lanes)) <= seen.window;
+  // canvas y points down, so the bottom of the tube is angle pi/2 and "right" is a smaller angle.
+  // `lane` may be a fraction and may be unwrapped (a step from lane 0 to lane 11 reads 0 -> -1).
+  function angleOf(lane, lanes) {
+    return Math.PI / 2 - (lane - Math.floor(lanes / 2)) * ((2 * Math.PI) / lanes);
   }
 
-  // Floor tiles from far to near, each {row, lane, kind, depth, points}. kind: "seen" (the player was
-  // shown this tile), "floor", or "finish" (past the last row). cam = {row, lane}, both may be fractions.
-  function quads(track, cam, seen, size, maxRows) {
-    const centre = size / 2;
-    const step = (2 * Math.PI) / track.lanes;
-    const point = (angle, d) => {
-      const radius = (RADIUS * size) / (1 + PERSPECTIVE * d);
-      return [centre + radius * Math.cos(angle), centre + radius * Math.sin(angle)];
-    };
+  function point(angle, depth, size) {
+    const radius = (RADIUS * size) / (1 + PERSPECTIVE * depth);
+    return [size / 2 + radius * Math.cos(angle), size / 2 + radius * Math.sin(angle)];
+  }
+
+  // the four corners of tile (row, lane) for a camera at `camRow` (a fraction while the clock runs)
+  function corners(lanes, row, lane, camRow, size) {
+    const half = Math.PI / lanes, angle = angleOf(lane, lanes);
+    const near = Math.max(row - camRow, -1), far = row + 1 - camRow;
+    return [point(angle + half, near, size), point(angle - half, near, size), point(angle - half, far, size), point(angle + half, far, size)];
+  }
+
+  // Floor tiles from far to near, each {row, lane, kind, depth, points}. kind: "floor", or "finish" (at or
+  // past the last row). `row` is the camera's row and may be a fraction.
+  function quads(track, row, size, maxRows) {
     const out = [];
-    const first = Math.floor(cam.row);
-    for (let row = first + DEPTH; row >= first; row--) {
-      const near = Math.max(row - cam.row, -1), far = row + 1 - cam.row;
+    const first = Math.floor(row);
+    for (let r = first + DEPTH; r >= first; r--) {
       // mirrors Game.step (bakeoff/game/engine.py): only row <= maxRows can ever be a fatal gap, so a
       // row past the finish line is never a hole, whatever `gaps` lists there
-      const neverKills = row > maxRows;
+      const neverKills = r > maxRows;
       for (let lane = 0; lane < track.lanes; lane++) {
-        if (!neverKills && isGap(track, row, lane)) continue;
-        // canvas y points down, so the bottom of the tube is angle pi/2 and "right" is a smaller angle
-        const angle = Math.PI / 2 - offset(lane, cam.lane, track.lanes) * step;
-        const a = angle + step / 2, b = angle - step / 2;
-        const kind = row >= maxRows ? "finish" : wasSeen(row, lane, seen, track.lanes) ? "seen" : "floor";
-        out.push({ row, lane, kind, depth: near, points: [point(a, near), point(b, near), point(b, far), point(a, far)] });
+        if (!neverKills && isGap(track, r, lane)) continue;
+        out.push({ row: r, lane, kind: r >= maxRows ? "finish" : "floor", depth: Math.max(r - row, -1),
+                   points: corners(track.lanes, r, lane, row, size) });
       }
     }
     return out;
   }
 
-  const rgb = (colour) => "rgb(" + colour.join(",") + ")";
-
-  function mix(from, to, share) {
-    return "rgb(" + from.map((c, i) => Math.round(c + (to[i] - c) * share)).join(",") + ")";
+  // The tiles a mind was shown for the decision in `frame`: `lookahead` rows ahead of where it stood,
+  // `window` lanes either side. Lanes are wrapped by the caller's isGap / corners, not here.
+  function seenOutline(frame, lookahead, window) {
+    const tiles = [];
+    for (let ahead = 1; ahead <= lookahead; ahead++) {
+      for (let off = -window; off <= window; off++) tiles.push({ row: frame.row + ahead, lane: frame.lane + off });
+    }
+    return tiles;
   }
 
-  // state comes from Timeline.stateAt; colours are [r, g, b]
-  function draw(ctx, size, track, state, seen, maxRows, colours) {
-    ctx.fillStyle = rgb(colours.space);
+  // Where a runner is drawn. `state` comes from Timeline.stateAt; `camRow` is the clock (default: the
+  // runner's own row). The runner stands on the tube wall with its head toward the axis: `rotation`
+  // turns an upright sprite to stand there (0 at the bottom, pi on the ceiling). `lift` is how far a
+  // jump raises it toward the axis, `fall` (0..1) how far a dead runner has dropped through the floor.
+  function place(state, lanes, size, camRow) {
+    const depth = state.row - (camRow == null ? state.row : camRow);
+    const scale = 1 / (1 + PERSPECTIVE * Math.max(0, depth + STANDS));
+    const angle = angleOf(state.lane, lanes);
+    const [x, y] = point(angle, Math.max(0, depth + STANDS), size);
+    return {
+      x, y, scale, rotation: angle - Math.PI / 2,
+      lift: state.air * 0.13 * size * scale,
+      fall: state.status === "dead" ? Math.min(1, state.since) : 0,
+      visible: depth > -0.5 && depth <= DEPTH,
+    };
+  }
+
+  const ACCENT = "rgba(122,162,247,0.6)"; // brand --accent: only ever the focused mind's tiles
+
+  function path(ctx, points) {
+    ctx.beginPath();
+    points.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+    ctx.closePath();
+  }
+
+  // outline: the tiles from seenOutline for the mind in focus, or null
+  function draw(ctx, size, track, row, maxRows, outline) {
+    ctx.fillStyle = "#0A0A0A";
     ctx.fillRect(0, 0, size, size);
-    const cam = { row: state.row, lane: state.lane };
-    for (const quad of quads(track, cam, seen, size, maxRows)) {
+    ctx.fillStyle = "#050505"; // the far end of the tube
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, ((RADIUS * size) / (1 + PERSPECTIVE * (DEPTH + 1))) * 0.92, 0, 2 * Math.PI);
+    ctx.fill();
+    for (const quad of quads(track, row, size, maxRows)) {
       const fog = Math.min(1, Math.max(0, quad.depth) / DEPTH);
-      const base = quad.kind === "seen" ? colours.seen : quad.kind === "finish" ? colours.finish : colours.floor;
-      ctx.fillStyle = mix(base, colours.space, fog * 0.85);
-      ctx.strokeStyle = mix(colours.space, base, 0.25);
+      // poured concrete: slightly uneven greys that fade into the void; the finish is a lighter band
+      const shade = Math.round((quad.kind === "finish" ? 78 : 34) * (1 - fog * 0.72) + ((quad.lane * 7 + quad.row * 3) % 5));
+      ctx.fillStyle = "rgb(" + shade + "," + (shade + 2) + "," + (shade + 4) + ")";
+      ctx.strokeStyle = fog > 0.75 ? "#1E2227" : "#2A2F35";
       ctx.lineWidth = 1;
-      ctx.beginPath();
-      quad.points.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
-      ctx.closePath();
+      path(ctx, quad.points);
       ctx.fill();
       ctx.stroke();
     }
-    drawRunner(ctx, size, state, colours);
-  }
-
-  // The runner stands at the bottom of the tube. A jump lifts it towards the middle; a death drops it
-  // through the floor and fades it out over one row of time.
-  function drawRunner(ctx, size, state, colours) {
-    const fall = state.status === "dead" ? Math.min(1, state.since) : 0;
-    if (fall >= 1) return;
-    const floor = size / 2 + RADIUS * size * 0.92;
-    const height = size * 0.075;
-    const y = floor - state.air * size * 0.2 + fall * size * 0.16;
-    ctx.globalAlpha = 1 - fall;
-    ctx.fillStyle = "rgba(0,0,0,0.35)";
-    ctx.beginPath();
-    ctx.ellipse(size / 2, floor, height * (0.5 - state.air * 0.2), height * 0.14, 0, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.fillStyle = rgb(colours.runner);
-    ctx.strokeStyle = rgb(colours.space); // an outline, so a grey baseline runner shows on grey tiles
+    if (!outline) return;
+    ctx.strokeStyle = ACCENT;
     ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.roundRect(size / 2 - height * 0.3, y - height * 0.95, height * 0.6, height * 0.7, height * 0.2);
-    ctx.fill();
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(size / 2, y - height * 1.2, height * 0.27, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.stroke();
-    ctx.globalAlpha = 1;
+    for (const tile of outline) {
+      if (tile.row - row > DEPTH || tile.row + 1 - row <= 0) continue;
+      if (tile.row <= maxRows && isGap(track, tile.row, tile.lane)) continue;
+      path(ctx, corners(track.lanes, tile.row, tile.lane, row, size));
+      ctx.stroke();
+    }
   }
 
-  const api = { DEPTH, isGap, offset, wasSeen, quads, draw };
+  const api = { DEPTH, isGap, offset, angleOf, corners, quads, seenOutline, place, draw };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Tunnel = api;
 })(typeof window !== "undefined" ? window : globalThis);

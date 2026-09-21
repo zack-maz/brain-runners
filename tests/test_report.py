@@ -206,6 +206,29 @@ def test_brier_is_none_for_a_player_that_answers_no_nouls():
     assert row["brier_gap_ahead"] is None and row["brier_left_safe"] is None
 
 
+def test_brier_scores_the_composed_jevs_four_nouls_against_what_the_senses_show():
+    def composed(row, gaps_row_1, gaps_row_2, **nouls):
+        senses = {"ahead": [{"row": 1, "gaps_relative": gaps_row_1}, {"row": 2, "gaps_relative": gaps_row_2}]}
+        return step(player="jev_composed", row=row, senses=senses,
+                    ground_truth={"gap_ahead": 0 in gaps_row_1, "left_safe": -1 not in gaps_row_1},
+                    answers={f"gap_{a}": {"type": "noul", "noul": p} for a, p in nouls.items()})
+
+    steps = [composed(0, [-1, 0], [], left=0.9, stay=0.7, right=0.0, jump=0.5),
+             composed(1, [], [0], left=0.2, stay=0.1, right=0.0, jump=1.0, cache_hit=True)]
+    (row,) = summarize(steps)
+    assert row["brier_gap_left"] == pytest.approx((0.1 ** 2 + 0.2 ** 2) / 2)
+    assert row["brier_gap_stay"] == pytest.approx((0.3 ** 2 + 0.1 ** 2) / 2)
+    assert row["brier_gap_right"] == 0.0
+    assert row["brier_gap_jump"] == pytest.approx(0.5 ** 2 / 2)
+    assert row["brier_gap_ahead"] is None and row["brier_left_safe"] is None  # it is not asked those
+
+
+def test_the_four_composed_columns_close_the_table_and_are_empty_for_everyone_else():
+    assert COLUMNS[-4:] == ("brier_gap_left", "brier_gap_stay", "brier_gap_right", "brier_gap_jump")
+    (row,) = summarize([step(answers={"gap_ahead": {"type": "noul", "noul": 0.5}}, ground_truth={"gap_ahead": True})])
+    assert [row[c] for c in COLUMNS[-4:]] == [None] * 4 and row["brier_gap_ahead"] == 0.25
+
+
 def test_small_amounts_keep_four_decimals_in_the_table():
     steps = [step(player="llm", latency_ms=100.0, usage={"input_tokens": 5200, "output_tokens": 90}, alive=False)]
     table = format_table(summarize(steps, {"models": {"llm": "claude-haiku-4-5-20251001"}}))

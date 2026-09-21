@@ -12,7 +12,7 @@ Every contestant plays the same seeded rounds. The output is a watchable tournam
 replays with each player's "mind" shown next to the game (Jev's probabilities, the LLM's
 answer, the fly's neurons firing) and a scoreboard across games.
 
-Status: phase 4 of 5 built. The untrained fly plays: on seeds 0–19 it survives 127 rows
+Status: phases 1 to 5 of 6 built (phase 6 is the tournament and the write-up). The untrained fly plays: on seeds 0–19 it survives 127 rows
 on average (random 35, always-jump 48, solver 300; `calibration/RESULTS.md`). Jev and the LLM
 (Claude Haiku 4.5) play behind a response cache and a hard request cap; first measured costs
 are in `docs/COSTS.md`.
@@ -23,10 +23,27 @@ are in `docs/COSTS.md`.
     uv run python -m bakeoff report runs/<run_id>
     uv run python -m bakeoff view runs/<run_id> [runs/<other_run_id> ...]   # writes replay.html
 
-Paid players (`jev`, `llm`) need `TYPESAFE_API_KEY` / `ANTHROPIC_API_KEY` in a git-ignored `.env`
+    uv run python -m bakeoff live --seed 1001 --players fly,jev_composed,llm --max-requests 300   # watch it happen
+
+`live` plays one track in real time: every mind decides the same row before anyone moves on (a jumper skips
+the next row; the slowest mind sets the pace, about a row a second with the fly), each decision goes into a
+normal run directory and, through a server on `127.0.0.1` only, into the same page as it happens. It waits
+for a browser to open the page before it starts and keeps serving afterwards until Ctrl-C (`--no-wait` does
+neither). The cap works as in `run`: per paid player, default 0, which makes a free live run of a track whose
+answers are already cached; a live paid run on a seed below 1000 is refused without `--tournament`. `live`
+builds one fly brain; do not start a second fly process next to it. Afterwards `view` replays the directory.
+
+Paid players (`jev`, `jev_composed`, `llm`) need `TYPESAFE_API_KEY` / `ANTHROPIC_API_KEY` in a git-ignored `.env`
 file at the repo root (template: `.env.example`). They spend nothing unless told to:
 
     uv run python -m bakeoff run --players jev --seeds 1 --seed-start 1000 --max-requests 300
+
+`jev_composed` is the Jev of the demo: instead of one broad question it asks Jev four pointed yes/no
+questions in one request ("would `left` land on a gap, that is, does `ahead[0].gaps_relative` contain
+-1?") and code picks the action least likely to land on a gap, ties in the order stay, left, right,
+jump. The wording and that rule are ours, not TypeSafe's, and it looks one step ahead only. The
+one-shot `jev` stays for comparison: on the dangerous states of practice track 1000 its single Choice
+landed on a gap about as often as always staying (`docs/DECISIONS.md`, decisions 14 and 15).
 
 `--max-requests` is a hard cap on live requests for **each** paid player in the run; the default 0
 only replays `.cache/responses`. Every answer is cached, so a repeated run is free and a run stopped
@@ -36,10 +53,15 @@ makes one real request per provider. A live paid run on seeds below 1000 is refu
 ends there, so later players in the list do not play: put free players first, or run paid players
 alone.
 
-`view` writes one self-contained HTML file (no server, no network): the players of a track side by
-side in the tunnel, each with what it had in mind (the fly's spikes and read-out signals, Jev's
-probabilities, the LLM's answer), a table of rows survived per track, the scoreboard, and what in
-the fly's set-up is ours rather than the fly's. Several run directories are merged, since the fly and
+`view` writes one self-contained HTML file (no server, no network, fonts embedded): the demo player. The
+fly, the composed Jev and the LLM run one tunnel together as pixel figures (fixed camera, everyone on the
+same row at the same time), with a strip of panels underneath showing what each had in mind (the fly's
+spikes and read-out signals, Jev's four answers, the LLM's answer). Blue is the cursor: it marks the mind
+in focus and the tiles that mind was shown, and with auto on it cuts to whoever faces a gap (keys 1, 2, 3
+or a click choose by hand; space plays, the arrows step a row). Below are the level table (rows survived
+per track; it picks the track and shows or hides runners, baselines and the one-shot Jev included), the
+scoreboard, and what in the set-up is ours rather than the fly's or TypeSafe's. The look is the user's
+brand (`~/Documents/PROJECTS/BRAND/brand.css`). Several run directories are merged, since the fly and
 the paid players usually run separately; one (player, seed) may appear only once. Viewing costs
 nothing: it reads logs only. The viewer's JavaScript has its own tests, which `uv run pytest` runs
 through `node --test` (skipped when node is not installed).

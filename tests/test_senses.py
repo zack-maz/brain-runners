@@ -1,7 +1,8 @@
 import json
 
 from bakeoff.game.engine import Game
-from bakeoff.senses import LOOMING_STEP_HZ, MAX_HZ, compute_senses, ground_truth, looming_rates
+from bakeoff.senses import (LANDS, LOOMING_STEP_HZ, MAX_HZ, compute_senses, ground_truth, lands_on_gap,
+                            looming_rates)
 
 
 def test_senses_shape_matches_the_spec(make_track):
@@ -88,3 +89,26 @@ def test_rates_are_capped_at_250_hz(make_track):
 def test_ground_truth(make_track):
     assert ground_truth(Game(make_track({1: [6]}))) == {"gap_ahead": True, "left_safe": True}
     assert ground_truth(Game(make_track({1: [5]}))) == {"gap_ahead": False, "left_safe": False}
+
+
+def test_lands_on_gap_reads_each_actions_landing_tile_from_the_senses(make_track):
+    senses = compute_senses(Game(make_track({1: [5], 2: [6]})))  # row 1: a gap to the left; row 2: a gap ahead
+    assert {a: lands_on_gap(senses, a) for a in LANDS} == {"left": True, "stay": False, "right": False, "jump": True}
+
+
+def test_lands_on_gap_agrees_with_the_engine_up_to_the_finish_line():
+    from bakeoff.game.track import generate_track
+
+    checked = 0
+    for action, (ahead, _) in LANDS.items():
+        game = Game(generate_track(1000, max_rows=60))
+        while not game.over:
+            senses = compute_senses(game)
+            if game.row + ahead + 1 <= game.track.max_rows:  # past the finish line a gap no longer kills
+                probe = Game(game.track)
+                probe.row, probe.lane = game.row, game.lane
+                probe.step(action)
+                assert (not probe.alive) == lands_on_gap(senses, action)
+                checked += 1
+            game.step(next(a for a in ("stay", "left", "right", "jump") if not lands_on_gap(senses, a)))
+    assert checked > 200

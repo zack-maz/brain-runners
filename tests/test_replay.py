@@ -117,6 +117,12 @@ def test_runs_are_merged_with_the_contestants_first(tmp_path):
     assert board["same_seeds"] is False  # the fly played a seed the others did not
 
 
+def test_the_demos_three_come_first_then_the_one_shot_jev(tmp_path):
+    run_dir = write_run(tmp_path, "a", [record(p, track=TRACK) for p in ("jev", "llm", "solver", "jev_composed", "fly")],
+                        meta={"players": ["jev", "llm", "solver", "jev_composed", "fly"], "seeds": [0]})
+    assert build_replay([run_dir])["players"] == ["fly", "jev_composed", "llm", "jev", "solver"]
+
+
 def test_other_players_keep_the_order_the_run_planned(tmp_path):
     run_dir = write_run(tmp_path, "a", [record("solver", track=TRACK), record("always_jump", track=TRACK),
                                         record("fly", track=TRACK)],
@@ -199,3 +205,17 @@ def test_a_run_without_meta_is_named_after_its_directory(tmp_path):
 def test_a_missing_run_directory_raises(tmp_path):
     with pytest.raises(FileNotFoundError, match="no such run directory"):
         build_replay([tmp_path / "nope"])
+
+
+def test_frame_of_and_summary_of_are_the_pieces_the_replay_is_built_from(tmp_path):
+    from bakeoff.replay import frame_of, summary_of
+
+    questions_a = {"action": {"type": "choice"}}
+    steps = [record(row=0, track=TRACK, questions=questions_a), record(row=1, questions=questions_a, **DIED)]
+    run_dir = write_run(tmp_path, "a", steps)
+    (episode,) = build_replay([run_dir])["episodes"]
+    questions: list[dict] = []
+    assert [frame_of(s, 12, questions) for s in steps] == episode["frames"]
+    assert questions == episode["questions"] == [questions_a]
+    assert summary_of(steps[-1]) == {k: episode[k] for k in ("complete", "finished", "death_cause", "rows_survived")}
+    assert summary_of(steps[0])["complete"] is False

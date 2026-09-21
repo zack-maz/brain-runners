@@ -6,14 +6,15 @@ from bakeoff.players.always_jump import AlwaysJumpPlayer
 from bakeoff.players.base import Player
 from bakeoff.players.fly import FlyPlayer
 from bakeoff.players.jev import JevPlayer
+from bakeoff.players.jev_composed import JevComposedPlayer
 from bakeoff.players.llm import LlmPlayer
 from bakeoff.players.random_player import RandomPlayer
 from bakeoff.players.solver import SolverPlayer
 
 REGISTRY: dict[str, Callable[..., Player]] = {
     "random": RandomPlayer, "always_jump": AlwaysJumpPlayer, "solver": SolverPlayer, "fly": FlyPlayer,
-    "jev": JevPlayer, "llm": LlmPlayer}
-PAID = ("jev", "llm")  # these take cache= and budget=; without a budget they can only replay the cache
+    "jev": JevPlayer, "jev_composed": JevComposedPlayer, "llm": LlmPlayer}
+PAID = ("jev", "jev_composed", "llm")  # these take cache= and budget=; without a budget they can only replay the cache
 
 
 def make_player(name: str, **options) -> Player:

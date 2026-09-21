@@ -12,7 +12,9 @@ from bakeoff.report import COLUMNS, load_meta, load_steps, summarize
 
 REPLAY_VERSION = 1
 SCHEMA_VERSION = 1  # the step record this module reads; the runner writes it (a test keeps the two equal)
-CONTESTANTS = ("fly", "jev", "llm")  # shown first, in this order; everyone else in order of appearance
+# shown first, in this order: the demo's three (the composed Jev is its Jev), then the one-shot Jev;
+# everyone else in order of appearance
+CONTESTANTS = ("fly", "jev_composed", "llm", "jev")
 # what a frame leaves out of its step record: the first three name the episode, the others are
 # replaced by `ahead`, `q` and the replay's `tracks`
 DROPPED = ("run_id", "player", "seed", "senses", "questions", "track")
@@ -28,6 +30,27 @@ def landing(row: int, lane: int, executed_action: str, lanes: int) -> list[int]:
     return [row + advance, (lane + shift) % lanes]
 
 
+def frame_of(step: dict, lanes: int, questions: list[dict]) -> dict:
+    """A step record as a frame (docs/REPLAY_DATA.md). `questions` is the episode's list of distinct
+    question sets; a set not seen before is appended to it and the frame points at it with `q`."""
+    frame = {k: v for k, v in step.items() if k not in DROPPED}
+    frame["ahead"] = [entry["gaps_relative"] for entry in step["senses"]["ahead"]]
+    frame["landing"] = landing(step["row"], step["lane"], step["executed_action"], lanes)
+    frame["q"] = None
+    if step.get("questions") is not None:
+        if step["questions"] not in questions:
+            questions.append(step["questions"])
+        frame["q"] = questions.index(step["questions"])
+    return frame
+
+
+def summary_of(last: dict) -> dict:
+    """How an episode stands after its latest record. A run cut off mid-way (abort, budget stop,
+    Ctrl-C) is incomplete, not a death; so is a live run that is still going."""
+    return {"complete": bool(last["finished"] or not last["alive"]), "finished": last["finished"],
+            "death_cause": last["death_cause"], "rows_survived": last["rows_survived"]}
+
+
 def _episode(player: str, seed: int, run_id: str, steps: list[dict]) -> tuple[dict, dict | None]:
     steps = sorted(steps, key=lambda s: s["row"])
     for prev, cur in zip(steps, steps[1:]):
@@ -36,24 +59,9 @@ def _episode(player: str, seed: int, run_id: str, steps: list[dict]) -> tuple[di
     track = next((s["track"] for s in steps if s.get("track")), None)
     lanes = track["lanes"] if track else steps[0]["senses"]["lanes"]
     questions: list[dict] = []
-    frames = []
-    for s in steps:
-        frame = {k: v for k, v in s.items() if k not in DROPPED}
-        frame["ahead"] = [entry["gaps_relative"] for entry in s["senses"]["ahead"]]
-        frame["landing"] = landing(s["row"], s["lane"], s["executed_action"], lanes)
-        frame["q"] = None
-        if s.get("questions") is not None:
-            if s["questions"] not in questions:
-                questions.append(s["questions"])
-            frame["q"] = questions.index(s["questions"])
-        frames.append(frame)
-    last = steps[-1]
-    episode = {"player": player, "seed": seed, "run_id": run_id,
-               # a run cut off mid-way (abort, budget stop, Ctrl-C) is incomplete, not a death
-               "complete": bool(last["finished"] or not last["alive"]),
-               "finished": last["finished"], "death_cause": last["death_cause"],
-               "rows_survived": last["rows_survived"], "max_rows": track["max_rows"] if track else None,
-               "questions": questions, "frames": frames}
+    frames = [frame_of(s, lanes, questions) for s in steps]
+    episode = {"player": player, "seed": seed, "run_id": run_id, **summary_of(steps[-1]),
+               "max_rows": track["max_rows"] if track else None, "questions": questions, "frames": frames}
     return episode, track
 
 

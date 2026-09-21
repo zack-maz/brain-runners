@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tunnel Run: the three figures</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root { --void:#0A0A0A; --panel:#0D0F12; --hairline:#1E2227; --line:#2A2F35; --muted:#7C848D; --text:#C9CDD2; --bright:#E8EBED; --accent:#7AA2F7; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 40px 48px 80px; background: var(--void); color: var(--text); font: 16px/1.6 "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+  h1 { margin: 0 0 8px; font-size: 28px; font-weight: 500; letter-spacing: -0.03em; color: var(--bright); }
+  h2 { margin: 16px 16px 4px; font-size: 20px; font-weight: 500; color: var(--bright); letter-spacing: -0.02em; }
+  p { margin: 0 0 12px; max-width: 640px; }
+  .label { font: 12px/1.4 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .fixed { display: flex; gap: 48px; margin: 32px 0 8px; align-items: flex-end; }
+  .fixed figure { margin: 0; }
+  .fixed canvas { display: block; image-rendering: pixelated; }
+  figcaption { margin-top: 12px; font-size: 14px; color: var(--muted); max-width: 300px; }
+  figcaption b { color: var(--bright); font-weight: 500; display: block; }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-top: 24px; }
+  .opt { border: 1px solid var(--hairline); background: var(--panel); cursor: pointer; padding-bottom: 16px; }
+  .opt:hover { border-color: var(--line); } .opt.selected { border-color: var(--bright); }
+  .opt canvas.scene { display: block; width: 100%; aspect-ratio: 1; background: var(--void); }
+  .opt .sprite { display: flex; align-items: flex-end; gap: 16px; padding: 16px 16px 0; }
+  .opt p { margin: 0 16px; font-size: 14px; }
+  hr { border: 0; border-top: 1px solid var(--hairline); margin: 40px 0 24px; }
+  @media (max-width: 1000px) { .grid { grid-template-columns: 1fr; } .fixed { flex-wrap: wrap; } }
+</style>
+</head>
+<body>
+<span class="label">Tunnel Run · visual direction 2 of 2</span>
+<h1>The three figures</h1>
+<p>Blue is the cursor (your pick, C): it marks the mind in focus and the tiles that one was shown, nothing else. The figures carry their own identity as pixel sprites. Two are fixed by what you asked for; Jev has three candidates below. Click one, then tell me in the terminal what to change on any of them.</p>
+
+<div class="fixed">
+  <figure><canvas id="s-fly"></canvas><figcaption><b>Fly: a pixel fruit fly</b>Seen from behind: folded wings in pale grey, dark body, and the one true-to-life detail, <i>Drosophila</i>'s red eyes. Wings flick open on a jump.</figcaption></figure>
+  <figure><canvas id="s-llm"></canvas><figcaption><b>LLM: the orange terminal critter</b>My own pixel rendition in the spirit of the Claude Code mascot, in Claude orange. It is Claude Haiku 4.5 playing, and the panel says so by name.</figcaption></figure>
+</div>
+
+<hr>
+<span class="label">Pick one for Jev</span>
+<div class="grid">
+  <div class="opt" data-choice="jev-visor" onclick="toggleSelect(this)">
+    <canvas class="scene" id="t-visor" width="840" height="840"></canvas>
+    <div class="sprite"><canvas id="s-visor"></canvas><span class="label">lit cells = confidence</span></div>
+    <h2>1. The visor</h2>
+    <p>A pale monolith with one horizontal slit. The slit is a live readout: it fills with Jev's confidence in the move it just made and goes nearly dark when it is unsure. The figure is its own gauge, which is what a System One model is: an answer with a probability attached.</p>
+  </div>
+  <div class="opt" data-choice="jev-die" onclick="toggleSelect(this)">
+    <canvas class="scene" id="t-die" width="840" height="840"></canvas>
+    <div class="sprite"><canvas id="s-die"></canvas><span class="label">four pips, four actions</span></div>
+    <h2>2. The die</h2>
+    <p>A four-sided die on legs: four pips for left, stay, right, jump, the brightest pip being the action it chose. Says "probabilities" immediately; a little more playful than the rest of the page.</p>
+  </div>
+  <div class="opt" data-choice="jev-mask" onclick="toggleSelect(this)">
+    <canvas class="scene" id="t-mask" width="840" height="840"></canvas>
+    <div class="sprite"><canvas id="s-mask"></canvas><span class="label">after the Safeguard</span></div>
+    <h2>3. The mask</h2>
+    <p>A thin dark body with a pale, blank mask, after BLAME!'s Safeguard: fast, silent, no deliberation. The most in-world of the three, but it says nothing about what Jev is, and it is the hardest to read at small size.</p>
+  </div>
+</div>
+
+<script>
+  const C = { void: "#0A0A0A", line: "#2A2F35", hair: "#1E2227", muted: "#7C848D", bright: "#E8EBED", accent: "#7AA2F7" };
+  const INK = { w: "#AEB4BA", b: "#3A4046", e: "#F7768E", o: "#D97757", k: "#1A0E0A", j: "#B9BEC4", v: "#15181C", V: "#FFFFFF",
+                p: "#7C848D", P: "#0A0A0A", m: "#E8EBED", d: "#4A5158", x: "#0A0A0A" };
+  const SPRITES = {
+    fly:   ["..ee.ee..", "...bbb...", ".w.bbb.w.", "ww.bbb.ww", "wwwbbbwww", "ww.bbb.ww", ".w.bbb.w.", "...b.b...", "..b...b.."],
+    llm:   [".ooooooo.", ".ooooooo.", ".okoookoo", "ooooooooo", ".ooooooo.", ".ooooooo.", ".o.o.o.o.", ".o.o.o.o."],
+    visor: [".jjjjj.", "jjjjjjj", "jVVVvvj", "jjjjjjj", ".jjjjj.", "..jjj..", ".jjjjj.", ".jjjjj.", ".j...j.", ".j...j."],
+    die:   ["...j...", "..jjj..", ".jjpjj.", "jjpjPjj", ".jjpjj.", "..jjj..", "...j...", "..j.j..", "..j.j.."],
+    mask:  ["..mmm..", ".mmmmm.", ".mxmxm.", ".mmmmm.", "..mmm..", "...d...", "..ddd..", ".ddddd.", "..d.d..", "..d.d.."],
+  };
+  function sprite(ctx, rows, px, x0, y0) {           // (x0, y0) = bottom centre
+    const w = rows[0].length, h = rows.length;
+    rows.forEach((line, r) => [...line].forEach((ch, c) => {
+      if (ch === ".") return;
+      ctx.fillStyle = INK[ch];
+      ctx.fillRect(Math.round(x0 - (w * px) / 2 + c * px), Math.round(y0 - (h - r) * px), px, px);
+    }));
+  }
+  function big(id, name) {
+    const rows = SPRITES[name], px = 12, cv = document.getElementById(id);
+    cv.width = rows[0].length * px; cv.height = rows.length * px; cv.style.width = cv.width + "px";
+    sprite(cv.getContext("2d"), rows, px, cv.width / 2, cv.height);
+  }
+
+  const LANES = 12, DEPTH = 26, K = 0.30, R = 0.47;
+  function rng(seed) { return () => (seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296; }
+  const rand = rng(7);
+  const gaps = Array.from({ length: DEPTH + 2 }, (_, r) => r < 2 ? [] : Array.from({ length: LANES }, (_, l) => l).filter(() => rand() < 0.10 + r * 0.006));
+
+  function scene(id, jev) {
+    const cv = document.getElementById(id), ctx = cv.getContext("2d"), S = cv.width, cx = S / 2, cy = S / 2;
+    const step = 2 * Math.PI / LANES, camLane = 6, focusLane = 8;
+    const pt = (a, d) => { const rad = R * S / (1 + K * d); return [cx + rad * Math.cos(a), cy + rad * Math.sin(a)]; };
+    ctx.fillStyle = C.void; ctx.fillRect(0, 0, S, S);
+    ctx.fillStyle = "#050505"; ctx.beginPath(); ctx.arc(cx, cy, R * S / (1 + K * (DEPTH + 1)) * 0.92, 0, 7); ctx.fill();
+    for (let row = DEPTH; row >= 0; row--) for (let lane = 0; lane < LANES; lane++) {
+      if (gaps[row].includes(lane)) continue;
+      const a = Math.PI / 2 - (lane - camLane) * step, a1 = a + step / 2, a2 = a - step / 2;
+      const near = Math.max(row - 0.35, -1), far = row + 0.65, fog = Math.min(1, row / DEPTH);
+      const shade = Math.round(34 - fog * 24 + ((lane * 7 + row * 3) % 5));
+      const off = ((lane - focusLane + 18) % 12) - 6, seen = row >= 1 && row <= 6 && Math.abs(off) <= 3;
+      ctx.fillStyle = `rgb(${shade},${shade + 2},${shade + 4})`;
+      ctx.strokeStyle = seen ? "rgba(122,162,247,0.55)" : (fog > 0.75 ? C.hair : C.line); ctx.lineWidth = seen ? 2 : 1.5;
+      ctx.beginPath(); [pt(a1, near), pt(a2, near), pt(a2, far), pt(a1, far)].forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y));
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+    const runners = [{ tag: "FLY", name: "fly", lane: 5, air: 0.6 }, { tag: "JEV", name: jev, lane: 8, air: 0, focus: true }, { tag: "LLM", name: "llm", lane: 6, air: 0 }];
+    for (const r of runners) {
+      const a = Math.PI / 2 - (r.lane - camLane) * step, rad = R * S * 0.93, px = 6, h = SPRITES[r.name].length * px;
+      ctx.save(); ctx.translate(cx + rad * Math.cos(a), cy + rad * Math.sin(a)); ctx.rotate(a - Math.PI / 2);
+      ctx.fillStyle = "rgba(0,0,0,0.55)"; ctx.beginPath(); ctx.ellipse(0, 0, h * 0.4, h * 0.09, 0, 0, 7); ctx.fill();
+      sprite(ctx, SPRITES[r.name], px, 0, -r.air * h * 1.4);
+      ctx.fillStyle = r.focus ? C.accent : C.muted; ctx.font = `${S * 0.022}px "JetBrains Mono", monospace`; ctx.textAlign = "center";
+      ctx.fillText(r.focus ? "[ " + r.tag + " ]" : r.tag, 0, -r.air * h * 1.4 - h - 12);
+      ctx.restore();
+    }
+    ctx.fillStyle = C.muted; ctx.font = `${S * 0.022}px "JetBrains Mono", monospace`; ctx.textAlign = "left"; ctx.fillText("ROW 0137 / 0300", S * 0.04, S * 0.06);
+    ctx.textAlign = "right"; ctx.fillText("TRACK 0007", S * 0.96, S * 0.06);
+  }
+  document.fonts.ready.then(() => {
+    big("s-fly", "fly"); big("s-llm", "llm"); big("s-visor", "visor"); big("s-die", "die"); big("s-mask", "mask");
+    scene("t-visor", "visor"); scene("t-die", "die"); scene("t-mask", "mask");
+  });
+</script>
+</body>
+</html>

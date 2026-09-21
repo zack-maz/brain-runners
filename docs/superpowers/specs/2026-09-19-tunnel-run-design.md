@@ -23,7 +23,8 @@ Output: replays showing the three runners side by side with each one's "mind" vi
   tuning is four fixed numbers of ours: the looming weighting (gain, falloff) that turns gaps
   into eye input, and two thresholds on its read-out neurons (see "Fly player").
 - No real-time play. The game is turn-based so slow API calls and the slow fly simulation
-  cost nobody anything; replays are what people watch.
+  cost nobody anything; replays are what people watch. (Reversed in part on 2026-09-20 for one local
+  mode, `bakeoff live`: see `2026-09-20-demo-player-design.md`.)
 - No food-seeking game. The spike showed the pure fly cannot steer toward food in this model.
 - No pixels. Contestants receive senses, not a screen (the fly model has no visual front end).
 
@@ -214,7 +215,8 @@ thresholding is tested with a fake brain. One opt-in `live` test per provider.
    on practice seeds, first fly-vs-baselines scoreboard.
 3. Jev and LLM players with cache and request cap; first cost numbers from one capped track.
 4. Replay viewer.
-5. Tournament run and short write-up with the caveats above.
+5. The demo player (`2026-09-20-demo-player-design.md`): 5a `jev_composed`, 5b the player, 5c go live.
+6. Tournament run and short write-up with the caveats above.
 
 ## Open items
 

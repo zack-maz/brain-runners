@@ -11,7 +11,7 @@ records it is built from are described in `docs/STEP_RECORD.md`.
 | --- | --- | --- |
 | `replay_version` | int | 1. Bumped on any breaking change to this object |
 | `runs` | object[] | one per run directory, in the order given: `run_id` plus these keys of its `meta.json`, null when absent: `status`, `git_sha`, `git_dirty`, `started_at`, `finished_at`, `players`, `seeds`, `game`, `fly`, `models`, `requests`. A directory without `meta.json` is named after the directory |
-| `players` | string[] | players with at least one episode: `fly`, `jev`, `llm` first, the others in the order the runs planned them |
+| `players` | string[] | players with at least one episode: `fly`, `jev_composed`, `llm` (the demo's three), then `jev`, then the others in the order the runs planned them |
 | `seeds` | int[] | every seed with at least one episode, ascending |
 | `tracks` | object | `{"<seed>": track}`, the step record's `track`. When runs played the same seed with different `max_rows`, the longest is kept (the shorter one is its prefix) |
 | `episodes` | object[] | one per (player, seed), sorted by seed, then by `players` order |
@@ -45,8 +45,27 @@ Frames are sorted by `row`. A jump advances two rows, so rows are not consecutiv
 
 ## How the viewer uses it
 
+The page never reads this object directly: `viewer/feed.js` hands it over as calls (`onMeta`, then
+`onEpisode` and `onFrame` per episode), the same calls a live run makes, so the two cannot drift apart.
+
+## The live stream
+
+`bakeoff live` serves the page with an empty replay (`episodes: []`, the run's entry in `runs`) and
+`<body data-live="/events">`, and streams Server-Sent Events from `/events`, built by the same functions as
+this object (`bakeoff.replay.frame_of`, `summary_of`):
+
+| event | data |
+| --- | --- |
+| `episode` | `{episode, track}`: an episode as above without `frames` (`complete` false, `rows_survived` 0), sent once, just before the player's first frame |
+| `frame` | `{player, seed, frame, summary}`: one frame as above; `summary` is `{complete, finished, death_cause, rows_survived}` after it |
+| `end` | `{status, runs, scoreboard}`: the run's final status and the replay's `runs` and `scoreboard` |
+| `error` | `{message}`: why the run stopped early (a request cap, a provider that kept failing) |
+
+A page that connects late or reconnects gets the whole history again; `viewer/feed.js` drops what it
+already has. After `end` the page closes the stream.
+
 Replay time is measured in rows and every player is on the same clock: at time `t` every runner
-still alive is at row `t`, so the columns show the same stretch of track. The frame on screen is
+still alive is at row `t`, so they all run the same stretch of one tunnel. The frame on screen is
 the last one with `row <= t`; between `row` and `landing[0]` the runner moves from one to the
 other (a jump takes two ticks). After the last frame's landing the episode is `dead`, `finished`
 or, when `complete` is false, `cut`.
