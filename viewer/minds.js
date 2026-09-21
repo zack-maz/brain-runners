@@ -35,7 +35,7 @@
     return '<span class="bar"><i class="fill" style="width:' + width.toFixed(1) + '%"></i>' + tick + "</span>";
   }
 
-  // The senses as the player got them: 6 rows ahead (far at the top), `window` lanes either side, gaps dark.
+  // The senses as the player got them: the game's rows ahead (far at the top), `window` lanes either side, gaps dark.
   function sensesGrid(frame, window) {
     let cells = "";
     for (let r = frame.ahead.length - 1; r >= 0; r--) {
@@ -46,7 +46,8 @@
       }
     }
     const height = frame.ahead.length * 8, width = (2 * window + 1) * 12;
-    return '<svg class="senses" viewBox="0 0 ' + width + " " + (height + 8) + '" role="img" aria-label="the six rows it was shown">' +
+    return '<svg class="senses" viewBox="0 0 ' + width + " " + (height + 8) + '" role="img" aria-label="the ' + frame.ahead.length +
+      ' rows it was shown">' +
       cells + '<circle cx="' + (width / 2 - 0.5) + '" cy="' + (height + 4) + '" r="3" class="me"/></svg>';
   }
 
@@ -202,8 +203,11 @@
       (run.fly.provisional
         ? '<li class="warn">These values were provisional when this run was made: not yet calibrated.</li>'
         : "<li>The gain, the falloff and the two thresholds were chosen once, by a rule fixed beforehand, on practice tracks " +
-          "1000 to 1199 that are not in the tournament, then frozen (calibration/REPORT.md). The cap, the step and the window " +
-          "length are fixed design choices of ours and were not tuned.</li>");
+          "1000 to 1199 of game v1 that are not in the tournament, then frozen (calibration/REPORT.md)." +
+          // a run from before game versions has no version and was v1
+          (run.game.version && !run.game.version.startsWith("v1")
+            ? " This run is game " + esc(run.game.version) + "; the fly was not retuned for it." : "") +
+          " The cap, the step and the window length are fixed design choices of ours and were not tuned.</li>");
   }
 
   // the whole panel for one decision; context = {windowMs, maxHz, window}, from the run's meta

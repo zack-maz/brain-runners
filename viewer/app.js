@@ -28,7 +28,7 @@
   const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // ---- the store: everything the feed has delivered -------------------------------------------
-  const store = { runs: [], players: [], seeds: [], tracks: {}, episodes: [], scoreboard: null, ended: !liveUrl, error: null };
+  const store = { game: null, runs: [], players: [], seeds: [], tracks: {}, episodes: [], scoreboard: null, ended: !liveUrl, error: null };
   const view = {
     seed: null, shown: new Set(), focus: null, auto: true, heldSince: 0,
     t: 0, playing: false, speed: 3, following: !!liveUrl, size: 0, runners: [], panels: {},
@@ -47,7 +47,7 @@
 
   const handlers = {
     onMeta(meta) {
-      Object.assign(store, { runs: meta.runs, players: meta.players.slice(), seeds: meta.seeds.slice(), scoreboard: meta.scoreboard });
+      Object.assign(store, { game: meta.game, runs: meta.runs, players: meta.players.slice(), seeds: meta.seeds.slice(), scoreboard: meta.scoreboard });
     },
     onEpisode(episode, track) {
       store.episodes.push({ ...episode, frames: [] });
@@ -238,7 +238,7 @@
       Tunnel.draw(ctx, size, track, t, maxRows, outline);
       drawRunners(all, track, t, size);
       $("row-label").textContent = "Row " + String(Math.min(Math.floor(t), maxRows)).padStart(4, "0") + " / " + String(maxRows).padStart(4, "0");
-      $("track-label").textContent = "Track " + view.seed;
+      $("track-label").textContent = "Track " + view.seed + (store.game ? " · " + store.game.version : "");
     }
 
     for (const s of all) {

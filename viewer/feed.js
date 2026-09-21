@@ -1,6 +1,6 @@
 // The one way frames reach the page. A replay file and a live run look the same to it:
 //
-//   handlers.onMeta({runs, players, seeds, scoreboard})   once, from the embedded replay
+//   handlers.onMeta({game, runs, players, seeds, scoreboard})  once, from the embedded replay
 //   handlers.onEpisode(episode, track)                    an episode begins; `episode` has no frames yet
 //   handlers.onFrame(player, seed, frame, summary)        one decision; `summary` is the episode's
 //                                                         {complete, finished, death_cause, rows_survived}
@@ -21,7 +21,7 @@
   };
 
   function fromEmbedded(replay, handlers) {
-    handlers.onMeta({ runs: replay.runs || [], players: replay.players || [], seeds: replay.seeds || [],
+    handlers.onMeta({ game: replay.game || null, runs: replay.runs || [], players: replay.players || [], seeds: replay.seeds || [],
                       scoreboard: replay.scoreboard || { columns: [], rows: [], same_seeds: true } });
     for (const episode of replay.episodes || []) {
       handlers.onEpisode(header(episode), (replay.tracks || {})[String(episode.seed)]);

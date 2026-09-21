@@ -102,7 +102,7 @@ class LiveRun:
         self.run_dir.mkdir(parents=True, exist_ok=False)
         self.meta = new_meta(self.run_id, self.players, [self.seed], self.rules, self.args)
         self._write_meta()
-        return {"replay_version": REPLAY_VERSION,
+        return {"replay_version": REPLAY_VERSION, "game": self.rules.to_json(),
                 "runs": [{"run_id": self.run_id, **{k: self.meta.get(k) for k in META_KEYS}}],
                 "players": [], "seeds": [self.seed], "tracks": {}, "episodes": [],
                 "scoreboard": {"columns": ["run_id", *COLUMNS], "rows": [], "same_seeds": True}}

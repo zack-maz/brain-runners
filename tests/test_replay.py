@@ -196,6 +196,28 @@ def test_the_longest_track_of_a_seed_is_kept(tmp_path):
     assert [e["max_rows"] for e in replay["episodes"]] == [4, 10]
 
 
+def test_a_replay_shows_one_game(tmp_path):
+    from bakeoff.game.rules import V1, V2
+
+    a = write_run(tmp_path, "a", [record("fly", track=TRACK)], meta={"game": V2.to_json()})
+    b = write_run(tmp_path, "b", [record("llm", track=TRACK)], meta={"game": {**V2.to_json(), "max_rows": 40}})
+    c = write_run(tmp_path, "c", [record("jev", track=TRACK)], meta={"game": V1.to_json()})
+    d = write_run(tmp_path, "d", [record("solver", track=TRACK)])  # no meta: nothing to compare
+    assert build_replay([a, b, d])["game"] == V2.to_json()  # a shorter run of the same game is a prefix
+    with pytest.raises(ValueError, match="a is game v2 but c is game v1; a replay shows one game"):
+        build_replay([a, c])
+
+
+def test_a_run_from_before_game_versions_is_v1(tmp_path):
+    from bakeoff.game.rules import V1
+
+    old = {"lanes": 12, "max_rows": 300, "lookahead": 6, "window": 3, "looming": {"gain_hz": 250.0}}
+    a = write_run(tmp_path, "a", [record("fly", track=TRACK)], meta={"game": old})
+    b = write_run(tmp_path, "b", [record("llm", track=TRACK)], meta={"game": V1.to_json()})
+    assert build_replay([a, b])["game"] == V1.to_json()
+    assert build_replay([write_run(tmp_path, "c", [record(track=TRACK)])])["game"] is None
+
+
 def test_a_run_without_meta_is_named_after_its_directory(tmp_path):
     run_dir = write_run(tmp_path, "nometa", [record(track=TRACK)])
     (run,) = build_replay([run_dir])["runs"]

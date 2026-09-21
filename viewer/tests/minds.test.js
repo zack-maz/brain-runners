@@ -31,6 +31,12 @@ test("the senses grid's column count follows the window it is given", () => {
   assert.equal(count(html, "<rect"), 5 * 6);
 });
 
+test("the senses grid has as many rows as the player was shown, and says so", () => {
+  const html = Minds.sensesGrid({ ...frame(), ahead: [[0], [], []] }, 3);
+  assert.equal(count(html, "<rect"), 3 * 7);
+  assert.match(html, /aria-label="the 3 rows it was shown"/);
+});
+
 test("the verdict rates the choice against the solver's depths", () => {
   assert.match(Minds.verdict(frame()), /as good as any move \(6 rows seen safe\)/);
   assert.match(Minds.verdict(frame({ chosen_action: "jump", executed_action: "jump" })),

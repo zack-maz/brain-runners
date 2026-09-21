@@ -23,12 +23,12 @@ const episode = (player, frames) => ({ player, seed: 1000, run_id: "r", complete
 
 test("an embedded replay arrives as meta, then each episode and its frames in order", () => {
   const { calls, handlers } = recorder();
-  const replay = { runs: [{ run_id: "r" }], players: ["fly", "llm"], seeds: [1000], tracks: { 1000: TRACK },
+  const replay = { game: { version: "v2" }, runs: [{ run_id: "r" }], players: ["fly", "llm"], seeds: [1000], tracks: { 1000: TRACK },
                    scoreboard: { columns: ["player"], rows: [], same_seeds: true },
                    episodes: [episode("fly", [frame(0), frame(1)]), episode("llm", [frame(0)])] };
   fromEmbedded(replay, handlers);
   assert.deepEqual(calls.map((c) => c[0]), ["meta", "episode", "frame", "frame", "episode", "frame"]);
-  assert.deepEqual(calls[0][1], { runs: replay.runs, players: replay.players, seeds: [1000], scoreboard: replay.scoreboard });
+  assert.deepEqual(calls[0][1], { game: { version: "v2" }, runs: replay.runs, players: replay.players, seeds: [1000], scoreboard: replay.scoreboard });
   const [, header, track] = calls[1];
   assert.equal(header.player, "fly");
   assert.equal(header.death_cause, "ran_into_gap");
@@ -41,7 +41,7 @@ test("an embedded replay arrives as meta, then each episode and its frames in or
 test("an empty replay, as the live page embeds it, is only meta", () => {
   const { calls, handlers } = recorder();
   fromEmbedded({ runs: [], players: [], seeds: [], tracks: {}, episodes: [] }, handlers);
-  assert.deepEqual(calls, [["meta", { runs: [], players: [], seeds: [], scoreboard: { columns: [], rows: [], same_seeds: true } }]]);
+  assert.deepEqual(calls, [["meta", { game: null, runs: [], players: [], seeds: [], scoreboard: { columns: [], rows: [], same_seeds: true } }]]);
 });
 
 test("a live stream delivers the same calls in the replay's own shapes", () => {

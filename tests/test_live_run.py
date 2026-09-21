@@ -5,7 +5,7 @@ import json
 import pytest
 
 from bakeoff.errors import BudgetExhausted
-from bakeoff.game.rules import V1
+from bakeoff.game.rules import V1, V2
 from bakeoff.live import Broadcast, LiveRun
 from bakeoff.players import make_player
 from bakeoff.players.base import Decision
@@ -130,6 +130,7 @@ def test_prepare_gives_the_page_an_empty_replay_that_names_the_run(tmp_path):
     assert replay["episodes"] == [] and replay["seeds"] == [1001] and replay["scoreboard"]["rows"] == []
     (run,) = replay["runs"]
     assert run["run_id"] == "live" and run["status"] == "running" and run["game"]["lookahead"] == 6
+    assert replay["game"] == V2.variant(max_rows=20).to_json()  # what the page shows next to the track
     assert (live.run_dir / "meta.json").is_file()
 
 

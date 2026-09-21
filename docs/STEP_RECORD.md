@@ -122,13 +122,14 @@ line and cannot kill. `finished` is true when the runner's row after the move is
 
 Present only in the first record of each seed (null elsewhere): `{seed, lanes, max_rows, gaps}`.
 `gaps[r]` is the sorted list of lane indices that are gaps in row `r`; the list has
-`max_rows + 8` entries (rows `0 .. max_rows + 7`); rows 0 to 4 are always empty; a row beyond
-the list is floor. Lanes wrap. Lookups: gap at (`r`, `l`) iff `r < gaps.length` and
+`max_rows + lookahead + 2` entries (rows `0 .. max_rows + lookahead + 1`); rows 0 to `runway_rows` are always
+empty; a row beyond the list is floor. Lanes wrap. Lookups: gap at (`r`, `l`) iff `r < gaps.length` and
 `gaps[r]` contains `((l % lanes) + lanes) % lanes`.
 
-A track's identity is its seed: the difficulty ramp is fixed at 300 rows, so a run with a smaller
-`max_rows` plays the first rows of the same track (its `gaps` is a prefix of the 300-row
-`gaps`). All players on a seed see the same track.
+A track's identity is its seed and its game version (`meta.json` `game`): the same seed is a different track
+in another version. Within a version the difficulty ramp is fixed (`difficulty_rows`), so a run with a
+smaller `max_rows` plays the first rows of the same track (its `gaps` is a prefix of the full track's).
+All players on a seed see the same track.
 
 ## `meta.json`
 
@@ -142,7 +143,7 @@ A track's identity is its seed: the difficulty ramp is fixed at 300 rows, so a r
 | `status` | string | `running`, then `completed`, `aborted`, `budget_exhausted` or `interrupted` |
 | `players` | string[] | the players planned for this run, in order |
 | `seeds` | int[] | the seeds planned for this run |
-| `game` | object | `lanes`, `max_rows`, `lookahead`, `window` (visible lanes each side), `looming: {gain_hz, falloff, step_hz, max_hz, provisional}` |
+| `game` | object | the game's rules (`bakeoff/game/rules.py`): `version` (`v1`, `v2`, or a vision variant such as `v2+look3`), `lanes`, `max_rows`, `lookahead`, `window` (visible lanes each side), `runway_rows`, `start_gap_rate`, `end_gap_rate`, `difficulty_rows`, `max_gap_width`; and `looming: {gain_hz, falloff, step_hz, max_hz, provisional}`. Runs from before game versions have only `lanes`, `max_rows`, `lookahead`, `window` and `looming`, and were played on v1 |
 | `fly` | object | `turn_threshold_hz`, `jump_threshold_hz`, `window_ms`, `provisional` (true until calibrated), `model_commit`, `annotations_commit` |
 | `models` | object | `{player: model id}` for paid players in the run, e.g. `{"jev": "jev-latest", "llm": "claude-haiku-4-5-20251001"}` |
 | `requests` | object | `{player: {max, used}}` for paid players: the `--max-requests` cap and the live requests spent against it, failed ones included. Written at the start with `used: 0` and rewritten when the run ends, so a crashed run may show a stale count |
