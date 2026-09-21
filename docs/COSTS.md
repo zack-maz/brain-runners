@@ -76,3 +76,30 @@ What the track showed (one track: an impression, not a result):
   `stay` was just as safe. None was fatal. The rule is ours and stays as specified; the demo shows the wandering
   and the write-up names it.
 - Agreement with the solver 1.00; no invalid answers, no provider errors, no fallbacks.
+
+## The first real go-live (phase 5c, 2026-09-21)
+
+`uv run python -m bakeoff live --seed 1001 --players fly,jev_composed,llm --max-requests 300`, run
+`runs/20260921-132459`, fresh practice seed 1001, status `completed`, watched in a browser. Inside decision 19's
+budget: 228 Jev requests (460 of the 1,000 in total) and 92 of the 300 Claude Haiku requests.
+
+| player | model | rows survived | live requests | failed requests | mean latency ms | input tokens | output tokens | cost USD |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| fly | (local simulation) | 212 | 0 | 0 | 1,193 per decision (wall clock) | 0 | 0 | 0 |
+| jev_composed | jev-latest | 241 | 228 | 0 | 213 | 137,342 | 16,644 | about 0.006 (estimate, as above) |
+| llm | claude-haiku-4-5-20251001 | 95 | 92 | 0 | 837 | 50,287 | 828 | 0.0544 |
+
+- **Pace:** 6 minutes 30 seconds from start to end including about a minute to build the fly's brain: a bit more
+  than two seconds a row while all three ran (the minds decide one after the other: about 1.2 s for the fly, 0.8 s
+  for the LLM, 0.2 s for Jev), one and a half once the LLM had fallen, a quarter of a second once only Jev was left.
+- The first rows of every track are the same all-floor runway, so 4 of the LLM's and 3 of Jev's first answers came
+  from the cache of track 1000; they are not in the request counts.
+- **The live loop plays what the runner plays:** the fly's 185 moves are move for move those of its batch run on
+  the same seed two days earlier (`runs/20260919-151934`, also 212 rows).
+- **How they ended (one track: an impression, not a result):** the LLM stepped right into a gap at row 95 while
+  `stay` was safe. The fly jumped into a gap at row 211. The composed Jev died at row 240 where all four landing
+  tiles were gaps, as on track 1000; 3 of its 924 answers were on the wrong side of 0.5 and none of its moves
+  landed on a gap while a safe one existed. With perfect answers and no wandering the rule finishes this track,
+  so here the wandering (or the three wrong answers) cost it the finish: it reached a dead end that running
+  straight avoids.
+

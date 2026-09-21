@@ -24,12 +24,14 @@ scoreboard in `calibration/RESULTS.md`. Phase 3 built (plan:
 `python -m bakeoff view` embeds it with `viewer/` in one offline HTML file (PR #3, merged). Phase 5a built
 (plan: `docs/superpowers/plans/2026-09-21-phase5a-jev-composed.md`): the `jev_composed` player (four pointed
 Nouls, code picks the action least likely to land on a gap; the wording and the rule are ours), 247 rows on
-practice track 1000 (`docs/COSTS.md`). In progress on branch `phase5-demo-player`: phase 5,
-the demo player, the project's main tool: design approved 2026-09-20 in
-`docs/superpowers/specs/2026-09-20-demo-player-design.md` (5a `jev_composed`, 5b the player in the user's
-brand, 5c go live). The runbook for the next session is "Next step" in `docs/DECISIONS.md`; decisions 14 to
-19 there are the background, including a pre-authorized budget. The tournament is phase 6. Each phase gets
-its own plan.
+practice track 1000 (`docs/COSTS.md`). Phase 5b built (plan: `...-phase5b-demo-player.md`): the replay page is the
+demo player, the project's main tool (design: `docs/superpowers/specs/2026-09-20-demo-player-design.md`): one tunnel,
+three pixel runners, the mind strip, blue as the cursor, the user's brand, one offline file. Phase 5c built (plan:
+`...-phase5c-go-live.md`): `python -m bakeoff live` plays a track in lockstep in real time, records a normal run
+directory and streams it into the same page from a loopback server; first real go-live on practice seed 1001
+(`runs/20260921-132459`). Phase 5 is a pull request from `phase5-demo-player`, opened and not merged. Next: phase 6,
+the tournament and the write-up, which needs a new budget go-ahead; see "Next step" in `docs/DECISIONS.md`. Each phase
+gets its own plan.
 
 ## How we work here
 

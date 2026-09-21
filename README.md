@@ -12,7 +12,7 @@ Every contestant plays the same seeded rounds. The output is a watchable tournam
 replays with each player's "mind" shown next to the game (Jev's probabilities, the LLM's
 answer, the fly's neurons firing) and a scoreboard across games.
 
-Status: phase 4 of 5 built. The untrained fly plays: on seeds 0–19 it survives 127 rows
+Status: phases 1 to 5 of 6 built (phase 6 is the tournament and the write-up). The untrained fly plays: on seeds 0–19 it survives 127 rows
 on average (random 35, always-jump 48, solver 300; `calibration/RESULTS.md`). Jev and the LLM
 (Claude Haiku 4.5) play behind a response cache and a hard request cap; first measured costs
 are in `docs/COSTS.md`.

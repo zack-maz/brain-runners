@@ -88,10 +88,17 @@
     three minds in real time on the user's Mac, streams them into the same page and records a normal run
     directory. This reverses the first spec's non-goal "no real-time play" for that one local mode.
     Phases: 5a `jev_composed`, 5b the player, 5c go live; the tournament and write-up become phase 6.
+    **First real go-live (2026-09-21, fresh practice seed 1001, `runs/20260921-132459`, `docs/COSTS.md`):**
+    completed in six and a half minutes, watched in a browser. Composed Jev 241 rows, the fly 212, the LLM 95;
+    no provider error. The fly's live run is move for move its batch run on the same seed of 2026-09-19
+    (`runs/20260919-151934`, also 212 rows), so the live loop plays exactly what the runner plays. Because the
+    fly's episode on seed 1001 now exists in both directories, `view` takes only one of the two at a time.
 19. **Budget pre-authorized for the session that builds phase 5** (practice seeds 1000 and up only, through
     the cache and hard caps): up to 1,000 Jev requests in total (about 0.04 USD) and up to 300 Claude Haiku
     requests in total (about 0.18 USD, for one real go-live test on a fresh practice seed). Anything beyond
-    that, and any tournament seed, needs a new go-ahead.
+    that, and any tournament seed, needs a new go-ahead. **Used (2026-09-21):** 460 Jev requests (232 for
+    track 1000, 228 live on track 1001) and 92 Claude Haiku requests (0.054 USD); nothing on a seed below
+    1000. What is left of this authorization ended with that session.
 
 ## Open
 
@@ -105,33 +112,36 @@
   phase 3: `preflight()` runs inside `Runner.run`. Declined: turning a brain exception into a `stay`
   fallback; phase 2 decided a simulator failure must end the run, because a silent `stay` would
   change the fly's score.
+- Left from the final review of phase 5 (Minor): a crash in `live` (and in `run`) closes the run as `interrupted`,
+  the same status as Ctrl-C; a status of its own would be the more honest record. A hard kill leaves `status:
+  running` behind. `viewer/tunnel.js` knows that rows past the finish line never kill (drawing only, commented and
+  tested); a `finish_row` in the track JSON would remove the one rule of the game that also lives in JavaScript.
+  The live `episode` event carries the question sets known at that moment; a player that changed its questions
+  mid-episode would show nothing under "What it was asked" for the later ones (no player does).
 
 ## Next step
 
-Phases 1 to 4 are built and merged (PR #3 was reviewed, fixed and merged on 2026-09-21; step 1 below is done).
-Phase 5a is built on `phase5-demo-player` (plan: `docs/superpowers/plans/2026-09-21-phase5a-jev-composed.md`);
-5b and 5c follow on the same branch. The user wanted all of the following done in one go, without stopping for
-questions that the documents already answer:
+Phases 1 to 5 are built. Phases 1 to 4 are on `main`; phase 5 (5a the composed Jev, 5b the demo player, 5c go
+live) is on branch `phase5-demo-player`, as a pull request against `main` that is **opened, not merged**: merging
+it is the user's call (the authorization of 2026-09-21 covered PR #3 only). Plans:
+`docs/superpowers/plans/2026-09-21-phase5a-jev-composed.md`, `...-phase5b-demo-player.md`, `...-phase5c-go-live.md`
+(each ends with the rulings on its reviews).
 
-1. **Review PR #3**: read its review comments (`gh pr view 3 --comments`, `gh api
-   repos/zack-maz/brain-bakeoff/pulls/3/comments`), run a code review of the branch if there are none, fix
-   what is found on `phase4-replay-viewer` (TDD, `superpowers:receiving-code-review`), push. **Merging is
-   pre-authorized** (the user, 2026-09-21: "your call"): once the review has no open Critical or Important
-   finding and `uv run pytest` is green on the branch, merge PR #3 with a merge commit (`gh pr merge 3
-   --merge`, as the earlier phases were merged), pull `main`, rebase `phase5-demo-player` onto it, then delete
-   the local `proto/phase4-replay-viewer` branch and `.superpowers/sdd/2026-09-20-phase4-replay-viewer/`.
-   This authorization covers PR #3 only; the phase 5 PR is opened, not merged.
-2. **Build phase 5** on branch `phase5-demo-player` (already created, stacked on `phase4-replay-viewer`, holds
-   the design): 5a `jev_composed`, 5b the player, 5c go live, in that order, each with its own plan in
-   `docs/superpowers/plans/`, written prototype-first and executed with subagent-driven development as in
-   phases 2 to 4. The design is approved: do not re-brainstorm it. Paid steps stay with the controller, one
-   command at a time, inside decision 19's ceilings.
-3. **Show it**: build the demo of practice track 1000 (fly `runs/20260919-151934`, LLM
-   `runs/20260920-102919`, plus the new `jev_composed` run), look at it in a browser at 1440 and 390 wide,
-   run one real `bakeoff live` on a fresh practice seed, then open the PR.
+To look at it: `uv run python -m bakeoff view runs/20260919-151934 runs/20260920-102919 runs/20260921-120903`
+(practice track 1000: the fly, the LLM, the composed Jev) and `uv run python -m bakeoff view runs/20260921-132459`
+(the live run on track 1001), then open the HTML file; or `uv run python -m bakeoff live` with the default cap
+of 0 and `--seed 1001`, which replays the paid answers of that run from the cache for free (the fly is
+simulated again, about a minute to build and a second a row).
 
-After that: phase 6, the tournament and write-up; it starts by settling the first open item above (which
-seeds).
+After the merge: delete the local branches `proto/phase5b` and `proto/phase5c` and the ledger
+`.superpowers/sdd/2026-09-21-phase5-demo-player/`.
+
+Then phase 6, the tournament and the write-up. It starts by settling the first open item above (which seeds),
+and it needs a new budget go-ahead: the tournament is the first paid use of seeds below 1000 (`--tournament`).
+Things the write-up must carry from phase 5: the composed Jev's wording and rule are ours and it looks one
+step ahead only; it wanders on safe rows because its four answers rarely tie; on both practice tracks it died
+only where all four landing tiles were gaps; the one-shot Jev stays in for comparison; all of this is one or
+two practice tracks, an impression and not a result.
 
 ## Prior art to reuse
 
