@@ -227,3 +227,50 @@ def test_max_requests_0_on_low_seeds_is_not_refused_by_the_guard(tmp_path, capsy
 def test_a_free_player_with_a_cap_on_low_seeds_is_not_refused_by_the_guard(tmp_path):
     assert main(["run", "--players", "solver", "--max-requests", "5", "--seeds", "1", "--max-rows", "20",
                 "--out", str(tmp_path)]) == 0
+
+
+def test_a_paid_player_with_a_different_window_is_a_usage_error(tmp_path, capsys, monkeypatch):
+    sdks = fake_paid(monkeypatch)
+    assert main(paid_args(tmp_path, "--window", "2")) == 2
+    assert ("paid players are told they see 3 lanes either side; --window 2 is for free players only"
+            in capsys.readouterr().err)
+    assert sdks[0].calls == []
+    assert not (tmp_path / "runs").exists()
+
+
+def test_a_paid_player_with_the_same_window_explicit_is_not_refused_by_this_check(tmp_path, capsys, monkeypatch):
+    fake_paid(monkeypatch)
+    assert main(paid_args(tmp_path, "--window", "3")) == 1  # request cap of 0: budget_exhausted, not the window rule
+    assert "run budget_exhausted: request cap of 0 reached" in capsys.readouterr().err
+
+
+def test_report_names_the_game(tmp_path, capsys):
+    assert main(["run", "--players", "solver", "--seeds", "1", "--max-rows", "20", "--out", str(tmp_path)]) == 0
+    (run_dir,) = tmp_path.iterdir()
+    capsys.readouterr()
+    assert main(["report", str(run_dir)]) == 0
+    assert "game: v2" in capsys.readouterr().out
+
+
+def test_report_names_v1_for_a_game_block_recorded_before_versions(tmp_path, capsys):
+    assert main(["run", "--players", "solver", "--seeds", "1", "--max-rows", "20", "--out", str(tmp_path)]) == 0
+    (run_dir,) = tmp_path.iterdir()
+    meta_path = run_dir / "meta.json"
+    meta = json.loads(meta_path.read_text())
+    del meta["game"]["version"]
+    meta_path.write_text(json.dumps(meta))
+    capsys.readouterr()
+    assert main(["report", str(run_dir)]) == 0
+    assert "game: v1" in capsys.readouterr().out
+
+
+def test_report_prints_no_game_line_without_a_game_block(tmp_path, capsys):
+    assert main(["run", "--players", "solver", "--seeds", "1", "--max-rows", "20", "--out", str(tmp_path)]) == 0
+    (run_dir,) = tmp_path.iterdir()
+    meta_path = run_dir / "meta.json"
+    meta = json.loads(meta_path.read_text())
+    del meta["game"]
+    meta_path.write_text(json.dumps(meta))
+    capsys.readouterr()
+    assert main(["report", str(run_dir)]) == 0
+    assert "game:" not in capsys.readouterr().out

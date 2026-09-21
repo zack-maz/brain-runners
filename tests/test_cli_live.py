@@ -49,6 +49,18 @@ def test_a_live_run_plays_the_chosen_game(tmp_path):
     assert meta["game"]["version"] == "v1+win2" and meta["args"]["game"] == "v1" and meta["args"]["window"] == 2
 
 
+def test_a_paid_player_with_a_different_window_is_refused_before_anything_exists(tmp_path, capsys):
+    assert main(live_args(tmp_path, "--window", "2", players="solver,jev_composed")) == 2
+    assert ("paid players are told they see 3 lanes either side; --window 2 is for free players only"
+            in capsys.readouterr().err)
+    assert not (tmp_path / "runs").exists()
+
+
+def test_a_paid_player_with_the_same_window_explicit_is_not_refused_by_this_check(tmp_path, capsys):
+    assert main(live_args(tmp_path, "--seed", "1001", "--window", "3", players="solver,jev_composed")) == 1
+    assert "run budget_exhausted: request cap of 0 reached" in capsys.readouterr().err
+
+
 def test_usage_errors(tmp_path, capsys):
     assert main(live_args(tmp_path, players="solver,nobody")) == 2
     assert "unknown player 'nobody'" in capsys.readouterr().err

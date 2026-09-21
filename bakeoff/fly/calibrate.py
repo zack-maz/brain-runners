@@ -98,7 +98,7 @@ def report(surface: dict, results: list[dict], held_out: dict, check: dict, floo
         f"## Winner on check seeds {CHECK_SEEDS.start}-{CHECK_SEEDS.stop - 1}, stand-in brain\n\n"
         + _table([check], SCORE_COLUMNS)
         + f"\n\nCompare with the real brain: `uv run python -m bakeoff run --players fly --seeds {len(CHECK_SEEDS)} "
-        f"--seed-start {CHECK_SEEDS.start}`.",
+        f"--seed-start {CHECK_SEEDS.start} --game v1`.",
         "## Floors and reference on the practice seeds\n\n" + _table(floors, ("player",) + SCORE_COLUMNS),
         "## Top 10 candidates\n\n" + _table(results[:10], CONFIG_COLUMNS + SCORE_COLUMNS),
     ]) + "\n"

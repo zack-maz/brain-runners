@@ -125,6 +125,11 @@ def test_solver_does_not_trust_tiles_it_cannot_see(make_track):
     assert solve(compute_senses(Game(track)), 3) == "right"
 
 
+def test_solver_before_reset_refuses_to_guess():
+    with pytest.raises(RuntimeError, match=r"reset\(\) first"):
+        make_player("solver").act({"ahead": []})
+
+
 def test_the_solver_sees_the_games_window(make_track):
     # after a step left (lane 5) the only way on is another step left, to lane 4: two lanes from the start,
     # in sight with a window of 3, unseen (so a gap to the solver) with a window of 1

@@ -89,6 +89,15 @@ def _spends_on_tournament_seeds(players: list, max_requests: int, first_seed: in
 SEED_RULE = ("paid players may not spend requests on seeds below 1000 (tournament seeds); "
              "use {flag} 1000 or higher, or pass --tournament")
 
+# the paid players' briefing (bakeoff/players/briefing.py) tells them they see 3 lanes either side; until
+# that text follows the window, a different window would be a lie to a paid player, cache or not
+WINDOW_RULE = ("paid players are told they see {chosen} lanes either side; --window {requested} is for "
+               "free players only")
+
+
+def _paid_window_mismatch(players: list, chosen_window: int, requested_window: int | None) -> bool:
+    return requested_window is not None and requested_window != chosen_window and any(p.name in PAID for p in players)
+
 
 def _live(args) -> int:
     try:
@@ -102,6 +111,9 @@ def _live(args) -> int:
         return 2
     if _spends_on_tournament_seeds(players, args.max_requests, args.seed, args.tournament):
         print(SEED_RULE.format(flag="--seed"), file=sys.stderr)
+        return 2
+    if _paid_window_mismatch(players, RULES[args.game].window, args.window):
+        print(WINDOW_RULE.format(chosen=RULES[args.game].window, requested=args.window), file=sys.stderr)
         return 2
     run_args = {"command": "live", "players": args.players, "seed": args.seed, "game": args.game,
                 "lookahead": args.lookahead, "window": args.window, "max_rows": args.max_rows,
@@ -153,6 +165,8 @@ def _live(args) -> int:
 def _print_report(run_dir) -> None:
     meta = load_meta(run_dir)
     print(f"status: {meta.get('status', 'unknown') if meta else 'unknown'}")
+    if meta and meta.get("game"):
+        print(f"game: {Rules.from_json(meta['game']).version}")
     print(format_table(summarize(load_steps(run_dir), meta)))
 
 
@@ -196,13 +210,16 @@ def main(argv: list[str] | None = None) -> int:
     if _spends_on_tournament_seeds(players, args.max_requests, args.seed_start, args.tournament):
         print(SEED_RULE.format(flag="--seed-start"), file=sys.stderr)
         return 2
+    if _paid_window_mismatch(players, RULES[args.game].window, args.window):
+        print(WINDOW_RULE.format(chosen=RULES[args.game].window, requested=args.window), file=sys.stderr)
+        return 2
     runner = Runner(args.out)
     run_id = time.strftime("%Y%m%d-%H%M%S")
     run_dir = runner.out_root / run_id
     seeds = range(args.seed_start, args.seed_start + args.seeds)
     run_args = {"players": args.players, "seeds": args.seeds, "seed_start": args.seed_start, "game": args.game,
-                "lookahead": args.lookahead, "window": args.window, "max_rows": args.max_rows, "max_requests": args.max_requests, "cache": args.cache,
-                "tournament": args.tournament}
+                "lookahead": args.lookahead, "window": args.window, "max_rows": args.max_rows,
+                "max_requests": args.max_requests, "cache": args.cache, "tournament": args.tournament}
     status = 0
     try:
         runner.run(players, seeds, rules, max_rows=args.max_rows, run_id=run_id, args=run_args)

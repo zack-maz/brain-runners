@@ -25,6 +25,14 @@ def test_a_different_vision_is_named_and_a_different_length_is_not():
     assert V2.variant(max_rows=40) == Rules(**{**V2.to_json(), "max_rows": 40})
 
 
+def test_chained_variants_are_named_from_the_base_version():
+    # back to the base version's own lookahead: named plain V2, not v2+look3+look6
+    assert V2.variant(lookahead=3).variant(lookahead=6) == V2
+    assert V2.variant(lookahead=3).variant(lookahead=6).version == "v2"
+    assert V2.variant(lookahead=3).variant(window=2).version == "v2+look3+win2"
+    assert V2.variant(lookahead=3).variant(lookahead=6).same_game(V2)
+
+
 def test_resolve_defaults_to_the_current_version():
     assert resolve() == V2 and resolve(V1) == V1
     assert resolve(max_rows=20).max_rows == 20 and resolve(V1, 20).version == "v1"
@@ -42,6 +50,25 @@ def test_a_game_block_from_before_versions_is_v1():
 
 def test_a_recorded_block_may_carry_more_than_the_rules():
     assert Rules.from_json({**V2.to_json(), "looming": {"gain_hz": 250.0}}) == V2
+
+
+def test_a_versioned_block_missing_a_field_is_filled_from_its_named_base_version():
+    block = V2.to_json()
+    del block["max_gap_width"]
+    assert Rules.from_json(block) == V2
+
+
+def test_a_versioned_variant_block_missing_a_field_is_filled_from_its_base_version():
+    block = V2.variant(lookahead=3).to_json()
+    del block["max_gap_width"]
+    assert Rules.from_json(block) == V2.variant(lookahead=3)
+
+
+def test_a_versioned_block_missing_a_field_with_an_unknown_base_version_raises():
+    block = {**V2.to_json(), "version": "v9"}
+    del block["max_gap_width"]
+    with pytest.raises(ValueError, match=r"cannot read game 'v9'"):
+        Rules.from_json(block)
 
 
 def test_same_game_ignores_length_only():

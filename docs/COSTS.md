@@ -50,9 +50,9 @@ One track is a weak basis for the second column: a player that survives longer c
 
 ## The composed Jev's first recorded track (phase 5a, 2026-09-21)
 
-`uv run python -m bakeoff run --players jev_composed --seeds 1 --seed-start 1000 --max-requests 300`, run
-`runs/20260921-120903`, practice seed 1000, status `completed`. Inside the budget of decision 19 (232 of the 1,000
-Jev requests pre-authorized for phase 5).
+`uv run python -m bakeoff run --players jev_composed --seeds 1 --seed-start 1000 --max-requests 300` (game v1: now
+needs `--game v1`), run `runs/20260921-120903`, practice seed 1000, status `completed`. Inside the budget of
+decision 19 (232 of the 1,000 Jev requests pre-authorized for phase 5).
 
 | player | model | rows survived | live requests | failed requests | mean latency ms | median / max ms | input tokens | output tokens | cost USD | USD per request |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -79,9 +79,9 @@ What the track showed (one track: an impression, not a result):
 
 ## The first real go-live (phase 5c, 2026-09-21)
 
-`uv run python -m bakeoff live --seed 1001 --players fly,jev_composed,llm --max-requests 300`, run
-`runs/20260921-132459`, fresh practice seed 1001, status `completed`, watched in a browser. Inside decision 19's
-budget: 228 Jev requests (460 of the 1,000 in total) and 92 of the 300 Claude Haiku requests.
+`uv run python -m bakeoff live --seed 1001 --players fly,jev_composed,llm --max-requests 300` (game v1: now needs
+`--game v1`), run `runs/20260921-132459`, fresh practice seed 1001, status `completed`, watched in a browser. Inside
+decision 19's budget: 228 Jev requests (460 of the 1,000 in total) and 92 of the 300 Claude Haiku requests.
 
 | player | model | rows survived | live requests | failed requests | mean latency ms | input tokens | output tokens | cost USD |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |

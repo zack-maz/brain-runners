@@ -43,7 +43,7 @@ builds one fly brain; do not start a second fly process next to it. Afterwards `
 Paid players (`jev`, `jev_composed`, `llm`) need `TYPESAFE_API_KEY` / `ANTHROPIC_API_KEY` in a git-ignored `.env`
 file at the repo root (template: `.env.example`). They spend nothing unless told to:
 
-    uv run python -m bakeoff run --players jev --seeds 1 --seed-start 1000 --max-requests 300
+    uv run python -m bakeoff run --players jev --seeds 1 --seed-start 1000 --max-requests 300 --game v1
 
 `jev_composed` is the Jev of the demo: instead of one broad question it asks Jev four pointed yes/no
 questions in one request ("would `left` land on a gap, that is, does `ahead[0].gaps_relative` contain
@@ -53,8 +53,9 @@ one-shot `jev` stays for comparison: on the dangerous states of practice track 1
 landed on a gap about as often as always staying (`docs/DECISIONS.md`, decisions 14 and 15).
 
 `--max-requests` is a hard cap on live requests for **each** paid player in the run; the default 0
-only replays `.cache/responses`. Every answer is cached, so a repeated run is free and a run stopped
-by the cap (`status: budget_exhausted`) continues from the cache next time. `uv run pytest -m live`
+only replays `.cache/responses`. Every answer is cached, so a repeated run of the same game and track
+is free, and a run stopped by the cap (`status: budget_exhausted`) continues from the cache next time.
+`uv run pytest -m live`
 makes one real request per provider. A live paid run on seeds below 1000 is refused unless
 `--tournament` is passed (tournament seeds stay untouched until phase 6). A run stopped by the cap
 ends there, so later players in the list do not play: put free players first, or run paid players

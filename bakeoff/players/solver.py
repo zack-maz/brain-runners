@@ -41,12 +41,14 @@ class SolverPlayer:
     name = "solver"
 
     def __init__(self):
-        self._window = 0
+        self._window = None
 
     def reset(self, game: Game, seed: int) -> None:
         self._window = game.track.rules.window
 
     def act(self, senses: dict) -> Decision:
+        if self._window is None:
+            raise RuntimeError("reset() first")
         return Decision(solve(senses, self._window))
 
     def observe(self, executed_action: str) -> None:

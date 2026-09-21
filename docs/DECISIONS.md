@@ -107,7 +107,9 @@
     seeds 1000–1199 with free players only): the faster ramp's job is to separate the players sooner; the track is
     150 rows and reaches full gap density by row 100 (perfect play still finishes 97%; the fly's stand-in brain
     averages 68 rows instead of 124, random 24). Vision stays 6 rows × 3 lanes either side: perfect play gains
-    nothing from more on the old ramp, and only the LLM reads beyond row 2.
+    nothing from more on either ramp (v2, seeds 1000–1199: 97% of tracks finish with 6 rows, 98.5% with 8, 99%
+    with 10), and only the LLM and the one-shot Jev are given the whole view in words; the fly weighs rows 1–2
+    almost entirely and the composed Jev asks only about landing tiles.
 22. **Vision is a setting of the game** (`--lookahead`, `--window`), and a changed vision renames the game
     (`v2+look3`), so an experiment can compare players at other depths without ever mixing scoreboards.
 23. **Named game versions** (approach A): `v1` stays playable and is tile for tile the game of phases 1 to 5 (a test

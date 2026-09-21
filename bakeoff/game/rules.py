@@ -32,15 +32,20 @@ class Rules:
     def variant(self, max_rows: int | None = None, lookahead: int | None = None, window: int | None = None) -> Rules:
         """A copy for tests and experiments. A different vision is a different game and says so in its
         version (`v2+look3`, `v2+look8+win4`); a different length plays a prefix of the same tracks, so
-        it keeps the version and is recorded in `max_rows`."""
-        version = self.version
-        if lookahead is not None and lookahead != self.lookahead:
-            version += f"+look{lookahead}"
-        if window is not None and window != self.window:
-            version += f"+win{window}"
+        it keeps the version and is recorded in `max_rows`. The name is built from the base version (not
+        from whatever this instance happens to already be called), so chaining variants back to the
+        base's own lookahead/window collapses back to the base's plain name."""
+        base_name = self.version.split("+")[0]
+        base = RULES.get(base_name, self)
+        new_lookahead = self.lookahead if lookahead is None else lookahead
+        new_window = self.window if window is None else window
+        version = base_name
+        if new_lookahead != base.lookahead:
+            version += f"+look{new_lookahead}"
+        if new_window != base.window:
+            version += f"+win{new_window}"
         return replace(self, version=version, max_rows=self.max_rows if max_rows is None else max_rows,
-                       lookahead=self.lookahead if lookahead is None else lookahead,
-                       window=self.window if window is None else window)
+                       lookahead=new_lookahead, window=new_window)
 
     def to_json(self) -> dict:
         return asdict(self)
@@ -48,11 +53,24 @@ class Rules:
     @classmethod
     def from_json(cls, block: dict) -> Rules:
         """The rules of a recorded run. A `game` block without `version` was written before versions
-        existed, on v1."""
+        existed, on v1. A field a future version of this dataclass has but an older recorded block does
+        not is filled from the named base version, so a field added later does not make every run
+        recorded today unreadable; if the base version is unknown, or a field is still missing, reading
+        fails loudly instead of guessing."""
         if "version" not in block:
             return V1.variant(max_rows=block.get("max_rows"), lookahead=block.get("lookahead"),
                               window=block.get("window"))
-        return cls(**{k: block[k] for k in cls.__dataclass_fields__})
+        version = block["version"]
+        base = RULES.get(version.split("+")[0])
+        fields = {}
+        for k in cls.__dataclass_fields__:
+            if k in block:
+                fields[k] = block[k]
+            elif base is not None and hasattr(base, k):
+                fields[k] = getattr(base, k)
+            else:
+                raise ValueError(f"cannot read game {version!r}: missing {k!r} and no known base version to fill it from")
+        return cls(**fields)
 
     def same_game(self, other: Rules) -> bool:
         """Equal in everything but length: a shorter run plays a prefix of the same tracks."""
