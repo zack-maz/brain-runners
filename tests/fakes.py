@@ -60,3 +60,10 @@ def llm_reply(text='{"action": "stay"}', stop_reason="end_turn"):
     return {"id": "msg_1", "type": "message", "role": "assistant", "model": "claude-haiku-4-5-20251001",
             "content": [{"type": "text", "text": text}], "stop_reason": stop_reason, "stop_sequence": None,
             "usage": {"input_tokens": 520, "output_tokens": 9}}
+
+
+def jev_set_reply(values: dict):
+    """A Jev reply to a question set: {id: P(yes)} for Nouls, {id: move} for a Choice."""
+    answers = {qid: {"type": "choice", "choice": v, "confidence": 0.7} if isinstance(v, str)
+               else {"type": "noul", "noul": v} for qid, v in values.items()}
+    return {"model": "jev-latest", "usage": {"input_tokens": 300, "output_tokens": 4 * len(values)}, "answers": answers}
