@@ -36,7 +36,9 @@
 
   const runOf = (episode) => store.runs.find((run) => run.run_id === episode.run_id) || {};
   const episodeOf = (player, seed) => store.episodes.find((e) => e.player === player && e.seed === seed);
-  const playing = () => store.episodes.filter((e) => e.seed === view.seed && view.shown.has(e.player) && e.frames.length)
+  // a runner can be placed once it has a frame and its track is known
+  const playing = () => store.episodes.filter((e) => e.seed === view.seed && view.shown.has(e.player) && e.frames.length &&
+    store.tracks[String(e.seed)])
     .sort((a, b) => order(a.player) - order(b.player));
   const order = (player) => {
     const at = store.players.indexOf(player);
@@ -72,7 +74,7 @@
     },
     onError(message) {
       if (store.ended) return;
-      store.error = message;
+      if (message != null) store.error = message; // why the run stops; it stays on screen
       notice(message == null ? "The connection to the live run was lost. Waiting for it to come back." : message, message != null);
     },
   };
@@ -113,7 +115,7 @@
         const track = store.tracks[String(seed)];
         const mark = !episode ? "" : !episode.complete ? " …" : episode.finished ? " ✓" : "";
         const shorter = episode && track && episode.max_rows != null && episode.max_rows !== track.max_rows ? " /" + esc(episode.max_rows) : "";
-        const shown = episode ? esc(episode.rows_survived) + mark + shorter : "";
+        const shown = episode && episode.rows_survived != null ? esc(episode.rows_survived) + mark + shorter : "";
         html += "<td" + (seed === view.seed ? ' class="current"' : "") + ">" + shown + "</td>";
       }
       html += "</tr>";
@@ -156,8 +158,8 @@
                context: { windowMs: run.fly ? run.fly.window_ms : null, window: window_, maxHz: game.looming ? game.looming.max_hz : null } };
     });
     if (!view.runners.length) {
-      strip.innerHTML = '<p class="note" style="padding:16px">None of the players shown ran track ' + esc(view.seed) +
-        ". Pick a player in the level table to show it.</p>";
+      strip.innerHTML = '<p class="note" style="padding:16px">' + (view.seed == null ? "Nothing has been played yet."
+        : "None of the players shown ran track " + esc(view.seed) + ". Pick a player in the level table to show it.") + "</p>";
     }
   }
 
@@ -351,7 +353,12 @@
     $("live").setAttribute("aria-pressed", "false");
   }
 
-  $("play").addEventListener("click", () => setPlaying(!view.playing));
+  function togglePlay() {
+    if (view.playing && liveUrl) setFollowingOff();
+    setPlaying(!view.playing);
+  }
+
+  $("play").addEventListener("click", togglePlay);
   $("back").addEventListener("click", () => stepRows(-1));
   $("forward").addEventListener("click", () => stepRows(1));
   $("speeds").addEventListener("click", (event) => {
@@ -370,7 +377,7 @@
   document.addEventListener("keydown", (event) => {
     const typing = event.target instanceof Element && event.target.closest("button, select, input, summary");
     if (typing || event.metaKey || event.ctrlKey || event.altKey) return;
-    if (event.key === " ") { event.preventDefault(); setPlaying(!view.playing); }
+    if (event.key === " ") { event.preventDefault(); togglePlay(); }
     if (event.key === "ArrowLeft") stepRows(-1);
     if (event.key === "ArrowRight") stepRows(1);
     if (event.key === "a" || event.key === "A") { setAuto(!view.auto); draw(); }
@@ -423,7 +430,8 @@
   if (liveUrl) {
     notice("Waiting for the first decision…", false);
     const clear = handlers.onFrame;
-    handlers.onFrame = (...args) => { if (!store.error) notice(null); clear(...args); };
+    // a frame means the stream is alive: the waiting or the lost-connection notice goes, a real error stays
+    handlers.onFrame = (...args) => { if (store.error == null) notice(null); clear(...args); };
     Feed.fromStream(liveUrl, handlers);
   }
 })();

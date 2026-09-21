@@ -33,8 +33,11 @@ class Broadcast:
         self.listeners = 0
 
     def emit(self, name: str, data: dict) -> None:
+        # a snapshot: the run goes on changing its own objects (an episode's list of question sets grows),
+        # and what was sent must not change under a listener that is still serialising it
+        snapshot = json.loads(json.dumps(data))
         with self._changed:
-            self._events.append((name, data))
+            self._events.append((name, snapshot))
             self._changed.notify_all()
 
     def close(self) -> None:
@@ -53,18 +56,22 @@ class Broadcast:
         with self._changed:
             self.listeners += 1
             self._changed.notify_all()
-        while True:
+        try:
+            while True:
+                with self._changed:
+                    if sent >= len(self._events) and not self.closed:
+                        self._changed.wait(poll_seconds)
+                    batch, done = self._events[sent:], self.closed
+                if not batch and done:
+                    return
+                if not batch:
+                    yield None
+                for event in batch:
+                    yield event
+                sent += len(batch)
+        finally:  # the page was closed, or the run is over
             with self._changed:
-                if sent >= len(self._events) and not self.closed:
-                    self._changed.wait(poll_seconds)
-                batch, done = self._events[sent:], self.closed
-            if not batch and done:
-                return
-            if not batch:
-                yield None
-            for event in batch:
-                yield event
-            sent += len(batch)
+                self.listeners -= 1
 
 
 class LiveRun:

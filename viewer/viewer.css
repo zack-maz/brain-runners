@@ -113,7 +113,7 @@ table { border-collapse: collapse; font-size: var(--size-small); font-variant-nu
   text-transform: uppercase; color: var(--muted); vertical-align: bottom; }
 #scoreboard tbody th { color: var(--bright); }
 #matrix td.current { color: var(--bright); background: var(--panel); }
-#matrix button { min-height: 44px; padding: 0 2px; border: 0; background: none; cursor: pointer; color: var(--muted);
+#matrix button { min-width: 44px; min-height: 44px; padding: 0 2px; border: 0; background: none; cursor: pointer; color: var(--muted);
   font: 400 var(--size-label)/1.4 var(--font-mono); letter-spacing: var(--tracking-label); text-transform: uppercase; }
 #matrix button:hover { color: var(--bright); }
 #matrix button[aria-current="true"], #matrix button[aria-pressed="true"] { color: var(--bright); }

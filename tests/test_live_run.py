@@ -163,3 +163,38 @@ def test_cancelling_before_the_run_began_leaves_an_interrupted_run_with_no_logs(
     meta = json.loads((live.run_dir / "meta.json").read_text())
     assert meta["status"] == "interrupted" and meta["finished_at"] and live.broadcast.closed
     assert list(live.run_dir.glob("*.jsonl")) == []
+
+
+def test_an_event_is_a_snapshot_later_decisions_do_not_change_what_was_already_sent(tmp_path):
+    class TwoQuestions(Scripted):
+        def act(self, senses):
+            decision = super().act(senses)
+            decision.questions = {"q": self.asked}  # a new question set with every decision
+            return decision
+
+    live = LiveRun([TwoQuestions("paid", "stay", cap=3)], 1001, out_root=tmp_path, max_rows=20, run_id="live")
+    listener = live.broadcast.listen(poll_seconds=0.01)
+    seen = []
+    original_emit = live.broadcast.emit
+
+    def emit(name, data):  # what a listener that reads at once would have serialised
+        original_emit(name, data)
+        seen.append(json.dumps(next(listener)))
+
+    live.broadcast.emit = emit
+    live.run()
+    first = json.loads(seen[0])
+    assert first[0] == "episode" and first[1]["episode"]["questions"] == [{"q": 1}]
+    assert json.dumps(list(live.broadcast.listen(poll_seconds=0.01))[0]) == seen[0]  # and history still says the same
+
+
+def test_a_listener_that_has_gone_is_no_longer_counted():
+    broadcast = Broadcast()
+    listener = broadcast.listen(poll_seconds=0.01)
+    assert broadcast.listeners == 0  # nobody listens until the first event is asked for
+    next(listener)
+    assert broadcast.listeners == 1
+    listener.close()  # the page was closed
+    assert broadcast.listeners == 0
+    broadcast.close()
+    assert list(broadcast.listen()) == [] and broadcast.listeners == 0

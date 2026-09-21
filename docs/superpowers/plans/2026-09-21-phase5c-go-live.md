@@ -1492,3 +1492,8 @@ Inside decision 19's ceilings: at most 300 Claude Haiku requests and what is lef
 | cap per paid player, default 0; refusal below seed 1000 without `--tournament`; one fly brain; keys as today; serves nothing but the page and the stream | Tasks 3 and 4 |
 | `Runner.run_seed`'s record building extracted; the runner's behaviour and tests unchanged | Task 1 (no existing test is edited) |
 | tests: the loop with fake players (a jumper, a death, a finisher, a budget stop), the stream's shapes, the server on an ephemeral port, the refusal rules | Tasks 2, 3, 4 |
+
+## Rulings on the task reviews (controller, after Task 5)
+
+- **Task 2, Important, fixed:** the `episode` event carried the episode's list of question sets by reference, and later frames append to that list, so what a listener had already been sent could change while it was being serialised in another thread. `Broadcast.emit` now stores a snapshot of every event.
+- **Task 2, Important, fixed:** `Broadcast.listeners` only ever grew. A listener that has gone (the page was closed, the run ended) is no longer counted.
