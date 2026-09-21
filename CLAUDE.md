@@ -5,7 +5,8 @@ simulation play the same seeded runs of a "Run"-style tunnel game; output is a w
 tournament. Read these before doing anything:
 
 1. `docs/DECISIONS.md` — what the user has decided, in order, and the next step.
-2. `docs/superpowers/specs/2026-09-19-tunnel-run-design.md` — the approved design (binding).
+2. `docs/superpowers/specs/2026-09-19-tunnel-run-design.md` — the approved design (binding), extended by
+   `docs/superpowers/specs/2026-09-20-demo-player-design.md` (the demo player; also binding).
 3. `docs/RESEARCH.md` — fly-brain resources. Spike results: branch `spike/fly-steering`,
    `spikes/01-fly-steering/REPORT.md` (throwaway code; port ideas, do not merge it).
 
@@ -20,8 +21,12 @@ scoreboard in `calibration/RESULTS.md`. Phase 3 built (plan:
 `bakeoff/clients/core.py` (disk cache, hard cap per paid player, no SDK retries). First costs in
 `docs/COSTS.md`. Phase 4 built (plan: `docs/superpowers/plans/2026-09-20-phase4-replay-viewer.md`):
 `bakeoff/replay.py` merges run directories into one replay object (`docs/REPLAY_DATA.md`) and
-`python -m bakeoff view` embeds it with `viewer/` in one offline HTML file. Next: write the phase 5
-plan (tournament run and write-up). Each phase gets its own plan.
+`python -m bakeoff view` embeds it with `viewer/` in one offline HTML file (PR #3, open). Next: phase 5,
+the demo player, the project's main tool: design approved 2026-09-20 in
+`docs/superpowers/specs/2026-09-20-demo-player-design.md` (5a `jev_composed`, 5b the player in the user's
+brand, 5c go live). The runbook for the next session is "Next step" in `docs/DECISIONS.md`; decisions 14 to
+19 there are the background, including a pre-authorized budget. The tournament is phase 6. Each phase gets
+its own plan.
 
 ## How we work here
 

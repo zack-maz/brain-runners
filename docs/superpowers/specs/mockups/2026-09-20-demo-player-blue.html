@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tunnel Run: where does the one blue go?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root { --void:#0A0A0A; --panel:#0D0F12; --hairline:#1E2227; --line:#2A2F35; --muted:#7C848D; --text:#C9CDD2; --bright:#E8EBED; --accent:#7AA2F7; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 40px 48px 80px; background: var(--void); color: var(--text); font: 16px/1.6 "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+  h1 { margin: 0 0 8px; font-size: 28px; font-weight: 500; letter-spacing: -0.03em; color: var(--bright); }
+  p { margin: 0 0 12px; max-width: 640px; }
+  .label { font: 12px/1.4 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-top: 32px; }
+  .opt { border: 1px solid var(--hairline); background: var(--panel); cursor: pointer; padding: 0 0 16px; transition: border-color .2s; }
+  .opt:hover { border-color: var(--line); }
+  .opt.selected { border-color: var(--bright); }
+  canvas { display: block; width: 100%; aspect-ratio: 1; background: var(--void); }
+  .opt h2 { margin: 16px 16px 4px; font-size: 20px; font-weight: 500; color: var(--bright); letter-spacing: -0.02em; }
+  .opt p { margin: 0 16px; font-size: 14px; color: var(--text); }
+  .minds { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); }
+  .minds div { padding: 10px 12px; border-right: 1px solid var(--hairline); }
+  .minds div:last-child { border-right: 0; }
+  .minds b { display: block; font-weight: 500; color: var(--bright); font-size: 14px; }
+  .bar { display: block; height: 3px; margin-top: 8px; background: var(--hairline); position: relative; }
+  .bar i { position: absolute; inset: 0 auto 0 0; background: var(--muted); }
+  .blue { color: var(--accent) !important; } .bar i.blue { background: var(--accent); }
+  @media (max-width: 1000px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<span class="label">Tunnel Run · visual direction 1 of 2</span>
+<h1>Where does the one blue go?</h1>
+<p>Your brand rations the blue: in any one view it marks exactly one thing. With three runners in one concrete tunnel, that one thing has to be chosen. The runners are told apart by their label and position, never by colour alone. Click the one that feels right, then tell me in the terminal (also say what you would change about the tunnel itself: line weight, how much concrete, how small the figures are).</p>
+
+<div class="grid">
+  <div class="opt" data-choice="blue-fly" onclick="toggleSelect(this)">
+    <canvas id="a" width="840" height="840"></canvas>
+    <div class="minds">
+      <div><span class="label blue">Fly</span><b>jump</b><span class="bar"><i class="blue" style="width:84%"></i></span></div>
+      <div><span class="label">Jev</span><b>right</b><span class="bar"><i style="width:61%"></i></span></div>
+      <div><span class="label">LLM</span><b>stay</b><span class="bar"><i style="width:40%"></i></span></div>
+    </div>
+    <h2>A. The fly is the blue</h2>
+    <p>Zima Blue read literally: the simplest machine in the room is the one in colour. Jev and the LLM are concrete-grey figures. The blue follows the fly into its mind panel (its spikes are the only blue marks there). If the fly falls, the page has no blue left.</p>
+  </div>
+
+  <div class="opt" data-choice="blue-end" onclick="toggleSelect(this)">
+    <canvas id="b" width="840" height="840"></canvas>
+    <div class="minds">
+      <div><span class="label">Fly</span><b>jump</b><span class="bar"><i style="width:84%"></i></span></div>
+      <div><span class="label">Jev</span><b>right</b><span class="bar"><i style="width:61%"></i></span></div>
+      <div><span class="label">LLM</span><b>stay</b><span class="bar"><i style="width:40%"></i></span></div>
+    </div>
+    <h2>B. The end of the tunnel is the blue</h2>
+    <p>All three runners are grey; the only colour is the far end of the megastructure, a small blue opening everyone is running toward. It grows as the finish line approaches. Most BLAME!: scale, distance, one light. No competitor is favoured by the palette.</p>
+  </div>
+
+  <div class="opt" data-choice="blue-focus" onclick="toggleSelect(this)">
+    <canvas id="c" width="840" height="840"></canvas>
+    <div class="minds">
+      <div><span class="label">Fly</span><b>jump</b><span class="bar"><i style="width:84%"></i></span></div>
+      <div><span class="label blue">Jev</span><b>right</b><span class="bar"><i class="blue" style="width:61%"></i></span></div>
+      <div><span class="label">LLM</span><b>stay</b><span class="bar"><i style="width:40%"></i></span></div>
+    </div>
+    <h2>C. The mind you are reading is the blue</h2>
+    <p>Blue is a cursor: it marks the competitor in focus (click a runner or a panel, or let it cut to whoever faces a gap), and lights the tiles that one was shown. Most useful for reading a mind against the track; the blue moves, so it says nothing about who anyone is.</p>
+  </div>
+</div>
+
+<script>
+  const C = { void: "#0A0A0A", line: "#2A2F35", hair: "#1E2227", muted: "#7C848D", bright: "#E8EBED", accent: "#7AA2F7" };
+  const LANES = 12, DEPTH = 26, K = 0.30, R = 0.47;
+  function rng(seed) { return () => (seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296; }
+  const rand = rng(7);
+  const gaps = Array.from({ length: DEPTH + 2 }, (_, r) => r < 2 ? [] : Array.from({ length: LANES }, (_, l) => l).filter(() => rand() < 0.10 + r * 0.006));
+
+  function draw(id, mode) {
+    const cv = document.getElementById(id), ctx = cv.getContext("2d"), S = cv.width, cx = S / 2, cy = S / 2;
+    const step = 2 * Math.PI / LANES, camLane = 6;
+    const pt = (a, d) => { const rad = R * S / (1 + K * d); return [cx + rad * Math.cos(a), cy + rad * Math.sin(a)]; };
+    ctx.fillStyle = C.void; ctx.fillRect(0, 0, S, S);
+    // the far end
+    const end = R * S / (1 + K * (DEPTH + 1));
+    ctx.fillStyle = mode === "end" ? C.accent : "#050505";
+    ctx.beginPath(); ctx.arc(cx, cy, end * 0.92, 0, 7); ctx.fill();
+    const focus = { lane: 8, row: 0 }; // Jev, for mode C
+    for (let row = DEPTH; row >= 0; row--) {
+      for (let lane = 0; lane < LANES; lane++) {
+        if (gaps[row].includes(lane)) continue;
+        const a = Math.PI / 2 - (lane - camLane) * step, a1 = a + step / 2, a2 = a - step / 2;
+        const near = Math.max(row - 0.35, -1), far = row + 0.65;
+        const fog = Math.min(1, row / DEPTH);
+        const shade = Math.round(34 - fog * 24 + ((lane * 7 + row * 3) % 5));  // poured concrete: slightly uneven
+        ctx.fillStyle = `rgb(${shade},${shade + 2},${shade + 4})`;
+        const off = ((lane - focus.lane + 18) % 12) - 6;
+        const seen = mode === "focus" && row >= 1 && row <= 6 && Math.abs(off) <= 3;
+        ctx.strokeStyle = seen ? "rgba(122,162,247,0.55)" : (fog > 0.75 ? C.hair : C.line);
+        ctx.lineWidth = seen ? 2 : 1.5;
+        ctx.beginPath();
+        [pt(a1, near), pt(a2, near), pt(a2, far), pt(a1, far)].forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y));
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+    }
+    // three small figures standing on the wall of the tube, heads toward the axis
+    const runners = [{ tag: "FLY", lane: 5, air: 0.55 }, { tag: "JEV", lane: 8, air: 0 }, { tag: "LLM", lane: 6, air: 0 }];
+    for (const r of runners) {
+      const a = Math.PI / 2 - (r.lane - camLane) * step, rad = R * S * 0.93, h = S * 0.05;
+      const blue = (mode === "fly" && r.tag === "FLY") || (mode === "focus" && r.tag === "JEV");
+      ctx.save(); ctx.translate(cx + rad * Math.cos(a), cy + rad * Math.sin(a)); ctx.rotate(a - Math.PI / 2);
+      ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.beginPath(); ctx.ellipse(0, 0, h * 0.3, h * 0.08, 0, 0, 7); ctx.fill();
+      ctx.translate(0, -r.air * h * 2.2);
+      ctx.fillStyle = blue ? C.accent : C.bright;
+      ctx.fillRect(-h * 0.13, -h * 0.72, h * 0.26, h * 0.62);
+      ctx.beginPath(); ctx.arc(0, -h * 0.92, h * 0.15, 0, 7); ctx.fill();
+      ctx.fillStyle = blue ? C.accent : C.muted; ctx.font = `${S * 0.022}px "JetBrains Mono", monospace`; ctx.textAlign = "center";
+      ctx.fillText(r.tag, 0, -h * 1.35);
+      ctx.restore();
+    }
+    ctx.fillStyle = C.muted; ctx.font = `${S * 0.022}px "JetBrains Mono", monospace`; ctx.textAlign = "left";
+    ctx.fillText("ROW 0137 / 0300", S * 0.04, S * 0.06);
+    ctx.textAlign = "right"; ctx.fillText("TRACK 0007", S * 0.96, S * 0.06);
+  }
+  document.fonts.ready.then(() => { draw("a", "fly"); draw("b", "end"); draw("c", "focus"); });
+</script>
+</body>
+</html>

@@ -59,6 +59,35 @@
     says its means are not a fair comparison. The fly's four numbers, the looming formula and the
     known weaknesses are on the page, with what is ours labelled as ours.
 
+14. **Why Jev fell after 23 rows (spike 02, 2026-09-20, branch `spike/jev-questions`,
+    `spikes/02-jev-questions/REPORT.md`; 200 capped requests on practice seed 1000, about 0.014 USD).** Not a
+    bug. Jev reads the track almost perfectly (pointed yes/no questions: 1 wrong in 800), but the one-shot
+    Choice carries no information about which actions are fatal: on the 55 dangerous states it landed on a
+    gap in 29%, always staying in 33%, the LLM in 2%. From the rules alone Jev cannot map an action to its
+    landing tile (it missed 16 of 16 jump landings). A confidence gate does not help. TypeSafe's own docs
+    call the broad question the anti-pattern. This lifts decision 12's freeze on Jev's questions.
+15. **The Jev in the demo is `jev_composed`:** four pointed per-action Nouls in one request, code picks the
+    action with the lowest P(gap), ties in the solver's order. The wording and the rule are ours and are
+    labelled as ours, like the fly's thresholds; frozen on practice seeds before any tournament seed. The
+    one-shot `jev` stays as a player for comparison.
+16. **The demo player is the main tool** (design: `docs/superpowers/specs/2026-09-20-demo-player-design.md`).
+    Everything built so far is restyled to the user's brand (`~/Documents/PROJECTS/BRAND/brand.css`:
+    near-black, concrete greys, one rationed blue, Hanken Grotesk, JetBrains Mono labels; BLAME! and Zima
+    Blue as seasoning) and arranged around it.
+17. **Staging:** one tunnel, three runners, fixed camera; everyone starts on the same tile and overlapping
+    sprites are drawn translucent and fanned. **Blue is the cursor:** it marks the mind in focus and the
+    tiles that mind was shown, nothing else. Figures are pixel sprites: a fruit fly with red eyes, an orange
+    critter for the LLM (our own rendition, not official artwork), and for Jev "the visor", whose slit
+    shows how sure it is that its move is safe.
+18. **"Live" means both:** recorded runs play for free from one offline file, and `bakeoff live` runs the
+    three minds in real time on the user's Mac, streams them into the same page and records a normal run
+    directory. This reverses the first spec's non-goal "no real-time play" for that one local mode.
+    Phases: 5a `jev_composed`, 5b the player, 5c go live; the tournament and write-up become phase 6.
+19. **Budget pre-authorized for the session that builds phase 5** (practice seeds 1000 and up only, through
+    the cache and hard caps): up to 1,000 Jev requests in total (about 0.04 USD) and up to 300 Claude Haiku
+    requests in total (about 0.18 USD, for one real go-live test on a fresh practice seed). Anything beyond
+    that, and any tournament seed, needs a new go-ahead.
+
 ## Open
 
 - Whether the tournament reuses seeds 0–19 or takes fresh seeds below 1000.
@@ -74,8 +103,25 @@
 
 ## Next step
 
-Phases 1 to 4 are built. Write the phase 5 plan (tournament run and write-up); it starts by settling
-the first open item above (which seeds).
+Phases 1 to 4 are built; phase 4 is PR #3 (https://github.com/zack-maz/brain-bakeoff/pull/3, branch
+`phase4-replay-viewer`), open. The user wants the next session to do all of the following in one go,
+without stopping for questions that the documents already answer:
+
+1. **Review PR #3**: read its review comments (`gh pr view 3 --comments`, `gh api
+   repos/zack-maz/brain-bakeoff/pulls/3/comments`), run a code review of the branch if there are none, fix
+   what is found on `phase4-replay-viewer` (TDD, `superpowers:receiving-code-review`), push. Merging is the
+   user's call unless they say so when they start the session.
+2. **Build phase 5** on branch `phase5-demo-player` (already created, stacked on `phase4-replay-viewer`, holds
+   the design): 5a `jev_composed`, 5b the player, 5c go live, in that order, each with its own plan in
+   `docs/superpowers/plans/`, written prototype-first and executed with subagent-driven development as in
+   phases 2 to 4. The design is approved: do not re-brainstorm it. Paid steps stay with the controller, one
+   command at a time, inside decision 19's ceilings.
+3. **Show it**: build the demo of practice track 1000 (fly `runs/20260919-151934`, LLM
+   `runs/20260920-102919`, plus the new `jev_composed` run), look at it in a browser at 1440 and 390 wide,
+   run one real `bakeoff live` on a fresh practice seed, then open the PR.
+
+After that: phase 6, the tournament and write-up; it starts by settling the first open item above (which
+seeds).
 
 ## Prior art to reuse
 
