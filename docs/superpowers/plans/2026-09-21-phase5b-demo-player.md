@@ -2235,3 +2235,9 @@ git commit -F <message file>   # feat: the demo player: one tunnel, three runner
 | one offline file, two fonts with their licence note embedded as base64, nothing fetched | Task 1 |
 | `feed.js` is the one way frames reach the page | Task 5, Task 7 |
 | every pure function has node tests, incl. three runners on the start tile, a ceiling runner's rotation, the visor at 0, 0.5 and 1, the 3-row hold and the manual pick, fonts present and no network reference | Tasks 1 to 6; the manual pick turning auto off is glue in `app.js`, checked in the browser (Task 8) |
+
+## Rulings on the task reviews (controller, after Task 7)
+
+- **Task 1, Important, fixed:** the stylesheet guard matched `url(` case-sensitively, so `URL(https://...)` reached the page although decision 11 says a stylesheet may load nothing but a bundled font, and the test had the same blind spot. The guard is now case-insensitive and also refuses `@import`, `image-set` and any `http(s):` reference.
+- **Tasks 3 to 5, Important, fixed:** `Stage.overlaps` could leave a runner out of a group it overlaps, depending on the order given (a, c, b with b between them); a runner that touches several groups now joins them. Chained grouping itself is intended: runners that overlap through a runner between them must be pulled apart together.
+- **Tasks 3 to 5, Important, fixed:** auto-focus stayed on a fallen runner for as long as nobody else was in danger. After the hold (time to read how it ended) it now goes to the first runner still running; with nothing chosen yet it also prefers a runner that is running.

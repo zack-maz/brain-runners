@@ -21,13 +21,17 @@
   // stack the line its tag goes on (0 nearest the runner), so tags never overprint.
   function overlaps(runners, lanes) {
     const out = {};
-    const groups = [];
+    const near = (a, b) => Math.abs(a.row - b.row) < 0.5 && laneDistance(a.lane, b.lane, lanes) <= NEAR_LANES;
+    // Runners that overlap through a runner between them are one group: all of them have to be pulled
+    // apart together. A runner that touches several groups joins them, so the order given cannot split one.
+    let groups = [];
     for (const runner of runners) {
-      const group = groups.find((g) => g.some((other) =>
-        Math.abs(other.row - runner.row) < 0.5 && laneDistance(other.lane, runner.lane, lanes) <= NEAR_LANES));
-      if (group) group.push(runner); else groups.push([runner]);
+      const touching = groups.filter((g) => g.some((other) => near(other, runner)));
+      groups = groups.filter((g) => !touching.includes(g));
+      groups.push([...touching.flat(), runner]);
     }
-    for (const group of groups) {
+    for (const members of groups) {
+      const group = runners.filter((r) => members.includes(r)); // fan and stack in the order given
       group.forEach((runner, i) => {
         out[runner.id] = group.length === 1 ? { alpha: 1, fan: 0, stack: 0 }
           : { alpha: OVERLAP_ALPHA, fan: i - (group.length - 1) / 2, stack: i };
@@ -46,12 +50,18 @@
   // Where auto-focus goes at time t. states: [{id, status, frame}] in panel order (from
   // Timeline.stateAt). It cuts to a runner that is still running and whose current decision has at
   // least one action that lands on a gap; among several, the one with the fewest safe actions, ties to
-  // the current focus, then to panel order. It holds for HOLD_ROWS rows. Returns {focus, heldSince}.
+  // the current focus, then to panel order. It holds for HOLD_ROWS rows. With nobody in danger it stays
+  // where it is, unless that runner is no longer running (the hold gave time to read how it ended): then
+  // it goes to the first runner that still is. Returns {focus, heldSince}.
   function autoFocus(current, states, heldSince, t) {
     const keep = { focus: current, heldSince };
     if (current != null && t >= heldSince && t - heldSince < HOLD_ROWS) return keep;
     const inDanger = states.filter((s) => s.status === "running" && safeActions(s.frame) < ACTIONS.length);
-    if (!inDanger.length) return current == null && states.length ? { focus: states[0].id, heldSince: t } : keep;
+    if (!inDanger.length) {
+      const mine = states.find((s) => s.id === current);
+      const next = mine && mine.status === "running" ? null : states.find((s) => s.status === "running") || (mine ? null : states[0]);
+      return next ? { focus: next.id, heldSince: t } : keep;
+    }
     const fewest = Math.min(...inDanger.map((s) => safeActions(s.frame)));
     const tied = inDanger.filter((s) => safeActions(s.frame) === fewest);
     const pick = tied.find((s) => s.id === current) || tied[0];

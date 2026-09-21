@@ -30,6 +30,17 @@ test("overlap needs the same row, and lanes are compared round the ring", () => 
   assert.deepEqual(overlaps([], 12), {});
 });
 
+test("runners that overlap through a runner between them are one group, whatever order they come in", () => {
+  // a and c are 0.8 lanes apart, but both overlap b: all three must be pulled apart together
+  for (const order of [["a", "b", "c"], ["a", "c", "b"], ["c", "a", "b"]]) {
+    const lane = { a: 6, b: 6.4, c: 6.8 };
+    const out = overlaps(order.map((id) => at(id, 4, lane[id])), 12);
+    assert.deepEqual(order.map((id) => out[id].alpha), [OVERLAP_ALPHA, OVERLAP_ALPHA, OVERLAP_ALPHA], order.join());
+    assert.deepEqual(order.map((id) => out[id].fan), [-1, 0, 1], order.join()); // fanned in the order given
+    assert.deepEqual(order.map((id) => out[id].stack), [0, 1, 2], order.join());
+  }
+});
+
 test("safe actions are the ones the solver does not see landing on a gap", () => {
   assert.equal(safeActions({ solver_depths: SAFE }), 4);
   assert.equal(safeActions({ solver_depths: { left: 0, stay: 0, right: 3, jump: 6 } }), 2);
@@ -53,9 +64,19 @@ test("auto-focus holds for three rows so it does not flicker", () => {
   assert.deepEqual(autoFocus("llm", states, 10, 4), { focus: "fly", heldSince: 4 }); // scrubbed back: the hold is void
 });
 
+test("auto-focus leaves a runner that is no longer running once its hold is over", () => {
+  const dead = { id: "fly", status: "dead", frame: { solver_depths: { left: 0, stay: 0, right: 0, jump: 0 } } };
+  const calm = [dead, running("jev_composed", {}), running("llm", {})];
+  assert.deepEqual(autoFocus("fly", calm, 58, 60), { focus: "fly", heldSince: 58 }); // the fall is still being read
+  assert.deepEqual(autoFocus("fly", calm, 58, 61), { focus: "jev_composed", heldSince: 61 }); // then on to the living
+  const over = [dead, { ...running("llm", {}), status: "finished" }];
+  assert.deepEqual(autoFocus("fly", over, 58, 300), { focus: "fly", heldSince: 58 }); // nobody left to cut to
+});
+
 test("auto-focus ignores the fallen and stays put when nobody is in danger", () => {
   const dead = { id: "fly", status: "dead", frame: { solver_depths: { left: 0, stay: 0, right: 0, jump: 0 } } };
   assert.deepEqual(autoFocus("llm", [dead, running("llm", {})], 0, 50), { focus: "llm", heldSince: 0 });
-  assert.deepEqual(autoFocus(null, [dead, running("llm", {})], 0, 50), { focus: "fly", heldSince: 50 }); // nothing chosen yet
+  assert.deepEqual(autoFocus(null, [dead, running("llm", {})], 0, 50), { focus: "llm", heldSince: 50 }); // nothing chosen yet: someone running
+  assert.deepEqual(autoFocus(null, [dead], 0, 50), { focus: "fly", heldSince: 50 }); // or whoever there is
   assert.deepEqual(autoFocus(null, [], 0, 0), { focus: null, heldSince: 0 });
 });
