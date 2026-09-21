@@ -1,6 +1,6 @@
 # Tunnel Run tournament: design
 
-Date: 2026-09-19 · Status: design approved in chat by the user; implementation not started ·
+Date: 2026-09-19 · Status: design approved in chat by the user; phases 1 to 5 built and merged (2026-09-21), phase 6 not started ·
 Background: `docs/DECISIONS.md`, `docs/RESEARCH.md`, spike report on branch
 `spike/fly-steering` (`spikes/01-fly-steering/REPORT.md`)
 
@@ -220,7 +220,7 @@ thresholding is tested with a fake brain. One opt-in `live` test per provider.
 
 ## Open items
 
-- Jev pricing and per-request latency (measured in phase 3).
+- Resolved in phase 3: Jev pricing and per-request latency (about 0.00003 USD, an estimate, and 159 ms; `docs/COSTS.md`).
 - Resolved in phase 2: looming weighting and fly thresholds, see `calibration/REPORT.md`
   (input in 25 Hz steps; `always_jump` added as a second floor).
 - Whether partial-field looming stimulation (a subset of LPLC2/LC4 cells by position) improves

@@ -1,7 +1,7 @@
 # Tunnel Run demo player: design
 
 Date: 2026-09-20 · Status: design approved in chat by the user (sections 1 to 4, with the amendment
-"all players start in the same spot, overlapping sprites get transparency"); implementation not started ·
+"all players start in the same spot, overlapping sprites get transparency"); built as phases 5a, 5b and 5c and merged in PR #4 (2026-09-21) ·
 Extends `docs/superpowers/specs/2026-09-19-tunnel-run-design.md` (still binding where this document is
 silent) · Background: `docs/DECISIONS.md` decisions 14 to 19, `spikes/02-jev-questions/REPORT.md` on branch
 `spike/jev-questions`

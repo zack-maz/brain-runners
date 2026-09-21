@@ -37,7 +37,7 @@ def _parser() -> argparse.ArgumentParser:
                           "the cache. Worst case a run spends this many requests per paid player")
     run.add_argument("--cache", default=str(DEFAULT_CACHE_DIR), help="response cache directory")
     run.add_argument("--tournament", action="store_true",
-                     help="allows live paid requests on seeds below 1000; for the phase 5 tournament only")
+                     help="allows live paid requests on seeds below 1000; for the phase 6 tournament only")
     report = sub.add_parser("report", help="summarize an existing run directory")
     report.add_argument("run_dir")
     view = sub.add_parser("view", help="write a replay of one or more run directories as one HTML file")
