@@ -121,9 +121,8 @@
 
 ## Next step
 
-Phases 1 to 5 are built. Phases 1 to 4 are on `main`; phase 5 (5a the composed Jev, 5b the demo player, 5c go
-live) is on branch `phase5-demo-player`, as a pull request against `main` that is **opened, not merged**: merging
-it is the user's call (the authorization of 2026-09-21 covered PR #3 only). Plans:
+Phases 1 to 5 are built and on `main`. Phase 5 (5a the composed Jev, 5b the demo player, 5c go live) was PR #4,
+merged on 2026-09-21 at the user's request. Plans:
 `docs/superpowers/plans/2026-09-21-phase5a-jev-composed.md`, `...-phase5b-demo-player.md`, `...-phase5c-go-live.md`
 (each ends with the rulings on its reviews).
 
@@ -132,9 +131,6 @@ To look at it: `uv run python -m bakeoff view runs/20260919-151934 runs/20260920
 (the live run on track 1001), then open the HTML file; or `uv run python -m bakeoff live` with the default cap
 of 0 and `--seed 1001`, which replays the paid answers of that run from the cache for free (the fly is
 simulated again, about a minute to build and a second a row).
-
-After the merge: delete the local branches `proto/phase5b` and `proto/phase5c` and the ledger
-`.superpowers/sdd/2026-09-21-phase5-demo-player/`.
 
 Then phase 6, the tournament and the write-up. It starts by settling the first open item above (which seeds),
 and it needs a new budget go-ahead: the tournament is the first paid use of seeds below 1000 (`--tournament`).

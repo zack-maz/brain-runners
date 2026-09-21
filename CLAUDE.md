@@ -29,7 +29,7 @@ demo player, the project's main tool (design: `docs/superpowers/specs/2026-09-20
 three pixel runners, the mind strip, blue as the cursor, the user's brand, one offline file. Phase 5c built (plan:
 `...-phase5c-go-live.md`): `python -m bakeoff live` plays a track in lockstep in real time, records a normal run
 directory and streams it into the same page from a loopback server; first real go-live on practice seed 1001
-(`runs/20260921-132459`). Phase 5 is a pull request from `phase5-demo-player`, opened and not merged. Next: phase 6,
+(`runs/20260921-132459`). Phase 5 is merged (PR #4). Next: phase 6,
 the tournament and the write-up, which needs a new budget go-ahead; see "Next step" in `docs/DECISIONS.md`. Each phase
 gets its own plan.
 
