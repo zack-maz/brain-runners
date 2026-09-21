@@ -4,6 +4,7 @@ An LLM (Claude Haiku 4.5), Jev (TypeSafe System One) and an untrained fruit-fly 
 simulation play the same seeded runs of a "Run"-style tunnel game; output is a watchable replay
 tournament. Read these before doing anything:
 
+0. `docs/EXPLAINER.html` — the plain-language tour of the whole project, high level first, then technical.
 1. `docs/DECISIONS.md` — what the user has decided, in order, and the next step.
 2. `docs/superpowers/specs/2026-09-19-tunnel-run-design.md` — the approved design (binding), extended by
    `docs/superpowers/specs/2026-09-20-demo-player-design.md` (the demo player; also binding).

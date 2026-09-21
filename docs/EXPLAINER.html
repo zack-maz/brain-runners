@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>brain-bakeoff explained</title>
+<style>
+  /* Fonts come from the repo (open this file from docs/); the system fonts stand in otherwise. */
+  @font-face { font-family: "Hanken Grotesk"; src: url("../viewer/fonts/HankenGrotesk-latin.woff2") format("woff2"); font-weight: 100 900; }
+  @font-face { font-family: "JetBrains Mono"; src: url("../viewer/fonts/JetBrainsMono-latin.woff2") format("woff2"); font-weight: 100 800; }
+  :root {
+    --void: #0A0A0A; --panel: #0D0F12; --hairline: #1E2227; --line-strong: #2A2F35;
+    --muted: #7C848D; --text: #C9CDD2; --bright: #E8EBED; --accent: #7AA2F7;
+    --good: #9ECE6A; --warn: #E0AF68; --bad: #F7768E;
+    --sans: "Hanken Grotesk", system-ui, -apple-system, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--void); }
+  body { margin: 0; background: var(--void); color: var(--text); font: 17px/1.62 var(--sans); }
+  main { max-width: 760px; margin: 0 auto; padding: 56px 16px 120px; }
+  h1 { color: var(--bright); font-size: 40px; line-height: 1.1; font-weight: 600; margin: 0 0 12px; letter-spacing: -0.01em; }
+  h2 { color: var(--bright); font-size: 26px; font-weight: 600; margin: 72px 0 8px; line-height: 1.2; }
+  h3 { color: var(--bright); font-size: 19px; font-weight: 600; margin: 36px 0 6px; }
+  p, li { max-width: 66ch; }
+  a { color: var(--bright); text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
+  strong { color: var(--bright); font-weight: 600; }
+  .label { font: 500 11px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .level { display: inline-block; margin-top: 64px; }
+  .level + h2 { margin-top: 8px; }
+  .lede { font-size: 20px; color: var(--bright); max-width: 60ch; }
+  code, pre { font-family: var(--mono); font-size: 13.5px; }
+  code { color: var(--bright); background: var(--panel); border: 1px solid var(--hairline); padding: 1px 5px; }
+  pre { background: var(--panel); border: 1px solid var(--hairline); padding: 14px 16px; overflow-x: auto; line-height: 1.5; color: var(--text); }
+  pre code { background: none; border: 0; padding: 0; color: inherit; }
+  hr { border: 0; border-top: 1px solid var(--hairline); margin: 48px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 15px; }
+  th, td { text-align: left; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--hairline); vertical-align: top; }
+  th { font: 500 11px/1.3 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  td.n { font-family: var(--mono); font-size: 14px; color: var(--bright); white-space: nowrap; }
+  .scroll { overflow-x: auto; }
+  .minds { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1px; background: var(--hairline); border: 1px solid var(--hairline); margin: 20px 0; }
+  .mind { background: var(--panel); padding: 18px 16px; }
+  .mind h3 { margin: 6px 0 8px; }
+  .mind p { font-size: 15px; margin: 0 0 8px; }
+  .note { border-left: 2px solid var(--warn); padding: 4px 0 4px 16px; margin: 20px 0; }
+  .note .label { color: var(--warn); }
+  .ours { border-left: 2px solid var(--line-strong); padding: 4px 0 4px 16px; margin: 20px 0; }
+  .bad { color: var(--bad); }
+  figure { margin: 24px 0; }
+  figcaption { font-size: 14px; color: var(--muted); margin-top: 8px; }
+  svg { max-width: 100%; height: auto; display: block; }
+  svg text { font-family: var(--mono); }
+  nav.toc { border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); padding: 16px 0; margin: 32px 0; }
+  nav.toc ol { margin: 0; padding-left: 20px; columns: 2; column-gap: 32px; font-size: 15px; }
+  nav.toc li { break-inside: avoid; }
+  .timeline { list-style: none; padding: 0; margin: 20px 0; border-left: 1px solid var(--line-strong); }
+  .timeline li { padding: 0 0 18px 20px; position: relative; }
+  .timeline li::before { content: ""; position: absolute; left: -4px; top: 9px; width: 7px; height: 7px; background: var(--muted); }
+  .timeline li.next::before { background: var(--accent); }
+  .timeline .label { display: block; margin-bottom: 4px; }
+  @media (max-width: 560px) {
+    body { font-size: 16px; }
+    h1 { font-size: 32px; }
+    nav.toc ol { columns: 1; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+<span class="label">brain-bakeoff · explainer · 2026-09-21</span>
+<h1>Three minds, one tunnel</h1>
+<p class="lede">A fruit fly's brain, a small AI that answers yes/no questions, and a chatbot all play the same
+video game. We watch how each one thinks while it plays.</p>
+
+<p>This page starts in plain language and gets more technical as it goes. Stop reading whenever you have
+enough. Each part is marked with its level.</p>
+
+<nav class="toc">
+<span class="label">Contents</span>
+<ol>
+  <li><a href="#idea">The idea in one minute</a></li>
+  <li><a href="#game">The game</a></li>
+  <li><a href="#minds">The three minds</a></li>
+  <li><a href="#results">What happened so far</a></li>
+  <li><a href="#watch">How to watch it</a></li>
+  <li><a href="#history">How we got here</a></li>
+  <li><a href="#next">What's next</a></li>
+  <li><a href="#machine">How it's built</a></li>
+  <li><a href="#fly">The fly, in detail</a></li>
+  <li><a href="#paid">Jev and the LLM, in detail</a></li>
+  <li><a href="#data">Runs, records and replays</a></li>
+  <li><a href="#rules">Rules we hold ourselves to</a></li>
+  <li><a href="#map">File map and glossary</a></li>
+</ol>
+</nav>
+
+<!-- ============================================================ -->
+<span class="label level">Level 1 · no background needed</span>
+<h2 id="idea">1. The idea in one minute</h2>
+
+<p>There are very different kinds of "mind" around now. Big chatbots write text. Smaller specialised
+models give judgments as numbers. And scientists have mapped every neuron and connection in a fruit fly's
+brain, which you can now run as a simulation on a laptop.</p>
+
+<p>We wanted to see them side by side, doing the same simple task, with their thinking visible. So we built:</p>
+<ul>
+  <li><strong>a tiny game</strong> in which a runner goes down a tunnel and must not fall into holes;</li>
+  <li><strong>three players</strong>: a fruit fly brain, Jev, and an LLM (Claude Haiku 4.5);</li>
+  <li><strong>a player page</strong> where you watch all three run the same tunnel together, with a panel
+  under each one showing what it "had in mind" at every step.</li>
+</ul>
+
+<p>The fun part is that the three are completely different inside. The fly was never trained on anything:
+it plays with the escape reflexes wiring gave it. Jev answers precise questions with probabilities. The LLM reads
+a description of what's ahead and replies with a move.</p>
+
+<h2 id="game">2. The game</h2>
+
+<p>It is modelled on the browser game <em>Run</em>. Imagine a tunnel whose wall is made of floor tiles. The
+runner moves forward one row at a time. Some tiles are missing: those are <strong>gaps</strong>. Land on a gap
+and you fall. Your score is how many rows you survive, up to 300.</p>
+
+<figure>
+<svg viewBox="0 0 640 300" role="img" aria-label="A grid of tunnel tiles seen from above: rows ahead of the runner, with gaps, and the four moves">
+  <g fill="none" stroke="#1E2227">
+    <!-- 7 lanes x 5 rows, row 0 at bottom -->
+  </g>
+  <g id="tiles"></g>
+  <g font-size="11" fill="#7C848D">
+    <text x="20" y="26">ROW 3</text><text x="20" y="86">ROW 2</text><text x="20" y="146">ROW 1</text><text x="20" y="206">NOW</text>
+    <text x="96" y="286">-3</text><text x="152" y="286">-2</text><text x="208" y="286">-1</text><text x="268" y="286">0</text>
+    <text x="322" y="286">+1</text><text x="378" y="286">+2</text><text x="434" y="286">+3</text>
+  </g>
+  <text x="480" y="60" font-size="12" fill="#C9CDD2">stay  → lands row 1, lane 0</text>
+  <text x="480" y="84" font-size="12" fill="#C9CDD2">left  → row 1, lane −1</text>
+  <text x="480" y="108" font-size="12" fill="#C9CDD2">right → row 1, lane +1</text>
+  <text x="480" y="132" font-size="12" fill="#C9CDD2">jump  → skips row 1,</text>
+  <text x="480" y="148" font-size="12" fill="#C9CDD2">        lands row 2, lane 0</text>
+  <text x="480" y="196" font-size="12" fill="#F7768E">■ gap: landing here ends the run</text>
+  <text x="480" y="220" font-size="12" fill="#7C848D">■ floor</text>
+  <text x="480" y="244" font-size="12" fill="#E8EBED">● the runner</text>
+</svg>
+<figcaption>What a player "sees", flattened. Lanes are counted from the runner (0 = its own lane). In this
+position <code>stay</code> and <code>right</code> land on gaps, <code>left</code> is safe, and <code>jump</code> clears the
+gap in row 1 and lands safely on row 2.</figcaption>
+</figure>
+
+<ul>
+  <li>The tunnel has <strong>12 lanes</strong> in a ring: step past the last lane and you are on the first
+  again (in the real game, the tunnel rotates).</li>
+  <li>Each turn a player picks one of four moves: <strong>left, right, stay, jump</strong>.</li>
+  <li>Everyone can see the next <strong>6 rows</strong>, three lanes either side.</li>
+  <li>Tracks come from a <strong>seed</strong> (a number). Same seed, same track, for every player. The
+  track gets harder as you go (more and wider gaps), but there is always at least one way through, so
+  every fall is the player's fault.</li>
+  <li>The game is <strong>turn-based</strong>: it waits for each player to decide. Nobody loses for being
+  slow, which matters because the fly simulation takes about a second per move.</li>
+</ul>
+
+<h2 id="minds">3. The three minds</h2>
+
+<div class="minds">
+  <div class="mind">
+    <span class="label">FLY</span>
+    <h3>A fruit fly brain</h3>
+    <p>A simulation of the whole adult fruit fly brain: about 139,000 neurons and 15 million connections,
+    mapped by scientists (the FlyWire project) and published as a runnable model.</p>
+    <p><strong>Untrained.</strong> We only plug in: holes ahead become "something is looming" signals into
+    its eyes, and we read the neurons that make a real fly turn or jump away.</p>
+  </div>
+  <div class="mind">
+    <span class="label">JEV</span>
+    <h3>Jev (TypeSafe)</h3>
+    <p>A "System One" model: instead of writing text, it answers questions with <strong>probabilities</strong>.</p>
+    <p>We ask it four yes/no questions per step: "would <em>left</em> land on a gap?", the same for
+    <em>stay</em>, <em>right</em> and <em>jump</em>. A few lines of our code then pick the move it thinks is
+    least likely to fall.</p>
+  </div>
+  <div class="mind">
+    <span class="label">LLM</span>
+    <h3>Claude Haiku 4.5</h3>
+    <p>A regular chatbot-style model. It gets the rules and a description of the rows ahead, and answers with
+    one move.</p>
+    <p>It is told exactly the same rules, in the same words, as Jev.</p>
+  </div>
+</div>
+
+<p>There are also three <strong>yardsticks</strong> that are not contestants: <code>random</code> (picks any
+move), <code>always_jump</code>, and <code>solver</code>, a perfect little search program that plays with the
+same 6-row view and almost always reaches the end. They tell us what "bad" and "as good as possible" look
+like.</p>
+
+<h2 id="results">4. What happened so far</h2>
+
+<p>We have played <strong>practice tracks only</strong> (seeds 1000 and up) with the paid players. The real
+contest, on tracks nobody has tuned anything on, is the next phase. So everything below is an impression,
+not a result.</p>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>Track</th><th>Fly</th><th>Jev (composed)</th><th>LLM</th><th>Jev (one-shot)</th></tr></thead>
+  <tbody>
+    <tr><td>practice 1000</td><td class="n">58</td><td class="n">247</td><td class="n">199</td><td class="n">23</td></tr>
+    <tr><td>practice 1001 (played live)</td><td class="n">212</td><td class="n">241</td><td class="n">95</td><td class="n">–</td></tr>
+  </tbody>
+</table>
+</div>
+<p style="font-size:14px;color:var(--muted)">Rows survived out of 300.</p>
+
+<p>And the fly alone, on 20 tracks (seeds 0–19, played once and never tuned on):</p>
+<div class="scroll">
+<table>
+  <thead><tr><th>Player</th><th>Average rows</th><th>What it means</th></tr></thead>
+  <tbody>
+    <tr><td>random</td><td class="n">35</td><td>the floor</td></tr>
+    <tr><td>always_jump</td><td class="n">48</td><td>the floor for a jump-happy player</td></tr>
+    <tr><td><strong>fly</strong></td><td class="n">127</td><td>an untrained brain, reflexes only</td></tr>
+    <tr><td>solver</td><td class="n">300</td><td>the ceiling</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>What we learned along the way:</p>
+<ul>
+  <li><strong>The fly really does dodge.</strong> Without any training it plays far above random, because its
+  wiring steers away from looming things. It doesn't plan, so it sometimes dodges into another hole.</li>
+  <li><strong>How you ask Jev matters enormously.</strong> Asked one broad question ("which move?"), Jev died
+  after 23 rows. Asked four narrow yes/no questions, it read the track almost perfectly (1 wrong answer in 928)
+  and survived 247. That's why the demo uses the "composed" version.</li>
+  <li><strong>The LLM's typical death</strong> is stepping sideways into a hole when running straight was safe.</li>
+  <li><strong>Composed Jev "wanders"</strong>: when every move is safe its four answers are nearly equal, so it
+  often steps sideways for no reason. It never killed it, but on track 1001 it probably cost it the finish.</li>
+  <li><strong>Cost is tiny.</strong> An LLM move costs about 0.0006 USD; a Jev move about 0.00003 USD (an
+  estimate). The fly runs on the laptop for free.</li>
+</ul>
+
+<h2 id="watch">5. How to watch it</h2>
+
+<p>Everything runs from the terminal in the project folder. Watching costs nothing.</p>
+
+<h3>A recorded run</h3>
+<pre><code>uv run python -m bakeoff view runs/20260919-151934 runs/20260920-102919 runs/20260921-120903</code></pre>
+<p>This writes one HTML file (the <strong>demo player</strong>) and you open it in a browser. It shows the tunnel with
+three pixel runners (a fly, an orange critter for the LLM, and "the visor" for Jev), a strip of "mind panels"
+under it, and a play bar. Keys: space plays, arrows step a row, 1/2/3 pick whose mind is in focus.</p>
+
+<h3>Live</h3>
+<pre><code>uv run python -m bakeoff live --seed 1001</code></pre>
+<p>This plays a track in real time on your Mac and streams it into the same page. With no
+<code>--max-requests</code> it spends nothing: Jev's and the LLM's answers come from the saved cache of the earlier
+run, and the fly is simulated again for real (about a minute to build its brain, then about a second per row).</p>
+
+<h2 id="history">6. How we got here</h2>
+
+<ol class="timeline">
+  <li><span class="label">2026-09-19 · decisions</span>Pick the three minds; keep the fly pure (no
+  training); make it a watchable tournament; budget is small, so every paid answer is cached and capped.</li>
+  <li><span class="label">Spike 01</span>A throwaway test showed the fly model turns away from threats in
+  36 of 36 trials, and its escape neuron (the Giant Fiber) fires harder for bigger threats. But it can't
+  steer <em>toward</em> food, which ruled out a food game and led to the tunnel runner.</li>
+  <li><span class="label">Phase 1 · the game</span>Track generator, game engine, "senses", the random and
+  solver yardsticks, a runner that logs every move, a report, the command line.</li>
+  <li><span class="label">Phase 2 · the fly</span>The real brain plugged in. Four numbers of ours (how
+  strongly holes stimulate the eyes, and two thresholds) chosen once by a fixed rule on practice tracks, then
+  frozen.</li>
+  <li><span class="label">Phase 3 · paid players</span>Jev and the LLM, behind a disk cache and a hard
+  request cap. First costs measured.</li>
+  <li><span class="label">Phase 4 · replay viewer</span>Turn logs into one offline HTML page.</li>
+  <li><span class="label">Spike 02 · why Jev fell</span>Jev's single broad question was the weak link;
+  narrow per-move questions are nearly perfect.</li>
+  <li><span class="label">Phase 5 · the demo</span>5a the composed Jev; 5b the demo player in your brand's
+  look; 5c going live. Merged 2026-09-21.</li>
+  <li class="next"><span class="label">Phase 6 · next</span>The tournament and the write-up.</li>
+</ol>
+
+<h2 id="next">7. What's next</h2>
+
+<p><strong>Phase 6: the tournament and a short write-up.</strong> All players play the same set of
+tournament tracks (seeds below 1000, which no paid player has ever seen and nothing was tuned on), then a
+scoreboard and a write-up with the honest caveats.</p>
+
+<p>Two things need you before it starts:</p>
+<ol>
+  <li><strong>Which seeds.</strong> Reuse seeds 0–19 (the fly already played them once, untuned; its
+  results there exist and would repeat exactly) or take fresh seeds below 1000.</li>
+  <li><strong>A budget go-ahead.</strong> Worst case for 20 tracks of 300 rows: about 3.56 USD for the LLM and
+  about 0.20 USD each for the Jev players (estimates; a player that dies early costs less). The fly is free
+  but takes about 4 minutes per track and must run on its own.</li>
+</ol>
+
+<!-- ============================================================ -->
+<hr>
+<span class="label level">Level 2 · some programming background</span>
+<h2 id="machine">8. How it's built</h2>
+
+<p>A Python package, <code>bakeoff/</code>, plus a plain-JavaScript page in <code>viewer/</code>. The data flows
+one way:</p>
+
+<figure>
+<svg viewBox="0 0 700 330" role="img" aria-label="Pipeline: seed to track to game to senses to players to runner to run directory, then report, replay and view, or live server">
+  <defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L8 4L0 8z" fill="#7C848D"/></marker></defs>
+  <g font-size="12" fill="#E8EBED">
+    <g stroke="#2A2F35" fill="#0D0F12">
+      <rect x="10" y="20" width="120" height="44"/><rect x="170" y="20" width="120" height="44"/>
+      <rect x="330" y="20" width="120" height="44"/><rect x="490" y="20" width="190" height="44"/>
+      <rect x="490" y="110" width="190" height="80"/>
+      <rect x="250" y="130" width="180" height="44"/>
+      <rect x="10" y="240" width="150" height="44"/><rect x="190" y="240" width="150" height="44"/>
+      <rect x="370" y="240" width="150" height="44"/><rect x="550" y="240" width="130" height="44"/>
+      <rect x="10" y="130" width="200" height="44"/>
+    </g>
+    <text x="22" y="40">seed</text><text x="22" y="56" fill="#7C848D" font-size="10">a number</text>
+    <text x="182" y="40">game/track.py</text><text x="182" y="56" fill="#7C848D" font-size="10">gaps, always passable</text>
+    <text x="342" y="40">game/engine.py</text><text x="342" y="56" fill="#7C848D" font-size="10">step(action), death</text>
+    <text x="502" y="40">senses.py</text><text x="502" y="56" fill="#7C848D" font-size="10">JSON view · eye rates (Hz)</text>
+    <text x="502" y="130">players/</text>
+    <text x="502" y="148" fill="#7C848D" font-size="10">fly · jev_composed · llm</text>
+    <text x="502" y="164" fill="#7C848D" font-size="10">jev · random · always_jump</text>
+    <text x="502" y="180" fill="#7C848D" font-size="10">solver   → Decision</text>
+    <text x="262" y="150">runner.py / live.py</text><text x="262" y="166" fill="#7C848D" font-size="10">play_row: one record per move</text>
+    <text x="22" y="150">runs/&lt;id&gt;/</text><text x="22" y="166" fill="#7C848D" font-size="10">meta.json · &lt;player&gt;.jsonl</text>
+    <text x="22" y="260">report.py</text><text x="22" y="276" fill="#7C848D" font-size="10">scoreboard (text)</text>
+    <text x="202" y="260">replay.py</text><text x="202" y="276" fill="#7C848D" font-size="10">runs → replay object</text>
+    <text x="382" y="260">view.py + viewer/</text><text x="382" y="276" fill="#7C848D" font-size="10">one offline HTML</text>
+    <text x="562" y="260">live_server</text><text x="562" y="276" fill="#7C848D" font-size="10">SSE, 127.0.0.1</text>
+  </g>
+  <g stroke="#7C848D" fill="none" marker-end="url(#ar)">
+    <path d="M130 42H166"/><path d="M290 42H326"/><path d="M450 42H486"/><path d="M585 64V106"/>
+    <path d="M490 152H434"/><path d="M250 152H214"/>
+    <path d="M80 174V236"/><path d="M130 174L250 236"/><path d="M340 262H366"/>
+    <path d="M400 174L600 236"/>
+  </g>
+  <text x="530" y="222" font-size="10" fill="#7C848D">live only</text>
+</svg>
+<figcaption>One source of truth per job: Python owns the rules of the game (including in the replay); the
+JavaScript only draws.</figcaption>
+</figure>
+
+<h3>The pieces</h3>
+<ul>
+  <li><strong>Track and engine</strong> (<code>bakeoff/game/</code>) are pure code: no files, no network, and
+  randomness only from the seed. The generator first carves one legal random walk through the track and keeps
+  those tiles as floor, then scatters gaps whose rate rises from 4% to 16% per lane and whose width grows to 3.
+  Rows 0–4 are an empty runway.</li>
+  <li><strong>Senses</strong> (<code>bakeoff/senses.py</code>) turn the game state into two encodings of the same
+  view: JSON for Jev and the LLM, and two firing rates (left eye, right eye) for the fly.</li>
+  <li><strong>Players</strong> all share one interface: <code>reset(game, seed)</code>,
+  <code>act(senses) → Decision</code>, <code>observe(action)</code>. A <code>Decision</code> carries the move plus
+  everything we want to see later: the questions, answers, latency, tokens, cache hit, and the fly's neuron
+  readings.</li>
+  <li><strong>The runner</strong> plays players × seeds and streams one JSON line per move into a run
+  directory. <code>live</code> uses the very same <code>play_row</code> function, one row at a time for all players
+  in lockstep.</li>
+  <li><strong>Report, replay, view</strong> only read run directories. That's why watching is free.</li>
+</ul>
+
+<h3>The commands</h3>
+<pre><code>uv run pytest                          # fast tests (Python + the viewer's JS via node --test)
+uv run pytest -m slow                  # builds the real fly brain: ~1 GB, ~1 minute
+uv run python -m scripts.fetch_fly_data   # once: fly model + annotations into data/
+uv run python -m bakeoff run    --players fly,random,solver --seeds 20 --seed-start 1000
+uv run python -m bakeoff report runs/&lt;id&gt;
+uv run python -m bakeoff view   runs/&lt;id&gt; [runs/&lt;id&gt; ...]
+uv run python -m bakeoff live   --seed 1001 --players fly,jev_composed,llm [--max-requests N]</code></pre>
+
+<!-- ============================================================ -->
+<hr>
+<span class="label level">Level 3 · the details</span>
+<h2 id="fly">9. The fly, in detail</h2>
+
+<p>The model is Shiu et al., <em>A Drosophila computational brain model reveals sensorimotor processing</em>,
+Nature 2024 (<a href="https://github.com/philshiu/Drosophila_brain_model">code</a>, MIT, Brian2), using FlyWire
+v783 connectivity: 138,639 leaky integrate-and-fire neurons and 15.1 million synapses, default parameters.
+It has no learning, no spontaneous activity and no visual front end: you choose which neurons to drive and
+read which neurons fire.</p>
+
+<h3>One decision</h3>
+<ol>
+  <li><strong>Eyes in.</strong> Every visible gap adds <code>250 / row³</code> Hz to an eye (row 1 = next row, so near
+  gaps dominate). Gaps left of the runner feed the left eye, right of it the right eye, straight ahead both.
+  Each eye is capped at 250 Hz and rounded to 25 Hz steps.</li>
+  <li><strong>Stimulate.</strong> Restore the network to its clean state, then drive the looming-detector
+  neurons of each eye (LPLC2 and LC4: 162 cells on the left, 152 on the right) with Poisson spikes at those
+  rates.</li>
+  <li><strong>Simulate</strong> 100 ms of brain time (about a second of wall clock on the M1).</li>
+  <li><strong>Read out.</strong>
+    <ul>
+      <li>Turn signal = (DNa01 + DNb01) right − (DNa01 + DNb01) left. These steering neurons fire on the side
+      opposite a one-sided threat. Above 0 Hz → <code>right</code>, below → <code>left</code>.</li>
+      <li>Jump signal = mean rate of the Giant Fiber (DNp01), the fly's real escape-jump neuron. Above 200 Hz →
+      <code>jump</code>, which beats a turn.</li>
+      <li>Otherwise <code>stay</code>.</li>
+    </ul></li>
+</ol>
+
+<div class="ours">
+<span class="label">Ours, not the fly's</span>
+<p>Four numbers: the gain (250 Hz) and falloff (cubic) of the eye input, and the two thresholds (0 Hz and
+200 Hz). They were picked once from 768 candidates by a rule fixed in advance, on practice seeds 1000–1199, using a
+measured "response surface" as a fast stand-in for the brain, then checked against the real brain (stand-in
+predicted 118.7 average rows on seeds 1000–1019, the real brain did 118.0). Frozen:
+<code>calibration/REPORT.md</code>. They must never be retuned.</p>
+</div>
+
+<div class="note">
+<span class="label">Known weaknesses (said on screen too)</span>
+<ul>
+  <li>It doesn't plan; it flees and may flee into another gap.</li>
+  <li>Input is crude: whole-eye stimulation, not a picture.</li>
+  <li>It leans right: on equal input to both eyes the turn signal is 0 to +20 Hz, never negative (its left eye
+  has more looming cells). With a 0 Hz threshold, a hole straight ahead usually becomes a step right. The lean
+  is the fly's; the threshold that exposes it is ours.</li>
+  <li>Its Giant Fiber fires at 100–200 Hz in the model, unrealistic for a real fly (about once per escape); we use
+  it as a graded signal.</li>
+  <li>The steering role of DNa01/DNb01 comes from published studies, not from anything we verified.</li>
+</ul>
+</div>
+
+<p>Randomness only comes from the Poisson input, seeded per (track, row), so a fly run repeats exactly: the live
+run on track 1001 was move for move the same as the batch run two days earlier.</p>
+
+<h2 id="paid">10. Jev and the LLM, in detail</h2>
+
+<p>Both are told the same rules in the same words (<code>bakeoff/players/briefing.py</code>, written before
+any paid request) and receive the same JSON view:</p>
+
+<pre><code>{
+  "lane": 4, "lanes": 12, "rows_survived": 37,
+  "ahead": [
+    {"row": 1, "gaps_relative": [-1, 0]},
+    {"row": 2, "gaps_relative": []},
+    {"row": 3, "gaps_relative": [2, 3]}, ...
+  ],
+  "actions": {"left": "move one lane left", "right": "move one lane right",
+              "jump": "clear the next row, land on the one after", "stay": "run straight"}
+}</code></pre>
+
+<h3>The LLM (<code>llm</code>)</h3>
+<p>Claude Haiku 4.5, one request per row, system prompt = the rules, user message = the JSON, answer forced to
+<code>{"action": "left" | "right" | "jump" | "stay"}</code> by structured output. Anything else is logged as
+<code>invalid</code>.</p>
+
+<h3>Composed Jev (<code>jev_composed</code>, the one in the demo)</h3>
+<p>One request per row with four Nouls (a Noul is Jev's yes/no-as-probability question type):</p>
+<pre><code>gap_left : Would the action `left` land the runner on a gap, that is,
+           does `ahead[0].gaps_relative` contain -1?
+gap_stay : ... `stay` ... ahead[0] contains 0?
+gap_right: ... `right` ... ahead[0] contains 1?
+gap_jump : ... `jump` ... ahead[1] contains 0?</code></pre>
+<p>Code picks the action with the lowest probability after rounding to two decimals; ties go in the solver's
+order stay, left, right, jump. If any answer is missing, the move is invalid. The visor sprite's lit slit shows
+1 minus the chosen action's probability, that is, how sure Jev is the move is safe.</p>
+<div class="ours">
+<span class="label">Ours, not TypeSafe's</span>
+<p>The question wording and the pick-the-lowest rule. It looks one step ahead only. The rounding is why it
+wanders: on safe rows answers like 0.03 and 0.04 rarely tie, so the "safest" move is often a sideways step.</p>
+</div>
+
+<h3>One-shot Jev (<code>jev</code>, kept for comparison)</h3>
+<p>One Choice over the four actions plus two logging Nouls. Spike 02 showed why it failed: on the 55 dangerous
+states of track 1000 its Choice landed on a gap 29% of the time, about the same as always staying (33%). Jev's
+questions in one request run in parallel and can't see each other's answers, so the Nouls couldn't help the
+Choice. TypeSafe's own docs call the broad question the anti-pattern.</p>
+
+<h3>Money safety</h3>
+<p>Every paid request goes through <code>bakeoff/clients/core.py</code>: first a <strong>disk cache</strong>
+(key = sha256 of provider, model, senses and the full question set, so a changed prompt can never reuse an
+old answer), then a <strong>hard cap</strong> (<code>--max-requests</code>, per paid player, default 0 = replay
+only), then the live call, with SDK retries off so the cap is exact. A provider failure is logged as an error
+and the game runs <code>stay</code> (never the solver's move; being rescued would hide exactly what we want to
+see). Keys load from a git-ignored <code>.env</code>. The CLI refuses a live paid run on seeds below 1000 without
+<code>--tournament</code>.</p>
+
+<h2 id="data">11. Runs, records and replays</h2>
+
+<p>A run directory (<code>runs/&lt;timestamp&gt;/</code>) holds <code>meta.json</code> (status, git commit, arguments,
+model ids, fly constants) and one <code>&lt;player&gt;.jsonl</code> file with one line per move. Status goes
+<code>running → completed | aborted | budget_exhausted | interrupted</code>.</p>
+
+<p>Each record mixes two moments: what the player saw when deciding (<code>row, lane, senses, looming,
+questions</code>) and what happened after (<code>answers, chosen_action, executed_action, solver_action, alive,
+rows_survived, death_cause, latency_ms, usage, cache_hit, info</code>). The full track is logged once per seed.
+Contract: <code>docs/STEP_RECORD.md</code>.</p>
+
+<p><code>bakeoff/replay.py</code> merges several run directories into one replay object
+(<code>docs/REPLAY_DATA.md</code>): tracks, episodes lined up by row, landing tiles, the scoreboard and whether its
+means are a fair comparison. <code>bakeoff/view.py</code> embeds that object, the JavaScript and the two fonts
+in one HTML file that never loads anything from the network.</p>
+
+<p>The viewer's JavaScript is split into pure, tested modules: <code>timeline.js</code> (time is rows; a jump
+takes two ticks), <code>tunnel.js</code> (tile geometry, fixed camera), <code>sprites.js</code> (pixel figures),
+<code>stage.js</code> (overlapping runners, auto-focus), <code>minds.js</code> (the panels) and <code>feed.js</code>,
+the only way frames reach <code>app.js</code>, either from the embedded replay or from the live stream.
+<code>live</code> serves the same page from <code>127.0.0.1</code> and pushes the same frame shapes over
+Server-Sent Events, standard library only.</p>
+
+<h2 id="rules">12. Rules we hold ourselves to</h2>
+<ul>
+  <li><strong>Seed discipline.</strong> Seeds 1000+ are practice (1000–1399 were used to calibrate the fly).
+  Tournament seeds are below 1000, and nothing is ever tuned on them. Prompts and rules are frozen before
+  the tournament; bad results get named in the write-up, not fixed.</li>
+  <li><strong>Honesty about the fly.</strong> Untrained, innate wiring only. Anything that is our mapping
+  rather than its biology is labelled as ours, on screen and in the write-up.</li>
+  <li><strong>Same words for Jev and the LLM</strong>, and the asymmetry (Jev gets four narrow questions, the LLM
+  one) is named.</li>
+  <li><strong>Budget.</strong> No paid request without a cap and a cache; no cap raised without your go-ahead.</li>
+  <li><strong>One fly at a time</strong> on the 8 GB Mac (about 1 GB each).</li>
+  <li><strong>How work gets done:</strong> brainstorm → spec → plan → one implementer and one reviewer per task →
+  final review → PR. Never on <code>main</code>. Tests first; no test touches the network.</li>
+</ul>
+
+<h2 id="map">13. File map and glossary</h2>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>Where</th><th>What</th></tr></thead>
+  <tbody>
+    <tr><td><code>bakeoff/game/</code></td><td>track generator and engine (pure)</td></tr>
+    <tr><td><code>bakeoff/senses.py</code></td><td>JSON view, eye rates, where each move lands</td></tr>
+    <tr><td><code>bakeoff/players/</code></td><td>every player; <code>briefing.py</code> = the shared rules text</td></tr>
+    <tr><td><code>bakeoff/fly/</code></td><td>brain wrapper, neuron selection, calibration, stand-in brain</td></tr>
+    <tr><td><code>bakeoff/clients/</code></td><td>Jev and Anthropic clients, cache, cap, keys</td></tr>
+    <tr><td><code>bakeoff/runner.py</code>, <code>live.py</code>, <code>live_server.py</code></td><td>playing and recording, batch and live</td></tr>
+    <tr><td><code>bakeoff/report.py</code>, <code>replay.py</code>, <code>view.py</code></td><td>reading runs, building the page</td></tr>
+    <tr><td><code>viewer/</code></td><td>the demo player (plain JS, no build step) and its tests</td></tr>
+    <tr><td><code>calibration/</code></td><td>the fly's frozen tuning and first scoreboard</td></tr>
+    <tr><td><code>docs/DECISIONS.md</code></td><td>every decision, in order, and the next step</td></tr>
+    <tr><td><code>docs/COSTS.md</code></td><td>measured costs and what each paid run showed</td></tr>
+    <tr><td><code>docs/superpowers/</code></td><td>the two binding design specs and one plan per phase</td></tr>
+    <tr><td><code>runs/</code>, <code>.cache/</code>, <code>data/</code></td><td>recorded runs, cached answers, fly model data (all git-ignored)</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td>Seed / track</td><td>A number that fully determines a tunnel layout.</td></tr>
+    <tr><td>Row</td><td>One step forward; also the unit of score and of time in the player.</td></tr>
+    <tr><td>Senses</td><td>What a player is given each turn: the next 6 rows, ±3 lanes.</td></tr>
+    <tr><td>Solver</td><td>A search program with the same view; the reference, not a contestant.</td></tr>
+    <tr><td>Connectome</td><td>The full wiring diagram of a brain: every neuron and connection.</td></tr>
+    <tr><td>Looming</td><td>Something growing fast in view, like an approaching threat; flies have neurons for it.</td></tr>
+    <tr><td>Giant Fiber</td><td>The fly neuron that triggers an escape jump.</td></tr>
+    <tr><td>System One / Jev</td><td>TypeSafe's model that returns typed judgments (probabilities, choices) instead of prose.</td></tr>
+    <tr><td>Noul</td><td>A Jev question answered with a probability between 0 and 1.</td></tr>
+    <tr><td>Choice</td><td>A Jev question answered with probabilities over a set of options.</td></tr>
+    <tr><td>Practice vs tournament seeds</td><td>1000 and up may be looked at and tuned on; below 1000 are for the real contest.</td></tr>
+    <tr><td>Run directory</td><td>One recorded session: <code>meta.json</code> plus one log file per player.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p style="margin-top:48px;color:var(--muted);font-size:14px">Written 2026-09-21, after phase 5 was merged. If
+this page and <code>docs/DECISIONS.md</code> disagree, the decisions file wins.</p>
+
+</main>
+<script>
+  // Draws the example grid in section 2: rows 1-3 ahead of the runner, lanes -3..+3.
+  (function () {
+    const g = document.getElementById("tiles"), ns = "http://www.w3.org/2000/svg";
+    const gaps = { 1: [0, 1, 3], 2: [-2, 2], 3: [-1, 0] };  // row -> gap offsets
+    const rows = [3, 2, 1, 0], x0 = 80, w = 56, h = 52;
+    rows.forEach((row, i) => {
+      for (let o = -3; o <= 3; o++) {
+        const r = document.createElementNS(ns, "rect");
+        const gap = (gaps[row] || []).includes(o);
+        r.setAttribute("x", x0 + (o + 3) * w + 2); r.setAttribute("y", 8 + i * 60);
+        r.setAttribute("width", w - 4); r.setAttribute("height", h);
+        r.setAttribute("fill", gap ? "#0A0A0A" : "#1E2227");
+        r.setAttribute("stroke", gap ? "#F7768E" : "#2A2F35");
+        g.appendChild(r);
+      }
+    });
+    const c = document.createElementNS(ns, "circle");
+    c.setAttribute("cx", x0 + 3 * w + w / 2); c.setAttribute("cy", 8 + 3 * 60 + h / 2);
+    c.setAttribute("r", 12); c.setAttribute("fill", "#E8EBED");
+    g.appendChild(c);
+  })();
+</script>
+</body>
+</html>

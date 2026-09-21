@@ -49,7 +49,7 @@ landed on a gap about as often as always staying (`docs/DECISIONS.md`, decisions
 only replays `.cache/responses`. Every answer is cached, so a repeated run is free and a run stopped
 by the cap (`status: budget_exhausted`) continues from the cache next time. `uv run pytest -m live`
 makes one real request per provider. A live paid run on seeds below 1000 is refused unless
-`--tournament` is passed (tournament seeds stay untouched until phase 5). A run stopped by the cap
+`--tournament` is passed (tournament seeds stay untouched until phase 6). A run stopped by the cap
 ends there, so later players in the list do not play: put free players first, or run paid players
 alone.
 
@@ -66,4 +66,5 @@ the paid players usually run separately; one (player, seed) may appear only once
 nothing: it reads logs only. The viewer's JavaScript has its own tests, which `uv run pytest` runs
 through `node --test` (skipped when node is not installed).
 
-See `docs/DECISIONS.md` for what has been decided and what comes next.
+New here? Open `docs/EXPLAINER.html` in a browser: what this project is and how it works, from the idea down to
+the code. See `docs/DECISIONS.md` for what has been decided and what comes next.

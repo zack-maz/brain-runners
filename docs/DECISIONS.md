@@ -121,6 +121,8 @@
 
 ## Next step
 
+A plain-language tour of everything built so far, from the idea down to the code: `docs/EXPLAINER.html`.
+
 Phases 1 to 5 are built and on `main`. Phase 5 (5a the composed Jev, 5b the demo player, 5c go live) was PR #4,
 merged on 2026-09-21 at the user's request. Plans:
 `docs/superpowers/plans/2026-09-21-phase5a-jev-composed.md`, `...-phase5b-demo-player.md`, `...-phase5c-go-live.md`
