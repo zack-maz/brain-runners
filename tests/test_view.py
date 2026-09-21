@@ -47,6 +47,16 @@ def test_the_page_says_what_is_ours_about_jev_and_the_figures():
     assert "The blue marks the mind in focus and the tiles it was shown, nothing else." in page
 
 
+def test_the_page_keeps_every_caveat_about_the_fly_and_about_jevs_questions():
+    page = " ".join(render_html({"episodes": []}).split())
+    for caveat in ("The fly does not plan.", "a whole eye is stimulated at one rate", "leans right (0 to +20 Hz",
+                   "a mild left bias in DNa02", "no spontaneous activity and no memory between decisions",
+                   "comes from published steering studies, not from anything verified in this project",
+                   "Giant Fiber rates of 100 to 200 Hz are not realistic",
+                   "TypeSafe runs the questions of one request in parallel and they cannot see one another's answers"):
+        assert caveat in page, caveat
+
+
 def test_every_script_the_page_names_exists_and_app_comes_last():
     names = re.findall(r'<script src="([^"]+)"></script>', (VIEWER_DIR / "index.html").read_text())
     assert names == ["timeline.js", "tunnel.js", "sprites.js", "stage.js", "minds.js", "feed.js", "app.js"]

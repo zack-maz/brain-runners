@@ -113,7 +113,8 @@
       for (const seed of store.seeds) {
         const episode = episodeOf(player, seed);
         const track = store.tracks[String(seed)];
-        const mark = !episode ? "" : !episode.complete ? " …" : episode.finished ? " ✓" : "";
+        // "…" means the run was stopped; an episode of a live run that is still going is neither stopped nor over
+        const mark = !episode ? "" : !episode.complete ? (store.ended ? " …" : "") : episode.finished ? " ✓" : "";
         const shorter = episode && track && episode.max_rows != null && episode.max_rows !== track.max_rows ? " /" + esc(episode.max_rows) : "";
         const shown = episode && episode.rows_survived != null ? esc(episode.rows_survived) + mark + shorter : "";
         html += "<td" + (seed === view.seed ? ' class="current"' : "") + ">" + shown + "</td>";
@@ -392,6 +393,7 @@
       "</tr></thead><tbody>" + board.rows.map((row) => "<tr>" + board.columns.map((c) =>
         (c === "player" ? "<th>" + cell(row[c]) + "</th>" : "<td>" + cell(row[c]) + "</td>")).join("") + "</tr>").join("") + "</tbody>";
     $("fairness").hidden = board.same_seeds;
+    $("board").hidden = !board.rows.length; // a live run has no scoreboard until it ends
     const flyRun = store.runs.find((run) => run.fly && (run.players || []).includes("fly")) || store.runs.find((run) => run.fly);
     $("ours").innerHTML = Minds.ours(flyRun);
     $("runs").innerHTML = store.runs.map((run) => {
