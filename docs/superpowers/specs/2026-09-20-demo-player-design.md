@@ -197,7 +197,8 @@ any tournament seed, needs a new go-ahead.
 
 ## Phases and order
 
-0. PR #3 (phase 4) is reviewed and its findings fixed on `phase4-replay-viewer`; 5b builds on it.
+0. PR #3 (phase 4) is reviewed, its findings fixed on `phase4-replay-viewer`, and merged (pre-authorized, see
+   "Next step" in `docs/DECISIONS.md`); 5b builds on it.
 1. 5a `jev_composed` → 2. 5b the player → 3. 5c go live. Each gets its own plan, written the prototype-first
    way and executed in order on one branch, `phase5-demo-player`, which is stacked on
    `phase4-replay-viewer` (rebase it if PR #3 changes); one PR at the end, against `main` if PR #3 has been

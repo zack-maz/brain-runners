@@ -109,8 +109,12 @@ without stopping for questions that the documents already answer:
 
 1. **Review PR #3**: read its review comments (`gh pr view 3 --comments`, `gh api
    repos/zack-maz/brain-bakeoff/pulls/3/comments`), run a code review of the branch if there are none, fix
-   what is found on `phase4-replay-viewer` (TDD, `superpowers:receiving-code-review`), push. Merging is the
-   user's call unless they say so when they start the session.
+   what is found on `phase4-replay-viewer` (TDD, `superpowers:receiving-code-review`), push. **Merging is
+   pre-authorized** (the user, 2026-09-21: "your call"): once the review has no open Critical or Important
+   finding and `uv run pytest` is green on the branch, merge PR #3 with a merge commit (`gh pr merge 3
+   --merge`, as the earlier phases were merged), pull `main`, rebase `phase5-demo-player` onto it, then delete
+   the local `proto/phase4-replay-viewer` branch and `.superpowers/sdd/2026-09-20-phase4-replay-viewer/`.
+   This authorization covers PR #3 only; the phase 5 PR is opened, not merged.
 2. **Build phase 5** on branch `phase5-demo-player` (already created, stacked on `phase4-replay-viewer`, holds
    the design): 5a `jev_composed`, 5b the player, 5c go live, in that order, each with its own plan in
    `docs/superpowers/plans/`, written prototype-first and executed with subagent-driven development as in
