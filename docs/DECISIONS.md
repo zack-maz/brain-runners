@@ -99,6 +99,10 @@
     that, and any tournament seed, needs a new go-ahead. **Used (2026-09-21):** 460 Jev requests (232 for
     track 1000, 228 live on track 1001) and 92 Claude Haiku requests (0.054 USD); nothing on a seed below
     1000. What is left of this authorization ended with that session.
+20. **All eight updates in `docs/UPDATES.md` come before phase 6** (2026-09-21): a trained or better fly, two more
+    Jev variants with the LLM fed the same signals, the number of rows of vision, one live log tab per mind, any
+    seed live, a faster difficulty ramp, a benchmark for time, cost and performance, and the analysis moved to its
+    own tab. Worked on branch `phase6-updates`, starting with the game (vision and ramp).
 
 ## Open
 

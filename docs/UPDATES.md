@@ -64,5 +64,5 @@ once made. Branch: `phase6-updates`.
 
 ## Next step
 
-Brainstorm these (superpowers workflow), likely as separate specs: the game (3, 6), the players (1, 2), the
-benchmark (7), the page (4, 5, 8). Then decide how they fit with phase 6, the tournament.
+Decided (decision 20 in `DECISIONS.md`): all eight come before phase 6. Brainstorm them (superpowers workflow) as
+separate specs, in this order: the game (3, 6), the players (1, 2), the benchmark (7), the page (4, 5, 8).
