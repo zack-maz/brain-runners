@@ -11,6 +11,7 @@ from pathlib import Path
 from bakeoff.report import COLUMNS, load_meta, load_steps, summarize
 
 REPLAY_VERSION = 1
+SCHEMA_VERSION = 1  # the step record this module reads; the runner writes it (a test keeps the two equal)
 CONTESTANTS = ("fly", "jev", "llm")  # shown first, in this order; everyone else in order of appearance
 # what a frame leaves out of its step record: the first three name the episode, the others are
 # replaced by `ahead`, `q` and the replay's `tracks`
@@ -66,6 +67,9 @@ def build_replay(run_dirs: list[Path | str]) -> dict:
         steps = load_steps(run_dir)
         meta = load_meta(run_dir)
         run_id = (meta or {}).get("run_id") or run_dir.name
+        if (meta or {}).get("schema_version", SCHEMA_VERSION) != SCHEMA_VERSION:
+            raise ValueError(f"{run_id} has schema_version {meta['schema_version']}; "
+                             f"this viewer reads {SCHEMA_VERSION}")
         runs.append({"run_id": run_id, **{k: (meta or {}).get(k) for k in META_KEYS}})
         grouped: dict[tuple[str, int], list[dict]] = {}
         for s in steps:
@@ -88,14 +92,17 @@ def build_replay(run_dirs: list[Path | str]) -> dict:
     players = [p for p in CONTESTANTS if p in seen] + [p for p in seen if p not in CONTESTANTS]
     episodes.sort(key=lambda e: (e["seed"], players.index(e["player"])))
     scoreboard.sort(key=lambda r: players.index(r["player"]) if r["player"] in players else len(players))
-    seeds_of: dict[tuple[str, str], set[int]] = {}
+    # the seeds behind each scoreboard row's means: the report averages complete episodes only, so a
+    # run that was cut off (a budget stop, Ctrl-C) or never started does not count as having played the seed
+    seeds_of: dict[tuple[str, str], set[int]] = {(r["run_id"], r["player"]): set() for r in scoreboard}
     for e in episodes:
-        seeds_of.setdefault((e["run_id"], e["player"]), set()).add(e["seed"])
+        if e["complete"]:
+            seeds_of[(e["run_id"], e["player"])].add(e["seed"])
     return {
         "replay_version": REPLAY_VERSION, "runs": runs, "players": players,
         "seeds": sorted({e["seed"] for e in episodes}), "tracks": tracks, "episodes": episodes,
         "scoreboard": {"columns": ["run_id", *COLUMNS], "rows": scoreboard,
-                       # true only when every scoreboard row (one per run, player) covers the same seeds;
+                       # true only when every scoreboard row (one per run, player) averages the same seeds;
                        # means over different seeds are not a fair comparison, and the viewer says so
                        "same_seeds": len({frozenset(s) for s in seeds_of.values()}) <= 1},
     }

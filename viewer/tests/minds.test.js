@@ -166,4 +166,6 @@ test("the status line says how an episode ended", () => {
   assert.match(Minds.statusLine(episode, { status: "cut" }, 12), /Run stopped after 23 rows \(not a death\)/);
   assert.match(Minds.statusLine(episode, { status: "finished" }, 12), /Reached the finish line/);
   assert.equal(Minds.statusLine(episode, { status: "running", row: 4.5, lane: -0.6 }, 12), "row 4, lane 11");
+  const hostile = { ...episode, rows_survived: "<script>" };
+  for (const status of ["dead", "cut", "finished"]) assert.doesNotMatch(Minds.statusLine(hostile, { status }, 12), /<script>/);
 });

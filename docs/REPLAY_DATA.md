@@ -15,7 +15,7 @@ records it is built from are described in `docs/STEP_RECORD.md`.
 | `seeds` | int[] | every seed with at least one episode, ascending |
 | `tracks` | object | `{"<seed>": track}`, the step record's `track`. When runs played the same seed with different `max_rows`, the longest is kept (the shorter one is its prefix) |
 | `episodes` | object[] | one per (player, seed), sorted by seed, then by `players` order |
-| `scoreboard` | object | `columns`: `run_id` followed by the report's columns; `rows`: the report's rows, one per player per run, in `players` order; `same_seeds`: false when the scoreboard's rows do not all cover the same seeds, so their means are not a fair comparison and the viewer says so |
+| `scoreboard` | object | `columns`: `run_id` followed by the report's columns; `rows`: the report's rows, one per player per run, in `players` order; `same_seeds`: false when the scoreboard's rows do not all average the same seeds (the means count complete episodes only, so a seed on which a player was cut off, or a player that never started, makes it false), so their means are not a fair comparison and the viewer says so |
 
 One (player, seed) may appear in only one of the run directories, and only once within a run
 directory. Two versions of the same episode are an error (`ValueError`, exit 2 from the CLI),

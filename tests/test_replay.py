@@ -37,6 +37,7 @@ def write_run(root, run_id, records, meta=None):
     return run_dir
 
 
+DIED = {"alive": False, "death_cause": "ran_into_gap"}  # a complete episode: the report's means count it
 TRACK = {"seed": 0, "lanes": 12, "max_rows": 10, "gaps": [[] for _ in range(18)]}
 
 
@@ -96,10 +97,11 @@ def test_a_run_cut_off_midway_is_incomplete_not_a_death(tmp_path):
 
 
 def test_runs_are_merged_with_the_contestants_first(tmp_path):
-    a = write_run(tmp_path, "a", [record("solver", track=TRACK), record("llm", track=TRACK)],
+    a = write_run(tmp_path, "a", [record("solver", track=TRACK, **DIED), record("llm", track=TRACK, **DIED)],
                   meta={"status": "completed", "players": ["solver", "llm"], "seeds": [0],
                         "models": {"llm": "claude-haiku-4-5-20251001"}})
-    b = write_run(tmp_path, "b", [record("fly", seed=0, track=TRACK), record("fly", seed=1, track=TRACK)],
+    b = write_run(tmp_path, "b", [record("fly", seed=0, track=TRACK, **DIED),
+                                  record("fly", seed=1, track=TRACK, **DIED)],
                   meta={"status": "interrupted", "players": ["fly"], "seeds": [0, 1],
                         "fly": {"turn_threshold_hz": 0.0, "jump_threshold_hz": 200.0}})
     replay = build_replay([a, b])
@@ -123,15 +125,47 @@ def test_other_players_keep_the_order_the_run_planned(tmp_path):
 
 
 def test_same_seeds_is_true_when_everyone_played_the_same_tracks(tmp_path):
-    run_dir = write_run(tmp_path, "a", [record("fly", track=TRACK), record("llm", track=TRACK)])
+    run_dir = write_run(tmp_path, "a", [record("fly", track=TRACK, **DIED), record("llm", track=TRACK, **DIED)])
     assert build_replay([run_dir])["scoreboard"]["same_seeds"] is True
 
 
 def test_same_seeds_is_false_when_one_player_is_split_across_runs(tmp_path):
-    a = write_run(tmp_path, "a", [record("fly", seed=0, track=TRACK)])
-    b = write_run(tmp_path, "b", [record("fly", seed=1, track=TRACK)])
-    c = write_run(tmp_path, "c", [record("jev", seed=0, track=TRACK), record("jev", seed=1, track=TRACK)])
+    a = write_run(tmp_path, "a", [record("fly", seed=0, track=TRACK, **DIED)])
+    b = write_run(tmp_path, "b", [record("fly", seed=1, track=TRACK, **DIED)])
+    c = write_run(tmp_path, "c", [record("jev", seed=0, track=TRACK, **DIED),
+                                  record("jev", seed=1, track=TRACK, **DIED)])
     assert build_replay([a, b, c])["scoreboard"]["same_seeds"] is False
+
+
+def test_same_seeds_counts_only_the_episodes_behind_the_means(tmp_path):
+    # the report's means are over complete episodes; the llm was cut off on seed 1 (a budget stop)
+    run_dir = write_run(tmp_path, "a", [record("fly", seed=0, track=TRACK, **DIED),
+                                        record("fly", seed=1, track=TRACK, **DIED),
+                                        record("llm", seed=0, track=TRACK, **DIED), record("llm", seed=1, track=TRACK)],
+                        meta={"players": ["fly", "llm"], "seeds": [0, 1], "status": "budget_exhausted"})
+    replay = build_replay([run_dir])
+    rows = replay["scoreboard"]["rows"]
+    assert [(r["player"], r["runs"], r["incomplete"]) for r in rows] == [("fly", 2, 0), ("llm", 1, 1)]
+    assert replay["scoreboard"]["same_seeds"] is False
+
+
+def test_same_seeds_is_false_when_a_scoreboard_row_has_no_complete_episode(tmp_path):
+    run_dir = write_run(tmp_path, "a", [record("fly", track=TRACK, **DIED), record("llm", track=TRACK)],
+                        meta={"players": ["fly", "llm", "jev"], "seeds": [0]})
+    assert build_replay([run_dir])["scoreboard"]["same_seeds"] is False
+
+
+def test_the_replay_reads_the_schema_the_runner_writes():
+    import bakeoff.replay
+    import bakeoff.runner
+
+    assert bakeoff.replay.SCHEMA_VERSION == bakeoff.runner.SCHEMA_VERSION
+
+
+def test_a_run_with_another_schema_version_is_an_error(tmp_path):
+    run_dir = write_run(tmp_path, "a", [record(track=TRACK)], meta={"schema_version": 2})
+    with pytest.raises(ValueError, match="a has schema_version 2; this viewer reads 1"):
+        build_replay([run_dir])
 
 
 def test_the_same_episode_in_two_runs_is_an_error(tmp_path):

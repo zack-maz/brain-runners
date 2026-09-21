@@ -71,3 +71,5 @@ def test_view_usage_errors(tmp_path, capsys):
     assert main(["view", str(run_dir), str(run_dir), "--output", str(tmp_path / "out.html")]) == 2
     assert "solver on seed 0 is in both" in capsys.readouterr().err
     assert not (tmp_path / "out.html").exists()
+    assert main(["view", str(run_dir), "--output", str(tmp_path / "nodir" / "out.html")]) == 2
+    assert "cannot write" in capsys.readouterr().err

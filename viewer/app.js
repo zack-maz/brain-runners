@@ -62,7 +62,7 @@
         const episode = episodeOf(player, seed);
         const track = replay.tracks[String(seed)];
         const mark = !episode ? "" : !episode.complete ? " …" : episode.finished ? " ✓" : "";
-        const shorter = episode && track && episode.max_rows !== track.max_rows ? " /" + esc(episode.max_rows) : "";
+        const shorter = episode && track && episode.max_rows != null && episode.max_rows !== track.max_rows ? " /" + esc(episode.max_rows) : "";
         const shown = episode ? esc(episode.rows_survived) + mark + shorter : "";
         html += "<td" + (seed === view.seed ? ' class="current"' : "") + ">" + shown + "</td>";
       }
@@ -92,7 +92,8 @@
     stage.innerHTML = "";
     view.columns = [];
     if (!track || !episodes.length) {
-      stage.innerHTML = '<p class="muted">None of the players shown ran track ' + view.seed + ". Pick a player above to show it.</p>";
+      stage.innerHTML = '<p class="muted">None of the players shown ran track ' + esc(view.seed) + ". Pick a player above to show it.</p>";
+      return;
     }
     for (const episode of episodes) {
       const run = runOf(episode);

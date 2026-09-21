@@ -191,7 +191,7 @@
 
   // one line under the tunnel: where the runner is, or how the episode ended
   function statusLine(episode, state, lanes) {
-    const rows = episode.rows_survived;
+    const rows = esc(episode.rows_survived);
     if (state.status === "dead") return '<span class="warn">Fell after ' + rows + " rows: " + (DEATHS[episode.death_cause] || "fell") + "</span>";
     if (state.status === "finished") return "Reached the finish line, " + rows + " rows";
     if (state.status === "cut") return '<span class="warn">Run stopped after ' + rows + " rows (not a death)</span>";

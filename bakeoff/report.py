@@ -29,9 +29,9 @@ def load_steps(run_dir: Path | str) -> list[dict]:
         for number, line in enumerate(lines):
             try:
                 steps.append(json.loads(line))
-            except json.JSONDecodeError:
+            except json.JSONDecodeError as e:
                 if number != len(lines) - 1:
-                    raise
+                    raise ValueError(f"{path}: line {number + 1} is not valid JSON: {e}") from e
                 # a run killed mid-write leaves a truncated last line; the rest is still good
     return steps
 

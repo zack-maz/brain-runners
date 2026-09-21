@@ -105,7 +105,7 @@ def test_load_steps_tolerates_a_truncated_last_line_only(tmp_path):
     (tmp_path / "p.jsonl").write_text(good + "\n" + good[:20])
     assert len(load_steps(tmp_path)) == 1
     (tmp_path / "p.jsonl").write_text(good[:20] + "\n" + good + "\n")
-    with pytest.raises(json.JSONDecodeError):
+    with pytest.raises(ValueError, match=r"p\.jsonl: line 1 is not valid JSON"):
         load_steps(tmp_path)
 
 

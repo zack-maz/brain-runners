@@ -68,7 +68,11 @@ def main(argv: list[str] | None = None) -> int:
             print("no step records in " + ", ".join(args.run_dirs), file=sys.stderr)
             return 2
         output = Path(args.output)
-        output.write_text(render_html(replay), encoding="utf-8")
+        try:
+            output.write_text(render_html(replay), encoding="utf-8")
+        except OSError as e:
+            print(f"cannot write {output}: {e}", file=sys.stderr)
+            return 2
         print(f"replay: {output} ({len(replay['episodes'])} episodes, {output.stat().st_size / 1e6:.1f} MB)")
         return 0
     cache = DiskCache(args.cache)
