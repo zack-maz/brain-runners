@@ -9,7 +9,6 @@ import time
 from pathlib import Path
 
 from bakeoff.clients.core import DEFAULT_CACHE_DIR, DiskCache, RequestBudget
-from bakeoff.game.track import MAX_ROWS
 from bakeoff.live import LiveRun
 from bakeoff.live_server import EVENTS_PATH, HOST, serve
 from bakeoff.players import PAID, REGISTRY, make_player
@@ -30,7 +29,7 @@ def _parser() -> argparse.ArgumentParser:
     run.add_argument("--seeds", type=int, default=20, help="number of seeds (default 20)")
     run.add_argument("--seed-start", type=int, default=0,
                      help="first seed; practice seeds must not overlap tournament seeds")
-    run.add_argument("--max-rows", type=int, default=MAX_ROWS)
+    run.add_argument("--max-rows", type=int, help="play a prefix of each track (default: the whole track)")
     run.add_argument("--out", default="runs")
     run.add_argument("--max-requests", type=int, default=0,
                      help=f"hard cap on live requests for EACH paid player ({', '.join(PAID)}); the default 0 only replays "
@@ -47,7 +46,7 @@ def _parser() -> argparse.ArgumentParser:
                                        "the run is recorded like any other")
     live.add_argument("--players", default="fly,jev_composed,llm", help=f"comma-separated; available: {sorted(REGISTRY)}")
     live.add_argument("--seed", type=int, default=1001, help="the track; practice seeds are 1000 and up")
-    live.add_argument("--max-rows", type=int, default=MAX_ROWS)
+    live.add_argument("--max-rows", type=int, help="play a prefix of the track (default: the whole track)")
     live.add_argument("--out", default="runs")
     live.add_argument("--max-requests", type=int, default=0,
                       help=f"hard cap on live requests for EACH paid player ({', '.join(PAID)}); the default 0 only "

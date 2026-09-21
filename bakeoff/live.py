@@ -13,7 +13,8 @@ from typing import Iterator
 
 from bakeoff.errors import RunAborted
 from bakeoff.game.engine import Game
-from bakeoff.game.track import MAX_ROWS, generate_track
+from bakeoff.game.rules import Rules, resolve
+from bakeoff.game.track import generate_track
 from bakeoff.players.base import Player
 from bakeoff.replay import META_KEYS, REPLAY_VERSION, build_replay, frame_of, summary_of
 from bakeoff.report import COLUMNS
@@ -79,13 +80,14 @@ class LiveRun:
     a jumper stands two rows on and skips the next tick; the slowest mind sets the pace. Records are
     the runner's own (`play_row`), so the directory is a normal run and `bakeoff view` plays it."""
 
-    def __init__(self, players: list[Player], seed: int, out_root: Path | str = "runs", max_rows: int = MAX_ROWS,
-                 run_id: str | None = None, args: dict | None = None, broadcast: Broadcast | None = None):
+    def __init__(self, players: list[Player], seed: int, out_root: Path | str = "runs", rules: Rules | None = None,
+                 max_rows: int | None = None, run_id: str | None = None, args: dict | None = None,
+                 broadcast: Broadcast | None = None):
         names = [p.name for p in players]
         duplicates = sorted({n for n in names if names.count(n) > 1})
         if duplicates:
             raise ValueError(f"duplicate player names: {duplicates}")
-        self.players, self.seed, self.max_rows = players, seed, max_rows
+        self.players, self.seed, self.rules = players, seed, resolve(rules, max_rows)
         self.run_id = run_id or time.strftime("%Y%m%d-%H%M%S")
         self.run_dir = Path(out_root) / self.run_id
         self.args = args or {}
@@ -98,7 +100,7 @@ class LiveRun:
         """Preflight, the run directory and meta.json. Returns the empty replay the page starts from."""
         _preflight(self.players)
         self.run_dir.mkdir(parents=True, exist_ok=False)
-        self.meta = new_meta(self.run_id, self.players, [self.seed], self.max_rows, self.args)
+        self.meta = new_meta(self.run_id, self.players, [self.seed], self.rules, self.args)
         self._write_meta()
         return {"replay_version": REPLAY_VERSION,
                 "runs": [{"run_id": self.run_id, **{k: self.meta.get(k) for k in META_KEYS}}],
@@ -118,7 +120,7 @@ class LiveRun:
     def run(self) -> Path:
         if self.meta is None:
             self.prepare()
-        track = generate_track(self.seed, max_rows=self.max_rows)
+        track = generate_track(self.seed, self.rules)
         games = {p.name: Game(track) for p in self.players}
         questions: dict[str, list[dict]] = {p.name: [] for p in self.players}
         started: set[str] = set()
@@ -142,7 +144,7 @@ class LiveRun:
                         self.broadcast.emit("episode", {
                             "episode": {"player": player.name, "seed": self.seed, "run_id": self.run_id,
                                         "complete": False, "finished": False, "death_cause": None, "rows_survived": 0,
-                                        "max_rows": self.max_rows, "questions": questions[player.name]},
+                                        "max_rows": track.max_rows, "questions": questions[player.name]},
                             "track": track.to_json()})
                     self.broadcast.emit("frame", {"player": player.name, "seed": self.seed, "frame": frame,
                                                   "summary": summary_of(record)})

@@ -19,6 +19,7 @@ from pathlib import Path
 
 from bakeoff.fly.surface import SurrogateBrain, load_surface
 from bakeoff.game.engine import Game
+from bakeoff.game.rules import V1
 from bakeoff.game.track import Track, generate_track
 from bakeoff.players import make_player
 from bakeoff.players.fly import FlyPlayer
@@ -109,13 +110,14 @@ def main(argv: list[str] | None = None) -> int:
         print("usage: python -m bakeoff.fly.calibrate <response_surface.json> <REPORT.md>", file=sys.stderr)
         return 2
     surface = load_surface(argv[0])
-    practice = [generate_track(seed) for seed in PRACTICE_SEEDS]
+    # v1: the frozen numbers were fixed on v1 tracks and must stay reproducible as they were
+    practice = [generate_track(seed, V1) for seed in PRACTICE_SEEDS]
     results = search(surface, practice)
     winner = {k: results[0][k] for k in CONFIG_COLUMNS}
     brain = SurrogateBrain(surface)
 
     def winner_on(seeds: range) -> dict:
-        return score(FlyPlayer(brain_factory=lambda: brain, **winner), [generate_track(seed) for seed in seeds])
+        return score(FlyPlayer(brain_factory=lambda: brain, **winner), [generate_track(seed, V1) for seed in seeds])
 
     floors = [{"player": name, **score(make_player(name), practice)} for name in FLOORS]
     text = report(surface, results, winner_on(HELD_OUT_SEEDS), winner_on(CHECK_SEEDS), floors)

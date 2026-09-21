@@ -112,3 +112,9 @@ def test_lands_on_gap_agrees_with_the_engine_up_to_the_finish_line():
                 checked += 1
             game.step(next(a for a in ("stay", "left", "right", "jump") if not lands_on_gap(senses, a)))
     assert checked > 200
+
+
+def test_the_senses_follow_the_games_vision(make_track):
+    senses = compute_senses(Game(make_track({1: [3, 4], 2: [9]}, lookahead=3, window=2)))
+    assert [e["row"] for e in senses["ahead"]] == [1, 2, 3]
+    assert senses["ahead"][0]["gaps_relative"] == [-2] and senses["ahead"][1]["gaps_relative"] == []

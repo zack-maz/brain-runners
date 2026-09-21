@@ -5,6 +5,7 @@ import json
 import pytest
 
 from bakeoff.errors import BudgetExhausted
+from bakeoff.game.rules import V1
 from bakeoff.live import Broadcast, LiveRun
 from bakeoff.players import make_player
 from bakeoff.players.base import Decision
@@ -38,7 +39,8 @@ def events_of(live):
 
 
 def run_live(tmp_path, players, max_rows=40, seed=1001):
-    live = LiveRun(players, seed, out_root=tmp_path, max_rows=max_rows, run_id="live", args={"port": 0})
+    # v1: always-stay dies on the first 40 rows of this track
+    live = LiveRun(players, seed, out_root=tmp_path, rules=V1, max_rows=max_rows, run_id="live", args={"port": 0})
     live.run()
     return live, events_of(live)
 

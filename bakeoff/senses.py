@@ -5,9 +5,7 @@ from __future__ import annotations
 import math
 
 from bakeoff.game.engine import Game
-from bakeoff.game.track import LOOKAHEAD
 
-WINDOW = 3  # gaps are visible up to this many lanes either side of the runner
 MAX_HZ = 250.0
 # OURS, not the fly's biology: a gap `row` rows ahead adds LOOMING_GAIN_HZ / row ** LOOMING_FALLOFF
 # to its eye; each eye's sum is capped at MAX_HZ and rounded to the nearest LOOMING_STEP_HZ, so
@@ -26,9 +24,11 @@ LANDS = {"left": (0, -1), "stay": (0, 0), "right": (0, 1), "jump": (1, 0)}
 
 
 def compute_senses(game: Game) -> dict:
+    # what the game version shows: `lookahead` rows, `window` lanes either side of the runner
+    lookahead, window = game.track.rules.lookahead, game.track.rules.window
     ahead = []
-    for distance in range(1, LOOKAHEAD + 1):
-        offsets = [o for o in range(-WINDOW, WINDOW + 1) if game.track.is_gap(game.row + distance, game.lane + o)]
+    for distance in range(1, lookahead + 1):
+        offsets = [o for o in range(-window, window + 1) if game.track.is_gap(game.row + distance, game.lane + o)]
         ahead.append({"row": distance, "gaps_relative": offsets})
     return {"lane": game.lane, "lanes": game.track.lanes, "rows_survived": game.rows_survived,
             "ahead": ahead, "actions": dict(ACTION_DESCRIPTIONS)}
