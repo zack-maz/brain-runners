@@ -20,6 +20,9 @@ ACTION_DESCRIPTIONS = {
     "left": "move one lane left", "right": "move one lane right",
     "jump": "clear the next row, land on the one after", "stay": "run straight",
 }
+# Where each action lands, as (index into `ahead`, lane offset): the rule of the game, written once for
+# everything that reads senses (the composed Jev's questions, the report's truth for them).
+LANDS = {"left": (0, -1), "stay": (0, 0), "right": (0, 1), "jump": (1, 0)}
 
 
 def compute_senses(game: Game) -> dict:
@@ -51,3 +54,11 @@ def looming_rates(senses: dict, gain_hz: float = LOOMING_GAIN_HZ,
 def ground_truth(game: Game) -> dict:
     return {"gap_ahead": game.track.is_gap(game.row + 1, game.lane),
             "left_safe": not game.track.is_gap(game.row + 1, game.lane - 1)}
+
+
+def lands_on_gap(senses: dict, action: str) -> bool:
+    """Does `action` land on a tile the senses show as a gap? Read from the senses alone, so it can be
+    asked of a logged record. It is the truth of the composed Jev's questions, which ask about the senses;
+    the engine differs only past the finish line, where a gap no longer kills."""
+    ahead, offset = LANDS[action]
+    return offset in senses["ahead"][ahead]["gaps_relative"]
