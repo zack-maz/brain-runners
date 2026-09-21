@@ -47,3 +47,32 @@ One track is a weak basis for the second column: a player that survives longer c
 - Agreement with the solver: jev 0.96, llm 0.99. No invalid answers, no provider errors, no fallbacks.
 - The prompts stay as they are: they were written before any paid request, and tuning them on what a track showed
   is what the seed rule exists to prevent. The write-up names the observation instead.
+
+## The composed Jev's first recorded track (phase 5a, 2026-09-21)
+
+`uv run python -m bakeoff run --players jev_composed --seeds 1 --seed-start 1000 --max-requests 300`, run
+`runs/20260921-120903`, practice seed 1000, status `completed`. Inside the budget of decision 19 (232 of the 1,000
+Jev requests pre-authorized for phase 5).
+
+| player | model | rows survived | live requests | failed requests | mean latency ms | median / max ms | input tokens | output tokens | cost USD | USD per request |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| jev_composed | jev-latest | 247 | 232 | 0 | 197 | 186 / 681 | 139,650 (602 per request) | 16,936 (73 per request) | about 0.006 (estimate) | about 0.00003 (estimate) |
+
+The cost is the same kind of estimate as above: 156,586 tokens at the blended rate of the one console reading
+(29,457 tokens for 0.0011 USD). Four Nouls in one request cost about what the one-shot Jev's Choice and two Nouls
+cost, and take about 40 ms longer.
+
+What the track showed (one track: an impression, not a result):
+
+- **It reached the ceiling of its rule.** With perfect answers the pick-the-safest rule survives 246 rows of this
+  track and dies where all four landing tiles are gaps one step ahead; the composed Jev died in that same place
+  (row 246, all four Nouls between 0.80 and 0.89, the lowest was `jump`, so it counts the row it flew over: 247).
+  The one-shot `jev` survived 23 rows of the same track, the LLM 199.
+- **One answer in 928 was on the wrong side of 0.5** (spike 02: 1 in 800). Brier: `gap_left` 0.0040, `gap_stay`
+  0.0025, `gap_right` 0.0089, `gap_jump` 0.0121. No move landed on a gap that a safe alternative existed for.
+- **It wanders.** On a row where every action is safe Jev's four answers differ by a hundredth (0.03 against
+  0.04), so rounding to two decimals rarely produces the tie that would make it run straight: 95 of its 232
+  moves differ from what perfect answers would have chosen, nearly all of them a sideways step or a jump where
+  `stay` was just as safe. None was fatal. The rule is ours and stays as specified; the demo shows the wandering
+  and the write-up names it.
+- Agreement with the solver 1.00; no invalid answers, no provider errors, no fallbacks.

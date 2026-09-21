@@ -69,7 +69,12 @@
 15. **The Jev in the demo is `jev_composed`:** four pointed per-action Nouls in one request, code picks the
     action with the lowest P(gap), ties in the solver's order. The wording and the rule are ours and are
     labelled as ours, like the fly's thresholds; frozen on practice seeds before any tournament seed. The
-    one-shot `jev` stays as a player for comparison.
+    one-shot `jev` stays as a player for comparison. **First recorded track (2026-09-21, practice seed 1000,
+    `runs/20260921-120903`, 232 requests, `docs/COSTS.md`):** 247 rows (one-shot `jev` 23, the LLM 199), which is
+    the ceiling of the rule on this track: it died where all four landing tiles were gaps one step ahead, as
+    perfect answers would have. 1 answer in 928 was on the wrong side of 0.5. On safe rows its four answers
+    differ by a hundredth, so ties are rare and it wanders sideways instead of running straight; never fatally.
+    The rule stays as specified and the write-up names the wandering.
 16. **The demo player is the main tool** (design: `docs/superpowers/specs/2026-09-20-demo-player-design.md`).
     Everything built so far is restyled to the user's brand (`~/Documents/PROJECTS/BRAND/brand.css`:
     near-black, concrete greys, one rationed blue, Hanken Grotesk, JetBrains Mono labels; BLAME! and Zima
@@ -103,9 +108,10 @@
 
 ## Next step
 
-Phases 1 to 4 are built; phase 4 is PR #3 (https://github.com/zack-maz/brain-bakeoff/pull/3, branch
-`phase4-replay-viewer`), open. The user wants the next session to do all of the following in one go,
-without stopping for questions that the documents already answer:
+Phases 1 to 4 are built and merged (PR #3 was reviewed, fixed and merged on 2026-09-21; step 1 below is done).
+Phase 5a is built on `phase5-demo-player` (plan: `docs/superpowers/plans/2026-09-21-phase5a-jev-composed.md`);
+5b and 5c follow on the same branch. The user wanted all of the following done in one go, without stopping for
+questions that the documents already answer:
 
 1. **Review PR #3**: read its review comments (`gh pr view 3 --comments`, `gh api
    repos/zack-maz/brain-bakeoff/pulls/3/comments`), run a code review of the branch if there are none, fix
