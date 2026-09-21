@@ -1,3 +1,7 @@
+/* The two brand fonts (OFL, viewer/fonts/LICENSE.md). bakeoff/view.py embeds them as base64. */
+@font-face { font-family: "Hanken Grotesk"; font-style: normal; font-weight: 100 900; font-display: swap; src: url(fonts/HankenGrotesk-latin.woff2) format("woff2"); }
+@font-face { font-family: "JetBrains Mono"; font-style: normal; font-weight: 100 800; font-display: swap; src: url(fonts/JetBrainsMono-latin.woff2) format("woff2"); }
+
 :root {
   --paper: #edf0ec;
   --grid: #dde3dd;

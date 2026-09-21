@@ -20,8 +20,10 @@ def test_render_inlines_every_file_and_the_data():
     replay = {"replay_version": 1, "episodes": [], "note": "</script>"}
     page = render_html(replay)
     assert "<link" not in page and "<script src" not in page  # one file: nothing left to fetch
-    for name in ("timeline.js", "tunnel.js", "minds.js", "app.js", "viewer.css"):
+    for name in ("timeline.js", "tunnel.js", "minds.js", "app.js"):
         assert (VIEWER_DIR / name).read_text() in page
+    rules = (VIEWER_DIR / "viewer.css").read_text().split("}\n\n", 1)[1]  # everything after the two font faces
+    assert rules in page
     (data,) = DATA.findall(page)
     assert json.loads(data) == replay
     assert DATA_SLOT not in page
@@ -30,7 +32,29 @@ def test_render_inlines_every_file_and_the_data():
 def test_the_page_makes_no_network_request():
     page = render_html({"episodes": []})
     assert not re.search(r"""(src|href)=["']?(https?:)?//""", page)
-    assert "@import" not in page and "url(" not in page
+    assert "@import" not in page
+    assert all(url.startswith("data:") for url in re.findall(r"url\(([^)]*)\)", page))  # only embedded data
+
+
+def test_the_two_brand_fonts_are_embedded_not_fetched():
+    page = render_html({"episodes": []})
+    fonts = re.findall(r"@font-face\s*{[^}]*}", page)
+    assert len(fonts) == 2
+    assert {re.search(r'font-family:\s*"([^"]+)"', f).group(1) for f in fonts} == {"Hanken Grotesk", "JetBrains Mono"}
+    for face in fonts:
+        (source,) = re.findall(r"url\(([^)]*)\)", face)
+        assert source.startswith("data:font/woff2;base64,") and len(source) > 40_000
+    assert "url(fonts/" not in page and ".woff2" not in page
+
+
+def test_a_stylesheet_url_that_is_not_a_bundled_font_is_an_error(tmp_path):
+    (tmp_path / "index.html").write_text('<link rel="stylesheet" href="a.css">' + DATA_SLOT)
+    (tmp_path / "a.css").write_text("body { background: url(https://example.com/x.png); }")
+    with pytest.raises(ValueError, match="a.css may only load fonts/<name>.woff2"):
+        render_html({}, tmp_path)
+    (tmp_path / "a.css").write_text('@font-face { font-family: "X"; src: url(fonts/missing.woff2) format("woff2"); }')
+    with pytest.raises(FileNotFoundError):
+        render_html({}, tmp_path)
 
 
 def test_a_backslash_in_a_viewer_file_survives(tmp_path):
