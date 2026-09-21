@@ -8,7 +8,12 @@
     ["DNa01", "steering"], ["DNb01", "steering"], ["DNp01", "Giant Fiber, escape jump"], ["DNa02", "logged only"],
   ];
   // the short uppercase tag a runner carries in the tunnel and on its panel
-  const TAGS = { fly: "FLY", jev_composed: "JEV", llm: "LLM", jev: "JEV ONE-SHOT", solver: "SOLVER", random: "RANDOM", always_jump: "JUMPER" };
+  const TAGS = { fly: "FLY", jev_composed: "JEV", llm: "LLM", jev: "JEV ONE-SHOT", solver: "SOLVER", random: "RANDOM", always_jump: "JUMPER",
+    jev_choice: "JEV CHOICE", jev_two_step: "JEV 2-STEP", jev_reader: "JEV READER", llm_composed: "LLM COMPOSED",
+    llm_choice: "LLM CHOICE", llm_two_step: "LLM 2-STEP", llm_reader: "LLM READER" };
+  // players that ask a question set (bakeoff/players/question_sets.py): Jev or the LLM, and the set's name
+  const SET_PLAYER = /^(jev|llm)_(composed|choice|two_step|reader)$/;
+  const isSetPlayer = (player) => SET_PLAYER.test(player) && player !== "jev_composed";
   const tagOf = (player) => TAGS[player] || String(player).toUpperCase();
   const DEATHS = {
     ran_into_gap: "ran straight into a gap",
@@ -165,6 +170,38 @@
     return answer && typeof answer.noul === "number" ? 1 - answer.noul : null;
   }
 
+  // What a question-set player was told (docs/superpowers/specs/2026-09-21-jev-family-design.md): the read tiles as a
+  // grid (darker = more sure it is a gap), each move's yes/no answers as bars, or the Choice it made.
+  function readGrid(answers) {
+    const tiles = Object.keys(answers).map((id) => /^tile_r(\d+)_(c|l\d+|r\d+)$/.exec(id)).filter(Boolean).map((m) => ({
+      row: Number(m[1]), offset: m[2] === "c" ? 0 : (m[2][0] === "l" ? -1 : 1) * Number(m[2].slice(1)), p: answers[m[0]].noul }));
+    if (!tiles.length) return "";
+    const rows = Math.max(...tiles.map((t) => t.row)), window_ = Math.max(...tiles.map((t) => Math.abs(t.offset)));
+    const cells = tiles.map((t) => '<rect x="' + (t.offset + window_) * 12 + '" y="' + (rows - t.row) * 8 +
+      '" width="11" height="7" class="tile"/>' + (typeof t.p === "number" ? '<rect x="' + (t.offset + window_) * 12 + '" y="' +
+      (rows - t.row) * 8 + '" width="11" height="7" class="gap" fill-opacity="' + Math.max(0, Math.min(1, t.p)).toFixed(2) + '"/>' : "")).join("");
+    return '<p class="label">What it read (darker = more sure it is a gap)</p><svg class="senses" viewBox="0 0 ' +
+      (2 * window_ + 1) * 12 + " " + rows * 8 + '" role="img" aria-label="the ' + tiles.length + ' tiles it read">' + cells + "</svg>";
+  }
+
+  function setMind(frame) {
+    const answers = frame.answers;
+    if (!answers) return "";
+    const noul = (id) => (answers[id] && typeof answers[id].noul === "number" ? answers[id].noul : null);
+    const kinds = [["gap_", "lands on a gap"], ["trapped_", "dead end after"]].filter(([prefix]) => ACTIONS.some((a) => answers[prefix + a]));
+    let html = readGrid(answers);
+    if (kinds.length) {
+      html += '<table class="probs"><tr><th></th>' + kinds.map(([, label]) => "<th>" + label + "</th>").join("") + "</tr>" +
+        ACTIONS.map((a) => "<tr" + (a === frame.chosen_action ? ' class="picked"' : "") + "><th>" + a + "</th>" +
+          kinds.map(([prefix]) => { const p = noul(prefix + a); return "<td>" + (p == null ? "–" : bar(p) + " " + percent(p)) + "</td>"; }).join("") +
+          "</tr>").join("") + "</table>";
+    }
+    if (answers.action && answers.action.choice != null) html += '<p class="label">Chose ' + esc(answers.action.choice) + "</p>";
+    if (answers.stop_reason != null && answers.stop_reason !== "end_turn") html += '<p class="warn">stopped: ' + esc(answers.stop_reason) + "</p>";
+    const rule = frame.info && frame.info.rule ? esc(frame.info.rule) : "its rule";
+    return html + '<p class="muted">Code picks the move from these answers by ' + rule + ". The questions and that rule are ours.</p>";
+  }
+
   function llmMind(frame) {
     const answers = frame.answers;
     if (!answers) return "";
@@ -215,7 +252,8 @@
     const body = episode.player === "fly" ? flyMind(frame, context)
       : episode.player === "jev" ? jevMind(frame)
       : episode.player === "jev_composed" ? jevComposedMind(frame)
-      : episode.player === "llm" ? llmMind(frame) : "";
+      : episode.player === "llm" ? llmMind(frame)
+      : isSetPlayer(episode.player) ? setMind(frame) : "";
     return '<div class="saw">' + sensesGrid(frame, context.window) + verdict(frame) + "</div>" + body + cost(frame) + asked(episode, frame);
   }
 
@@ -229,7 +267,7 @@
   }
 
   const api = { esc, cell, bar, tagOf, sensesGrid, verdict, spikeRaster, flyMind, jevMind, jevComposedMind, visorP, llmMind, cost, asked,
-                ours, mind, statusLine };
+                ours, mind, statusLine, isSetPlayer, readGrid, setMind };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Minds = api;
 })(typeof window !== "undefined" ? window : globalThis);

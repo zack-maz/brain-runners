@@ -40,7 +40,7 @@ neither). The cap works as in `run`: per paid player, default 0, which makes a f
 answers are already cached; a live paid run on a seed below 1000 is refused without `--tournament`. `live`
 builds one fly brain; do not start a second fly process next to it. Afterwards `view` replays the directory.
 
-Paid players (`jev`, `jev_composed`, `llm`) need `TYPESAFE_API_KEY` / `ANTHROPIC_API_KEY` in a git-ignored `.env`
+Paid players (`jev`, `jev_composed`, `llm` and the question-set players below) need `TYPESAFE_API_KEY` / `ANTHROPIC_API_KEY` in a git-ignored `.env`
 file at the repo root (template: `.env.example`). They spend nothing unless told to:
 
     uv run python -m bakeoff run --players jev --seeds 1 --seed-start 1000 --max-requests 300 --game v1
@@ -51,6 +51,13 @@ questions in one request ("would `left` land on a gap, that is, does `ahead[0].g
 jump. The wording and that rule are ours, not TypeSafe's, and it looks one step ahead only. The
 one-shot `jev` stays for comparison: on the dangerous states of practice track 1000 its single Choice
 landed on a gap about as often as always staying (`docs/DECISIONS.md`, decisions 14 and 15).
+
+Three more ways to ask Jev, and an LLM twin for each way (decisions 25 and 26): `jev_choice` asks one Choice whose
+options name each move's landing tile, `jev_two_step` asks eight yes/no questions (each move's landing, and whether it
+leaves a way on), `jev_reader` asks about every visible tile and code plans over its answers like the solver.
+`llm_composed`, `llm_choice`, `llm_two_step` and `llm_reader` ask Claude Haiku exactly the same questions and use the
+same rule, so the model is the only difference. The questions and the rules are ours
+(`bakeoff/players/question_sets.py`).
 
 `--max-requests` is a hard cap on live requests for **each** paid player in the run; the default 0
 only replays `.cache/responses`. Every answer is cached, so a repeated run of the same game and track

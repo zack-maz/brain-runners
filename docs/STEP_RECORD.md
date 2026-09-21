@@ -38,8 +38,8 @@ use the next record's `row`/`lane`, or derive the landing tile as below.
 | `lane` | int | lane at decision time, `0 .. lanes-1` (starts at `lanes // 2`, i.e. 6) |
 | `senses` | object | exactly what the player was shown, see below |
 | `looming` | `{left_hz, right_hz}` | floats, the fly's eye rates for these senses: each visible gap adds `gain_hz / row ** falloff` to its eye (own lane: both eyes), the sum is capped at `max_hz` and rounded to the nearest `step_hz` (so 11 levels, 0 to 250). Ours, not the fly's biology |
-| `questions` | object or null | what a paid player was asked, else null. Jev: `{action, gap_ahead, left_safe}`, each `{type: "choice" \| "noul", instructions, criteria?}`. Composed Jev: `{gap_left, gap_stay, gap_right, gap_jump}`, four Nouls. LLM: `{system, schema, max_tokens}`; its user message is the `senses` as JSON |
-| `answers` | object or null | Jev: `{action: {type, choice, confidence, probabilities: {left, right, jump, stay}}, gap_ahead: {type, noul}, left_safe: {type, noul}}`, `noul` being the probability of yes. Composed Jev: `{gap_left: {type, noul}, gap_stay, gap_right, gap_jump}`, each the probability that the action lands on a gap. LLM: `{text, stop_reason}`, `text` being the raw JSON it returned. Null after an `error` |
+| `questions` | object or null | what a paid player was asked, else null. Jev: `{action, gap_ahead, left_safe}`, each `{type: "choice" \| "noul", instructions, criteria?}`. Composed Jev: `{gap_left, gap_stay, gap_right, gap_jump}`, four Nouls. LLM: `{system, schema, max_tokens}`; its user message is the `senses` as JSON. Question-set players (`jev_choice`, `jev_two_step`, `jev_reader`): the set's questions, in Jev's form. Their LLM twins (`llm_<set>`): `{system, schema, max_tokens, questions}`, `questions` being the same set |
+| `answers` | object or null | Jev: `{action: {type, choice, confidence, probabilities: {left, right, jump, stay}}, gap_ahead: {type, noul}, left_safe: {type, noul}}`, `noul` being the probability of yes. Composed Jev: `{gap_left: {type, noul}, gap_stay, gap_right, gap_jump}`, each the probability that the action lands on a gap. LLM: `{text, stop_reason}`, `text` being the raw JSON it returned. Question-set players: one entry per question id in Jev's form (`{noul}` or `{choice}`); an LLM twin's entries are read from its JSON, plus `text` and `stop_reason`. Null after an `error` |
 | `chosen_action` | string or null | what the player asked for. May be an invalid string, or null if it gave none |
 | `executed_action` | string | what the game ran: `left`, `right`, `jump` or `stay`. Equals `chosen_action` unless a fallback applied |
 | `solver_action` | string | the reference solver's move on the same senses: the first action, in the order `stay, left, right, jump`, with the maximum depth |
@@ -102,6 +102,16 @@ wording of the questions are ours. It is `invalid` when any of the four Nouls is
 finite number, and never `gated`. The report scores its Nouls (`brier_gap_left` and so on) against what
 the record's `senses` show (`bakeoff.senses.lands_on_gap`), since that is what the questions ask;
 `ground_truth` keeps its two keys.
+
+The question-set players (`bakeoff/players/question_sets.py`, `set_players.py`) ask one set each: `composed` (the
+composed Jev's four Nouls; Jev's own player is `jev_composed`), `choice` (one Choice whose options name each move's
+landing tile), `two_step` (the four landing Nouls plus `trapped_<action>`: would every move after this one land on a
+gap?) and `reader` (`tile_r<row>_<side>`, one Noul per visible tile, e.g. `tile_r2_l3`). `jev_<set>` asks Jev,
+`llm_<set>` asks Claude Haiku the same questions in one structured request. The set's rule picks the move from the
+answers and is named in `info.rule` (with `info.set` and `info.order`); every wording and every rule is ours. A
+decision is `invalid` unless every answer is usable (a Noul a finite number from 0 to 1, the Choice one of the four
+moves; for an LLM twin also JSON with `stop_reason` `end_turn`). The report's `brier_all` scores every Noul whose
+truth the senses show (`bakeoff.senses.truth_of`).
 
 ## The landing tile
 

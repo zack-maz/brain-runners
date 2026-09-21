@@ -7,14 +7,14 @@ import statistics
 from collections import defaultdict
 from pathlib import Path
 
-from bakeoff.senses import LANDS, lands_on_gap
+from bakeoff.senses import truth_of
 
 COLUMNS = ("player", "runs", "incomplete", "missing", "mean_rows", "median_rows", "finished",
            "ran_into_gap", "jumped_into_gap", "dodged_into_gap", "jump_share", "solver_agreement",
            "fallback_rate", "invalid_rate", "error_rate",
            "requests", "spent", "cache_hits", "mean_latency_ms", "input_tokens", "output_tokens", "cost_usd",
            "brier_gap_ahead", "brier_left_safe",
-           "brier_gap_left", "brier_gap_stay", "brier_gap_right", "brier_gap_jump")
+           "brier_gap_left", "brier_gap_stay", "brier_gap_right", "brier_gap_jump", "brier_all")
 
 # USD per million tokens (input, output), by the model id in meta.json. Jev is absent: only a blended
 # figure from its console is known (docs/COSTS.md), not an input and an output price, so its cost
@@ -75,23 +75,30 @@ def _cost_usd(model: str | None, input_tokens: int, output_tokens: int) -> float
 
 
 def _truth(step: dict, noul: str) -> bool | None:
-    """The logged `ground_truth` for the one-shot Jev's two Nouls. The composed Jev's `gap_<action>`
-    Nouls ask what the senses show, so their truth is read from the record's senses."""
+    """The logged `ground_truth` for the one-shot Jev's two Nouls. The question sets' Nouls (`gap_<action>`,
+    `trapped_<action>`, `tile_r<row>_<side>`) ask what the senses show, so their truth is read from the
+    record's senses (bakeoff.senses.truth_of)."""
     truth = (step.get("ground_truth") or {}).get(noul)
-    if truth is None and noul.removeprefix("gap_") in LANDS and step.get("senses"):
-        truth = lands_on_gap(step["senses"], noul.removeprefix("gap_"))
+    if truth is None and step.get("senses"):
+        truth = truth_of(step["senses"], noul)
     return truth
 
 
-def _brier(steps: list[dict], noul: str) -> float | None:
+def _brier(steps: list[dict], noul: str | None) -> float | None:
     """Mean squared gap between a logged Noul probability and the truth (0 is perfect, 0.25 is what
-    always answering 0.5 scores). Cached answers count: a judgment is a judgment."""
+    always answering 0.5 scores), for one Noul id, or for every Noul whose truth is known when `noul` is
+    None. Cached answers count: a judgment is a judgment."""
     errors = []
     for s in steps:
-        answer = (s.get("answers") or {}).get(noul)
-        truth = _truth(s, noul)
-        if isinstance(answer, dict) and isinstance(answer.get("noul"), (int, float)) and truth is not None:
-            errors.append((answer["noul"] - float(truth)) ** 2)
+        answers = s.get("answers") or {}
+        for qid in (answers if noul is None else (noul,)):
+            answer = answers.get(qid)
+            if not isinstance(answer, dict) or isinstance(answer.get("noul"), bool) \
+                    or not isinstance(answer.get("noul"), (int, float)):
+                continue
+            truth = _truth(s, qid)
+            if truth is not None:
+                errors.append((answer["noul"] - float(truth)) ** 2)
     return _mean(errors)
 
 
@@ -129,6 +136,7 @@ def _summarize_player(player: str, steps: list[dict], model: str | None = None) 
         "cost_usd": _cost_usd(model, input_tokens, output_tokens),
         "brier_gap_ahead": _brier(steps, "gap_ahead"), "brier_left_safe": _brier(steps, "left_safe"),
         **{f"brier_gap_{action}": _brier(steps, f"gap_{action}") for action in ("left", "stay", "right", "jump")},
+        "brier_all": _brier(steps, None),
     }
 
 

@@ -221,12 +221,22 @@ def test_brier_scores_the_composed_jevs_four_nouls_against_what_the_senses_show(
     assert row["brier_gap_right"] == 0.0
     assert row["brier_gap_jump"] == pytest.approx(0.5 ** 2 / 2)
     assert row["brier_gap_ahead"] is None and row["brier_left_safe"] is None  # it is not asked those
+    assert row["brier_all"] == pytest.approx((0.1 ** 2 + 0.3 ** 2 + 0 + 0.5 ** 2 + 0.2 ** 2 + 0.1 ** 2 + 0 + 0) / 8)
 
 
-def test_the_four_composed_columns_close_the_table_and_are_empty_for_everyone_else():
-    assert COLUMNS[-4:] == ("brier_gap_left", "brier_gap_stay", "brier_gap_right", "brier_gap_jump")
+def test_brier_all_scores_every_question_set_noul_it_can_check():
+    senses = {"ahead": [{"row": r, "gaps_relative": [0] if r == 1 else []} for r in range(1, 7)]}
+    answers = {"tile_r1_c": {"noul": 0.8}, "tile_r2_l1": {"noul": 0.4}, "trapped_stay": {"noul": 0.5},
+               "tile_r9_c": {"noul": 1.0}, "text": "{}", "stop_reason": "end_turn", "flag": {"noul": True}}
+    (row,) = summarize([step(player="llm_reader", senses=senses, ground_truth={}, answers=answers)])
+    assert row["brier_all"] == pytest.approx((0.2 ** 2 + 0.4 ** 2 + 0.5 ** 2) / 3)  # row 9 is out of view
+    assert row["brier_gap_left"] is None
+
+
+def test_the_four_composed_columns_then_brier_all_close_the_table():
+    assert COLUMNS[-5:] == ("brier_gap_left", "brier_gap_stay", "brier_gap_right", "brier_gap_jump", "brier_all")
     (row,) = summarize([step(answers={"gap_ahead": {"type": "noul", "noul": 0.5}}, ground_truth={"gap_ahead": True})])
-    assert [row[c] for c in COLUMNS[-4:]] == [None] * 4 and row["brier_gap_ahead"] == 0.25
+    assert [row[c] for c in COLUMNS[-5:-1]] == [None] * 4 and row["brier_gap_ahead"] == row["brier_all"] == 0.25
 
 
 def test_small_amounts_keep_four_decimals_in_the_table():

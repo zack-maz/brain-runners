@@ -223,3 +223,34 @@ test("the status line says how an episode ended", () => {
   const hostile = { ...episode, rows_survived: "<script>" };
   for (const status of ["dead", "cut", "finished"]) assert.doesNotMatch(Minds.statusLine(hostile, { status }, 12), /<script>/);
 });
+
+test("question-set players get the set panel; the composed Jev and the one-shots keep theirs", () => {
+  assert.deepEqual(["jev_choice", "jev_two_step", "jev_reader", "llm_composed", "llm_choice", "llm_two_step", "llm_reader"]
+    .map(Minds.isSetPlayer), [true, true, true, true, true, true, true]);
+  assert.deepEqual(["jev_composed", "jev", "llm", "fly", "jev_other"].map(Minds.isSetPlayer), [false, false, false, false, false]);
+  assert.equal(Minds.tagOf("jev_two_step"), "JEV 2-STEP");
+  assert.equal(Minds.tagOf("llm_reader"), "LLM READER");
+});
+
+test("the two-step panel shows both answers per move, marks the move made and names the rule as ours", () => {
+  const answers = {};
+  for (const a of ["left", "stay", "right", "jump"]) { answers["gap_" + a] = { noul: 0.1 }; answers["trapped_" + a] = { noul: 0.2 }; }
+  const html = Minds.setMind(frame({ answers, chosen_action: "left", info: { rule: "lowest_two_step_risk" } }));
+  assert.match(html, /lands on a gap<\/th><th>dead end after/);
+  assert.match(html, /<tr class="picked"><th>left<\/th>/);
+  assert.equal(count(html, "10%"), 4);
+  assert.match(html, /by lowest_two_step_risk\. The questions and that rule are ours\./);
+});
+
+test("the reader panel draws what it read, darker for surer gaps, and escapes a choice and a stop reason", () => {
+  const answers = { tile_r1_c: { noul: 0.9 }, tile_r1_l1: { noul: 0 }, tile_r1_r1: { noul: 0.25 }, tile_r2_c: { noul: 1 },
+                    tile_r2_l1: { noul: 0 }, tile_r2_r1: { noul: 0 } };
+  const html = Minds.setMind(frame({ answers, info: null }));
+  assert.match(html, /aria-label="the 6 tiles it read"/);
+  assert.match(html, /fill-opacity="0\.90"/);
+  assert.match(html, /by its rule\./);
+  const odd = Minds.setMind(frame({ answers: { action: { choice: "<b>" }, stop_reason: "<i>" } }));
+  assert.match(odd, /Chose &#60;b&#62;/);
+  assert.match(odd, /stopped: &#60;i&#62;/);
+  assert.equal(Minds.readGrid({ gap_left: { noul: 0.1 } }), "");
+});
