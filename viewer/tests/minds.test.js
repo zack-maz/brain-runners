@@ -147,6 +147,17 @@ test("Minds.ours names the calibrated four and says the rest were not tuned", ()
   assert.match(html, /cap, the step and the window length are fixed design choices of ours and were not tuned/);
 });
 
+test("Minds.ours says the fly was calibrated on v1 and not retuned for any other game", () => {
+  const looming = { gain_hz: 25, falloff: 1, max_hz: 250, step_hz: 25 };
+  const game = (version) => flyRun({ game: { version, looming } });
+  assert.match(Minds.ours(flyRun()), /practice tracks 1000 to 1199 of game v1/);
+  assert.doesNotMatch(Minds.ours(flyRun()), /not retuned/); // a run from before versions was v1
+  assert.doesNotMatch(Minds.ours(game("v1")), /not retuned/);
+  assert.match(Minds.ours(game("v2")), /This run is game v2; the fly was not retuned for it\./);
+  assert.match(Minds.ours(game("v1+look8")), /This run is game v1\+look8; the fly was not retuned for it\./);
+  assert.match(Minds.ours(game("<b>")), /This run is game &#60;b&#62;;/); // escaped like every log value
+});
+
 test("composed Jev shows its four answers with the chosen action marked, and says what is ours", () => {
   const answers = { gap_left: { noul: 0.97 }, gap_stay: { noul: 0.02 }, gap_right: { noul: 0.5 }, gap_jump: { noul: 0.01 } };
   const info = { model: "jev-latest", rule: "lowest_gap_probability", order: ["stay", "left", "right", "<b>jump</b>"] };

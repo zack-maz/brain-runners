@@ -205,7 +205,7 @@
         : "<li>The gain, the falloff and the two thresholds were chosen once, by a rule fixed beforehand, on practice tracks " +
           "1000 to 1199 of game v1 that are not in the tournament, then frozen (calibration/REPORT.md)." +
           // a run from before game versions has no version and was v1
-          (run.game.version && !run.game.version.startsWith("v1")
+          (run.game.version && run.game.version !== "v1"
             ? " This run is game " + esc(run.game.version) + "; the fly was not retuned for it." : "") +
           " The cap, the step and the window length are fixed design choices of ours and were not tuned.</li>");
   }
