@@ -40,11 +40,19 @@ def _stylesheet(path: Path) -> str:
     return _CSS_URL.sub(embed, css)
 
 
-def render_html(replay: dict, viewer_dir: Path | str = VIEWER_DIR) -> str:
+def render_html(replay: dict, viewer_dir: Path | str = VIEWER_DIR, live: str | None = None) -> str:
+    """`live`: the path of the event stream of `bakeoff live`. The page then also listens there; a
+    replay file has no such attribute and never looks for a server."""
     viewer_dir = Path(viewer_dir)
     page = (viewer_dir / "index.html").read_text(encoding="utf-8")
     if page.count(DATA_SLOT) != 1:
         raise ValueError(f"{viewer_dir / 'index.html'} must contain the replay data slot exactly once")
+    if live is not None:
+        if not re.fullmatch(r"/[a-z]+", live):
+            raise ValueError(f"live must be a path like /events, not {live!r}")
+        if page.count("<body>") != 1:
+            raise ValueError(f"{viewer_dir / 'index.html'} must contain <body> exactly once")
+        page = page.replace("<body>", f'<body data-live="{live}">')
     # lambdas, so that a backslash in a file is never read as a regex group reference
     page = _STYLESHEET.sub(lambda m: "<style>\n" + _stylesheet(viewer_dir / m.group(1)) + "</style>", page)
     page = _SCRIPT.sub(lambda m: "<script>\n" + (viewer_dir / m.group(1)).read_text(encoding="utf-8") + "</script>", page)
