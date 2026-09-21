@@ -1,8 +1,10 @@
 # Step record and `meta.json` (schema version 1)
 
-The contract between the runner (Python) and the phase 4 replay viewer (JavaScript, which cannot
-import Python). The code that writes it is `bakeoff/runner.py`; the spec's "Step record" section
-is the short version and points here.
+The contract between the runner and everything that reads a run: the report and
+`bakeoff/replay.py`, which turns run directories into the replay viewer's data
+(`docs/REPLAY_DATA.md`; the viewer is JavaScript and cannot import Python, so the rules below are
+applied once, in Python). The code that writes it is `bakeoff/runner.py`; the spec's "Step record"
+section is the short version and points here.
 
 ## Files in a run directory
 
@@ -36,8 +38,8 @@ use the next record's `row`/`lane`, or derive the landing tile as below.
 | `lane` | int | lane at decision time, `0 .. lanes-1` (starts at `lanes // 2`, i.e. 6) |
 | `senses` | object | exactly what the player was shown, see below |
 | `looming` | `{left_hz, right_hz}` | floats, the fly's eye rates for these senses: each visible gap adds `gain_hz / row ** falloff` to its eye (own lane: both eyes), the sum is capped at `max_hz` and rounded to the nearest `step_hz` (so 11 levels, 0 to 250). Ours, not the fly's biology |
-| `questions` | object or null | questions put to the player (Jev / LLM), else null |
-| `answers` | object or null | the player's answers, else null |
+| `questions` | object or null | what a paid player was asked, else null. Jev: `{action, gap_ahead, left_safe}`, each `{type: "choice" \| "noul", instructions, criteria?}`. LLM: `{system, schema, max_tokens}`; its user message is the `senses` as JSON |
+| `answers` | object or null | Jev: `{action: {type, choice, confidence, probabilities: {left, right, jump, stay}}, gap_ahead: {type, noul}, left_safe: {type, noul}}`, `noul` being the probability of yes. LLM: `{text, stop_reason}`, `text` being the raw JSON it returned. Null after an `error` |
 | `chosen_action` | string or null | what the player asked for. May be an invalid string, or null if it gave none |
 | `executed_action` | string | what the game ran: `left`, `right`, `jump` or `stay`. Equals `chosen_action` unless a fallback applied |
 | `solver_action` | string | the reference solver's move on the same senses: the first action, in the order `stay, left, right, jump`, with the maximum depth |
@@ -51,9 +53,9 @@ use the next record's `row`/`lane`, or derive the landing tile as below.
 | `death_cause` | string or null | `ran_into_gap` (executed `stay`), `jumped_into_gap`, `dodged_into_gap` (executed `left` or `right`); null if alive |
 | `rows_survived` | int | after the move, the rows cleared, capped at `max_rows`. A fatal jump still counts the row it flew over |
 | `latency_ms` | float or null | wall time of a live call; null for players with no call |
-| `usage` | object or null | `{input_tokens, output_tokens}` for paid players |
+| `usage` | object or null | `{input_tokens, output_tokens}` for paid players, as reported by the provider (also on a cache hit: what the original request used) |
 | `cache_hit` | bool | the answer came from the response cache (no request, no cost) |
-| `info` | object or null | player-specific extras (e.g. fly activity), free-form |
+| `info` | object or null | player-specific extras: the fly's activity (below); `{model}` for paid players, the model id the provider reported |
 | `track` | object or null | the full track, present only in the first record of each seed, else null |
 
 The fallback rule: when `gated`, `invalid`, `error` is set, or `chosen_action` is null, the
@@ -84,6 +86,15 @@ only, never decides), each `_left` and `_right`; every group is a single neuron.
 | `jump_signal_hz` | float | Giant Fiber mean over both sides; above `jump_threshold_hz` → `jump`, which wins over a turn |
 | `turn_threshold_hz`, `jump_threshold_hz` | float | the fly's only tuning (ours), as used for this decision |
 | `wall_ms` | float | wall-clock time of the simulated window |
+
+### Paid players
+
+One request per row. `latency_ms` is set only for a live request; `cache_hit: true` means the answer
+came from `.cache/responses` and cost nothing. A provider failure sets `error` (`"<ExceptionName>:
+<message>"`), leaves `answers` null and executes `stay`. The LLM is `invalid` when its text is not
+JSON with a string `action`, the action is unknown, or `stop_reason` is not `end_turn`; Jev is
+`invalid` when its choice is missing or unknown. Jev is never `gated`. The two Nouls never influence
+the move: they are scored against `ground_truth` (same key names) in the report.
 
 ## The landing tile
 
@@ -126,15 +137,21 @@ A track's identity is its seed: the difficulty ramp is fixed at 300 rows, so a r
 | `seeds` | int[] | the seeds planned for this run |
 | `game` | object | `lanes`, `max_rows`, `lookahead`, `window` (visible lanes each side), `looming: {gain_hz, falloff, step_hz, max_hz, provisional}` |
 | `fly` | object | `turn_threshold_hz`, `jump_threshold_hz`, `window_ms`, `provisional` (true until calibrated), `model_commit`, `annotations_commit` |
+| `models` | object | `{player: model id}` for paid players in the run, e.g. `{"jev": "jev-latest", "llm": "claude-haiku-4-5-20251001"}` |
+| `requests` | object | `{player: {max, used}}` for paid players: the `--max-requests` cap and the live requests spent against it, failed ones included. Written at the start with `used: 0` and rewritten when the run ends, so a crashed run may show a stale count |
 | `args` | object | the CLI arguments |
 | `python` | string | interpreter version |
-| `versions` | object | `brian2`, `cython`, `numpy`, `typesafe-sdk`, `anthropic` versions or null |
+| `versions` | object | `brian2`, `cython`, `numpy`, `typesafe-sdk`, `anthropic`, `python-dotenv` versions or null |
 
 Added in phase 2 without a version bump (additions only): `fly`, `game.looming.falloff`,
 `game.looming.step_hz`, and the `cython` / `numpy` entries of `versions`. Runs made before phase 2
 lack them, and their `looming` values were computed with the old weighting (`100 / row`, not
 rounded), so a reader must treat these keys as optional and read the weighting from
 `game.looming`, not assume it.
+
+Added in phase 3 without a version bump (additions only): `models`, `requests`, `args.max_requests`,
+`args.cache`, `args.tournament` and the `python-dotenv` entry of `versions`. Readers must treat them
+as optional.
 
 A run that is not `completed` may lack records for some players or seeds; compare `players` and
 `seeds` with the files to see what is missing.

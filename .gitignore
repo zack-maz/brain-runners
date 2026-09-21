@@ -9,3 +9,5 @@ runs/
 .pytest_cache/
 data/
 .superpowers/
+/replay*.html
+.playwright-mcp/

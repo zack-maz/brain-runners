@@ -162,8 +162,10 @@ Python package `bakeoff/` in this repo, managed with `uv`, tests with `pytest`.
 | `bakeoff/clients/` | Thin Jev and Anthropic clients sharing a disk cache (sha256 of provider, model, senses, questions) and a hard `--max-requests` cap; load keys from `.env` inside the program | typesafe-sdk, anthropic |
 | `bakeoff/runner.py` | Players × seeds, streaming JSONL step log, `meta.json` with `schema_version`, `git_sha`, run arguments and final `status` | all above |
 | `bakeoff/report.py` | Logs → scoreboard (reads files only) | — |
-| `bakeoff/__main__.py` | `uv run python -m bakeoff run|report` | runner, report |
-| `viewer/` | Static HTML replay reading a run's JSONL | — |
+| `bakeoff/replay.py` | Run directories → one replay object: merged runs, landing tiles, scoreboard (reads files only; `docs/REPLAY_DATA.md`) | report |
+| `bakeoff/view.py` | Replay object + `viewer/` → one self-contained HTML file | — |
+| `bakeoff/__main__.py` | `uv run python -m bakeoff run|report|view` | runner, report, replay, view |
+| `viewer/` | Static page that draws the replay object: tunnels side by side, each player's mind, scoreboard. Plain JavaScript, no build step, no network | — |
 
 Carry over from `jev-testing` PR #1, adapting names: `Decision`/`Policy`, the runner's
 streaming log and status handling, the report's complete-episodes-only rule, and the review
