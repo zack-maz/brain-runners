@@ -118,6 +118,19 @@
     the page says so.
 24. **Built as update 1** (plan `docs/superpowers/plans/2026-09-21-update1-game-v2.md`). Amended while prototyping:
     `--max-rows` stays (a shorter track is a prefix of the same game, so it keeps its version).
+25. **The players update (items 1 and 2 of `docs/UPDATES.md`, 2026-09-21).** Measured first, for free, on v2 practice
+    seeds 1000–1199 with perfect answers: the composed Jev's one-step rule averages 112 rows (26% finish), a two-step
+    rule 140 (74%), the solver 149 (97%). The fly's input is two eye rates of 11 levels each, so a trained readout on
+    it could only learn a 121-entry table. The user chose: **the fly** gets richer input first (`fly_rich`,
+    untrained, calibrated once on practice seeds), then a trained readout of ours on the same wiring
+    (`fly_trained`); **three new Jev variants**: `jev_choice` (one Choice whose wording names each move's landing
+    tile), `jev_two_step` (landing plus safe-follow-up questions) and `jev_reader` (Jev reads every visible tile, code
+    plans over its answers); **an LLM twin for every question set** (composed Jev and the three new ones: Claude
+    Haiku answers the same questions, the same rule picks), so the model is the only difference. Built as update 2a
+    (the Jev family and twins), then 2b (the fly).
+26. **Budget for update 2 (2026-09-21):** Claude Haiku up to **5.00 USD** in total, on v2 practice seeds 1000 and up
+    only. Jev spend is not a concern to the user ("jev isn't costing me anything"); its requests stay capped and cached
+    as always. Paid runs start with one capped track.
 
 ## Open
 
