@@ -33,7 +33,9 @@ def test_the_page_makes_no_network_request():
     page = render_html({"episodes": []})
     assert not re.search(r"""(src|href)=["']?(https?:)?//""", page)
     assert "@import" not in page
-    assert all(url.startswith("data:") for url in re.findall(r"url\(([^)]*)\)", page))  # only embedded data
+    styles = "".join(re.findall(r"<style>(.*?)</style>", page, re.S))
+    assert all(url.startswith("data:") for url in re.findall(r"url\(([^)]*)\)", styles, re.I))  # only embedded data
+    assert not re.search(r"@import|image-set|https?:", styles, re.I)
 
 
 def test_the_page_says_what_is_ours_about_jev_and_the_figures():
@@ -67,6 +69,14 @@ def test_a_stylesheet_url_that_is_not_a_bundled_font_is_an_error(tmp_path):
     (tmp_path / "a.css").write_text("body { background: url(https://example.com/x.png); }")
     with pytest.raises(ValueError, match="a.css may only load fonts/<name>.woff2"):
         render_html({}, tmp_path)
+    # url() is case-insensitive in CSS, and it is not the only way a stylesheet can fetch something
+    for css in ("body { background: URL(https://example.com/x.png); }", "body { background: Url( 'fonts/../x.woff2' ); }",
+                '@import "https://example.com/a.css";', "@IMPORT 'b.css';",
+                'body { background: image-set("https://example.com/x.png" 1x); }',
+                "/* see http://example.com */ body { color: red; }"):
+        (tmp_path / "a.css").write_text(css)
+        with pytest.raises(ValueError, match="a.css may only load fonts/<name>.woff2"):
+            render_html({}, tmp_path)
     (tmp_path / "a.css").write_text('@font-face { font-family: "X"; src: url(fonts/missing.woff2) format("woff2"); }')
     with pytest.raises(FileNotFoundError):
         render_html({}, tmp_path)

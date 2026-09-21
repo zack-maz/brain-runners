@@ -11,7 +11,9 @@ VIEWER_DIR = Path(__file__).resolve().parent.parent / "viewer"
 DATA_SLOT = '<script type="application/json" id="replay-data">null</script>'
 _STYLESHEET = re.compile(r'<link rel="stylesheet" href="([^"]+)">')
 _SCRIPT = re.compile(r'<script src="([^"]+)"></script>')
-_CSS_URL = re.compile(r"url\(([^)]*)\)")
+_CSS_URL = re.compile(r"url\(([^)]*)\)", re.IGNORECASE)  # CSS function names are case-insensitive
+# the other ways a stylesheet can fetch something; none has a use in a page that must load nothing
+_CSS_FETCHES = re.compile(r"@import|image-set|https?:", re.IGNORECASE)
 _FONT = re.compile(r"fonts/[A-Za-z0-9_-]+\.woff2")
 
 
@@ -24,13 +26,18 @@ def embed_json(value) -> str:
 def _stylesheet(path: Path) -> str:
     """A stylesheet with its fonts embedded as base64, so the page stays one file that fetches nothing.
     The only url() a viewer stylesheet may contain is a bundled font, `fonts/<name>.woff2`."""
+    css = path.read_text(encoding="utf-8")
+    other = _CSS_FETCHES.search(css)
+    if other:
+        raise ValueError(f"{path.name} may only load fonts/<name>.woff2, not {other.group(0)!r}")
+
     def embed(match: re.Match) -> str:
-        target = match.group(1).strip("'\"")
+        target = match.group(1).strip().strip("'\"")
         if not _FONT.fullmatch(target):
             raise ValueError(f"{path.name} may only load fonts/<name>.woff2, not {target!r}")
         return "url(data:font/woff2;base64," + base64.b64encode((path.parent / target).read_bytes()).decode("ascii") + ")"
 
-    return _CSS_URL.sub(embed, path.read_text(encoding="utf-8"))
+    return _CSS_URL.sub(embed, css)
 
 
 def render_html(replay: dict, viewer_dir: Path | str = VIEWER_DIR) -> str:
