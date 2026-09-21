@@ -23,6 +23,16 @@ are in `docs/COSTS.md`.
     uv run python -m bakeoff report runs/<run_id>
     uv run python -m bakeoff view runs/<run_id> [runs/<other_run_id> ...]   # writes replay.html
 
+    uv run python -m bakeoff live --seed 1001 --players fly,jev_composed,llm --max-requests 300   # watch it happen
+
+`live` plays one track in real time: every mind decides the same row before anyone moves on (a jumper skips
+the next row; the slowest mind sets the pace, about a row a second with the fly), each decision goes into a
+normal run directory and, through a server on `127.0.0.1` only, into the same page as it happens. It waits
+for a browser to open the page before it starts and keeps serving afterwards until Ctrl-C (`--no-wait` does
+neither). The cap works as in `run`: per paid player, default 0, which makes a free live run of a track whose
+answers are already cached; a live paid run on a seed below 1000 is refused without `--tournament`. `live`
+builds one fly brain; do not start a second fly process next to it. Afterwards `view` replays the directory.
+
 Paid players (`jev`, `jev_composed`, `llm`) need `TYPESAFE_API_KEY` / `ANTHROPIC_API_KEY` in a git-ignored `.env`
 file at the repo root (template: `.env.example`). They spend nothing unless told to:
 

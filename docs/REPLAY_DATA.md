@@ -46,7 +46,23 @@ Frames are sorted by `row`. A jump advances two rows, so rows are not consecutiv
 ## How the viewer uses it
 
 The page never reads this object directly: `viewer/feed.js` hands it over as calls (`onMeta`, then
-`onEpisode` and `onFrame` per episode), the same calls a live run will make, so the two cannot drift apart.
+`onEpisode` and `onFrame` per episode), the same calls a live run makes, so the two cannot drift apart.
+
+## The live stream
+
+`bakeoff live` serves the page with an empty replay (`episodes: []`, the run's entry in `runs`) and
+`<body data-live="/events">`, and streams Server-Sent Events from `/events`, built by the same functions as
+this object (`bakeoff.replay.frame_of`, `summary_of`):
+
+| event | data |
+| --- | --- |
+| `episode` | `{episode, track}`: an episode as above without `frames` (`complete` false, `rows_survived` 0), sent once, just before the player's first frame |
+| `frame` | `{player, seed, frame, summary}`: one frame as above; `summary` is `{complete, finished, death_cause, rows_survived}` after it |
+| `end` | `{status, runs, scoreboard}`: the run's final status and the replay's `runs` and `scoreboard` |
+| `error` | `{message}`: why the run stopped early (a request cap, a provider that kept failing) |
+
+A page that connects late or reconnects gets the whole history again; `viewer/feed.js` drops what it
+already has. After `end` the page closes the stream.
 
 Replay time is measured in rows and every player is on the same clock: at time `t` every runner
 still alive is at row `t`, so they all run the same stretch of one tunnel. The frame on screen is

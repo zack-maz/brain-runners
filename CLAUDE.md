@@ -58,6 +58,11 @@ its own plan.
   `viewer/fonts/` are embedded as base64 by `bakeoff/view.py`). The page is the user's brand: tokens from
   `~/Documents/PROJECTS/BRAND/brand.css`, blue only for the cursor (the mind in focus and its tiles), mono for short
   labels only, deaths and errors `--bad`, warnings `--warn`. Frames reach `app.js` through `Feed` alone.
+- `bakeoff live` (`bakeoff/live.py`, `bakeoff/live_server.py`) plays one track in lockstep by row, records a
+  normal run directory and streams it to the page over Server-Sent Events on `127.0.0.1` only (standard
+  library, no dependency). It builds one fly brain in its own process: never start it next to another fly run.
+  Its records come from `runner.play_row` and its frames from `replay.frame_of`, the same functions `run` and
+  `view` use; keep it that way.
 - Paid players spend nothing without `--max-requests` (default 0 replays `.cache/responses`). Never
   raise a cap, rerun a paid command or run `pytest -m live` without the user's go-ahead. No paid
   request on a seed below 1000 before the tournament; the CLI refuses a live paid run on seeds

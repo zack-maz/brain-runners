@@ -94,9 +94,9 @@
     view.shown = new Set(shown.length ? shown : here);
   }
 
-  function arrived(episode) { // live: a runner joins
+  function arrived(episode) { // live: a runner joins. The operator chose who plays, so everyone is shown.
     if (view.seed == null) view.seed = episode.seed;
-    if (episode.seed === view.seed && (DEMO.includes(episode.player) || !view.shown.size)) view.shown.add(episode.player);
+    if (episode.seed === view.seed) view.shown.add(episode.player);
     renderAll();
   }
 
