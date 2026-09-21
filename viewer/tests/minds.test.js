@@ -141,6 +141,43 @@ test("Minds.ours names the calibrated four and says the rest were not tuned", ()
   assert.match(html, /cap, the step and the window length are fixed design choices of ours and were not tuned/);
 });
 
+test("composed Jev shows its four answers with the chosen action marked, and says what is ours", () => {
+  const answers = { gap_left: { noul: 0.97 }, gap_stay: { noul: 0.02 }, gap_right: { noul: 0.5 }, gap_jump: { noul: 0.01 } };
+  const info = { model: "jev-latest", rule: "lowest_gap_probability", order: ["stay", "left", "right", "<b>jump</b>"] };
+  const html = Minds.mind({ player: "jev_composed", questions: [] }, frame({ answers, info, chosen_action: "jump", executed_action: "jump" }), context());
+  assert.match(html, /Lands on a gap\?/);
+  assert.match(html, /<tr class="picked"><th>jump<\/th>/);
+  assert.equal(count(html, 'class="picked"'), 1);
+  assert.match(html, /<th>left<\/th><td>.*?<\/td><td>97%<\/td>/);
+  assert.match(html, /ties in the order stay, left, right, &#60;b&#62;jump&#60;\/b&#62;/); // from the log, so escaped
+  assert.match(html, /The wording and that rule are ours\. It looks one step ahead only\./);
+  assert.equal(Minds.jevComposedMind(frame()), ""); // after a provider error there are no answers
+  const partial = Minds.jevComposedMind(frame({ answers: { gap_left: { noul: 0.4 } }, chosen_action: null }));
+  assert.equal(count(partial, "–"), 3); // an answer that did not arrive is a dash, never 0%
+  assert.equal(count(partial, 'class="picked"'), 0);
+});
+
+test("the visor shows how sure Jev was that the move it chose is safe", () => {
+  const answers = { gap_left: { noul: 0.97 }, gap_stay: { noul: 0.02 }, gap_right: { noul: 0.5 }, gap_jump: { noul: 0.25 } };
+  assert.equal(Minds.visorP(frame({ answers, chosen_action: "jump" })), 0.75);
+  assert.equal(Minds.visorP(frame({ answers, chosen_action: "stay" })), 0.98);
+  assert.equal(Minds.visorP(frame({ answers, chosen_action: null })), null); // an invalid answer: the slit is dark
+  assert.equal(Minds.visorP(frame({ answers: null })), null);
+  assert.equal(Minds.visorP(frame({ answers: { gap_stay: { noul: "0.1" } } })), null);
+});
+
+test("tags are short and uppercase, and an unknown player still gets one", () => {
+  assert.deepEqual(["fly", "jev_composed", "llm", "jev"].map(Minds.tagOf), ["FLY", "JEV", "LLM", "JEV ONE-SHOT"]);
+  assert.equal(Minds.tagOf("my_bot"), "MY_BOT");
+});
+
+test("a death and an error are marked bad, a stopped run is only a warning", () => {
+  const episode = { rows_survived: 23, death_cause: "ran_into_gap" };
+  assert.match(Minds.statusLine(episode, { status: "dead" }, 12), /^<span class="bad">/);
+  assert.match(Minds.statusLine(episode, { status: "cut" }, 12), /^<span class="warn">/);
+  assert.match(Minds.verdict(frame({ error: "boom", chosen_action: null })), /<p class="bad">boom<\/p>/);
+});
+
 test("Minds.ours shows the provisional warning instead of the calibration sentence", () => {
   const html = Minds.ours(flyRun({ fly: { turn_threshold_hz: 0, jump_threshold_hz: 200, window_ms: 100, provisional: true } }));
   assert.match(html, /provisional when this run was made/);

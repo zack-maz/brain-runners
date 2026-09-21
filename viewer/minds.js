@@ -7,6 +7,9 @@
   const FLY_GROUPS = [
     ["DNa01", "steering"], ["DNb01", "steering"], ["DNp01", "Giant Fiber, escape jump"], ["DNa02", "logged only"],
   ];
+  // the short uppercase tag a runner carries in the tunnel and on its panel
+  const TAGS = { fly: "FLY", jev_composed: "JEV", llm: "LLM", jev: "JEV ONE-SHOT", solver: "SOLVER", random: "RANDOM", always_jump: "JUMPER" };
+  const tagOf = (player) => TAGS[player] || String(player).toUpperCase();
   const DEATHS = {
     ran_into_gap: "ran straight into a gap",
     jumped_into_gap: "jumped into a gap",
@@ -64,7 +67,7 @@
       : depth === best ? "as good as any move (" + esc(best) + " rows seen safe)"
       : "solver preferred " + safe.join(" or ") + " (" + esc(best) + " rows safe, this move " + esc(depth) + ")";
     return '<p class="verdict">' + line + '<br><span class="muted">' + rating + "</span></p>" +
-      (frame.error != null ? '<p class="warn">' + esc(frame.error) + "</p>" : "");
+      (frame.error != null ? '<p class="bad">' + esc(frame.error) + "</p>" : "");
   }
 
   // windowMs null: the window is unknown, so the x axis is scaled by the frame's own latest spike instead
@@ -139,6 +142,28 @@
     return html + '<p class="muted">The two yes/no questions are asked alongside the move and never influence it.</p>';
   }
 
+  // Composed Jev: four yes/no answers, one per action, and the rule that turns them into a move.
+  function jevComposedMind(frame) {
+    const answers = frame.answers;
+    if (!answers) return "";
+    const rows = ACTIONS.map((a) => {
+      const noul = (answers["gap_" + a] || {}).noul;
+      const known = typeof noul === "number";
+      return "<tr" + (a === frame.chosen_action ? ' class="picked"' : "") + "><th>" + a + "</th><td>" + bar(known ? noul : 0) +
+        "</td><td>" + (known ? percent(noul) : "–") + "</td></tr>";
+    }).join("");
+    const order = frame.info && Array.isArray(frame.info.order) ? frame.info.order.map(esc).join(", ") : null;
+    return '<p class="label">Lands on a gap?</p><table class="probs">' + rows + "</table>" +
+      '<p class="muted">Four yes/no questions in one request; code picks the lowest' + (order ? ", ties in the order " + order : "") +
+      ". The wording and that rule are ours. It looks one step ahead only.</p>";
+  }
+
+  // How sure the composed Jev was that the move it chose does not land on a gap (the visor's slit), or null
+  function visorP(frame) {
+    const answer = (frame.answers || {})["gap_" + frame.chosen_action];
+    return answer && typeof answer.noul === "number" ? 1 - answer.noul : null;
+  }
+
   function llmMind(frame) {
     const answers = frame.answers;
     if (!answers) return "";
@@ -185,6 +210,7 @@
   function mind(episode, frame, context) {
     const body = episode.player === "fly" ? flyMind(frame, context)
       : episode.player === "jev" ? jevMind(frame)
+      : episode.player === "jev_composed" ? jevComposedMind(frame)
       : episode.player === "llm" ? llmMind(frame) : "";
     return '<div class="saw">' + sensesGrid(frame, context.window) + verdict(frame) + "</div>" + body + cost(frame) + asked(episode, frame);
   }
@@ -192,13 +218,14 @@
   // one line under the tunnel: where the runner is, or how the episode ended
   function statusLine(episode, state, lanes) {
     const rows = esc(episode.rows_survived);
-    if (state.status === "dead") return '<span class="warn">Fell after ' + rows + " rows: " + (DEATHS[episode.death_cause] || "fell") + "</span>";
+    if (state.status === "dead") return '<span class="bad">Fell after ' + rows + " rows: " + (DEATHS[episode.death_cause] || "fell") + "</span>";
     if (state.status === "finished") return "Reached the finish line, " + rows + " rows";
     if (state.status === "cut") return '<span class="warn">Run stopped after ' + rows + " rows (not a death)</span>";
     return "row " + Math.floor(state.row) + ", lane " + (((Math.round(state.lane) % lanes) + lanes) % lanes);
   }
 
-  const api = { esc, cell, bar, sensesGrid, verdict, spikeRaster, flyMind, jevMind, llmMind, cost, asked, ours, mind, statusLine };
+  const api = { esc, cell, bar, tagOf, sensesGrid, verdict, spikeRaster, flyMind, jevMind, jevComposedMind, visorP, llmMind, cost, asked,
+                ours, mind, statusLine };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Minds = api;
 })(typeof window !== "undefined" ? window : globalThis);

@@ -12,7 +12,9 @@ from bakeoff.report import COLUMNS, load_meta, load_steps, summarize
 
 REPLAY_VERSION = 1
 SCHEMA_VERSION = 1  # the step record this module reads; the runner writes it (a test keeps the two equal)
-CONTESTANTS = ("fly", "jev", "llm")  # shown first, in this order; everyone else in order of appearance
+# shown first, in this order: the demo's three (the composed Jev is its Jev), then the one-shot Jev;
+# everyone else in order of appearance
+CONTESTANTS = ("fly", "jev_composed", "llm", "jev")
 # what a frame leaves out of its step record: the first three name the episode, the others are
 # replaced by `ahead`, `q` and the replay's `tracks`
 DROPPED = ("run_id", "player", "seed", "senses", "questions", "track")

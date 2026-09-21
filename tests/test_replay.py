@@ -117,6 +117,12 @@ def test_runs_are_merged_with_the_contestants_first(tmp_path):
     assert board["same_seeds"] is False  # the fly played a seed the others did not
 
 
+def test_the_demos_three_come_first_then_the_one_shot_jev(tmp_path):
+    run_dir = write_run(tmp_path, "a", [record(p, track=TRACK) for p in ("jev", "llm", "solver", "jev_composed", "fly")],
+                        meta={"players": ["jev", "llm", "solver", "jev_composed", "fly"], "seeds": [0]})
+    assert build_replay([run_dir])["players"] == ["fly", "jev_composed", "llm", "jev", "solver"]
+
+
 def test_other_players_keep_the_order_the_run_planned(tmp_path):
     run_dir = write_run(tmp_path, "a", [record("solver", track=TRACK), record("always_jump", track=TRACK),
                                         record("fly", track=TRACK)],

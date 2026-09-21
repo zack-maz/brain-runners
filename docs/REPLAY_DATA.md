@@ -11,7 +11,7 @@ records it is built from are described in `docs/STEP_RECORD.md`.
 | --- | --- | --- |
 | `replay_version` | int | 1. Bumped on any breaking change to this object |
 | `runs` | object[] | one per run directory, in the order given: `run_id` plus these keys of its `meta.json`, null when absent: `status`, `git_sha`, `git_dirty`, `started_at`, `finished_at`, `players`, `seeds`, `game`, `fly`, `models`, `requests`. A directory without `meta.json` is named after the directory |
-| `players` | string[] | players with at least one episode: `fly`, `jev`, `llm` first, the others in the order the runs planned them |
+| `players` | string[] | players with at least one episode: `fly`, `jev_composed`, `llm` (the demo's three), then `jev`, then the others in the order the runs planned them |
 | `seeds` | int[] | every seed with at least one episode, ascending |
 | `tracks` | object | `{"<seed>": track}`, the step record's `track`. When runs played the same seed with different `max_rows`, the longest is kept (the shorter one is its prefix) |
 | `episodes` | object[] | one per (player, seed), sorted by seed, then by `players` order |
