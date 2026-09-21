@@ -86,6 +86,55 @@ def _requests(players: list[Player]) -> dict:
             for p in players if getattr(p, "budget", None) is not None}
 
 
+def play_row(player: Player, game: Game, seed: int, run_id: str, first: bool) -> dict:
+    """One decision and one move: asks the player, applies the fallback rule, steps the game and
+    returns the step record. The runner and the live loop both build their records here, so a
+    live run's log is a normal log. `first`: the episode's first record carries the track."""
+    senses = compute_senses(game)
+    left_hz, right_hz = looming_rates(senses)
+    truth = ground_truth(game)
+    depths = solve_depths(senses)
+    row, lane = game.row, game.lane
+    decision = player.act(senses)
+    invalid = decision.invalid or (
+        decision.chosen_action is not None and decision.chosen_action not in ACTIONS)
+    executed = FALLBACK_ACTION if decision.needs_fallback or invalid else decision.chosen_action
+    game.step(executed)
+    player.observe(executed)
+    return {
+        "run_id": run_id, "player": player.name, "seed": seed, "row": row, "lane": lane,
+        "senses": senses, "looming": {"left_hz": left_hz, "right_hz": right_hz},
+        "questions": decision.questions, "answers": decision.answers,
+        "chosen_action": decision.chosen_action, "executed_action": executed,
+        "solver_action": max(depths, key=depths.get), "solver_depths": depths,
+        "gated": decision.gated, "invalid": invalid, "error": decision.error,
+        "ground_truth": truth, "alive": game.alive, "finished": game.finished, "death_cause": game.death_cause,
+        "rows_survived": game.rows_survived, "latency_ms": decision.latency_ms,
+        "usage": decision.usage, "cache_hit": decision.cache_hit, "info": decision.info,
+        "track": game.track.to_json() if first else None,
+    }
+
+
+def new_meta(run_id: str, players: list[Player], seeds: Sequence[int], max_rows: int, args: dict | None) -> dict:
+    """meta.json as a run starts: status `running`, no finish time yet."""
+    return {
+        "run_id": run_id, "schema_version": SCHEMA_VERSION, "git_sha": _git_sha(), "git_dirty": _git_dirty(),
+        "started_at": _now(), "finished_at": None, "status": "running",
+        "players": [p.name for p in players], "seeds": list(seeds),
+        "game": {"lanes": LANES, "max_rows": max_rows, "lookahead": LOOKAHEAD, "window": WINDOW,
+                 "looming": {"gain_hz": LOOMING_GAIN_HZ, "falloff": LOOMING_FALLOFF, "step_hz": LOOMING_STEP_HZ,
+                             "max_hz": MAX_HZ, "provisional": not fly.CALIBRATED}},
+        "fly": {"turn_threshold_hz": fly.TURN_THRESHOLD_HZ, "jump_threshold_hz": fly.JUMP_THRESHOLD_HZ,
+                "window_ms": WINDOW_MS, "provisional": not fly.CALIBRATED,
+                "model_commit": fly_data.MODEL_REPO_COMMIT, "annotations_commit": fly_data.ANNOTATIONS_COMMIT},
+        "models": {p.name: p.model for p in players if getattr(p, "model", None)},
+        "requests": _requests(players),
+        "args": args or {}, "python": platform.python_version(),
+        "versions": {pkg: _version(pkg) for pkg in ("brian2", "cython", "numpy", "typesafe-sdk", "anthropic",
+                                                     "python-dotenv")},
+    }
+
+
 class Runner:
     def __init__(self, out_root: Path | str = "runs", max_consecutive_errors: int = 5):
         self.out_root = Path(out_root)
@@ -101,35 +150,13 @@ class Runner:
         player.reset(game, seed)
         records: list[dict] = []
         while not game.over:
-            senses = compute_senses(game)
-            left_hz, right_hz = looming_rates(senses)
-            truth = ground_truth(game)
-            depths = solve_depths(senses)
-            row, lane = game.row, game.lane
-            decision = player.act(senses)
-            invalid = decision.invalid or (
-                decision.chosen_action is not None and decision.chosen_action not in ACTIONS)
-            executed = FALLBACK_ACTION if decision.needs_fallback or invalid else decision.chosen_action
-            game.step(executed)
-            player.observe(executed)
-            record = {
-                "run_id": run_id, "player": player.name, "seed": seed, "row": row, "lane": lane,
-                "senses": senses, "looming": {"left_hz": left_hz, "right_hz": right_hz},
-                "questions": decision.questions, "answers": decision.answers,
-                "chosen_action": decision.chosen_action, "executed_action": executed,
-                "solver_action": max(depths, key=depths.get), "solver_depths": depths,
-                "gated": decision.gated, "invalid": invalid, "error": decision.error,
-                "ground_truth": truth, "alive": game.alive, "finished": game.finished, "death_cause": game.death_cause,
-                "rows_survived": game.rows_survived, "latency_ms": decision.latency_ms,
-                "usage": decision.usage, "cache_hit": decision.cache_hit, "info": decision.info,
-                "track": track.to_json() if not records else None,
-            }
+            record = play_row(player, game, seed, run_id, first=not records)
             records.append(record)
             if sink is not None:
                 sink(record)
-            self._error_streak = self._error_streak + 1 if decision.error is not None else 0
+            self._error_streak = self._error_streak + 1 if record["error"] is not None else 0
             if self._error_streak > self.max_consecutive_errors:
-                raise RunAborted(f"{self._error_streak} consecutive player errors; last: {decision.error}")
+                raise RunAborted(f"{self._error_streak} consecutive player errors; last: {record['error']}")
         return records
 
     def run(self, players: list[Player], seeds: Sequence[int], max_rows: int = MAX_ROWS,
@@ -143,22 +170,7 @@ class Runner:
         run_dir = self.out_root / run_id
         run_dir.mkdir(parents=True, exist_ok=False)
         meta_path = run_dir / "meta.json"
-        meta = {
-            "run_id": run_id, "schema_version": SCHEMA_VERSION, "git_sha": _git_sha(), "git_dirty": _git_dirty(),
-            "started_at": _now(), "finished_at": None, "status": "running",
-            "players": names, "seeds": list(seeds),
-            "game": {"lanes": LANES, "max_rows": max_rows, "lookahead": LOOKAHEAD, "window": WINDOW,
-                     "looming": {"gain_hz": LOOMING_GAIN_HZ, "falloff": LOOMING_FALLOFF, "step_hz": LOOMING_STEP_HZ,
-                                 "max_hz": MAX_HZ, "provisional": not fly.CALIBRATED}},
-            "fly": {"turn_threshold_hz": fly.TURN_THRESHOLD_HZ, "jump_threshold_hz": fly.JUMP_THRESHOLD_HZ,
-                    "window_ms": WINDOW_MS, "provisional": not fly.CALIBRATED,
-                    "model_commit": fly_data.MODEL_REPO_COMMIT, "annotations_commit": fly_data.ANNOTATIONS_COMMIT},
-            "models": {p.name: p.model for p in players if getattr(p, "model", None)},
-            "requests": _requests(players),
-            "args": args or {}, "python": platform.python_version(),
-            "versions": {pkg: _version(pkg) for pkg in ("brian2", "cython", "numpy", "typesafe-sdk", "anthropic",
-                                                         "python-dotenv")},
-        }
+        meta = new_meta(run_id, players, seeds, max_rows, args)
         meta_path.write_text(json.dumps(meta, indent=2))
         self._error_streak = 0
         try:

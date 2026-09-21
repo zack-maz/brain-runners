@@ -242,3 +242,33 @@ def test_run_ending_exceptions_live_in_errors_and_are_re_exported_by_the_runner(
 
     assert runner.RunAborted is errors.RunAborted and runner.BudgetExhausted is errors.BudgetExhausted
     assert errors.BudgetExhausted.status == "budget_exhausted" and errors.RunAborted.status == "aborted"
+
+
+def test_play_row_is_one_decision_one_move_and_the_record_the_runner_writes(tmp_path):
+    from bakeoff.game.engine import Game
+    from bakeoff.game.track import generate_track
+    from bakeoff.runner import play_row
+
+    solver = make_player("solver")
+    game = Game(generate_track(3, max_rows=30))
+    solver.reset(game, 3)
+    first = play_row(solver, game, 3, "r", first=True)
+    second = play_row(solver, game, 3, "r", first=False)
+    assert first["row"] == 0 and first["track"] == game.track.to_json() and second["track"] is None
+    assert second["row"] == first["row"] + (2 if first["executed_action"] == "jump" else 1) == game.row - (
+        2 if second["executed_action"] == "jump" else 1)
+    fresh = make_player("solver")
+    records = Runner(tmp_path).run_seed(fresh, 3, "r", max_rows=30)
+    assert records[:2] == [first, second]  # the runner's records are play_row's, key for key
+
+
+def test_new_meta_is_what_run_writes_first(tmp_path):
+    from bakeoff.runner import new_meta
+
+    players = [make_player("solver")]
+    meta = new_meta("r", players, [5], 40, {"x": 1})
+    run_dir = Runner(tmp_path).run(players, [5], max_rows=40, run_id="r", args={"x": 1})
+    written = json.loads((run_dir / "meta.json").read_text())
+    assert meta["status"] == "running" and meta["finished_at"] is None
+    for key in ("run_id", "schema_version", "players", "seeds", "game", "fly", "models", "args", "versions"):
+        assert written[key] == meta[key]
