@@ -1,6 +1,8 @@
 import json
 import time
 
+import pytest
+
 from bakeoff.__main__ import main
 from bakeoff.players import REGISTRY
 from bakeoff.players.base import Decision
@@ -184,6 +186,17 @@ def test_the_tournament_flag_allows_a_paid_cap_on_seeds_below_1000(tmp_path, mon
     (run_dir,) = (tmp_path / "runs").iterdir()
     meta = json.loads((run_dir / "meta.json").read_text())
     assert meta["args"]["tournament"] is True
+
+
+def test_the_composed_jev_is_a_paid_player_for_the_seed_rule_and_the_help(tmp_path, capsys):
+    args = ["run", "--players", "jev_composed", "--seeds", "1", "--max-rows", "12", "--max-requests", "5",
+            "--out", str(tmp_path / "runs"), "--cache", str(tmp_path / "cache")]
+    assert main(args) == 2
+    assert "paid players may not spend requests on seeds below 1000" in capsys.readouterr().err
+    assert not (tmp_path / "runs").exists()
+    with pytest.raises(SystemExit):
+        main(["run", "--help"])
+    assert "EACH paid player (jev, jev_composed, llm)" in " ".join(capsys.readouterr().out.split())
 
 
 def test_max_requests_0_on_low_seeds_is_not_refused_by_the_guard(tmp_path, capsys, monkeypatch):

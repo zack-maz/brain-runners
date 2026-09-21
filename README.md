@@ -23,10 +23,17 @@ are in `docs/COSTS.md`.
     uv run python -m bakeoff report runs/<run_id>
     uv run python -m bakeoff view runs/<run_id> [runs/<other_run_id> ...]   # writes replay.html
 
-Paid players (`jev`, `llm`) need `TYPESAFE_API_KEY` / `ANTHROPIC_API_KEY` in a git-ignored `.env`
+Paid players (`jev`, `jev_composed`, `llm`) need `TYPESAFE_API_KEY` / `ANTHROPIC_API_KEY` in a git-ignored `.env`
 file at the repo root (template: `.env.example`). They spend nothing unless told to:
 
     uv run python -m bakeoff run --players jev --seeds 1 --seed-start 1000 --max-requests 300
+
+`jev_composed` is the Jev of the demo: instead of one broad question it asks Jev four pointed yes/no
+questions in one request ("would `left` land on a gap, that is, does `ahead[0].gaps_relative` contain
+-1?") and code picks the action least likely to land on a gap, ties in the order stay, left, right,
+jump. The wording and that rule are ours, not TypeSafe's, and it looks one step ahead only. The
+one-shot `jev` stays for comparison: on the dangerous states of practice track 1000 its single Choice
+landed on a gap about as often as always staying (`docs/DECISIONS.md`, decisions 14 and 15).
 
 `--max-requests` is a hard cap on live requests for **each** paid player in the run; the default 0
 only replays `.cache/responses`. Every answer is cached, so a repeated run is free and a run stopped

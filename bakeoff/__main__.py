@@ -30,7 +30,7 @@ def _parser() -> argparse.ArgumentParser:
     run.add_argument("--max-rows", type=int, default=MAX_ROWS)
     run.add_argument("--out", default="runs")
     run.add_argument("--max-requests", type=int, default=0,
-                     help="hard cap on live requests for EACH paid player (jev, llm); the default 0 only replays "
+                     help=f"hard cap on live requests for EACH paid player ({', '.join(PAID)}); the default 0 only replays "
                           "the cache. Worst case a run spends this many requests per paid player")
     run.add_argument("--cache", default=str(DEFAULT_CACHE_DIR), help="response cache directory")
     run.add_argument("--tournament", action="store_true",
