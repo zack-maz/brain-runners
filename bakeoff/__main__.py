@@ -9,6 +9,7 @@ import time
 from pathlib import Path
 
 from bakeoff.clients.core import DEFAULT_CACHE_DIR, DiskCache, RequestBudget
+from bakeoff.game.rules import DEFAULT, RULES, Rules, rules_for
 from bakeoff.live import LiveRun
 from bakeoff.live_server import EVENTS_PATH, HOST, serve
 from bakeoff.players import PAID, REGISTRY, make_player
@@ -21,6 +22,19 @@ from bakeoff.view import render_html
 FIRST_PRACTICE_SEED = 1000
 
 
+def _add_game_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--game", choices=sorted(RULES), default=DEFAULT,
+                        help=f"the game version (default {DEFAULT}); different versions never share a scoreboard")
+    parser.add_argument("--lookahead", type=int,
+                        help="rows a player is shown (default: the version's); renames the game")
+    parser.add_argument("--window", type=int,
+                        help="lanes a player is shown either side (default: the version's); renames the game")
+
+
+def _rules(args) -> Rules:
+    return rules_for(args.game).variant(lookahead=args.lookahead, window=args.window)
+
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="bakeoff")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -29,6 +43,7 @@ def _parser() -> argparse.ArgumentParser:
     run.add_argument("--seeds", type=int, default=20, help="number of seeds (default 20)")
     run.add_argument("--seed-start", type=int, default=0,
                      help="first seed; practice seeds must not overlap tournament seeds")
+    _add_game_arguments(run)
     run.add_argument("--max-rows", type=int, help="play a prefix of each track (default: the whole track)")
     run.add_argument("--out", default="runs")
     run.add_argument("--max-requests", type=int, default=0,
@@ -46,6 +61,7 @@ def _parser() -> argparse.ArgumentParser:
                                        "the run is recorded like any other")
     live.add_argument("--players", default="fly,jev_composed,llm", help=f"comma-separated; available: {sorted(REGISTRY)}")
     live.add_argument("--seed", type=int, default=1001, help="the track; practice seeds are 1000 and up")
+    _add_game_arguments(live)
     live.add_argument("--max-rows", type=int, help="play a prefix of the track (default: the whole track)")
     live.add_argument("--out", default="runs")
     live.add_argument("--max-requests", type=int, default=0,
@@ -76,6 +92,7 @@ SEED_RULE = ("paid players may not spend requests on seeds below 1000 (tournamen
 
 def _live(args) -> int:
     try:
+        rules = _rules(args)
         players = _players(args.players, DiskCache(args.cache), args.max_requests)
     except KeyError as e:
         print(e.args[0], file=sys.stderr)
@@ -86,10 +103,11 @@ def _live(args) -> int:
     if _spends_on_tournament_seeds(players, args.max_requests, args.seed, args.tournament):
         print(SEED_RULE.format(flag="--seed"), file=sys.stderr)
         return 2
-    run_args = {"command": "live", "players": args.players, "seed": args.seed, "max_rows": args.max_rows,
+    run_args = {"command": "live", "players": args.players, "seed": args.seed, "game": args.game,
+                "lookahead": args.lookahead, "window": args.window, "max_rows": args.max_rows,
                 "max_requests": args.max_requests, "cache": args.cache, "tournament": args.tournament, "port": args.port}
     try:
-        live = LiveRun(players, args.seed, out_root=args.out, max_rows=args.max_rows, args=run_args)
+        live = LiveRun(players, args.seed, out_root=args.out, rules=rules, max_rows=args.max_rows, args=run_args)
         server = serve(None, live.broadcast, args.port)  # before anything is on disk: a busy port leaves nothing behind
     except ValueError as e:
         print(e, file=sys.stderr)
@@ -167,6 +185,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "live":
         return _live(args)
     try:
+        rules = _rules(args)
         players = _players(args.players, DiskCache(args.cache), args.max_requests)
     except KeyError as e:
         print(e.args[0], file=sys.stderr)
@@ -181,12 +200,12 @@ def main(argv: list[str] | None = None) -> int:
     run_id = time.strftime("%Y%m%d-%H%M%S")
     run_dir = runner.out_root / run_id
     seeds = range(args.seed_start, args.seed_start + args.seeds)
-    run_args = {"players": args.players, "seeds": args.seeds, "seed_start": args.seed_start,
-                "max_rows": args.max_rows, "max_requests": args.max_requests, "cache": args.cache,
+    run_args = {"players": args.players, "seeds": args.seeds, "seed_start": args.seed_start, "game": args.game,
+                "lookahead": args.lookahead, "window": args.window, "max_rows": args.max_rows, "max_requests": args.max_requests, "cache": args.cache,
                 "tournament": args.tournament}
     status = 0
     try:
-        runner.run(players, seeds, max_rows=args.max_rows, run_id=run_id, args=run_args)
+        runner.run(players, seeds, rules, max_rows=args.max_rows, run_id=run_id, args=run_args)
     except FileExistsError:
         print(f"run directory already exists: {run_dir}", file=sys.stderr)
         return 2

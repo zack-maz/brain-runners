@@ -22,6 +22,13 @@ class Rules:
     difficulty_rows: int  # gap density ramps over this many rows whatever max_rows is, so tracks are prefix-stable
     max_gap_width: int
 
+    def __post_init__(self):
+        # every action's landing tile must be in sight: a jump lands two rows on, a dodge one lane over
+        if self.lookahead < 2:
+            raise ValueError(f"lookahead must be at least 2 (a jump lands two rows on), not {self.lookahead}")
+        if not 1 <= self.window <= (self.lanes - 1) // 2:
+            raise ValueError(f"window must be 1 to {(self.lanes - 1) // 2} lanes, not {self.window}")
+
     def variant(self, max_rows: int | None = None, lookahead: int | None = None, window: int | None = None) -> Rules:
         """A copy for tests and experiments. A different vision is a different game and says so in its
         version (`v2+look3`, `v2+look8+win4`); a different length plays a prefix of the same tracks, so

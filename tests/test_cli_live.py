@@ -42,11 +42,20 @@ def test_without_a_cap_a_paid_player_can_only_replay_the_cache(tmp_path, capsys)
     assert json.loads((run_dir / "meta.json").read_text())["requests"] == {"jev_composed": {"max": 0, "used": 0}}
 
 
+def test_a_live_run_plays_the_chosen_game(tmp_path):
+    assert main(live_args(tmp_path, "--game", "v1", "--window", "2")) == 0
+    (run_dir,) = (tmp_path / "runs").iterdir()
+    meta = json.loads((run_dir / "meta.json").read_text())
+    assert meta["game"]["version"] == "v1+win2" and meta["args"]["game"] == "v1" and meta["args"]["window"] == 2
+
+
 def test_usage_errors(tmp_path, capsys):
     assert main(live_args(tmp_path, players="solver,nobody")) == 2
     assert "unknown player 'nobody'" in capsys.readouterr().err
     assert main(live_args(tmp_path, players="solver,solver")) == 2
     assert "duplicate player names" in capsys.readouterr().err
+    assert main(live_args(tmp_path, "--window", "9")) == 2
+    assert "window must be 1 to 5 lanes" in capsys.readouterr().err
     with socket.socket() as taken:
         taken.bind(("127.0.0.1", 0))
         taken.listen()

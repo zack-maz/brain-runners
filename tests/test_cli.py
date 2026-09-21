@@ -15,12 +15,31 @@ def test_run_then_report(tmp_path, capsys):
     (run_dir,) = tmp_path.iterdir()
     meta = json.loads((run_dir / "meta.json").read_text())
     assert meta["status"] == "completed" and meta["seeds"] == [0, 1]
-    assert meta["args"] == {"players": "solver,random", "seeds": 2, "seed_start": 0, "max_rows": 30,
+    assert meta["args"] == {"players": "solver,random", "seeds": 2, "seed_start": 0, "game": "v2",
+                            "lookahead": None, "window": None, "max_rows": 30,
                             "max_requests": 0, "cache": ".cache/responses", "tournament": False}
     assert meta["models"] == {} and meta["requests"] == {}
 
     assert main(["report", str(run_dir)]) == 0
     assert "| solver |" in capsys.readouterr().out
+
+
+def test_the_game_version_and_vision_are_chosen_and_recorded(tmp_path):
+    assert main(["run", "--players", "solver", "--seeds", "1", "--max-rows", "20", "--out", str(tmp_path / "a")]) == 0
+    assert main(["run", "--players", "solver", "--seeds", "1", "--game", "v1", "--lookahead", "3",
+                 "--out", str(tmp_path / "b")]) == 0
+    (a,), (b,) = (tmp_path / "a").iterdir(), (tmp_path / "b").iterdir()
+    game_a, game_b = (json.loads((d / "meta.json").read_text())["game"] for d in (a, b))
+    assert (game_a["version"], game_a["max_rows"]) == ("v2", 20)
+    assert (game_b["version"], game_b["max_rows"], game_b["lookahead"]) == ("v1+look3", 300, 3)
+    first = json.loads((b / "solver.jsonl").read_text().splitlines()[0])
+    assert len(first["senses"]["ahead"]) == 3
+
+
+def test_an_impossible_vision_is_a_usage_error(tmp_path, capsys):
+    assert main(["run", "--players", "solver", "--lookahead", "1", "--out", str(tmp_path)]) == 2
+    assert "lookahead must be at least 2" in capsys.readouterr().err
+    assert list(tmp_path.iterdir()) == []
 
 
 def test_seed_start_offsets_the_seeds(tmp_path):

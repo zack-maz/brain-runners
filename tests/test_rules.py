@@ -48,3 +48,12 @@ def test_same_game_ignores_length_only():
     assert V2.same_game(V2.variant(max_rows=40))
     assert not V2.same_game(V1)
     assert not V2.same_game(V2.variant(lookahead=3))
+
+
+def test_every_landing_tile_must_be_in_sight():
+    with pytest.raises(ValueError, match="lookahead must be at least 2"):
+        V2.variant(lookahead=1)
+    with pytest.raises(ValueError, match="window must be 1 to 5 lanes, not 0"):
+        V2.variant(window=0)
+    with pytest.raises(ValueError, match="window must be 1 to 5 lanes, not 6"):
+        V2.variant(window=6)
