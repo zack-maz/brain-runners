@@ -62,3 +62,49 @@ def lands_on_gap(senses: dict, action: str) -> bool:
     the engine differs only past the finish line, where a gap no longer kills."""
     ahead, offset = LANDS[action]
     return offset in senses["ahead"][ahead]["gaps_relative"]
+
+
+def trapped(senses: dict, action: str) -> bool:
+    """After `action`, would every next move land on a gap the senses show? (The two-step question sets
+    ask this; it needs two more rows in view beyond the landing row.)"""
+    ahead, offset = LANDS[action]
+    if ahead + 2 >= len(senses["ahead"]):
+        raise IndexError(f"the view ends before the move after `{action}`")
+    return all(offset + shift in senses["ahead"][ahead + step]["gaps_relative"]
+               for step, shift in ((1, -1), (1, 0), (1, 1), (2, 0)))
+
+
+def tile_id(row: int, offset: int) -> str:
+    """The question id of one visible tile: `tile_r2_c` is the runner's lane two rows ahead, `tile_r1_l3`
+    three lanes to its left one row ahead, `tile_r4_r1` one lane to its right four rows ahead."""
+    side = "c" if offset == 0 else ("l" if offset < 0 else "r") + str(abs(offset))
+    return f"tile_r{row}_{side}"
+
+
+def parse_tile_id(noul_id: str) -> tuple[int, int] | None:
+    """(row, offset) of a `tile_id`, or None if `noul_id` is not one."""
+    parts = noul_id.split("_")
+    if len(parts) != 3 or parts[0] != "tile" or not parts[1].startswith("r") or not parts[1][1:].isdigit():
+        return None
+    side = parts[2]
+    if side == "c":
+        return int(parts[1][1:]), 0
+    if side[:1] in ("l", "r") and side[1:].isdigit() and side[1:] != "0":
+        return int(parts[1][1:]), int(side[1:]) * (-1 if side[0] == "l" else 1)
+    return None
+
+
+def truth_of(senses: dict, noul_id: str) -> bool | None:
+    """The truth of a question-set Noul, read from the senses alone (so the report can score any record):
+    `gap_<action>`, `trapped_<action>` and `tile_r<row>_<side>`. None for any other id, or for a tile or a
+    follow-up the senses do not reach."""
+    kind, _, rest = noul_id.partition("_")
+    if kind in ("gap", "trapped") and rest in LANDS:
+        try:
+            return lands_on_gap(senses, rest) if kind == "gap" else trapped(senses, rest)
+        except IndexError:
+            return None
+    tile = parse_tile_id(noul_id)
+    if tile is not None and 1 <= tile[0] <= len(senses["ahead"]):
+        return tile[1] in senses["ahead"][tile[0] - 1]["gaps_relative"]
+    return None
