@@ -43,10 +43,15 @@ makes one real request per provider. A live paid run on seeds below 1000 is refu
 ends there, so later players in the list do not play: put free players first, or run paid players
 alone.
 
-`view` writes one self-contained HTML file (no server, no network): the players of a track side by
-side in the tunnel, each with what it had in mind (the fly's spikes and read-out signals, Jev's
-probabilities, the LLM's answer), a table of rows survived per track, the scoreboard, and what in
-the fly's set-up is ours rather than the fly's. Several run directories are merged, since the fly and
+`view` writes one self-contained HTML file (no server, no network, fonts embedded): the demo player. The
+fly, the composed Jev and the LLM run one tunnel together as pixel figures (fixed camera, everyone on the
+same row at the same time), with a strip of panels underneath showing what each had in mind (the fly's
+spikes and read-out signals, Jev's four answers, the LLM's answer). Blue is the cursor: it marks the mind
+in focus and the tiles that mind was shown, and with auto on it cuts to whoever faces a gap (keys 1, 2, 3
+or a click choose by hand; space plays, the arrows step a row). Below are the level table (rows survived
+per track; it picks the track and shows or hides runners, baselines and the one-shot Jev included), the
+scoreboard, and what in the set-up is ours rather than the fly's or TypeSafe's. The look is the user's
+brand (`~/Documents/PROJECTS/BRAND/brand.css`). Several run directories are merged, since the fly and
 the paid players usually run separately; one (player, seed) may appear only once. Viewing costs
 nothing: it reads logs only. The viewer's JavaScript has its own tests, which `uv run pytest` runs
 through `node --test` (skipped when node is not installed).

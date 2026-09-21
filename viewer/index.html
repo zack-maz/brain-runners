@@ -3,88 +3,111 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tunnel Run replay</title>
+<title>Tunnel Run</title>
 <link rel="stylesheet" href="viewer.css">
 </head>
 <body>
-<header>
-  <h1>Tunnel Run</h1>
-  <p id="runs" class="muted"></p>
+<header class="top">
+  <h1 class="label">Tunnel Run</h1>
+  <p class="label" id="mode"></p>
 </header>
 
 <main id="app" hidden>
-  <section aria-label="Tracks">
-    <h2>Rows survived on each track</h2>
-    <p class="muted">Pick a track to watch it. Pick a player to show or hide its column.
-      ✓ reached the finish line; … the run was stopped (not a death); a number after a slash is the length of a shorter run.</p>
-    <div class="scroll"><table id="matrix"></table></div>
+  <section id="player" aria-label="The run">
+    <div id="tunnel">
+      <canvas id="canvas" aria-label="Three runners in one tunnel. The same information is in the panels below."></canvas>
+      <span class="label corner left" id="row-label"></span>
+      <span class="label corner right" id="track-label"></span>
+      <p class="label corner bottom" id="notice" hidden></p>
+    </div>
+    <div id="strip"></div>
+    <p class="note"><span id="sight"></span> The blue marks the mind in focus and the tiles it was shown, nothing else.
+      Everyone is on the same row at the same time: a jump covers two rows, so it takes two ticks.</p>
   </section>
 
-  <section aria-label="Replay">
-    <div id="stage"></div>
-    <div id="transport">
-      <button id="play" type="button">Play</button>
-      <button id="back" type="button" aria-label="Back one row">&#9664;</button>
-      <button id="forward" type="button" aria-label="Forward one row">&#9654;</button>
-      <label>Speed
-        <select id="speed">
-          <option value="1">1 row a second</option>
-          <option value="3" selected>3 rows a second</option>
-          <option value="8">8 rows a second</option>
-          <option value="20">20 rows a second</option>
-        </select>
-      </label>
-      <input id="scrub" type="range" min="0" max="1" step="0.01" value="0" aria-label="Position on the track">
-      <output id="clock"></output>
-    </div>
-    <p class="muted"><span id="sight"></span> Players are lined up by row: a jump covers two rows, so it takes two ticks.</p>
+  <section aria-label="Levels">
+    <h2 class="label">Levels</h2>
+    <div class="scroll"><table id="matrix"></table></div>
+    <p class="note">Rows survived on each track. Pick a track to play it; pick a player to show or hide its runner.
+      ✓ reached the finish line · … the run was stopped, which is not a death · a number after a slash is the
+      length of a shorter run.</p>
   </section>
 
   <section aria-label="Scoreboard">
-    <h2>Scoreboard</h2>
-    <p id="fairness" class="warn" hidden>The rows of this table do not all cover the same tracks, so their averages are not
-      a fair comparison. Compare the players track by track in the table at the top.</p>
+    <h2 class="label">Scoreboard</h2>
+    <p id="fairness" class="warn" hidden>The rows of this table do not all average the same tracks, so their averages are
+      not a fair comparison. Compare the players track by track in the table above.</p>
     <div class="scroll"><table id="scoreboard"></table></div>
-    <p class="muted">Same columns as <code>python -m bakeoff report</code>. Only complete runs count; a run that was
-      stopped is listed as incomplete, not as a death.</p>
+    <p class="note">The columns of <code>python -m bakeoff report</code>. Only complete runs count; a run that was stopped
+      is listed as incomplete, not as a death.</p>
   </section>
 
-  <section id="honesty" aria-label="What is ours and what is the fly's">
-    <h2>What is the fly's and what is ours</h2>
-    <p>The fly is the published whole-brain model of the adult <i>Drosophila</i> connectome (Shiu et al., Nature 2024;
-      FlyWire v783, 138,639 neurons), untrained, with default parameters. Gaps stimulate the looming detectors of
-      each eye (LPLC2 and LC4); the steering neurons DNa01 and DNb01 are read as left and right, the Giant Fiber
-      (DNp01) as jump. The wiring is the fly's. These numbers are ours:</p>
-    <ul id="ours"></ul>
-    <p>Known weaknesses:</p>
-    <ul>
-      <li>The fly does not plan. It flees gaps by reflex and may dodge into another gap.</li>
-      <li>Its input is crude: a whole eye is stimulated at one rate. Stimulating part of the visual field was not tested.</li>
-      <li>On equal input to both eyes its deciding read-out leans right (0 to +20 Hz, never negative; the model's
-        left eye has 162 looming cells, its right eye 152). With our turn threshold (listed above) that lean decides moves:
-        a gap straight ahead that does not trigger a jump usually becomes a step to the right. The lean is the fly's,
-        the threshold that exposes it is ours.</li>
-      <li>The wiring also has a mild left bias in DNa02, which is logged but never decides.</li>
-      <li>The model has no spontaneous activity and no memory between decisions; trial-to-trial spread comes only
-        from input noise.</li>
-      <li>That DNa01, DNa02 and DNb01 turn the fly towards their own side comes from published steering studies,
-        not from anything verified in this project.</li>
-      <li>Giant Fiber rates of 100 to 200 Hz are not realistic (a real one fires about once per escape); the rate
-        is used as a graded signal.</li>
-    </ul>
-    <p>Jev and the LLM are told the same rules in the same words. Jev's request also carries two yes/no questions
-      for calibration; TypeSafe runs the questions of one request in parallel and they cannot see one another's
-      answers, so they are not a scaffold for its move. The LLM answers one question.</p>
+  <section id="honesty" aria-label="What is the fly's and what is ours">
+    <h2 class="label">What is the fly's and what is ours</h2>
+    <div class="prose">
+      <p>The fly is the published whole-brain model of the adult <i>Drosophila</i> connectome (Shiu et al., Nature 2024;
+        FlyWire v783, 138,639 neurons), untrained, with default parameters. Gaps stimulate the looming detectors of
+        each eye (LPLC2 and LC4); the steering neurons DNa01 and DNb01 are read as left and right, the Giant Fiber
+        (DNp01) as jump. The wiring is the fly's. These numbers are ours:</p>
+      <ul id="ours"></ul>
+      <p>Known weaknesses:</p>
+      <ul>
+        <li>The fly does not plan. It flees gaps by reflex and may dodge into another gap.</li>
+        <li>Its input is crude: a whole eye is stimulated at one rate. Stimulating part of the visual field was not tested.</li>
+        <li>On equal input to both eyes its deciding read-out leans right (0 to +20 Hz, never negative; the model's
+          left eye has 162 looming cells, its right eye 152). With our turn threshold (listed above) that lean decides
+          moves: a gap straight ahead that does not trigger a jump usually becomes a step to the right. The lean is the
+          fly's, the threshold that exposes it is ours.</li>
+        <li>The wiring also has a mild left bias in DNa02, which is logged but never decides.</li>
+        <li>The model has no spontaneous activity and no memory between decisions; trial-to-trial spread comes only
+          from the random input spikes.</li>
+      </ul>
+      <p>Jev and the LLM. The Jev in this player is the composed Jev: each row it is asked four yes/no questions in one
+        request, one per action ("would <code>left</code> land the runner on a gap, that is, does
+        <code>ahead[0].gaps_relative</code> contain -1?"), and code picks the action it thinks least likely to land on a
+        gap, ties in the order stay, left, right, jump. The wording of those questions and that rule are ours, not
+        TypeSafe's, and the rule looks one step ahead only; it does not plan. We built it after measuring the one-shot
+        Jev, which answers a single broad question ("which action?"): on the dangerous rows of practice track 1000 its
+        choice landed on a gap about as often as always staying would have, while its narrow yes/no answers were almost
+        always right. The one-shot Jev is still in the level table for comparison. The LLM answers one question per
+        row and is told the rules in the same words as the one-shot Jev; what each was asked is under every panel.</p>
+      <p>The figures are ours too: a fruit fly, a visor whose slit shows how sure Jev is that its move is safe, and an
+        orange critter for the LLM, which is our own drawing and nobody's official artwork.</p>
+    </div>
+  </section>
+
+  <section aria-label="Runs">
+    <h2 class="label">Runs</h2>
+    <p class="note" id="runs"></p>
   </section>
 </main>
 
-<p id="empty">This page has no replay in it. Make one with
-  <code>uv run python -m bakeoff view runs/&lt;run_id&gt;</code> and open the file it writes.</p>
+<p id="empty" class="note">This is the viewer's template. Build a replay with
+  <code>uv run python -m bakeoff view runs/&lt;run_id&gt;</code>, or go live with <code>uv run python -m bakeoff live</code>.</p>
+
+<nav id="transport" aria-label="Transport" hidden>
+  <button id="play" type="button" class="label">Play</button>
+  <button id="back" type="button" class="label" aria-label="Back one row">&lsaquo;</button>
+  <button id="forward" type="button" class="label" aria-label="Forward one row">&rsaquo;</button>
+  <div id="speeds" role="group" aria-label="Rows a second">
+    <button type="button" class="label" data-speed="1">1</button>
+    <button type="button" class="label" data-speed="3" aria-pressed="true">3</button>
+    <button type="button" class="label" data-speed="8">8</button>
+    <button type="button" class="label" data-speed="20">20</button>
+  </div>
+  <input id="scrub" type="range" min="0" max="1" step="0.01" value="0" aria-label="Position on the track">
+  <button id="live" type="button" class="label" aria-pressed="true" hidden>Live</button>
+  <output id="clock" class="label"></output>
+  <button id="auto" type="button" class="label" aria-pressed="true" title="Let the focus cut to whoever faces a gap">Auto</button>
+</nav>
 
 <script type="application/json" id="replay-data">null</script>
 <script src="timeline.js"></script>
 <script src="tunnel.js"></script>
+<script src="sprites.js"></script>
+<script src="stage.js"></script>
 <script src="minds.js"></script>
+<script src="feed.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

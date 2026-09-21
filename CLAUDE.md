@@ -51,9 +51,13 @@ its own plan.
 - `uv run pytest` runs the fast tests only. `uv run pytest -m slow` builds the real fly brain (about 1 GB,
   one minute); never run two fly processes at once.
 - The viewer is plain JavaScript with no build step and no npm packages. Rules of the game stay in
-  Python (`bakeoff/replay.py`); the pure JavaScript (`timeline.js`, `tunnel.js`, `minds.js`) is tested by
+  Python (`bakeoff/replay.py`); the pure JavaScript (`timeline.js`, `tunnel.js`, `sprites.js`, `stage.js`, `minds.js`,
+  `feed.js`) is tested by
   `viewer/tests/*.test.js`, which `uv run pytest` runs through `node --test`. Text from a log is always
-  escaped (`Minds.esc`) and the page must never load anything from the network.
+  escaped (`Minds.esc`) and the page must never load anything from the network (the two brand fonts in
+  `viewer/fonts/` are embedded as base64 by `bakeoff/view.py`). The page is the user's brand: tokens from
+  `~/Documents/PROJECTS/BRAND/brand.css`, blue only for the cursor (the mind in focus and its tiles), mono for short
+  labels only, deaths and errors `--bad`, warnings `--warn`. Frames reach `app.js` through `Feed` alone.
 - Paid players spend nothing without `--max-requests` (default 0 replays `.cache/responses`). Never
   raise a cap, rerun a paid command or run `pytest -m live` without the user's go-ahead. No paid
   request on a seed below 1000 before the tournament; the CLI refuses a live paid run on seeds

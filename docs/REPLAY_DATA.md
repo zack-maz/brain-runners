@@ -45,8 +45,11 @@ Frames are sorted by `row`. A jump advances two rows, so rows are not consecutiv
 
 ## How the viewer uses it
 
+The page never reads this object directly: `viewer/feed.js` hands it over as calls (`onMeta`, then
+`onEpisode` and `onFrame` per episode), the same calls a live run will make, so the two cannot drift apart.
+
 Replay time is measured in rows and every player is on the same clock: at time `t` every runner
-still alive is at row `t`, so the columns show the same stretch of track. The frame on screen is
+still alive is at row `t`, so they all run the same stretch of one tunnel. The frame on screen is
 the last one with `row <= t`; between `row` and `landing[0]` the runner moves from one to the
 other (a jump takes two ticks). After the last frame's landing the episode is `dead`, `finished`
 or, when `complete` is false, `cut`.

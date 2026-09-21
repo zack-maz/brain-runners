@@ -20,7 +20,7 @@ def test_render_inlines_every_file_and_the_data():
     replay = {"replay_version": 1, "episodes": [], "note": "</script>"}
     page = render_html(replay)
     assert "<link" not in page and "<script src" not in page  # one file: nothing left to fetch
-    for name in ("timeline.js", "tunnel.js", "minds.js", "app.js"):
+    for name in ("timeline.js", "tunnel.js", "sprites.js", "stage.js", "minds.js", "feed.js", "app.js"):
         assert (VIEWER_DIR / name).read_text() in page
     rules = (VIEWER_DIR / "viewer.css").read_text().split("}\n\n", 1)[1]  # everything after the two font faces
     assert rules in page
@@ -34,6 +34,21 @@ def test_the_page_makes_no_network_request():
     assert not re.search(r"""(src|href)=["']?(https?:)?//""", page)
     assert "@import" not in page
     assert all(url.startswith("data:") for url in re.findall(r"url\(([^)]*)\)", page))  # only embedded data
+
+
+def test_the_page_says_what_is_ours_about_jev_and_the_figures():
+    page = " ".join(render_html({"episodes": []}).split())
+    assert "The wording of those questions and that rule are ours, not TypeSafe's" in page
+    assert "looks one step ahead only" in page
+    assert "landed on a gap about as often as always staying would have" in page
+    assert "our own drawing and nobody's official artwork" in page
+    assert "The blue marks the mind in focus and the tiles it was shown, nothing else." in page
+
+
+def test_every_script_the_page_names_exists_and_app_comes_last():
+    names = re.findall(r'<script src="([^"]+)"></script>', (VIEWER_DIR / "index.html").read_text())
+    assert names == ["timeline.js", "tunnel.js", "sprites.js", "stage.js", "minds.js", "feed.js", "app.js"]
+    assert all((VIEWER_DIR / name).is_file() for name in names)
 
 
 def test_the_two_brand_fonts_are_embedded_not_fetched():
