@@ -30,8 +30,12 @@ demo player, the project's main tool (design: `docs/superpowers/specs/2026-09-20
 three pixel runners, the mind strip, blue as the cursor, the user's brand, one offline file. Phase 5c built (plan:
 `...-phase5c-go-live.md`): `python -m bakeoff live` plays a track in lockstep in real time, records a normal run
 directory and streams it into the same page from a loopback server; first real go-live on practice seed 1001
-(`runs/20260921-132459`). Phase 5 is merged (PR #4). Next: phase 6,
-the tournament and the write-up, which needs a new budget go-ahead; see "Next step" in `docs/DECISIONS.md`. Each phase
+(`runs/20260921-132459`). Phase 5 is merged (PR #4). Before phase 6 come eight
+updates (`docs/UPDATES.md`, decision 20), on branch `phase6-updates`. Update 1, game v2, is built (plan
+`...-update1-game-v2.md`): named game versions in `bakeoff/game/rules.py`; `v2` (default) is 150 rows at full
+difficulty by row 100, `v1` is the old 300-row game, pinned tile for tile; runs record their game and `view` never
+mixes two; everything recorded so far is v1 (`--game v1` replays it). Then phase 6, the tournament and the write-up,
+which needs a new budget go-ahead; see "Next step" in `docs/DECISIONS.md`. Each phase
 gets its own plan.
 
 ## How we work here

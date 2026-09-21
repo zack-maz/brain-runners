@@ -122,10 +122,10 @@ A frozen dataclass `Rules`, everything that defines a game:
 
 ## Testing
 
-TDD, fast tests only, no network. New `tests/test_rules.py` (presets, `with_vision` naming, JSON round trip,
+TDD, fast tests only, no network. New `tests/test_rules.py` (presets, `variant` naming, vision validation, JSON round trip,
 old-block fallback to v1). `tests/test_track.py`: the v1 pin, v2 length and ramp, survivability of v2 tracks on a
 seed sample. Senses and solver follow the track's lookahead and window. Runner and live record the rules. CLI:
-`--game`, `--lookahead`, `--window`, unknown version error, `--max-rows` gone. Replay: mixed versions refused, an old
+`--game`, `--lookahead`, `--window`, an impossible vision is a usage error, `--max-rows` still a prefix. Replay: mixed versions refused, an old
 meta without `version` reads as v1. Viewer JS test: the senses label uses the lookahead. `uv run pytest` green;
 no slow test needed (the fly brain is untouched).
 

@@ -103,6 +103,19 @@
     Jev variants with the LLM fed the same signals, the number of rows of vision, one live log tab per mind, any
     seed live, a faster difficulty ramp, a benchmark for time, cost and performance, and the analysis moved to its
     own tab. Worked on branch `phase6-updates`, starting with the game (vision and ramp).
+21. **Game v2** (2026-09-21, design `docs/superpowers/specs/2026-09-21-game-v2-design.md`, measured on practice
+    seeds 1000–1199 with free players only): the faster ramp's job is to separate the players sooner; the track is
+    150 rows and reaches full gap density by row 100 (perfect play still finishes 97%; the fly's stand-in brain
+    averages 68 rows instead of 124, random 24). Vision stays 6 rows × 3 lanes either side: perfect play gains
+    nothing from more on the old ramp, and only the LLM reads beyond row 2.
+22. **Vision is a setting of the game** (`--lookahead`, `--window`), and a changed vision renames the game
+    (`v2+look3`), so an experiment can compare players at other depths without ever mixing scoreboards.
+23. **Named game versions** (approach A): `v1` stays playable and is tile for tile the game of phases 1 to 5 (a test
+    pins it); `v2` is the default. Every run records its rules in `meta.json`; a run from before versions reads as
+    v1; `view` refuses to mix games. The fly's frozen numbers were fixed on v1 tracks and are not retuned for v2;
+    the page says so.
+24. **Built as update 1** (plan `docs/superpowers/plans/2026-09-21-update1-game-v2.md`). Amended while prototyping:
+    `--max-rows` stays (a shorter track is a prefix of the same game, so it keeps its version).
 
 ## Open
 
@@ -134,9 +147,15 @@ merged on 2026-09-21 at the user's request. Plans:
 
 To look at it: `uv run python -m bakeoff view runs/20260919-151934 runs/20260920-102919 runs/20260921-120903`
 (practice track 1000: the fly, the LLM, the composed Jev) and `uv run python -m bakeoff view runs/20260921-132459`
-(the live run on track 1001), then open the HTML file; or `uv run python -m bakeoff live` with the default cap
-of 0 and `--seed 1001`, which replays the paid answers of that run from the cache for free (the fly is
-simulated again, about a minute to build and a second a row).
+(the live run on track 1001), then open the HTML file; or `uv run python -m bakeoff live --game v1 --seed 1001`
+with the default cap of 0, which replays the paid answers of that run from the cache for free (the fly is
+simulated again, about a minute to build and a second a row). All of these are game v1. Without `--game v1`,
+`live` plays v2, where no paid answer is cached yet: with a cap of 0 a paid player stops at its first question.
+A free v2 run of the yardsticks: `runs/20260921-155758` (seeds 1000–1019: solver 150, always-jump 39, random 24).
+
+Before phase 6: the eight updates of `docs/UPDATES.md` (decision 20). Game v2 (items 3 and 6) is built
+(decisions 21–24). Next: the players, items 1 (a better or trained fly) and 2 (two more Jev variants, the LLM fed the
+same signals), brainstormed as their own spec; they will be the first paid runs on v2 and need a budget go-ahead.
 
 Then phase 6, the tournament and the write-up. It starts by settling the first open item above (which seeds),
 and it needs a new budget go-ahead: the tournament is the first paid use of seeds below 1000 (`--tournament`).

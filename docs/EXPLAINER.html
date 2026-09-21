@@ -120,7 +120,7 @@ a description of what's ahead and replies with a move.</p>
 
 <p>It is modelled on the browser game <em>Run</em>. Imagine a tunnel whose wall is made of floor tiles. The
 runner moves forward one row at a time. Some tiles are missing: those are <strong>gaps</strong>. Land on a gap
-and you fall. Your score is how many rows you survive, up to 300.</p>
+and you fall. Your score is how many rows you survive, up to 150 (up to 300 in the first version of the game).</p>
 
 <figure>
 <svg viewBox="0 0 640 300" role="img" aria-label="A grid of tunnel tiles seen from above: rows ahead of the runner, with gaps, and the four moves">
@@ -151,10 +151,17 @@ gap in row 1 and lands safely on row 2.</figcaption>
   <li>The tunnel has <strong>12 lanes</strong> in a ring: step past the last lane and you are on the first
   again (in the real game, the tunnel rotates).</li>
   <li>Each turn a player picks one of four moves: <strong>left, right, stay, jump</strong>.</li>
-  <li>Everyone can see the next <strong>6 rows</strong>, three lanes either side.</li>
+  <li>Everyone can see the next <strong>6 rows</strong>, three lanes either side. More would not help: a perfect
+  player finishes 98% of tracks with 6 rows and no more with 8 or 10.</li>
   <li>Tracks come from a <strong>seed</strong> (a number). Same seed, same track, for every player. The
   track gets harder as you go (more and wider gaps), but there is always at least one way through, so
   every fall is the player's fault.</li>
+  <li>The game comes in <strong>versions</strong>. <code>v1</code> is the one phases 1 to 5 were played on: 300 rows, the
+  gaps thicken slowly over all 300. <code>v2</code>, the default since 2026-09-21, is 150 rows and reaches full
+  difficulty by row 100, so the players pull apart sooner and a paid run costs half as much. A seed is a
+  different track in each version, so runs of different versions never share a scoreboard. How far players see
+  is part of the version too; an experiment can change it (<code>--lookahead</code>, <code>--window</code>) and the
+  version's name then says so (<code>v2+look3</code>).</li>
   <li>The game is <strong>turn-based</strong>: it waits for each player to decide. Nobody loses for being
   slow, which matters because the fly simulation takes about a second per move.</li>
 </ul>
@@ -207,9 +214,9 @@ not a result.</p>
   </tbody>
 </table>
 </div>
-<p style="font-size:14px;color:var(--muted)">Rows survived out of 300.</p>
+<p style="font-size:14px;color:var(--muted)">Rows survived out of 300 (game v1).</p>
 
-<p>And the fly alone, on 20 tracks (seeds 0–19, played once and never tuned on):</p>
+<p>And the fly alone, on 20 tracks (game v1, seeds 0–19, played once and never tuned on):</p>
 <div class="scroll">
 <table>
   <thead><tr><th>Player</th><th>Average rows</th><th>What it means</th></tr></thead>
@@ -247,10 +254,11 @@ three pixel runners (a fly, an orange critter for the LLM, and "the visor" for J
 under it, and a play bar. Keys: space plays, arrows step a row, 1/2/3 pick whose mind is in focus.</p>
 
 <h3>Live</h3>
-<pre><code>uv run python -m bakeoff live --seed 1001</code></pre>
+<pre><code>uv run python -m bakeoff live --game v1 --seed 1001</code></pre>
 <p>This plays a track in real time on your Mac and streams it into the same page. With no
 <code>--max-requests</code> it spends nothing: Jev's and the LLM's answers come from the saved cache of the earlier
-run, and the fly is simulated again for real (about a minute to build its brain, then about a second per row).</p>
+run (which was played on game v1, hence <code>--game v1</code>; on a track nobody has played, a paid player with no
+budget stops at its first question), and the fly is simulated again for real (about a minute to build its brain, then about a second per row).</p>
 
 <h2 id="history">6. How we got here</h2>
 
@@ -272,12 +280,19 @@ run, and the fly is simulated again for real (about a minute to build its brain,
   narrow per-move questions are nearly perfect.</li>
   <li><span class="label">Phase 5 · the demo</span>5a the composed Jev; 5b the demo player in your brand's
   look; 5c going live. Merged 2026-09-21.</li>
-  <li class="next"><span class="label">Phase 6 · next</span>The tournament and the write-up.</li>
+  <li><span class="label">Update 1 · game v2</span>Named game versions; v2 is 150 rows and gets hard by row 100.
+  First of eight updates that come before the tournament (<code>docs/UPDATES.md</code>).</li>
+  <li class="next"><span class="label">Next</span>The rest of the eight updates, then phase 6: the tournament and the
+  write-up.</li>
 </ol>
 
 <h2 id="next">7. What's next</h2>
 
-<p><strong>Phase 6: the tournament and a short write-up.</strong> All players play the same set of
+<p><strong>First, the eight updates</strong> in <code>docs/UPDATES.md</code> (decision 20): a better or trained fly,
+more Jev variants, one live log tab per mind, any seed from the page, a benchmark for time, cost and
+performance, and the analysis moved to its own tab. The game changes (v2) are done.</p>
+
+<p><strong>Then phase 6: the tournament and a short write-up.</strong> All players play the same set of
 tournament tracks (seeds below 1000, which no paid player has ever seen and nothing was tuned on), then a
 scoreboard and a write-up with the honest caveats.</p>
 
@@ -285,8 +300,8 @@ scoreboard and a write-up with the honest caveats.</p>
 <ol>
   <li><strong>Which seeds.</strong> Reuse seeds 0–19 (the fly already played them once, untuned; its
   results there exist and would repeat exactly) or take fresh seeds below 1000.</li>
-  <li><strong>A budget go-ahead.</strong> Worst case for 20 tracks of 300 rows: about 3.56 USD for the LLM and
-  about 0.20 USD each for the Jev players (estimates; a player that dies early costs less). The fly is free
+  <li><strong>A budget go-ahead.</strong> Worst case for 20 tracks of 150 rows (game v2): about 1.80 USD for the LLM
+  and about 0.10 USD each for the Jev players (estimates; a player that dies early costs less). The fly is free
   but takes about 4 minutes per track and must run on its own.</li>
 </ol>
 
@@ -342,8 +357,10 @@ JavaScript only draws.</figcaption>
 <ul>
   <li><strong>Track and engine</strong> (<code>bakeoff/game/</code>) are pure code: no files, no network, and
   randomness only from the seed. The generator first carves one legal random walk through the track and keeps
-  those tiles as floor, then scatters gaps whose rate rises from 4% to 16% per lane and whose width grows to 3.
-  Rows 0–4 are an empty runway.</li>
+  those tiles as floor, then scatters gaps whose rate rises from 4% to 16% per lane and whose width grows to 3
+  (over 300 rows in v1, over 100 in v2). Rows 0–4 are an empty runway. Every number of a game version lives in
+  one record, <code>Rules</code> (<code>bakeoff/game/rules.py</code>), which each run writes into its
+  <code>meta.json</code>.</li>
   <li><strong>Senses</strong> (<code>bakeoff/senses.py</code>) turn the game state into two encodings of the same
   view: JSON for Jev and the LLM, and two firing rates (left eye, right eye) for the fly.</li>
   <li><strong>Players</strong> all share one interface: <code>reset(game, seed)</code>,
@@ -360,7 +377,7 @@ JavaScript only draws.</figcaption>
 <pre><code>uv run pytest                          # fast tests (Python + the viewer's JS via node --test)
 uv run pytest -m slow                  # builds the real fly brain: ~1 GB, ~1 minute
 uv run python -m scripts.fetch_fly_data   # once: fly model + annotations into data/
-uv run python -m bakeoff run    --players fly,random,solver --seeds 20 --seed-start 1000
+uv run python -m bakeoff run    --players fly,random,solver --seeds 20 --seed-start 1000   # [--game v1] [--lookahead N]
 uv run python -m bakeoff report runs/&lt;id&gt;
 uv run python -m bakeoff view   runs/&lt;id&gt; [runs/&lt;id&gt; ...]
 uv run python -m bakeoff live   --seed 1001 --players fly,jev_composed,llm [--max-requests N]</code></pre>
@@ -517,7 +534,7 @@ Server-Sent Events, standard library only.</p>
 <table>
   <thead><tr><th>Where</th><th>What</th></tr></thead>
   <tbody>
-    <tr><td><code>bakeoff/game/</code></td><td>track generator and engine (pure)</td></tr>
+    <tr><td><code>bakeoff/game/</code></td><td>game versions (<code>rules.py</code>), track generator and engine (pure)</td></tr>
     <tr><td><code>bakeoff/senses.py</code></td><td>JSON view, eye rates, where each move lands</td></tr>
     <tr><td><code>bakeoff/players/</code></td><td>every player; <code>briefing.py</code> = the shared rules text</td></tr>
     <tr><td><code>bakeoff/fly/</code></td><td>brain wrapper, neuron selection, calibration, stand-in brain</td></tr>

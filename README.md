@@ -12,8 +12,14 @@ Every contestant plays the same seeded rounds. The output is a watchable tournam
 replays with each player's "mind" shown next to the game (Jev's probabilities, the LLM's
 answer, the fly's neurons firing) and a scoreboard across games.
 
-Status: phases 1 to 5 of 6 built (phase 6 is the tournament and the write-up). The untrained fly plays: on seeds 0–19 it survives 127 rows
-on average (random 35, always-jump 48, solver 300; `calibration/RESULTS.md`). Jev and the LLM
+Status: phases 1 to 5 of 6 built (phase 6 is the tournament and the write-up); eight updates come first
+(`docs/UPDATES.md`), of which game v2 is built. The untrained fly plays: on seeds 0–19 of game v1 it survives 127
+rows on average (random 35, always-jump 48, solver 300; `calibration/RESULTS.md`).
+
+The game comes in versions (`bakeoff/game/rules.py`): `v1`, the 300-row game phases 1 to 5 were played on, and
+`v2`, the default, 150 rows that reach full difficulty by row 100. `--game v1` plays the old one; `--lookahead` and
+`--window` change how far players see and rename the game (`v2+look3`). Each run records its game, and `view`
+refuses to mix two games. Jev and the LLM
 (Claude Haiku 4.5) play behind a response cache and a hard request cap; first measured costs
 are in `docs/COSTS.md`.
 
@@ -23,7 +29,8 @@ are in `docs/COSTS.md`.
     uv run python -m bakeoff report runs/<run_id>
     uv run python -m bakeoff view runs/<run_id> [runs/<other_run_id> ...]   # writes replay.html
 
-    uv run python -m bakeoff live --seed 1001 --players fly,jev_composed,llm --max-requests 300   # watch it happen
+    uv run python -m bakeoff live --seed 1001 --players fly,jev_composed,llm --max-requests 150   # watch it happen
+    uv run python -m bakeoff live --game v1 --seed 1001    # free: replays the recorded v1 run's answers from the cache
 
 `live` plays one track in real time: every mind decides the same row before anyone moves on (a jumper skips
 the next row; the slowest mind sets the pace, about a row a second with the fly), each decision goes into a

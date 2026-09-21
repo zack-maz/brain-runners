@@ -1,8 +1,8 @@
 # Updates requested on 2026-09-21
 
-The user's list of changes after phase 5 was merged, recorded as given, each with where the project stands today
-and the questions to settle when it is brainstormed. Nothing here is decided yet; decisions go to `DECISIONS.md`
-once made. Branch: `phase6-updates`.
+The user's list of changes after phase 5 was merged, recorded as given, each with where the project stood that day
+and the questions to settle when it is brainstormed. Decisions go to `DECISIONS.md` once made (decisions 20 on).
+Branch: `phase6-updates`.
 
 ## The list
 
@@ -20,7 +20,13 @@ once made. Branch: `phase6-updates`.
 8. **Homepage is the run.** Move the extra findings, report, dialogue and analysis (everything below the
    scoreboard) to a separate tab. The homepage keeps the tunnel and the real-time thoughts below it.
 
-## Where each one stands today
+## Built
+
+- Items 3 and 6: game v2 (decisions 21–24 in `DECISIONS.md`; spec `docs/superpowers/specs/2026-09-21-game-v2-design.md`,
+  plan `docs/superpowers/plans/2026-09-21-update1-game-v2.md`). Vision stays 6 rows × 3 lanes and is now a setting;
+  v2 is 150 rows at full difficulty by row 100; v1 stays playable.
+
+## Where each one stood on 2026-09-21
 
 1. The fly is untrained by rule (`CLAUDE.md`, honesty rule): innate wiring only, looming weighting and two
    thresholds frozen on practice seeds 1000–1199 (`calibration/REPORT.md`, "never retune"). A trained fly or a new
