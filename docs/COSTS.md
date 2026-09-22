@@ -103,3 +103,45 @@ decision 19's budget: 228 Jev requests (460 of the 1,000 in total) and 92 of the
   so here the wandering (or the three wrong answers) cost it the finish: it reached a dead end that running
   straight avoids.
 
+
+## Update 2a: the Jev family and its LLM twins (game v2, 2026-09-21, in progress)
+
+Inside decision 26: Claude Haiku at most 5.00 USD for update 2, v2 practice seeds 1000 and up only. **Spent so far:
+1.55 USD of Haiku** (run 1: 1.38; run 2: 0.044; run 3: 0.126). Jev's cost is not known per request (see above);
+the user does not count it.
+
+**Run 1** (`runs/20260921-165433`, seed 1000, every paid player, cap 150 each, `completed`):
+
+| player | rows (of 150) | live requests | mean latency ms | input tokens | output tokens | cost USD | Brier (all Nouls) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| jev_composed | 150, finished | 128 | 201 | 78,063 | 9,344 | - | 0.011 |
+| jev_two_step | 150, finished | 136 | 208 | 124,070 | 19,856 | - | 0.007 |
+| jev_choice | 94 | 81 | 204 | 68,752 | 3,645 | - | - |
+| jev_reader | 38 | 39 | 223 | 79,692 | 32,682 | - | 0.005 |
+| llm (one-shot) | 93 | 85 | 740 | 47,209 | 765 | 0.051 | - |
+| llm_composed | 132 | 131 | 939 | 107,816 | 4,586 | 0.130 | 0.019 |
+| llm_choice | 93 | 92 | 750 | 71,435 | 828 | 0.076 | - |
+| llm_two_step | 95 | 95 | 1,700 | 119,115 | 6,321 | 0.150 | 0.013 |
+| llm_reader | 150, finished | 150 | 2,991 | 596,551 | 74,986 | 0.970 | 0.003 |
+
+**Run 2** (`runs/20260921-171044`, seeds 1001–1004, cap 600 each, `aborted` on Anthropic connection errors while
+the API was down): all four Jev players completed all four tracks; `llm` was cut on 1001; the other LLM twins did
+not start. Jev over the five tracks 1000–1004 (runs 1 and 2 together):
+
+| player | mean rows (of 150) | finished | Brier |
+| --- | --- | --- | --- |
+| jev_two_step | 144.6 | 4 of 5 | 0.007 |
+| jev_composed | 124.2 | 2 of 5 | 0.008–0.011 |
+| jev_choice | 78.2 | 0 of 5 | - |
+| jev_reader | 49.6 | 0 of 5 | 0.005–0.009 |
+
+**Run 3** (`runs/20260921-184858`, seeds 1001–1004, the four cheaper LLM twins, cap 600 each): stopped by the
+controller at the user's request before a context reset (its `meta.json` still says `running`: a hard stop, the
+known gap of the phase 5 review). `llm` finished its four tracks (mean 47.5 rows), `llm_choice` had played part of
+1001; `llm_composed` and `llm_two_step` had not started. Everything answered is cached: rerunning the same command
+replays it for free and continues.
+
+What these five tracks suggest (an impression, not a result): looking two moves ahead is where the rows are
+(`jev_two_step` and `llm_reader` finish, the one-step rules do not); Jev reads tiles very well but `jev_reader`
+still dies early, because a single misread tile gives the planner a wrong picture; `llm_reader` is the priciest
+player by far (about 0.0065 USD and 3 s a row).

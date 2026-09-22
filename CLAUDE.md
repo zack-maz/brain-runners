@@ -34,7 +34,11 @@ directory and streams it into the same page from a loopback server; first real g
 updates (`docs/UPDATES.md`, decision 20), on branch `phase6-updates`. Update 1, game v2, is built (plan
 `...-update1-game-v2.md`): named game versions in `bakeoff/game/rules.py`; `v2` (default) is 150 rows at full
 difficulty by row 100, `v1` is the old 300-row game, pinned tile for tile; runs record their game and `view` never
-mixes two; everything recorded so far is v1 (`--game v1` replays it). Then phase 6, the tournament and the write-up,
+mixes two; everything recorded so far is v1 (`--game v1` replays it). Update 2a, the Jev family, is built (plan
+`...-update2a-jev-family.md`): `bakeoff/players/question_sets.py` (composed, choice, two_step, reader: questions and a
+rule, ours) played by `jev_<set>` and by Claude Haiku twins `llm_<set>` (`set_players.py`); the report's `brier_all`;
+its paid runs are part done (`docs/COSTS.md`). Resume from "Next step" in `docs/DECISIONS.md`; one PR "Opus v1" when
+all updates are done. Then phase 6, the tournament and the write-up,
 which needs a new budget go-ahead; see "Next step" in `docs/DECISIONS.md`. Each phase
 gets its own plan.
 

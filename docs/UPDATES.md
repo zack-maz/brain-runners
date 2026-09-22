@@ -30,6 +30,9 @@ Branch: `phase6-updates`.
 - Items 3 and 6: game v2 (decisions 21–24 in `DECISIONS.md`; spec `docs/superpowers/specs/2026-09-21-game-v2-design.md`,
   plan `docs/superpowers/plans/2026-09-21-update1-game-v2.md`). Vision stays 6 rows × 3 lanes and is now a setting;
   v2 is 150 rows at full difficulty by row 100; v1 stays playable.
+- Item 2 (update 2a): `jev_choice`, `jev_two_step`, `jev_reader` and an LLM twin for every question set (decisions
+  25–27; spec `docs/superpowers/specs/2026-09-21-jev-family-design.md`). Code built and reviewed; paid runs part done
+  (`docs/COSTS.md`). Item 1 (the fly) is update 2b, not started.
 
 ## Where each one stood on 2026-09-21
 
@@ -75,5 +78,6 @@ Branch: `phase6-updates`.
 
 ## Next step
 
-Decided (decision 20 in `DECISIONS.md`): all eight come before phase 6. Brainstorm them (superpowers workflow) as
-separate specs, in this order: the game (3, 6), the players (1, 2), the benchmark (7), the page (4, 5, 8).
+Decided (decision 20 in `DECISIONS.md`): all of these come before phase 6, each brainstormed as its own spec. Order:
+the game (3, 6: done), the players (2: built, runs part done; 1: next), GLM Flash (10), the benchmark (7), the page
+(4, 5, 8, 9). The step-by-step resume list is "Next step" in `DECISIONS.md`. When all are done: one PR, "Opus v1".

@@ -130,7 +130,13 @@
     (the Jev family and twins), then 2b (the fly).
 26. **Budget for update 2 (2026-09-21):** Claude Haiku up to **5.00 USD** in total, on v2 practice seeds 1000 and up
     only. Jev spend is not a concern to the user ("jev isn't costing me anything"); its requests stay capped and cached
-    as always. Paid runs start with one capped track.
+    as always. Paid runs start with one capped track. **Split (controller's ruling after run 1):** the four Jev
+    players and the four cheaper LLM twins on seeds 1000–1004, `llm_reader` (about 1 USD a track) on 1000 and 1001
+    only.
+27. **The LLM stays Claude Haiku** for update 2a (the user, 2026-09-21); a **GLM Flash** twin (Zhipu's free tier,
+    through an OpenAI-compatible client) comes later as another model, and is one of the players the page will let
+    the user select (items 9 and 10 of `docs/UPDATES.md`). OpenAI's GPT-5.6 Luna was considered (about 4 to 5 times
+    cheaper than Haiku); not chosen for now.
 
 ## Open
 
@@ -168,9 +174,35 @@ simulated again, about a minute to build and a second a row). All of these are g
 `live` plays v2, where no paid answer is cached yet: with a cap of 0 a paid player stops at its first question.
 A free v2 run of the yardsticks: `runs/20260921-155758` (seeds 1000–1019: solver 150, always-jump 39, random 24).
 
-Before phase 6: the eight updates of `docs/UPDATES.md` (decision 20). Game v2 (items 3 and 6) is built
-(decisions 21–24). Next: the players, items 1 (a better or trained fly) and 2 (two more Jev variants, the LLM fed the
-same signals), brainstormed as their own spec; they will be the first paid runs on v2 and need a budget go-ahead.
+Before phase 6: the updates of `docs/UPDATES.md` (decision 20; items 9 and 10 were added later). Game v2 (items 3
+and 6) is built (decisions 21–24). **Update 2a (the Jev family and its LLM twins, decisions 25–26) is built and
+reviewed** (spec `docs/superpowers/specs/2026-09-21-jev-family-design.md`, plan
+`docs/superpowers/plans/2026-09-21-update2a-jev-family.md`, commits up to f30dcf1); its paid runs are part done
+(`docs/COSTS.md`, "Update 2a"; 1.55 of the 5.00 USD of Haiku spent).
+
+**Where to resume (in this order):**
+
+1. Finish update 2a's paid runs, one command at a time, each inside decision 26 (Haiku at most 5.00 USD in total;
+   worst case of what is left: about 2.95 USD):
+   `uv run python -m bakeoff run --players llm,llm_choice,llm_composed,llm_two_step --seeds 4 --seed-start 1001 --max-requests 600`
+   (what was answered in runs 2 and 3 replays from the cache for free), then
+   `uv run python -m bakeoff run --players llm_reader --seeds 1 --seed-start 1001 --max-requests 150`. If Anthropic is
+   down the run aborts after 6 connection errors; rerun it when the API answers.
+2. The fly on the same five tracks (free; nothing else may hold a fly brain at the same time):
+   `uv run python -m bakeoff run --players fly --seeds 5 --seed-start 1000`.
+3. Record the five-track results in `docs/COSTS.md` and here; then a final whole-branch review of update 2a (money
+   safety, the same signals for both models, honest labels, `jev_composed`'s cache still replaying).
+4. Update 2b, the fly (decision 25): `fly_rich` (richer input, untrained, calibrated once on practice seeds), then
+   `fly_trained` (a readout of ours on the same wiring). Its own spec.
+5. Item 10, the GLM Flash twin (the user will add a Zhipu key to `.env` later), then item 7 (the benchmark), then
+   the page: items 4, 5, 8 and 9 (per-mind live log tabs, pick seed and players from the page, GLM Flash among them,
+   the analysis on its own tab).
+6. When all updates are done: refresh `docs/EXPLAINER.html` (it knows game v2, not yet the Jev family), then one PR
+   titled **"Opus v1"** from `phase6-updates` (the user's instruction; not before).
+
+Tooling: plans are generated from a prototype (`.superpowers/tools/genplan.py`; prototypes kept as local branches
+`proto/game-v2`, `proto/jev-family`); the SDD ledger of update 2a is `.superpowers/sdd/2026-09-21-update2a-jev-family/`
+(git-ignored).
 
 Then phase 6, the tournament and the write-up. It starts by settling the first open item above (which seeds),
 and it needs a new budget go-ahead: the tournament is the first paid use of seeds below 1000 (`--tournament`).
