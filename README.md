@@ -69,7 +69,8 @@ Three more ways to ask Jev, and an LLM twin for each way (decisions 25 and 26): 
 options name each move's landing tile, `jev_two_step` asks eight yes/no questions (each move's landing, and whether it
 leaves a way on), `jev_reader` asks about every visible tile and code plans over its answers like the solver.
 `llm_composed`, `llm_choice`, `llm_two_step` and `llm_reader` ask Claude Haiku exactly the same questions and use the
-same rule. Three things still differ: the LLM is also given the briefing of the rules (for three of the four sets
+same rule, and `glm_composed`, `glm_choice`, `glm_two_step` and `glm_reader` ask GLM Flash (Zhipu's free tier,
+`ZHIPU_API_KEY`) the same again. Three things still differ: the LLM is also given the briefing of the rules (for three of the four sets
 Jev's yes/no questions carry only the question), Jev answers its questions in parallel while the LLM writes them in
 one reply, and the LLM's probabilities are numbers it writes down. The questions and the rules are ours
 (`bakeoff/players/question_sets.py`).

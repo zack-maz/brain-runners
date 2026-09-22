@@ -31,7 +31,13 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 
 ## Where to resume (in this order)
 
-1. Item 10, the GLM Flash twin, once the user has added a Zhipu key to `.env` (not there on 2026-09-22).
+1. Item 10, GLM Flash (decision 33): the four `glm_<set>` players are **built**; what is left is the runs, once
+   `ZHIPU_API_KEY` is in `.env` (the user pastes it; a guard keeps Claude out of that file). First
+   `uv run python -m bakeoff run --players glm_composed,glm_choice,glm_two_step,glm_reader --seeds 1 --seed-start 1000
+   --max-requests 150`, checking the first records read like the Haiku twins' (`text`, `stop_reason`, no fallbacks),
+   then seeds 1001–1004. Free tier, but the cap and the cache rules still apply. Check which endpoint the key
+   belongs to: the default is `https://api.z.ai/api/paas/v4`, a mainland account needs
+   `GLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4`.
 2. The page: items 4, 5, 8 and 9 (per-mind live log tabs, pick seed and players from the page, GLM Flash among them,
    the analysis on its own tab).
 3. When all updates are done: refresh `docs/EXPLAINER.html` (it knows game v2, not yet the Jev family), then one PR

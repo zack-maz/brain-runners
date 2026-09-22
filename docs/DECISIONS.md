@@ -165,6 +165,12 @@
     `docs/COSTS.md`. Now: 95% Student t intervals (paired for pairs), none below 5 tracks; tracks needed is for an
     80% chance of a verdict; a note counts the pairs compared and the verdicts chance alone would give; runs of
     different lengths are refused. A test simulates the verdict rate with no difference (about 5%).
+33. **The GLM Flash twins** (the user, 2026-09-22; item 10 of `docs/UPDATES.md`): a third model on all four question
+    sets (`glm_composed`, `glm_choice`, `glm_two_step`, `glm_reader`), sent the same request as the Haiku twins
+    (`ChatSetPlayer`), so the model is what differs. `glm-4.5-flash` through the OpenAI-compatible endpoint
+    (`ZHIPU_API_KEY`, `GLM_BASE_URL` for a mainland account), called with the standard library: one HTTP request per
+    decision, no retries, the same cache and cap as every paid player. The free tier is priced at 0, so it reads as
+    free rather than unknown. First run capped at one practice track, then tracks 1001–1004 to match the others.
 
 Where we are and what comes next: `docs/NEXT.md`.
 
