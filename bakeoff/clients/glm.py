@@ -50,6 +50,11 @@ class GlmClient(PaidClient):
     provider = "glm"
     key_name = "ZHIPU_API_KEY"
     default_model = "glm-4.5-flash"
+    # GLM-4.5 thinks by default and its thoughts eat the token budget: the first smoke test came back empty and cut
+    # off. Claude Haiku answers these questions without thinking, so neither model thinks. These knobs are part of
+    # the cache key, so answers made with other knobs are never replayed.
+    request_options = {"temperature": 0, "response_format": {"type": "json_object"},
+                       "thinking": {"type": "disabled"}}
 
     def _live(self, senses: dict, questions: dict) -> dict:
         if self._sdk is None:
@@ -58,15 +63,17 @@ class GlmClient(PaidClient):
             "model": self.model,
             "messages": [{"role": "system", "content": questions["system"]},
                          {"role": "user", "content": json.dumps(senses)}],
-            "max_tokens": questions["max_tokens"], "temperature": 0,
-            "response_format": {"type": "json_object"}})
+            "max_tokens": questions["max_tokens"], **self.request_options})
         try:
             choice = data["choices"][0]
             text, finish = choice["message"]["content"], choice.get("finish_reason")
         except (KeyError, IndexError, TypeError) as e:
             raise ProviderError(f"unreadable reply: {json.dumps(data)[:200]}") from e
         usage = data.get("usage") or {}
+        thoughts = (choice["message"].get("reasoning_content") or "") if isinstance(choice.get("message"), dict) else ""
         return {"model": data.get("model") or self.model,
+                # nothing should appear here while thinking is off; logged, never parsed, if it does
+                **({"reasoning_content": thoughts} if thoughts else {}),
                 # the set players read `end_turn` for a complete answer, as Anthropic names it
                 "stop_reason": "end_turn" if finish == "stop" else finish,
                 "finish_reason": finish, "text": text,

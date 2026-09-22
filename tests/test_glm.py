@@ -23,6 +23,7 @@ def test_one_request_carries_the_system_prompt_the_senses_and_asks_for_json(tmp_
     (body,) = http.calls
     assert body["model"] == "glm-4.5-flash" and body["temperature"] == 0 and body["max_tokens"] == 300
     assert body["response_format"] == {"type": "json_object"}
+    assert body["thinking"] == {"type": "disabled"}  # Haiku does not think here either
     assert body["messages"] == [{"role": "system", "content": "you are a runner"},
                                 {"role": "user", "content": json.dumps(SENSES)}]
     assert reply.payload["text"] == '{"gap_stay": 0.1}' and reply.payload["stop_reason"] == "end_turn"
@@ -71,3 +72,21 @@ def test_the_base_url_is_a_setting_and_the_key_never_appears_in_a_failure(monkey
     with pytest.raises(ProviderError) as failure:
         transport.post({"model": "glm-4.5-flash"})
     assert "secret-key" not in str(failure.value) and "URLError" in str(failure.value)
+
+
+def test_reasoning_content_is_logged_if_the_model_sends_any(tmp_path):
+    reply = glm_reply(text='{"gap_stay": 0.1}')
+    reply["choices"][0]["message"]["reasoning_content"] = "first I look at the tiles"
+    glm, _ = client(tmp_path, reply)
+    payload = glm.ask(SENSES, QUESTIONS).payload
+    assert payload["reasoning_content"] == "first I look at the tiles" and payload["text"] == '{"gap_stay": 0.1}'
+
+
+def test_changing_how_the_request_is_made_does_not_replay_the_old_answers(tmp_path):
+    """The knobs the client adds are part of the cache key: the first GLM run cached empty replies made with
+    thinking on, and those must never come back once thinking is off."""
+    glm, http = client(tmp_path, glm_reply(text='{"gap_stay": 0.1}'), max_requests=2)
+    glm.ask(SENSES, QUESTIONS)
+    glm.request_options = {**GlmClient.request_options, "thinking": {"type": "enabled"}}
+    again = glm.ask(SENSES, QUESTIONS)
+    assert not again.cache_hit and len(http.calls) == 2

@@ -111,8 +111,13 @@ class PaidClient:
         if self._owns_sdk and self.budget.max_requests > 0:
             require_key(self.key_name)
 
+    # what the client itself puts in the request besides the questions (a provider's own knobs). It is part of the
+    # cache key: changing how a request is made must not replay answers made the old way.
+    request_options: dict = {}
+
     def ask(self, senses: dict, questions: dict) -> Reply:
-        return cached_request(self.cache, self.budget, self.provider, self.model, senses, questions,
+        asked = {**questions, **({"request_options": self.request_options} if self.request_options else {})}
+        return cached_request(self.cache, self.budget, self.provider, self.model, senses, asked,
                               lambda: self._live(senses, questions))
 
     def _live(self, senses: dict, questions: dict) -> dict:
