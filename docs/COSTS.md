@@ -173,7 +173,22 @@ taken from exactly one of runs 1, 2, 4, 5, 6; deaths are "ran into / jumped into
 What these five tracks suggest (an impression, not a result): looking two moves ahead is where the rows are, but
 only when the answers are sharp: `jev_two_step` finishes 4 of 5, while its Haiku twin, asked the same questions under
 the same rule, averages 110 rows with a Brier nearly three times Jev's, and falls below its own one-step twin. On
-the pointed question sets Jev's answers are the better calibrated of the two models (Brier 0.007–0.009 against
-0.017–0.020); on the reader set it is the other way round (`llm_reader` 0.003 finishes both its tracks, `jev_reader`
-dies in every track because one misread tile gives the planner a wrong picture). The one-shot Choice is weak for both
-models. `llm_reader` is the priciest player by far (about 0.0063 USD and 3 s a row).
+the pointed question sets Jev's answers score the better Brier of the two models (0.007–0.009 against 0.017–0.020);
+on the reader set it is the other way round (`llm_reader` 0.003 finishes both its tracks, `jev_reader` dies in every
+track). The one-shot Choice is weak for both models. `llm_reader` is the priciest player by far (about 0.0063 USD
+and 3 s a row).
+
+What the comparison between the models must carry (final review of update 2a):
+
+- The model is not the only difference. The LLM twin is also given the briefing of the rules in its system prompt;
+  Jev's yes/no questions carry only the question (the choice set gives the briefing to both). Jev's answers in one
+  request are made in parallel and cannot see each other (decision 11); the LLM writes all of its answers in one
+  reply, each able to see the ones before it. And an LLM probability is a number it states, while Jev's is Jev's
+  probability. The Brier numbers above compare these two kinds of number.
+- `brier_all` compares the two models within one set, not sets with each other: about 90% of the reader's tiles are
+  floor, so `jev_reader` scores 0.008 while dying on every track.
+- `jev_reader`'s five deaths are one event: the tile straight ahead (`tile_r1_c`) read as floor (p 0.09–0.19) while it
+  is a gap, and the planner stays. Jev missed 35 of 80 gaps at offset 0 (44%) and 81 of 763 elsewhere (11%), and read
+  no floor as a gap (0 of 9,783); `llm_reader` missed 1 of 274 and 13 of 2,119. The composed wording for the same tile
+  (`gap_stay`) was never missed in 73 cases, so it is the reader's wording or the 42-question request that fails, not
+  Jev's reading of the track.

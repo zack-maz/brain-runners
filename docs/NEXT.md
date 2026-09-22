@@ -13,20 +13,22 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
   `docs/superpowers/specs/2026-09-21-jev-family-design.md`, plan `docs/superpowers/plans/2026-09-21-update2a-jev-family.md`).
   **Its paid runs are done** (2026-09-21): every player over v2 practice seeds 1000–1004, `llm_reader` on 1000–1001,
   the fly on the same five tracks. Scoreboard and costs: `docs/COSTS.md`, "Update 2a". Claude Haiku spent 3.85 of the
-  5.00 USD of decision 26; nothing on a seed below 1000.
+  5.00 USD of decision 26; nothing on a seed below 1000. **Final whole-branch review done** (2026-09-21, "ready with
+  fixes", nothing critical; report `.superpowers/sdd/2026-09-21-update2a-jev-family/final-review-report.md`): money
+  safety, `jev_composed`'s phase 5 cache (still 247 rows on v1 track 1000, all from cache) and the rules all hold.
+  Fixed: the docs name what still differs between the two models; a question set that needs more vision is now a
+  usage error before anything is played; `brier_all` leaves out answers outside 0 to 1.
 
 ## Where to resume (in this order)
 
-1. A final whole-branch review of update 2a: money safety, the same signals for both models, honest labels,
-   `jev_composed`'s cache still replaying.
-2. Update 2b, the fly (decision 25): `fly_rich` (richer input, untrained, calibrated once on practice seeds), then
+1. Update 2b, the fly (decision 25): `fly_rich` (richer input, untrained, calibrated once on practice seeds), then
    `fly_trained` (a readout of ours on the same wiring). Its own spec.
-3. Item 10, the GLM Flash twin (the user will add a Zhipu key to `.env` later), then item 7 (the benchmark), then
+2. Item 10, the GLM Flash twin (the user will add a Zhipu key to `.env` later), then item 7 (the benchmark), then
    the page: items 4, 5, 8 and 9 (per-mind live log tabs, pick seed and players from the page, GLM Flash among them,
    the analysis on its own tab).
-4. When all updates are done: refresh `docs/EXPLAINER.html` (it knows game v2, not yet the Jev family), then one PR
+3. When all updates are done: refresh `docs/EXPLAINER.html` (it knows game v2, not yet the Jev family), then one PR
    titled **"Opus v1"** from `phase6-updates` (the user's instruction; not before).
-5. Then phase 6, the tournament and the write-up. It starts by settling which seeds (see "Open"), and it needs a new
+4. Then phase 6, the tournament and the write-up. It starts by settling which seeds (see "Open"), and it needs a new
    budget go-ahead: the tournament is the first paid use of seeds below 1000 (`--tournament`).
 
 ## To look at it
@@ -56,8 +58,14 @@ From phase 5: the composed Jev's wording and rule are ours and it looks one step
 because its four answers rarely tie; on both v1 practice tracks it died only where all four landing tiles were gaps;
 the one-shot Jev stays in for comparison.
 
-From update 2a: every question set and rule is ours, and each LLM twin gets the same questions and the same rule as
-its Jev, so the model is the only difference. The fly on v2 still runs on thresholds frozen on v1 tracks.
+From update 2a: every question set and rule is ours. Each LLM twin gets the same questions and the same rule as its
+Jev, but the model is not the only difference: the twin is also given the briefing of the rules (Jev's yes/no
+questions carry only the question, except in the choice set); Jev's answers in one request are made in parallel and
+cannot see each other, while the LLM writes all of its answers in one reply; and an LLM probability is a number it
+states. The Brier comparison between the models must carry all three. `brier_all` compares the two models within a set,
+not sets with each other (the reader's tiles are about 90% floor). `jev_reader` dies because it misses the gap straight
+ahead (44% of them), a failure of the reader's wording or of the 42-question request, not of Jev's reading: the
+composed wording for the same tile was never missed. The fly on v2 still runs on thresholds frozen on v1 tracks.
 
 All of this is one to five practice tracks: an impression, not a result.
 
@@ -82,3 +90,10 @@ All of this is one to five practice tracks: an impression, not a result.
   ones (no player does).
 - There is no command that scores several run directories as one table; the update 2a scoreboard in `docs/COSTS.md`
   was merged by a throwaway script. Worth folding into item 7 (the benchmark).
+- Left from the final review of update 2a (Minor): `jev_composed` accepts any finite answer while `llm_composed`
+  requires 0 to 1, and `jev_composed` logs no `info.set` (leave its class alone: its cache and records must not
+  change); the reader LLM's `max_tokens` (256 + 12 per question, about 50% headroom) is untested on larger visions;
+  the `CONTESTANTS` order in `replay.py`, for update 8.
+- For the user: whether to test the briefing difference on practice seeds with a new Jev set whose yes/no questions
+  carry the briefing (e.g. `reader_briefed`; a new set, so `jev_composed`'s cache is untouched), and whether to add gap
+  recall to the report beside `brier_all`.
