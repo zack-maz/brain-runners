@@ -33,10 +33,10 @@ def safe(questions, value=0.1):
     return {qid: value for qid in questions}
 
 
-def test_seven_paid_players_one_per_model_and_set():
+def test_one_paid_player_per_model_and_set():
     names = [p.name for p in SET_PLAYERS]
     assert names == ["jev_choice", "jev_two_step", "jev_reader", "llm_composed", "llm_choice", "llm_two_step",
-                     "llm_reader"]
+                     "llm_reader", "glm_composed", "glm_choice", "glm_two_step", "glm_reader"]
     assert all(name in PAID for name in names)
 
 
@@ -133,3 +133,41 @@ def test_set_players_spend_nothing_without_a_budget_and_stop_at_the_cap(tmp_path
         game.step("jump")
     with pytest.raises(BudgetExhausted):
         capped.act(compute_senses(game))
+
+
+def test_both_chat_models_are_sent_the_same_request_and_differ_only_in_the_provider(tmp_path):
+    from bakeoff.clients.core import DiskCache, RequestBudget
+    from bakeoff.players.set_players import GlmComposedPlayer
+    from tests.fakes import FakeHttp, glm_reply
+
+    cache = DiskCache(tmp_path / "cache")
+    haiku = LlmComposedPlayer(cache=cache, budget=RequestBudget(1), sdk=FakeAnthropic(llm_reply()))
+    glm = GlmComposedPlayer(cache=cache, budget=RequestBudget(1), sdk=FakeHttp(glm_reply()))
+    assert glm.questions == haiku.questions  # same system prompt, same question lines, same JSON shape
+    assert glm.client.provider == "glm" and glm.client.model == "glm-4.5-flash"
+
+
+def test_a_glm_player_reads_its_answers_like_the_haiku_twin(tmp_path):
+    import json
+
+    from bakeoff.clients.core import DiskCache, RequestBudget
+    from bakeoff.players.set_players import GlmTwoStepPlayer
+    from tests.fakes import FakeHttp, glm_reply
+
+    player = GlmTwoStepPlayer(cache=DiskCache(tmp_path / "cache"), budget=RequestBudget(1), sdk=FakeHttp(None))
+    answers = {**safe(player.set_questions, 0.9), "gap_left": 0.01, "trapped_left": 0.01}
+    player.client._sdk.reply = glm_reply(text=json.dumps(answers))
+    decision = player.act(SENSES)
+    assert decision.chosen_action == "left" and not decision.invalid
+    assert decision.info["set"] == "two_step" and decision.answers["gap_left"] == {"noul": 0.01}
+
+
+def test_a_cut_off_glm_reply_is_invalid_and_the_runner_falls_back(tmp_path):
+    from bakeoff.clients.core import DiskCache, RequestBudget
+    from bakeoff.players.set_players import GlmReaderPlayer
+    from tests.fakes import FakeHttp, glm_reply
+
+    player = GlmReaderPlayer(cache=DiskCache(tmp_path / "cache"), budget=RequestBudget(1),
+                             sdk=FakeHttp(glm_reply(text='{"tile_r1_c": 0.1', finish_reason="length")))
+    decision = player.act(SENSES)
+    assert decision.chosen_action is None and decision.invalid

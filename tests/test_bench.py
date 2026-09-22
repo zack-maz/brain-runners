@@ -172,6 +172,9 @@ def test_cost_says_free_priced_or_no_price():
     assert player_numbers([Episode("p", 1, "r", (live,), "claude-haiku-4-5-20251001")], 150)["cost"] == "priced"
     assert player_numbers([Episode("p", 1, "r", (live,), "jev-latest")], 150)["cost"] == "no price"
     assert player_numbers(episodes_of(("fly", 1, 3)), 150)["cost"] == "free"
+    free_tier = record(player="p", seed=1, row=0, latency_ms=300,
+                       usage={"input_tokens": 500, "output_tokens": 20}, **DIED)
+    assert player_numbers([Episode("p", 1, "r", (free_tier,), "glm-4.5-flash")], 150)["cost"] == "free"
 
 
 def test_load_refuses_what_would_score_wrong(tmp_path):

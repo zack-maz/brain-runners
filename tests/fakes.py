@@ -67,3 +67,25 @@ def jev_set_reply(values: dict):
     answers = {qid: {"type": "choice", "choice": v, "confidence": 0.7} if isinstance(v, str)
                else {"type": "noul", "noul": v} for qid, v in values.items()}
     return {"model": "jev-latest", "usage": {"input_tokens": 300, "output_tokens": 4 * len(values)}, "answers": answers}
+
+
+class FakeHttp:
+    """Looks like bakeoff.clients.glm.HttpTransport. `reply` is a chat-completion-shaped dict, or an exception."""
+
+    def __init__(self, reply):
+        self.reply, self.calls, self.closed = reply, [], False
+
+    def post(self, body):
+        self.calls.append(body)
+        if isinstance(self.reply, Exception):
+            raise self.reply
+        return self.reply
+
+    def close(self):
+        self.closed = True
+
+
+def glm_reply(text='{"action": "stay"}', finish_reason="stop", model="glm-4.5-flash"):
+    return {"id": "1", "model": model, "choices": [{"index": 0, "finish_reason": finish_reason,
+                                                    "message": {"role": "assistant", "content": text}}],
+            "usage": {"prompt_tokens": 480, "completion_tokens": 7, "total_tokens": 487}}

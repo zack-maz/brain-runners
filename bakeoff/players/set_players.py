@@ -1,12 +1,14 @@
 """Players that ask a question set (bakeoff/players/question_sets.py): `jev_<set>` asks Jev, `llm_<set>` asks
-Claude Haiku the same questions, and the set's rule picks the move from either one's answers. The same cache, cap,
-error and fallback rules as every paid player (PaidPlayer). The composed set's Jev is `jev_composed`, which stays
-its own class."""
+Claude Haiku and `glm_<set>` asks GLM Flash the same questions, and the set's rule picks the move from any of their
+answers. The two chat models are sent the same request, built once in ChatSetPlayer, so only the model differs.
+The same cache, cap, error and fallback rules as every paid player (PaidPlayer). The composed set's Jev is
+`jev_composed`, which stays its own class."""
 
 from __future__ import annotations
 
 import json
 
+from bakeoff.clients.glm import GlmClient
 from bakeoff.clients.jev import JevClient
 from bakeoff.clients.llm import LlmClient
 from bakeoff.game.engine import Game
@@ -70,8 +72,9 @@ class JevSetPlayer(SetPlayer):
         return answers, answers
 
 
-class LlmSetPlayer(SetPlayer):
-    client_class = LlmClient
+class ChatSetPlayer(SetPlayer):
+    """A chat model asked the set's questions in one request: the same system prompt, the same question lines and
+    the same JSON shape for every such model, so the model is what differs."""
 
     def request(self, set_questions: dict) -> dict:
         lines = []
@@ -98,6 +101,14 @@ class LlmSetPlayer(SetPlayer):
         answers = {qid: {"noul": data.get(qid)} if q["type"] == "noul" else {"choice": data.get(qid)}
                    for qid, q in self.set_questions.items()}
         return answers, {**answers, **logged}
+
+
+class LlmSetPlayer(ChatSetPlayer):
+    client_class = LlmClient
+
+
+class GlmSetPlayer(ChatSetPlayer):
+    client_class = GlmClient
 
 
 class JevChoicePlayer(JevSetPlayer):
@@ -128,5 +139,22 @@ class LlmReaderPlayer(LlmSetPlayer):
     name, question_set = "llm_reader", READER
 
 
+class GlmComposedPlayer(GlmSetPlayer):
+    name, question_set = "glm_composed", COMPOSED
+
+
+class GlmChoicePlayer(GlmSetPlayer):
+    name, question_set = "glm_choice", CHOICE
+
+
+class GlmTwoStepPlayer(GlmSetPlayer):
+    name, question_set = "glm_two_step", TWO_STEP
+
+
+class GlmReaderPlayer(GlmSetPlayer):
+    name, question_set = "glm_reader", READER
+
+
 SET_PLAYERS = (JevChoicePlayer, JevTwoStepPlayer, JevReaderPlayer,
-               LlmComposedPlayer, LlmChoicePlayer, LlmTwoStepPlayer, LlmReaderPlayer)
+               LlmComposedPlayer, LlmChoicePlayer, LlmTwoStepPlayer, LlmReaderPlayer,
+               GlmComposedPlayer, GlmChoicePlayer, GlmTwoStepPlayer, GlmReaderPlayer)

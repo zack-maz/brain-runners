@@ -224,7 +224,8 @@ def test_the_composed_jev_is_a_paid_player_for_the_seed_rule_and_the_help(tmp_pa
     with pytest.raises(SystemExit):
         main(["run", "--help"])
     assert ("EACH paid player (jev, jev_composed, llm, jev_choice, jev_two_step, jev_reader, llm_composed, "
-            "llm_choice, llm_two_step, llm_reader)") in " ".join(capsys.readouterr().out.split())
+            "llm_choice, llm_two_step, llm_reader, glm_composed, glm_choice, glm_two_step, glm_reader)"
+            ) in " ".join(capsys.readouterr().out.split())
 
 
 def test_max_requests_0_on_low_seeds_is_not_refused_by_the_guard(tmp_path, capsys, monkeypatch):

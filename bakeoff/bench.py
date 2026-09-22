@@ -172,10 +172,10 @@ def player_numbers(episodes: list[Episode], max_rows: int) -> dict:
     usd = [u for u in (_usd(s, m) for s, m in priced) if u is not None]
     s_mean = float(np.mean(seconds)) if seconds else None
     usd_mean = float(np.mean(usd)) if usd else None
-    if usd_mean is not None:
+    if usd_mean:
         cost = "priced"
-    elif model is None and not any(s.get("usage") for s in steps):
-        cost = "free"  # a free player (the fly, the baselines): nothing to price
+    elif usd_mean == 0 or (model is None and not any(s.get("usage") for s in steps)):
+        cost = "free"  # the fly and the baselines, and a model priced at 0 (GLM Flash's free tier)
     else:
         cost = "no price"  # a paid player whose model has no per-token price (Jev), or only cache hits
     return {
