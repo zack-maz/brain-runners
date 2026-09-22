@@ -5,7 +5,8 @@ simulation play the same seeded runs of a "Run"-style tunnel game; output is a w
 tournament. Read these before doing anything:
 
 0. `docs/EXPLAINER.html` — the plain-language tour of the whole project, high level first, then technical.
-1. `docs/DECISIONS.md` — what the user has decided, in order, and the next step.
+1. `docs/NEXT.md` — where things stand and what to do next, in order (rewritten as the state changes).
+   `docs/DECISIONS.md` — what the user has decided, numbered, only ever added to.
 2. `docs/superpowers/specs/2026-09-19-tunnel-run-design.md` — the approved design (binding), extended by
    `docs/superpowers/specs/2026-09-20-demo-player-design.md` (the demo player; also binding).
 3. `docs/RESEARCH.md` — fly-brain resources. Spike results: branch `spike/fly-steering`,
@@ -37,9 +38,8 @@ difficulty by row 100, `v1` is the old 300-row game, pinned tile for tile; runs 
 mixes two; everything recorded so far is v1 (`--game v1` replays it). Update 2a, the Jev family, is built (plan
 `...-update2a-jev-family.md`): `bakeoff/players/question_sets.py` (composed, choice, two_step, reader: questions and a
 rule, ours) played by `jev_<set>` and by Claude Haiku twins `llm_<set>` (`set_players.py`); the report's `brier_all`;
-its paid runs are part done (`docs/COSTS.md`). Resume from "Next step" in `docs/DECISIONS.md`; one PR "Opus v1" when
-all updates are done. Then phase 6, the tournament and the write-up,
-which needs a new budget go-ahead; see "Next step" in `docs/DECISIONS.md`. Each phase
+its paid runs are done (five v2 practice tracks, `docs/COSTS.md`). Resume from `docs/NEXT.md`; one PR "Opus v1" when
+all updates are done. Then phase 6, the tournament and the write-up, which needs a new budget go-ahead. Each phase
 gets its own plan.
 
 ## How we work here

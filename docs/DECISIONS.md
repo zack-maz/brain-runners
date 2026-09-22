@@ -137,79 +137,11 @@
     through an OpenAI-compatible client) comes later as another model, and is one of the players the page will let
     the user select (items 9 and 10 of `docs/UPDATES.md`). OpenAI's GPT-5.6 Luna was considered (about 4 to 5 times
     cheaper than Haiku); not chosen for now.
+28. **This file is the log only** (the user, 2026-09-21): numbered decisions, only ever added to. Where things
+    stand, the resume list, the open items and what the write-up must carry moved to `docs/NEXT.md`, which is
+    rewritten as the state changes.
 
-## Open
-
-- Whether the tournament reuses seeds 0–19 or takes fresh seeds below 1000.
-- Left from the PR #2 review for phase 3 or later (details in the PR comments): `meta.json` and the logged `looming`
-  ignore per-player overrides of the fly constants; `calibrate.play` duplicates the game loop without the fallback
-  rule; `fetch_fly_data` cannot repair an existing clone; `Network.restore` copies static synapse arrays every
-  decision (measure before optimising).
-- Left from the second PR #2 review: the fly data is hashed twice per CLI run (preflight, then
-  `Brain`); `SurrogateBrain` raises a bare `KeyError` on a surface file missing a pin field. Done in
-  phase 3: `preflight()` runs inside `Runner.run`. Declined: turning a brain exception into a `stay`
-  fallback; phase 2 decided a simulator failure must end the run, because a silent `stay` would
-  change the fly's score.
-- Left from the final review of phase 5 (Minor): a crash in `live` (and in `run`) closes the run as `interrupted`,
-  the same status as Ctrl-C; a status of its own would be the more honest record. A hard kill leaves `status:
-  running` behind. `viewer/tunnel.js` knows that rows past the finish line never kill (drawing only, commented and
-  tested); a `finish_row` in the track JSON would remove the one rule of the game that also lives in JavaScript.
-  The live `episode` event carries the question sets known at that moment; a player that changed its questions
-  mid-episode would show nothing under "What it was asked" for the later ones (no player does).
-
-## Next step
-
-A plain-language tour of everything built so far, from the idea down to the code: `docs/EXPLAINER.html`.
-
-Phases 1 to 5 are built and on `main`. Phase 5 (5a the composed Jev, 5b the demo player, 5c go live) was PR #4,
-merged on 2026-09-21 at the user's request. Plans:
-`docs/superpowers/plans/2026-09-21-phase5a-jev-composed.md`, `...-phase5b-demo-player.md`, `...-phase5c-go-live.md`
-(each ends with the rulings on its reviews).
-
-To look at it: `uv run python -m bakeoff view runs/20260919-151934 runs/20260920-102919 runs/20260921-120903`
-(practice track 1000: the fly, the LLM, the composed Jev) and `uv run python -m bakeoff view runs/20260921-132459`
-(the live run on track 1001), then open the HTML file; or `uv run python -m bakeoff live --game v1 --seed 1001`
-with the default cap of 0, which replays the paid answers of that run from the cache for free (the fly is
-simulated again, about a minute to build and a second a row). All of these are game v1. Without `--game v1`,
-`live` plays v2, where no paid answer is cached yet: with a cap of 0 a paid player stops at its first question.
-A free v2 run of the yardsticks: `runs/20260921-155758` (seeds 1000–1019: solver 150, always-jump 39, random 24).
-
-Before phase 6: the updates of `docs/UPDATES.md` (decision 20; items 9 and 10 were added later). Game v2 (items 3
-and 6) is built (decisions 21–24). **Update 2a (the Jev family and its LLM twins, decisions 25–26) is built and
-reviewed** (spec `docs/superpowers/specs/2026-09-21-jev-family-design.md`, plan
-`docs/superpowers/plans/2026-09-21-update2a-jev-family.md`, commits up to f30dcf1); its paid runs are part done
-(`docs/COSTS.md`, "Update 2a"; 1.55 of the 5.00 USD of Haiku spent).
-
-**Where to resume (in this order):**
-
-1. Finish update 2a's paid runs, one command at a time, each inside decision 26 (Haiku at most 5.00 USD in total;
-   worst case of what is left: about 2.95 USD):
-   `uv run python -m bakeoff run --players llm,llm_choice,llm_composed,llm_two_step --seeds 4 --seed-start 1001 --max-requests 600`
-   (what was answered in runs 2 and 3 replays from the cache for free), then
-   `uv run python -m bakeoff run --players llm_reader --seeds 1 --seed-start 1001 --max-requests 150`. If Anthropic is
-   down the run aborts after 6 connection errors; rerun it when the API answers.
-2. The fly on the same five tracks (free; nothing else may hold a fly brain at the same time):
-   `uv run python -m bakeoff run --players fly --seeds 5 --seed-start 1000`.
-3. Record the five-track results in `docs/COSTS.md` and here; then a final whole-branch review of update 2a (money
-   safety, the same signals for both models, honest labels, `jev_composed`'s cache still replaying).
-4. Update 2b, the fly (decision 25): `fly_rich` (richer input, untrained, calibrated once on practice seeds), then
-   `fly_trained` (a readout of ours on the same wiring). Its own spec.
-5. Item 10, the GLM Flash twin (the user will add a Zhipu key to `.env` later), then item 7 (the benchmark), then
-   the page: items 4, 5, 8 and 9 (per-mind live log tabs, pick seed and players from the page, GLM Flash among them,
-   the analysis on its own tab).
-6. When all updates are done: refresh `docs/EXPLAINER.html` (it knows game v2, not yet the Jev family), then one PR
-   titled **"Opus v1"** from `phase6-updates` (the user's instruction; not before).
-
-Tooling: plans are generated from a prototype (`.superpowers/tools/genplan.py`; prototypes kept as local branches
-`proto/game-v2`, `proto/jev-family`); the SDD ledger of update 2a is `.superpowers/sdd/2026-09-21-update2a-jev-family/`
-(git-ignored).
-
-Then phase 6, the tournament and the write-up. It starts by settling the first open item above (which seeds),
-and it needs a new budget go-ahead: the tournament is the first paid use of seeds below 1000 (`--tournament`).
-Things the write-up must carry from phase 5: the composed Jev's wording and rule are ours and it looks one
-step ahead only; it wanders on safe rows because its four answers rarely tie; on both practice tracks it died
-only where all four landing tiles were gaps; the one-shot Jev stays in for comparison; all of this is one or
-two practice tracks, an impression and not a result.
+Where we are and what comes next: `docs/NEXT.md`.
 
 ## Prior art to reuse
 

@@ -79,5 +79,5 @@ Branch: `phase6-updates`.
 ## Next step
 
 Decided (decision 20 in `DECISIONS.md`): all of these come before phase 6, each brainstormed as its own spec. Order:
-the game (3, 6: done), the players (2: built, runs part done; 1: next), GLM Flash (10), the benchmark (7), the page
-(4, 5, 8, 9). The step-by-step resume list is "Next step" in `DECISIONS.md`. When all are done: one PR, "Opus v1".
+the game (3, 6: done), the players (2: built, runs done; 1: next), GLM Flash (10), the benchmark (7), the page
+(4, 5, 8, 9). The step-by-step resume list is `docs/NEXT.md`. When all are done: one PR, "Opus v1".

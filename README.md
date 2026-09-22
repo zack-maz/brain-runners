@@ -82,4 +82,4 @@ nothing: it reads logs only. The viewer's JavaScript has its own tests, which `u
 through `node --test` (skipped when node is not installed).
 
 New here? Open `docs/EXPLAINER.html` in a browser: what this project is and how it works, from the idea down to
-the code. See `docs/DECISIONS.md` for what has been decided and what comes next.
+the code. See `docs/DECISIONS.md` for what has been decided and `docs/NEXT.md` for what comes next.
