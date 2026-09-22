@@ -19,6 +19,10 @@ Branch: `phase6-updates`.
 7. **Time, cost, performance.** Track all three, and research a scientific way to evaluate and benchmark success.
 8. **Homepage is the run.** Move the extra findings, report, dialogue and analysis (everything below the
    scoreboard) to a separate tab. The homepage keeps the tunnel and the real-time thoughts below it.
+9. **Selectable players** (added 2026-09-21). Make the players selectable: from the page, choose which players play
+   a live run (with the seed of item 5), and which are shown in a replay. Built with the page (items 4, 5, 8).
+10. **A GLM Flash toggle** (added 2026-09-21, after update 2a). A free-tier LLM twin (Zhipu's GLM Flash, through an
+   OpenAI-compatible client) next to Haiku, which stays the reference LLM.
 
 ## Built
 
@@ -66,7 +70,7 @@ Branch: `phase6-updates`.
   that no longer exist.
 - Items 1, 2 and 7 all need the benchmark method from item 7 to say which variant is "best".
 - Items 2 and 4 spend money when run live on new tracks; the cap and the go-ahead rules stand.
-- Items 4, 5 and 8 are the viewer and the live server, one piece of work.
+- Items 4, 5, 8 and 9 are the viewer and the live server, one piece of work.
 
 ## Next step
 
