@@ -171,3 +171,12 @@ def test_a_cut_off_glm_reply_is_invalid_and_the_runner_falls_back(tmp_path):
                              sdk=FakeHttp(glm_reply(text='{"tile_r1_c": 0.1', finish_reason="length")))
     decision = player.act(SENSES)
     assert decision.chosen_action is None and decision.invalid
+
+
+def test_a_fenced_json_answer_is_read_by_both_chat_models():
+    from bakeoff.players.set_players import unfenced
+
+    assert unfenced('```json\n{"a": 1}\n```') == '{"a": 1}'
+    assert unfenced('```\n{"a": 1}```') == '{"a": 1}'
+    assert unfenced('{"a": 1}') == '{"a": 1}'  # Claude Haiku's structured output is unchanged
+    assert unfenced("  ") == ""

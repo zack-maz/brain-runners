@@ -9,7 +9,9 @@ from bakeoff.clients.glm import DEFAULT_BASE_URL, GlmClient, HttpTransport, base
 from tests.fakes import FakeHttp, glm_reply
 
 SENSES = {"lane": 3, "ahead": []}
-QUESTIONS = {"system": "you are a runner", "max_tokens": 300, "questions": {"gap_stay": {"type": "noul"}}}
+QUESTIONS = {"system": "you are a runner", "max_tokens": 300, "questions": {"gap_stay": {"type": "noul"}},
+             "schema": {"type": "object", "properties": {"gap_stay": {"type": "number"}},
+                        "required": ["gap_stay"], "additionalProperties": False}}
 
 
 def client(tmp_path, reply, max_requests=1):
@@ -22,7 +24,8 @@ def test_one_request_carries_the_system_prompt_the_senses_and_asks_for_json(tmp_
     reply = glm.ask(SENSES, QUESTIONS)
     (body,) = http.calls
     assert body["model"] == "glm-4.5-flash" and body["temperature"] == 0 and body["max_tokens"] == 300
-    assert body["response_format"] == {"type": "json_object"}
+    assert body["response_format"] == {"type": "json_schema", "json_schema": {
+        "name": "answers", "strict": True, "schema": QUESTIONS["schema"]}}  # the schema Claude Haiku gets
     assert body["thinking"] == {"type": "disabled"}  # Haiku does not think here either
     assert body["messages"] == [{"role": "system", "content": "you are a runner"},
                                 {"role": "user", "content": json.dumps(SENSES)}]

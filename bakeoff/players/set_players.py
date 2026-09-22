@@ -19,6 +19,16 @@ from bakeoff.players.jev_composed import ORDER
 from bakeoff.players.paid import PaidPlayer
 from bakeoff.players.question_sets import CHOICE, COMPOSED, READER, TWO_STEP, QuestionSet, values_of
 
+def unfenced(text: str) -> str:
+    """The answer without a markdown code fence around it. GLM wraps its JSON in ```json ... ```; Claude Haiku
+    does not, so this changes nothing for it and both models are read by the same rule."""
+    stripped = text.strip()
+    if stripped.startswith("```"):
+        stripped = stripped.split("\n", 1)[-1] if "\n" in stripped else stripped
+        stripped = stripped.rsplit("```", 1)[0]
+    return stripped.strip()
+
+
 LLM_SYSTEM = (BRIEFING + " The user message is the runner's current view as JSON. Answer every question below, "
               "each under its id, in the JSON format given: for a yes/no question, your probability from 0 to 1 that "
               "the answer is yes; for a choice, one of its options.")
@@ -93,7 +103,7 @@ class ChatSetPlayer(SetPlayer):
     def answers_of(self, payload: dict) -> tuple[dict | None, dict]:
         logged = {"text": payload.get("text"), "stop_reason": payload.get("stop_reason")}
         try:
-            data = json.loads(payload.get("text") or "")
+            data = json.loads(unfenced(payload.get("text") or ""))
         except ValueError:
             return None, logged
         if not isinstance(data, dict) or payload.get("stop_reason") != "end_turn":

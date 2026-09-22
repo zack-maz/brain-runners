@@ -51,10 +51,11 @@ class GlmClient(PaidClient):
     key_name = "ZHIPU_API_KEY"
     default_model = "glm-4.5-flash"
     # GLM-4.5 thinks by default and its thoughts eat the token budget: the first smoke test came back empty and cut
-    # off. Claude Haiku answers these questions without thinking, so neither model thinks. These knobs are part of
-    # the cache key, so answers made with other knobs are never replayed.
-    request_options = {"temperature": 0, "response_format": {"type": "json_object"},
-                       "thinking": {"type": "disabled"}}
+    # off. Claude Haiku answers these questions without thinking, so neither model thinks. Asked only for "an
+    # object", GLM invents a wrapper ({"answer": {...}}), so it gets the same JSON schema Claude Haiku gets. These
+    # are part of the cache key, so answers made another way are never replayed; `response_format` names the shape
+    # here, and the request below carries the set's own schema.
+    request_options = {"temperature": 0, "response_format": "json_schema", "thinking": {"type": "disabled"}}
 
     def _live(self, senses: dict, questions: dict) -> dict:
         if self._sdk is None:
@@ -63,7 +64,10 @@ class GlmClient(PaidClient):
             "model": self.model,
             "messages": [{"role": "system", "content": questions["system"]},
                          {"role": "user", "content": json.dumps(senses)}],
-            "max_tokens": questions["max_tokens"], **self.request_options})
+            "max_tokens": questions["max_tokens"],
+            "temperature": self.request_options["temperature"], "thinking": self.request_options["thinking"],
+            "response_format": {"type": "json_schema",
+                                "json_schema": {"name": "answers", "strict": True, "schema": questions["schema"]}}})
         try:
             choice = data["choices"][0]
             text, finish = choice["message"]["content"], choice.get("finish_reason")
