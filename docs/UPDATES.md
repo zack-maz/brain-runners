@@ -22,7 +22,8 @@ Branch: `phase6-updates`.
 9. **Selectable players** (added 2026-09-21). Make the players selectable: from the page, choose which players play
    a live run (with the seed of item 5), and which are shown in a replay. Built with the page (items 4, 5, 8).
 10. **A GLM Flash toggle** (added 2026-09-21, after update 2a). A free-tier LLM twin (Zhipu's GLM Flash, through an
-   OpenAI-compatible client) next to Haiku, which stays the reference LLM.
+   OpenAI-compatible client) next to Haiku, which stays the reference LLM. It is one of the selectable players of
+   item 9 (the user, 2026-09-21), so it is built before the page work.
 
 ## Built
 
