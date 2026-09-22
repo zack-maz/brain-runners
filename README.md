@@ -14,7 +14,7 @@ answer, the fly's neurons firing) and a scoreboard across games.
 
 Status: phases 1 to 5 of 6 built (phase 6 is the tournament and the write-up); ten updates come first
 (`docs/UPDATES.md`). Game v2 is built; update 2a, the Jev family and its LLM twins, is built and its paid runs
-are done; update 2b, the fly, stopped at its probe. Next: the benchmark (item 7). Details in `docs/NEXT.md`. The
+are done; update 2b, the fly, stopped at its probe. The benchmark (item 7) is built. Details in `docs/NEXT.md`. The
 untrained fly plays: on seeds 0–19 of game v1 it survives 127 rows on average (random 35, always-jump 48, solver
 300; `calibration/RESULTS.md`).
 
@@ -30,9 +30,18 @@ are in `docs/COSTS.md`.
     uv run python -m bakeoff run --players fly,always_jump,random,solver --seeds 20 --seed-start 1000
     uv run python -m bakeoff report runs/<run_id>
     uv run python -m bakeoff view runs/<run_id> [runs/<other_run_id> ...]   # writes replay.html
+    uv run python -m bakeoff bench runs/<run_id>[:player,...] [...]          # writes bench.html and bench.json
 
     uv run python -m bakeoff live --seed 1001 --players fly,jev_composed,llm --max-requests 150   # watch it happen
     uv run python -m bakeoff live --game v1 --seed 1001    # free: replays the recorded v1 run's answers from the cache
+
+`bench` scores recorded runs and spends nothing. It merges run directories like `view` (one game; each player and
+seed from one directory; `DIR:player,player` takes only those players from a directory) and leaves out episodes a
+stopped run cut off. Per player: mean rows with a 95% bootstrap interval, the median, the share finished, a survival
+curve, and seconds and USD per row from live decisions (a cache hit records neither; Jev has no per-token price, so
+"-"). Per pair, on the tracks both played: the mean difference, its interval, wins, ties and losses, a verdict only
+when the interval leaves out zero, and how many tracks would separate them. Below 5 tracks there is no interval and
+no verdict: a bootstrap of fewer only returns their range. The page is one offline file like the replay.
 
 `live` plays one track in real time: every mind decides the same row before anyone moves on (a jumper skips
 the next row; the slowest mind sets the pace, about a row a second with the fly), each decision goes into a

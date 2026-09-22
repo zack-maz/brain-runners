@@ -33,8 +33,8 @@ Branch: `phase6-updates`.
 - Item 2 (update 2a): `jev_choice`, `jev_two_step`, `jev_reader` and an LLM twin for every question set (decisions
   25–27; spec `docs/superpowers/specs/2026-09-21-jev-family-design.md`). Code built and reviewed; paid runs done
   (`docs/COSTS.md`). Item 1 (the fly) is update 2b: the trained fly dropped for now, `fly_rich` stopped at its probe (decisions 29–30).
-- Item 7, the benchmark: approved design (decision 31, `docs/superpowers/specs/2026-09-22-benchmark-design.md`), not
-  built yet.
+- Item 7, the benchmark (decision 31, `docs/superpowers/specs/2026-09-22-benchmark-design.md`): built; `python -m
+  bakeoff bench` scores recorded runs with intervals, pairs, time and cost per row, and writes its own page.
 
 ## Where each one stood on 2026-09-21
 
