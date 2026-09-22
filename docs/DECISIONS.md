@@ -154,6 +154,11 @@
     different action. The user chose a play test with a rule fixed beforehand; on v2 practice seeds 1100-1104 with
     the frozen v1 thresholds the band flies survived 21.6 and 29.6 rows against `fly`'s 58.2 and never jumped. So
     `fly_rich` is not built; `fly` stays the only fly, and the report is the result for the write-up.
+31. **The benchmark (item 7)** (the user, 2026-09-22; design `docs/superpowers/specs/2026-09-22-benchmark-design.md`):
+    one report that says both who is better with confidence (paired comparisons on shared seeds, bootstrap
+    intervals, survival curves, seeds needed) and the cost/performance trade-off (USD and seconds per row). It reads
+    recorded runs only and spends nothing. `python -m bakeoff bench` prints the tables and writes `bench.json` and
+    its own offline page, `bench.html`, now; the Analysis tab of item 8 reuses it later.
 
 Where we are and what comes next: `docs/NEXT.md`.
 
