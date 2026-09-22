@@ -99,7 +99,7 @@ def test_an_overloaded_free_tier_is_retried_once_and_the_retry_spends_from_the_c
     import bakeoff.clients.glm as glm_module
     from bakeoff.clients.core import BudgetExhausted
 
-    monkeypatch.setattr(glm_module, "RETRY_PAUSE_S", 0)
+    monkeypatch.setattr(glm_module, "RETRY_PAUSES_S", (0, 0, 0))
     replies = [ProviderError("HTTP 429: overloaded"), glm_reply(text='{"gap_stay": 0.2}')]
 
     class Flaky(FakeHttp):

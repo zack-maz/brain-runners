@@ -19,8 +19,8 @@ TIMEOUT_S = 60.0
 # The free tier queues: a share of requests come back "temporarily overloaded" (HTTP 429) or time out. One retry
 # after a pause, and the retry spends from the cap like any other request, so the cap is still exactly the number
 # of HTTP requests a run may make. Claude Haiku and Jev keep no retries: they are metered, not queued.
-RETRIES = 1
-RETRY_PAUSE_S = 3.0
+RETRIES = 3
+RETRY_PAUSES_S = (5.0, 20.0, 60.0)  # the free tier throttles in bursts: back off rather than burn the cap
 RETRYABLE = ("HTTP 429", "HTTP 500", "HTTP 502", "HTTP 503", "HTTP 504", "TimeoutError", "URLError")
 # the international endpoint; a mainland account reads GLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4 from .env
 DEFAULT_BASE_URL = "https://api.z.ai/api/paas/v4"
@@ -74,7 +74,7 @@ class GlmClient(PaidClient):
                 if attempt == RETRIES or not str(e).startswith(RETRYABLE):
                     raise
                 self.budget.spend()  # the retry is a request of its own: the cap counts HTTP requests
-                time.sleep(RETRY_PAUSE_S)
+                time.sleep(RETRY_PAUSES_S[min(attempt, len(RETRY_PAUSES_S) - 1)])
         raise AssertionError("unreachable")
 
     def _once(self, senses: dict, questions: dict, attempt: int) -> dict:
