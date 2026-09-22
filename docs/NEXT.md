@@ -21,6 +21,8 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 - **Update 2b, the fly** (decisions 29–30): `fly_trained` dropped by the user; `fly_rich` stopped at its probe (spike
   03, branch `spike/fly-bands`, local): the wiring carries "where" only as strength, and band input made the fly
   worse. `fly` stays the only fly.
+- **Item 10, GLM Flash** (decisions 33–34): the four `glm_<set>` players are built and track 1000 is recorded;
+  tracks 1001–1004 are parked while the free tier throttles (`docs/COSTS.md`, "Item 10").
 - **Item 7, the benchmark** (decision 31, spec `docs/superpowers/specs/2026-09-22-benchmark-design.md`): built
   2026-09-22. `python -m bakeoff bench RUN_DIR[:PLAYER,...] ...` scores recorded runs (spends nothing), prints the
   tables and writes `bench.json` and an offline `bench.html`. Prototyped, then its five tested commits taken as they
@@ -31,15 +33,12 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 
 ## Where to resume (in this order)
 
-1. Item 10, GLM Flash (decision 33): the four `glm_<set>` players are **built**; what is left is the runs, once
-   `ZHIPU_API_KEY` is in `.env` (the user pastes it; a guard keeps Claude out of that file). First
-   `uv run python -m bakeoff run --players glm_composed,glm_choice,glm_two_step,glm_reader --seeds 1 --seed-start 1000
-   --max-requests 150`, checking the first records read like the Haiku twins' (`text`, `stop_reason`, no fallbacks),
-   then seeds 1001–1004. Free tier, but the cap and the cache rules still apply. Check which endpoint the key
-   belongs to: the default is `https://api.z.ai/api/paas/v4`, a mainland account needs
-   `GLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4`.
-2. The page: items 4, 5, 8 and 9 (per-mind live log tabs, pick seed and players from the page, GLM Flash among them,
-   the analysis on its own tab).
+1. The page: items 4, 5, 8 and 9 (per-mind live log tabs, pick seed and players from the page, GLM Flash among
+   them, the analysis on its own tab, which can reuse `bench.json`). Its own spec.
+2. **Parked**: GLM Flash's tracks 1001–1004 (decision 34), while Zhipu's free tier throttles. To pick it up, check
+   it answers (a few requests through `bakeoff.clients.glm.HttpTransport`), then
+   `uv run python -m bakeoff run --players glm_composed,glm_choice,glm_two_step --seeds 5 --seed-start 1000 --max-requests 700`
+   and `--players glm_reader --seeds 2 --seed-start 1000 --max-requests 350`. Track 1000 replays free from the cache.
 3. When all updates are done: refresh `docs/EXPLAINER.html` (it knows game v2, not yet the Jev family), then one PR
    titled **"Opus v1"** from `phase6-updates` (the user's instruction; not before).
 4. Then phase 6, the tournament and the write-up. It starts by settling which seeds (see "Open"), and it needs a new

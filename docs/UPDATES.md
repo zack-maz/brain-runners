@@ -33,8 +33,9 @@ Branch: `phase6-updates`.
 - Item 2 (update 2a): `jev_choice`, `jev_two_step`, `jev_reader` and an LLM twin for every question set (decisions
   25–27; spec `docs/superpowers/specs/2026-09-21-jev-family-design.md`). Code built and reviewed; paid runs done
   (`docs/COSTS.md`). Item 1 (the fly) is update 2b: the trained fly dropped for now, `fly_rich` stopped at its probe (decisions 29–30).
-- Item 10, the GLM Flash twins (decision 33): `glm_composed`, `glm_choice`, `glm_two_step` and `glm_reader` on
-  `glm-4.5-flash`, the same questions and rules as their Jev and Haiku twins; built, runs pending a key.
+- Item 10, the GLM Flash twins (decisions 33–34): `glm_composed`, `glm_choice`, `glm_two_step` and `glm_reader` on
+  `glm-4.5-flash`, the same questions and rules as their Jev and Haiku twins. Built; track 1000 recorded, the rest
+  parked while the free tier throttles (`docs/COSTS.md`).
 - Item 7, the benchmark (decision 31, `docs/superpowers/specs/2026-09-22-benchmark-design.md`): built; `python -m
   bakeoff bench` scores recorded runs with intervals, pairs, time and cost per row, and writes its own page.
 

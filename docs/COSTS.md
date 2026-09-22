@@ -205,3 +205,32 @@ What the comparison between the models must carry (final review of update 2a):
   no floor as a gap (0 of 9,783); `llm_reader` missed 1 of 274 and 13 of 2,119. The composed wording for the same tile
   (`gap_stay`) was never missed in 73 cases, so it is the reader's wording or the 42-question request that fails, not
   Jev's reading of the track.
+
+## Item 10: the GLM Flash twins (game v2, 2026-09-22, parked)
+
+Free tier (`glm-4.5-flash`, 0 USD), so the cost of these runs is nothing; what limits them is the tier's throttle.
+Two fixes came out of the first requests: GLM-4.5 thinks by default and its thoughts spent the whole token budget
+(empty, cut-off replies), and asked only for "an object" it wrapped its answer (`{"answer": {...}}`), which made
+every `glm_choice` decision invalid. It now answers with thinking off and with the same JSON schema Claude Haiku
+gets, inside a markdown fence that both chat models' reader strips.
+
+**Track 1000** (`runs/20260922-110347`, cap 150 each, `completed`; no invalid answer):
+
+| player | rows (of 150) | live requests | failed decisions | mean latency ms | input tokens | output tokens |
+| --- | --- | --- | --- | --- | --- | --- |
+| glm_composed | 109 | 103 | 4.6% | 5,496 | 58,754 | 3,595 |
+| glm_two_step | 74 | 73 | 2.7% | 4,196 | 64,381 | 6,030 |
+| glm_choice | 73 | 71 | 0% | 1,157 | 41,435 | 810 |
+| glm_reader | 38 | 34 | 13% | 14,151 | 74,889 | 12,832 |
+
+On the same track: `jev_composed` 150, `llm_composed` 132, `jev_two_step` 150, `llm_two_step` 95, `jev_choice` 94,
+`llm_choice` 93, `jev_reader` 38, `llm_reader` 150.
+
+**Tracks 1001–1004 are not run** (`runs/20260922-113159`, `aborted`): the free tier began answering "the service
+may be temporarily overloaded" (HTTP 429) to nearly every request, and the run's circuit breaker stopped it after
+six in a row. A plain probe then got 1 request through in 5. GLM now backs off 5, 20 and 60 seconds and each retry
+spends from the cap, so a throttled run waits instead of burning it. Parked by the user on 2026-09-22 (decision 34);
+track 1000 stands as its record.
+
+A failed decision is a logged error and a `stay`, which can kill a player on a bad row: GLM's rows above are a
+floor, not its ability. The benchmark shows it but does not rank it, since a rank needs five tracks.

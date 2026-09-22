@@ -171,6 +171,10 @@
     (`ZHIPU_API_KEY`, `GLM_BASE_URL` for a mainland account), called with the standard library: one HTTP request per
     decision, no retries, the same cache and cap as every paid player. The free tier is priced at 0, so it reads as
     free rather than unknown. First run capped at one practice track, then tracks 1001–1004 to match the others.
+34. **GLM Flash is parked after one track** (the user, 2026-09-22). The four `glm_<set>` players work and track 1000
+    is recorded (`docs/COSTS.md`), but Zhipu's free tier throttles: about one request in five got through, and the
+    run of tracks 1001–1004 aborted on six refusals in a row. Item 10 is part done; pick it up when the quota
+    recovers. The page work (items 4, 5, 8, 9) comes next, with GLM among the selectable players.
 
 Where we are and what comes next: `docs/NEXT.md`.
 
