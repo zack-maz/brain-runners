@@ -1,8 +1,9 @@
-"""uv run python -m bakeoff run|report|view|live"""
+"""uv run python -m bakeoff run|report|view|live|bench"""
 
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 import threading
 import time
@@ -57,6 +58,14 @@ def _parser() -> argparse.ArgumentParser:
     view = sub.add_parser("view", help="write a replay of one or more run directories as one HTML file")
     view.add_argument("run_dirs", nargs="+", help="run directories; one (player, seed) may appear only once")
     view.add_argument("--output", default="replay.html", help="the file to write (default replay.html)")
+    bench = sub.add_parser("bench", help="score recorded runs: who is better and how sure, time and cost per row; "
+                                         "spends nothing")
+    bench.add_argument("sources", nargs="+", metavar="RUN_DIR[:PLAYER,...]",
+                       help="run directories, each optionally with the players to take from it")
+    bench.add_argument("--output", default="bench.html",
+                       help="the page to write (default bench.html); the numbers go next to it as .json")
+    bench.add_argument("--pair", action="append", default=[], metavar="A,B",
+                       help="show only these pairs in the terminal (repeatable); the page shows every pair")
     live = sub.add_parser("live", help="play one track in real time and watch it in the browser (loopback only); "
                                        "the run is recorded like any other")
     live.add_argument("--players", default="fly,jev_composed,llm", help=f"comma-separated; available: {sorted(REGISTRY)}")
@@ -174,8 +183,42 @@ def _print_report(run_dir) -> None:
     print(format_table(summarize(load_steps(run_dir), meta)))
 
 
+def _bench(args) -> int:
+    from bakeoff.bench import benchmark, format_tables, load as load_runs, parse_source  # numpy: only for bench
+
+    try:
+        pairs = [tuple(n.strip() for n in pair.split(",")) for pair in args.pair]
+        if any(len(pair) != 2 for pair in pairs):
+            raise ValueError("--pair takes two players: A,B")
+        loaded = load_runs([parse_source(s) for s in args.sources])
+    except (FileNotFoundError, ValueError) as e:
+        print(e, file=sys.stderr)
+        return 2
+    if not loaded.episodes:
+        print("no complete episode in " + ", ".join(args.sources), file=sys.stderr)
+        return 2
+    out = benchmark(loaded)
+    names = {p["player"] for p in out["players"]}
+    unknown = sorted({n for pair in pairs for n in pair} - names)
+    if unknown:
+        print(f"--pair names players that are not in the runs: {', '.join(unknown)}", file=sys.stderr)
+        return 2
+    page, numbers = Path(args.output), Path(args.output).with_suffix(".json")
+    try:
+        numbers.write_text(json.dumps(out, indent=1), encoding="utf-8")
+        page.write_text(render_html(out, page_name="bench.html"), encoding="utf-8")
+    except OSError as e:
+        print(f"cannot write {e.filename}: {e.strerror}", file=sys.stderr)
+        return 2
+    print(format_tables(out, pairs or None))
+    print(f"\nbench: {page} and {numbers}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
+    if args.command == "bench":
+        return _bench(args)
     if args.command == "report":
         try:
             _print_report(args.run_dir)

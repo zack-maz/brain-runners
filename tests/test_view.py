@@ -132,3 +132,8 @@ def test_view_usage_errors(tmp_path, capsys):
     assert not (tmp_path / "out.html").exists()
     assert main(["view", str(run_dir), "--output", str(tmp_path / "nodir" / "out.html")]) == 2
     assert "cannot write" in capsys.readouterr().err
+
+
+def test_the_benchmark_page_is_filled_the_same_way():
+    page = render_html({"players": [{"player": "</script>"}]}, page_name="bench.html")
+    assert '"player":"\\u003c/script>"' in page and "<script src=" not in page and '<link rel="stylesheet"' not in page

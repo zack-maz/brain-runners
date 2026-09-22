@@ -217,3 +217,37 @@ def benchmark(loaded: Loaded) -> dict:
             "incomplete": [{"player": e.player, "seed": e.seed, "run_id": e.run_id, "rows": e.rows}
                            for e in loaded.incomplete],
             "notes": notes}
+
+
+# ---- the terminal ----------------------------------------------------------------------------------------------
+
+def _num(value, digits: int = 1) -> str:
+    return "-" if value is None else f"{value:.{digits}f}"
+
+
+def _interval(low, high) -> str:
+    return "-" if low is None else f"{low:.1f} to {high:.1f}"
+
+
+def format_tables(out: dict, pairs: list[tuple[str, str]] | None = None) -> str:
+    """The players table, the pairs table (all, or only `pairs`), what was left out, and the notes."""
+    lines = [f"game: {out['game'] or 'unknown'} · runs: {', '.join(out['runs'])}", "",
+             "| player | seeds | mean rows | 95% interval | median | finished | s per row | USD per row | live | cached |",
+             "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
+    for p in out["players"]:
+        lines.append(f"| {p['player']} | {p['seeds']} | {_num(p['mean_rows'])} | {_interval(p['ci_low'], p['ci_high'])} "
+                     f"| {_num(p['median_rows'])} | {p['finished']:.0%} | {_num(p['s_per_row'], 2)} "
+                     f"| {_num(p['usd_per_row'], 5)} | {p['live_decisions']} | {p['cache_hits']} |")
+    wanted = None if pairs is None else {frozenset(pair) for pair in pairs}
+    lines += ["", "| A | B | seeds | mean A - B | 95% interval | A wins / ties / B wins | verdict | seeds needed |",
+              "| --- | --- | --- | --- | --- | --- | --- | --- |"]
+    for q in out["pairs"]:
+        if wanted is None or frozenset((q["a"], q["b"])) in wanted:
+            lines.append(f"| {q['a']} | {q['b']} | {q['common_seeds']} | {_num(q['mean_diff'])} "
+                         f"| {_interval(q['ci_low'], q['ci_high'])} | {q['wins']} / {q['ties']} / {q['losses']} "
+                         f"| {q['verdict']} | {q['seeds_needed'] if q['seeds_needed'] is not None else '-'} |")
+    if out["incomplete"]:
+        lines += ["", "Left out, neither dead nor finished: " + ", ".join(
+            f"{e['player']} on seed {e['seed']} ({e['run_id']}, {e['rows']} rows)" for e in out["incomplete"])]
+    lines += [""] + out["notes"]
+    return "\n".join(lines)
