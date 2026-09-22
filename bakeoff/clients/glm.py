@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 import urllib.error
 import urllib.request
 
@@ -15,6 +16,12 @@ from bakeoff.clients.core import PaidClient, ProviderError
 from bakeoff.clients.keys import ENV_FILE, require_key
 
 TIMEOUT_S = 60.0
+# The free tier queues: a share of requests come back "temporarily overloaded" (HTTP 429) or time out. One retry
+# after a pause, and the retry spends from the cap like any other request, so the cap is still exactly the number
+# of HTTP requests a run may make. Claude Haiku and Jev keep no retries: they are metered, not queued.
+RETRIES = 1
+RETRY_PAUSE_S = 3.0
+RETRYABLE = ("HTTP 429", "HTTP 500", "HTTP 502", "HTTP 503", "HTTP 504", "TimeoutError", "URLError")
 # the international endpoint; a mainland account reads GLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4 from .env
 DEFAULT_BASE_URL = "https://api.z.ai/api/paas/v4"
 
@@ -60,6 +67,17 @@ class GlmClient(PaidClient):
     def _live(self, senses: dict, questions: dict) -> dict:
         if self._sdk is None:
             self._sdk = HttpTransport(base_url() + "/chat/completions", require_key(self.key_name))
+        for attempt in range(RETRIES + 1):
+            try:
+                return self._once(senses, questions, attempt + 1)
+            except ProviderError as e:
+                if attempt == RETRIES or not str(e).startswith(RETRYABLE):
+                    raise
+                self.budget.spend()  # the retry is a request of its own: the cap counts HTTP requests
+                time.sleep(RETRY_PAUSE_S)
+        raise AssertionError("unreachable")
+
+    def _once(self, senses: dict, questions: dict, attempt: int) -> dict:
         data = self._sdk.post({
             "model": self.model,
             "messages": [{"role": "system", "content": questions["system"]},
@@ -75,7 +93,7 @@ class GlmClient(PaidClient):
             raise ProviderError(f"unreadable reply: {json.dumps(data)[:200]}") from e
         usage = data.get("usage") or {}
         thoughts = (choice["message"].get("reasoning_content") or "") if isinstance(choice.get("message"), dict) else ""
-        return {"model": data.get("model") or self.model,
+        return {"model": data.get("model") or self.model, "attempts": attempt,
                 # nothing should appear here while thinking is off; logged, never parsed, if it does
                 **({"reasoning_content": thoughts} if thoughts else {}),
                 # the set players read `end_turn` for a complete answer, as Anthropic names it

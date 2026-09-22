@@ -55,8 +55,8 @@ def test_an_unreadable_reply_is_a_provider_error(tmp_path):
 
 
 def test_a_transport_failure_is_a_provider_error(tmp_path):
-    glm, _ = client(tmp_path, ProviderError("HTTP 429: rate limit"))
-    with pytest.raises(ProviderError, match="429"):
+    glm, _ = client(tmp_path, ProviderError("HTTP 400: bad request"))  # a queue failure is retried: see below
+    with pytest.raises(ProviderError, match="400"):
         glm.ask(SENSES, QUESTIONS)
 
 
@@ -93,3 +93,37 @@ def test_changing_how_the_request_is_made_does_not_replay_the_old_answers(tmp_pa
     glm.request_options = {**GlmClient.request_options, "thinking": {"type": "enabled"}}
     again = glm.ask(SENSES, QUESTIONS)
     assert not again.cache_hit and len(http.calls) == 2
+
+
+def test_an_overloaded_free_tier_is_retried_once_and_the_retry_spends_from_the_cap(tmp_path, monkeypatch):
+    import bakeoff.clients.glm as glm_module
+    from bakeoff.clients.core import BudgetExhausted
+
+    monkeypatch.setattr(glm_module, "RETRY_PAUSE_S", 0)
+    replies = [ProviderError("HTTP 429: overloaded"), glm_reply(text='{"gap_stay": 0.2}')]
+
+    class Flaky(FakeHttp):
+        def post(self, body):
+            self.calls.append(body)
+            reply = replies[len(self.calls) - 1]
+            if isinstance(reply, Exception):
+                raise reply
+            return reply
+
+    http = Flaky(None)
+    glm = GlmClient(DiskCache(tmp_path / "cache"), RequestBudget(2), sdk=http)
+    payload = glm.ask(SENSES, QUESTIONS).payload
+    assert payload["text"] == '{"gap_stay": 0.2}' and payload["attempts"] == 2
+    assert len(http.calls) == 2 and glm.budget.used == 2  # both HTTP requests counted
+
+    tight = GlmClient(DiskCache(tmp_path / "cache2"), RequestBudget(1), sdk=Flaky(None))
+    replies[:] = [ProviderError("HTTP 429: overloaded"), glm_reply()]
+    with pytest.raises(BudgetExhausted):  # no room for the retry: the cap wins
+        tight.ask(SENSES, QUESTIONS)
+
+
+def test_a_failure_that_is_not_the_queue_is_not_retried(tmp_path):
+    glm, http = client(tmp_path, ProviderError("HTTP 401: bad key"), max_requests=5)
+    with pytest.raises(ProviderError, match="401"):
+        glm.ask(SENSES, QUESTIONS)
+    assert len(http.calls) == 1 and glm.budget.used == 1
