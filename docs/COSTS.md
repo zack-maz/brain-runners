@@ -175,11 +175,12 @@ taken from exactly one of runs 1, 2, 4, 5, 6; deaths are "ran into / jumped into
 (Yardsticks on the same game, `runs/20260921-155758`: solver 150, always-jump 39, random 24.)
 
 The same scoreboard with 95% intervals, time and cost per row and every pair (2026-09-22, the benchmark of item 7):
-`uv run python -m bakeoff bench runs/20260921-165433 "runs/20260921-171044:jev_composed,jev_choice,jev_two_step,jev_reader" runs/20260921-185546 runs/20260921-191326 runs/20260921-192037`. On these five tracks it separates, among others: `jev_two_step` ahead of its Haiku twin
-`llm_two_step` (+35.0 rows, interval 14.0 to 55.4, 4 wins, 1 tie, 0 losses) and of the fly (+76.6); `llm_composed`
-ahead of `llm_two_step` (+22.6, 1.2 to 37.6). It cannot yet tell `jev_composed` from `llm_composed` (+8.0 for Haiku,
--16.2 to 39.0; about 75 tracks would be needed at that difference) nor `jev_two_step` from `llm_composed` (about 15).
-`llm_reader`, on 2 tracks, gets no interval and no verdict. Per row: `llm_reader` 2.88 s and 0.0064 USD, the other
+`uv run python -m bakeoff bench runs/20260921-165433 "runs/20260921-171044:jev_composed,jev_choice,jev_two_step,jev_reader" runs/20260921-185546 runs/20260921-191326 runs/20260921-192037`. With 95% paired t intervals over five tracks (decision 32) it separates, among others, `jev_two_step` from its
+Haiku twin `llm_two_step` (+35.0 rows, interval 2.0 to 68.0, 4 wins, 1 tie, 0 losses) and from the fly (+76.6, 37.7
+to 115.5). It cannot yet tell `llm_composed` from `llm_two_step` (+22.6, -7.1 to 52.3; about 9 tracks for an 80%
+chance of a verdict), `jev_two_step` from `llm_composed` (+12.4, about 31) nor `jev_composed` from `llm_composed`
+(+8.0 for Haiku, about 152). These are 36 pairs at 95% each, so about 2 verdicts would come by chance alone: read
+each as a lead. `llm_reader`, on 2 tracks, gets no interval, no verdict and no rank. Per row: `llm_reader` 2.88 s and 0.0064 USD, the other
 Haiku twins 0.7 to 1.1 s and 0.0008 to 0.0016 USD, the Jev players 0.17 to 0.23 s (price unknown), the fly 0.66 s.
 
 What these five tracks suggest (an impression, not a result): looking two moves ahead is where the rows are, but

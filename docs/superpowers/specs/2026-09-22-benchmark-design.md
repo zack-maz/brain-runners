@@ -1,5 +1,10 @@
 # Item 7: the benchmark (time, cost, performance): design
 
+> **Amended by decision 32 (2026-09-22, final review):** intervals are Student t intervals (paired for pairs),
+> not percentile bootstraps; tracks needed is for an 80% chance of a verdict and absent below 5 tracks; runs of
+> different lengths are refused; a note counts the pairs and the verdicts chance would give. The text below is the
+> design as approved; the code and `docs/DECISIONS.md` hold the change.
+
 Date: 2026-09-22 · Status: approved by the user in chat ("both, one report"; "command plus its own HTML now";
 design "yes") · Item 7 of `docs/UPDATES.md` · Decision 31 of `docs/DECISIONS.md`
 

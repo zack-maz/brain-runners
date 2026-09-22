@@ -159,6 +159,12 @@
     intervals, survival curves, seeds needed) and the cost/performance trade-off (USD and seconds per row). It reads
     recorded runs only and spends nothing. `python -m bakeoff bench` prints the tables and writes `bench.json` and
     its own offline page, `bench.html`, now; the Analysis tab of item 8 reuses it later.
+32. **The benchmark's intervals are t intervals** (2026-09-22, final review of item 7; controller's ruling under the
+    user's aim of honest science, decision 29). The spec's percentile bootstrap is too narrow at a handful of tracks:
+    at 5 tracks it gave a verdict about 1 time in 7 with no real difference, and one such verdict had been quoted in
+    `docs/COSTS.md`. Now: 95% Student t intervals (paired for pairs), none below 5 tracks; tracks needed is for an
+    80% chance of a verdict; a note counts the pairs compared and the verdicts chance alone would give; runs of
+    different lengths are refused. A test simulates the verdict rate with no difference (about 5%).
 
 Where we are and what comes next: `docs/NEXT.md`.
 

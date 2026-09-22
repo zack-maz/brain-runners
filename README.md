@@ -37,11 +37,13 @@ are in `docs/COSTS.md`.
 
 `bench` scores recorded runs and spends nothing. It merges run directories like `view` (one game; each player and
 seed from one directory; `DIR:player,player` takes only those players from a directory) and leaves out episodes a
-stopped run cut off. Per player: mean rows with a 95% bootstrap interval, the median, the share finished, a survival
-curve, and seconds and USD per row from live decisions (a cache hit records neither; Jev has no per-token price, so
-"-"). Per pair, on the tracks both played: the mean difference, its interval, wins, ties and losses, a verdict only
-when the interval leaves out zero, and how many tracks would separate them. Below 5 tracks there is no interval and
-no verdict: a bootstrap of fewer only returns their range. The page is one offline file like the replay.
+stopped run cut off; it refuses runs of different track lengths. Per player: mean rows with a 95% t interval over
+tracks, the median, the share finished, a survival curve, and seconds and USD per row from live decisions (a cache
+hit records neither; the fly and the baselines are "free", Jev has no per-token price, "no price"). Per pair, on the
+tracks both played: the mean difference, its paired t interval, wins, ties and losses, a verdict only when the
+interval leaves out zero, and how many tracks would give an 80% chance of a verdict (an estimate). Below 5 tracks
+there is no interval, no verdict and no estimate, and such a player is not ranked. With many pairs some verdicts
+come by chance; the page counts the pairs and says so. The page is one offline file like the replay.
 
 `live` plays one track in real time: every mind decides the same row before anyone moves on (a jumper skips
 the next row; the slowest mind sets the pace, about a row a second with the fly), each decision goes into a

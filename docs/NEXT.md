@@ -24,18 +24,19 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 - **Item 7, the benchmark** (decision 31, spec `docs/superpowers/specs/2026-09-22-benchmark-design.md`): built
   2026-09-22. `python -m bakeoff bench RUN_DIR[:PLAYER,...] ...` scores recorded runs (spends nothing), prints the
   tables and writes `bench.json` and an offline `bench.html`. Prototyped, then its five tested commits taken as they
-  were (not re-typed by implementers); the final design review is next. Found while prototyping: a bootstrap of
-  fewer than 5 seeds is not an honest interval, so below 5 there is none and no verdict.
+  were (not re-typed by implementers). Final design review done ("ready with fixes"; report
+  `.superpowers/sdd/2026-09-22-benchmark/final-review-report.md`), all its findings fixed (decision 32): t
+  intervals instead of a percentile bootstrap, which gave a verdict about 1 time in 7 at 5 tracks with no real
+  difference; runs of one length only; a note on how many verdicts chance gives among many pairs.
 
 ## Where to resume (in this order)
 
-1. The final design review of the benchmark (statistics, honest labels, the page's brand rules); then its fixes.
-2. Item 10, the GLM Flash twin, once the user has added a Zhipu key to `.env` (not there on 2026-09-22).
-3. The page: items 4, 5, 8 and 9 (per-mind live log tabs, pick seed and players from the page, GLM Flash among them,
+1. Item 10, the GLM Flash twin, once the user has added a Zhipu key to `.env` (not there on 2026-09-22).
+2. The page: items 4, 5, 8 and 9 (per-mind live log tabs, pick seed and players from the page, GLM Flash among them,
    the analysis on its own tab).
-4. When all updates are done: refresh `docs/EXPLAINER.html` (it knows game v2, not yet the Jev family), then one PR
+3. When all updates are done: refresh `docs/EXPLAINER.html` (it knows game v2, not yet the Jev family), then one PR
    titled **"Opus v1"** from `phase6-updates` (the user's instruction; not before).
-5. Then phase 6, the tournament and the write-up. It starts by settling which seeds (see "Open"), and it needs a new
+4. Then phase 6, the tournament and the write-up. It starts by settling which seeds (see "Open"), and it needs a new
    budget go-ahead: the tournament is the first paid use of seeds below 1000 (`--tournament`).
 
 ## To look at it
