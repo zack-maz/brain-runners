@@ -68,7 +68,8 @@ def test_a_players_rows_and_its_interval():
     eps = episodes_of(("jev", 1000, 10), ("jev", 1001, 20), ("jev", 1002, 150, True), ("jev", 1003, 20), ("jev", 1004, 50))
     n = player_numbers(eps, 150)
     assert (n["seeds"], n["mean_rows"], n["median_rows"], n["finished"]) == (5, 50.0, 20.0, 1 / 5)
-    assert 10 <= n["ci_low"] < 50 < n["ci_high"] <= 150
+    # t interval 50 +- 2.776 * sd / sqrt(5) = -21.9 to 121.9, clipped to the rows a track can have
+    assert n["ci_low"] == 0.0 and n["ci_high"] == pytest.approx(121.855, abs=1e-3)
     assert n == player_numbers(eps, 150)  # the same numbers every time
     assert n["survival"][0] == 1.0 and n["survival"][10] == 1.0 and n["survival"][11] == 4 / 5
     assert n["survival"][150] == 1 / 5 and len(n["survival"]) == 151
@@ -111,18 +112,19 @@ def test_pairs_say_who_is_ahead_only_when_the_interval_excludes_zero():
     b = episodes_of(("b", 1, 50), ("b", 2, 60), ("b", 3, 55), ("b", 4, 40), ("b", 5, 45), ("b", 9, 3))
     p = pair_numbers(a, b)
     assert (p["common_seeds"], p["wins"], p["ties"], p["losses"], p["verdict"]) == (5, 5, 0, 0, "a ahead")
-    assert p["mean_diff"] == 54.0 and p["ci_low"] > 0 and p["seeds_needed"] == 5
+    assert p["mean_diff"] == 54.0 and p["ci_low"] == pytest.approx(45.907, abs=1e-3) and p["seeds_needed"] == 5
     assert pair_numbers(b, a)["verdict"] == "a ahead"
     close = pair_numbers(episodes_of(*[("a", s, r) for s, r in enumerate([100, 80, 100, 80, 100])]),
                          episodes_of(*[("b", s, r) for s, r in enumerate([90, 85, 90, 85, 90])]))
     assert close["verdict"] == "can't tell yet" and close["mean_diff"] == 4.0
-    assert close["seeds_needed"] == 17  # differences 10, -5, 10, -5, 10: sd 8.22, (1.96 * 8.22 / 4) ** 2 = 16.2
+    assert close["seeds_needed"] == 34  # differences 10, -5, 10, -5, 10: sd 8.22, ((1.96 + 0.842) * 8.22 / 4) ** 2
+    assert close["ci_low"] == pytest.approx(-6.200, abs=1e-3)
     few = pair_numbers(episodes_of(("a", 1, 100), ("a", 2, 110)), episodes_of(("b", 1, 50), ("b", 2, 60)))
-    assert (few["verdict"], few["ci_low"], few["seeds_needed"]) == ("too few seeds (2)", None, 5)
+    assert (few["verdict"], few["ci_low"], few["seeds_needed"]) == ("too few tracks (2)", None, None)
     tied = pair_numbers(episodes_of(*[("a", s, 30) for s in range(5)]), episodes_of(*[("b", s, 30) for s in range(5)]))
     assert (tied["ties"], tied["verdict"], tied["seeds_needed"]) == (5, "can't tell yet", None)
     apart = pair_numbers(episodes_of(("a", 1, 30)), episodes_of(("b", 2, 40)))
-    assert (apart["common_seeds"], apart["mean_diff"], apart["verdict"]) == (0, None, "too few seeds (0)")
+    assert (apart["common_seeds"], apart["mean_diff"], apart["verdict"]) == (0, None, "too few tracks (0)")
 
 
 def test_the_benchmark_ranks_players_pairs_them_and_lists_what_it_left_out(tmp_path):
@@ -137,3 +139,56 @@ def test_the_benchmark_ranks_players_pairs_them_and_lists_what_it_left_out(tmp_p
     assert (out["game"], out["max_rows"], out["runs"]) == ("v2", 150, ["a"])
     assert JEV_PRICE_NOTE in out["notes"] and len(out["players"][0]["survival"]) == 151
     json.dumps(out)  # JSON-ready
+
+
+def test_with_no_real_difference_a_verdict_comes_about_1_time_in_20():
+    """The reason for t intervals (final review of item 7): at 5 tracks a percentile bootstrap gave a verdict
+    about 1 time in 7 when the two players were equal."""
+    from bakeoff.bench import _t_interval
+    rng = __import__("numpy").random.default_rng(7)
+    trials = 4000
+    verdicts = sum((lambda ci: ci[0] > 0 or ci[1] < 0)(_t_interval(list(rng.normal(0, 20, 5)))) for _ in range(trials))
+    assert 0.03 < verdicts / trials < 0.065
+
+
+def test_the_t_quantile_uses_the_next_lower_degrees_of_freedom():
+    from bakeoff.bench import t975
+    assert (t975(4), t975(30), t975(35), t975(1000)) == (2.776, 2.042, 2.042, 1.980)
+
+
+def test_players_with_too_few_tracks_are_not_ranked_and_many_pairs_get_a_warning(tmp_path):
+    from bakeoff.bench import benchmark
+    recs = episode("few", 1000, 150, finished=True)
+    for seed in range(1000, 1005):
+        recs += episode("a", seed, 100 + seed - 1000) + episode("b", seed, 50) + episode("c", seed, 60)
+    out = benchmark(load([Source(write_run(tmp_path, "r", recs, {"game": V2}))]))
+    assert [(p["player"], p["ranked"]) for p in out["players"]] == [("a", True), ("c", True), ("b", True), ("few", False)]
+    assert any(n.startswith("3 pairs are compared at 95% each") for n in out["notes"])
+
+
+def test_cost_says_free_priced_or_no_price():
+    from bakeoff.bench import Episode, player_numbers
+    live = record(player="p", seed=1, row=0, latency_ms=500, usage={"input_tokens": 10, "output_tokens": 1}, **DIED)
+    assert player_numbers([Episode("p", 1, "r", (live,), "claude-haiku-4-5-20251001")], 150)["cost"] == "priced"
+    assert player_numbers([Episode("p", 1, "r", (live,), "jev-latest")], 150)["cost"] == "no price"
+    assert player_numbers(episodes_of(("fly", 1, 3)), 150)["cost"] == "free"
+
+
+def test_load_refuses_what_would_score_wrong(tmp_path):
+    short = write_run(tmp_path, "short", episode("a", 1000, 50, finished=True), {"game": {**V2, "max_rows": 50}})
+    full = write_run(tmp_path, "full", episode("b", 1000, 120), {"game": V2})
+    with pytest.raises(ValueError, match="short has tracks of 50 rows but full of 150"):
+        load([Source(short), Source(full)])
+    m1 = write_run(tmp_path, "m1", episode("llm", 1000, 5), {"game": V2, "models": {"llm": "one"}})
+    m2 = write_run(tmp_path, "m2", episode("llm", 1001, 5), {"game": V2, "models": {"llm": "two"}})
+    with pytest.raises(ValueError, match="llm is one in m1 but two in m2"):
+        load([Source(m1), Source(m2)])
+    twice = write_run(tmp_path, "twice", episode("a", 1000, 3) + episode("a", 1000, 3), {"game": V2})
+    with pytest.raises(ValueError, match="a on seed 1000 appears more than once in twice"):
+        load([Source(twice)])
+
+
+def test_a_colon_in_a_directory_path_is_not_a_player_list():
+    from pathlib import Path
+    assert parse_source("runs/a:b/c") == Source(Path("runs/a:b/c"), None)
+    assert parse_source("runs/a:b/c:llm") == Source(Path("runs/a:b/c"), ("llm",))

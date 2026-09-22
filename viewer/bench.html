@@ -16,14 +16,18 @@
 <main id="app" hidden>
   <section aria-label="Players">
     <h2 class="label">Players</h2>
-    <p class="note first">Rows survived per track, with a 95% interval: where the mean would land again on other tracks
-      like these. Click a player to follow it through the charts; the blue marks the player in focus, nothing else.</p>
+    <p class="note first">Rows survived per track, with a 95% interval for the mean over tracks like these. Players
+      with fewer than five tracks get no interval and are not ranked. Click a player to follow it through the charts;
+      the blue marks the player in focus, nothing else.</p>
     <div class="scroll"><table id="players"></table></div>
   </section>
 
   <section aria-label="Survival">
     <h2 class="label">Still running, row by row</h2>
-    <svg id="survival" class="chart" role="img" aria-label="Share of tracks each player is still running at each row. The same numbers are in the players table."></svg>
+    <svg id="survival" class="chart" role="img" aria-label="Share of tracks each player is still running at each row. The numbers are in the table below it."></svg>
+    <details class="numbers"><summary class="label">The numbers</summary>
+      <div class="scroll"><table id="survival-table"></table></div>
+    </details>
   </section>
 
   <section aria-label="Rows against cost and time" class="pair-charts">
@@ -40,7 +44,8 @@
   <section aria-label="Pairs">
     <h2 class="label">Who is ahead</h2>
     <p class="note first">Each pair on the tracks both played: the mean difference in rows, its 95% interval, and a
-      verdict only when the interval leaves out zero.</p>
+      verdict only when the interval leaves out zero. With many pairs some verdicts come by chance: read one as a
+      lead, not a result.</p>
     <div class="scroll"><table id="pairs"></table></div>
   </section>
 

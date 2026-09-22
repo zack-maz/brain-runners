@@ -47,6 +47,10 @@ def test_bench_usage_errors(tmp_path, capsys):
     assert "--pair takes two players" in capsys.readouterr().err
     assert main(["bench", str(run_dir), "--pair", "solver,fly", "--output", out]) == 2
     assert "not in the runs: fly" in capsys.readouterr().err
+    assert main(["bench", str(run_dir), "--pair", "solver,solver", "--output", out]) == 2
+    assert "--pair takes two different players" in capsys.readouterr().err
+    assert main(["bench", str(run_dir), "--output", str(tmp_path / "b.json")]) == 2
+    assert "--output must end in .html" in capsys.readouterr().err
     assert main(["bench", str(tmp_path / "nope"), "--output", out]) == 2
     assert "no such run directory" in capsys.readouterr().err
     assert main(["bench", str(run_dir), "--output", str(tmp_path / "missing" / "b.html")]) == 2

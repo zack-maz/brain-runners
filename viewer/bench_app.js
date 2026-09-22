@@ -32,10 +32,12 @@
                   "live", "cached"];
     const rows = data.players.map((p) => {
       const cur = p.player === focus ? ' aria-current="true"' : "";
+      const interval = p.ranked ? fmt.interval(p.ci_low, p.ci_high) : "not ranked";
+      const cost = p.cost === "priced" ? fmt.usd(p.usd_per_row) : esc(p.cost);
       return `<tr data-player="${esc(p.player)}"${cur} tabindex="0"><td>${esc(p.player)}</td><td>${p.seeds}</td>` +
-        `<td>${fmt.rows(p.mean_rows)}</td><td>${fmt.interval(p.ci_low, p.ci_high)}</td><td>${ciBar(p)}</td>` +
+        `<td>${fmt.rows(p.mean_rows)}</td><td>${interval}</td><td>${ciBar(p)}</td>` +
         `<td>${fmt.rows(p.median_rows)}</td><td>${fmt.percent(p.finished)}</td><td>${fmt.seconds(p.s_per_row)}</td>` +
-        `<td>${fmt.usd(p.usd_per_row)}</td><td>${p.live_decisions}</td><td>${p.cache_hits}</td></tr>`;
+        `<td>${cost}</td><td>${p.live_decisions}</td><td>${p.cache_hits}</td></tr>`;
     });
     const table = document.getElementById("players");
     table.innerHTML = `<thead><tr>${head.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody>`;
@@ -72,12 +74,24 @@
     svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
     svg.innerHTML = s;
     svg.querySelectorAll(".line").forEach((el) => el.addEventListener("click", () => setFocus(el.dataset.player)));
+    survivalTable();
   }
 
-  function scatter(id, key, xLabel, xFormat, missingLabel) {
+  // the survival curve as numbers: share still running at round rows and at the finish line
+  function survivalTable() {
+    const at = ticks(0, data.max_rows, 8).filter((r) => r > 0);
+    if (at[at.length - 1] !== data.max_rows) at.push(data.max_rows);
+    const head = `<tr><th>player</th>${at.map((r) => `<th>row ${r}</th>`).join("")}</tr>`;
+    const rows = data.players.map((p) => `<tr${p.player === focus ? ' aria-current="true"' : ""}><td>${esc(p.player)}</td>` +
+      at.map((r) => `<td>${fmt.percent(p.survival[r])}</td>`).join("") + "</tr>");
+    document.getElementById("survival-table").innerHTML = `<thead>${head}</thead><tbody>${rows.join("")}</tbody>`;
+  }
+
+  // `strips`: for a player without a value, the label of the strip it is listed in (never drawn at 0)
+  function scatter(id, key, xLabel, xFormat, strips) {
     const { placed, missing } = split(data.players, key);
     const svg = document.getElementById(id);
-    const w = 520, h = 320, m = { left: 48, right: 24, top: 12, bottom: 56 };
+    const w = 520, h = 340, m = { left: 48, right: 24, top: 12, bottom: 76 };
     svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
     const y = linear([0, data.max_rows], [h - m.bottom, m.top + 8]);
     let s = "";
@@ -96,11 +110,14 @@
         if (p.ci_low != null) s += `<line class="whisker${f}" x1="${cx}" x2="${cx}" y1="${y(p.ci_low)}" y2="${y(p.ci_high)}"/>`;
         s += `<circle class="dot${f}" data-player="${esc(p.player)}" cx="${cx}" cy="${y(p.mean_rows)}" r="${f ? 5 : 4}"><title>${esc(p.player)}</title></circle>`;
         if (f) s += `<text class="name focus" x="${cx + 8}" y="${y(p.mean_rows) - 8}">${esc(p.player)}</text>`;
+        else if (placed.length <= 12) s += `<text class="dot-name" x="${cx + 7}" y="${y(p.mean_rows) + 3}">${esc(p.player)}</text>`;
       }
     }
-    if (missing.length) {
-      s += `<text class="strip" x="${m.left}" y="${h - 4}">${missingLabel}: ${missing.map((p) => esc(p.player)).join(", ")}</text>`;
-    }
+    const groups = {};
+    for (const p of missing) (groups[strips(p)] = groups[strips(p)] || []).push(esc(p.player));
+    Object.keys(groups).forEach((label, i) => {
+      s += `<text class="strip" x="${m.left}" y="${h - 4 - 14 * i}">${esc(label)}: ${groups[label].join(", ")}</text>`;
+    });
     svg.innerHTML = s;
     svg.querySelectorAll(".dot").forEach((el) => el.addEventListener("click", () => setFocus(el.dataset.player)));
   }
@@ -130,8 +147,8 @@
   function render() {
     playersTable();
     survivalChart();
-    scatter("cost", "usd_per_row", "USD per row", (t) => String(t), "no price");
-    scatter("time", "s_per_row", "seconds per row", (t) => String(t), "no time recorded");
+    scatter("cost", "usd_per_row", "USD per row", (t) => String(t), (p) => (p.cost === "free" ? "free" : "no price"));
+    scatter("time", "s_per_row", "seconds per row", (t) => String(t), () => "no time recorded");
     pairsTable();
   }
 

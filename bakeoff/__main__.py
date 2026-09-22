@@ -190,6 +190,10 @@ def _bench(args) -> int:
         pairs = [tuple(n.strip() for n in pair.split(",")) for pair in args.pair]
         if any(len(pair) != 2 for pair in pairs):
             raise ValueError("--pair takes two players: A,B")
+        if any(pair[0] == pair[1] for pair in pairs):
+            raise ValueError("--pair takes two different players: A,B")
+        if Path(args.output).suffix != ".html":
+            raise ValueError("--output must end in .html (the numbers go next to it as .json)")
         loaded = load_runs([parse_source(s) for s in args.sources])
     except (FileNotFoundError, ValueError) as e:
         print(e, file=sys.stderr)
