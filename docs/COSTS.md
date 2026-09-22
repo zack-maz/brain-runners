@@ -104,10 +104,10 @@ decision 19's budget: 228 Jev requests (460 of the 1,000 in total) and 92 of the
   straight avoids.
 
 
-## Update 2a: the Jev family and its LLM twins (game v2, 2026-09-21, in progress)
+## Update 2a: the Jev family and its LLM twins (game v2, 2026-09-21, paid runs done)
 
-Inside decision 26: Claude Haiku at most 5.00 USD for update 2, v2 practice seeds 1000 and up only. **Spent so far:
-1.55 USD of Haiku** (run 1: 1.38; run 2: 0.044; run 3: 0.126). Jev's cost is not known per request (see above);
+Inside decision 26: Claude Haiku at most 5.00 USD for update 2, v2 practice seeds 1000 and up only. **Spent: 3.85
+USD of Haiku** (run 1: 1.38; run 2: 0.044; run 3: 0.126; run 4: 1.37; run 5: 0.93), 1.15 USD of the budget left. Jev's cost is not known per request (see above);
 the user does not count it.
 
 **Run 1** (`runs/20260921-165433`, seed 1000, every paid player, cap 150 each, `completed`):
@@ -141,7 +141,39 @@ known gap of the phase 5 review). `llm` finished its four tracks (mean 47.5 rows
 1001; `llm_composed` and `llm_two_step` had not started. Everything answered is cached: rerunning the same command
 replays it for free and continues.
 
-What these five tracks suggest (an impression, not a result): looking two moves ahead is where the rows are
-(`jev_two_step` and `llm_reader` finish, the one-step rules do not); Jev reads tiles very well but `jev_reader`
-still dies early, because a single misread tile gives the planner a wrong picture; `llm_reader` is the priciest
-player by far (about 0.0065 USD and 3 s a row).
+**Run 4** (`runs/20260921-185546`, seeds 1001–1004, the four cheaper LLM twins, cap 600 each, `completed`, no
+error or fallback): run 3's answers replayed from the cache (`llm` entirely). Live: `llm_choice` 190 requests (0.16
+USD), `llm_composed` 516 (0.51), `llm_two_step` 443 (0.70); mean latency 700–990 ms.
+
+**Run 5** (`runs/20260921-191326`, seed 1001, `llm_reader`, cap 150, `completed`): 150 rows, finished; 144 requests,
+2,863 ms mean latency, 573,101 input and 71,729 output tokens, 0.93 USD.
+
+**Run 6** (`runs/20260921-192037`, seeds 1000–1004, the fly, free, `completed`): mean 68.0 rows, median 64, none
+finished, all five deaths jumps into a gap. This is the v1-calibrated fly on v2 (decision 23) and matches the stand-in
+brain's 68-row average of decision 21.
+
+**All players over v2 practice seeds 1000–1004** (`llm_reader` on 1000–1001 only, decision 26; each (player, seed)
+taken from exactly one of runs 1, 2, 4, 5, 6; deaths are "ran into / jumped into / dodged into" a gap):
+
+| player | tracks | mean rows | median | finished | deaths ran / jumped / dodged | Brier (all Nouls) |
+| --- | --- | --- | --- | --- | --- | --- |
+| llm_reader | 2 | 150.0 | 150 | 2 of 2 | - | 0.003 |
+| jev_two_step | 5 | 144.6 | 150 | 4 of 5 | 0 / 1 / 0 | 0.007 |
+| llm_composed | 5 | 132.2 | 132 | 1 of 5 | 4 / 0 / 0 | 0.017 |
+| jev_composed | 5 | 124.2 | 146 | 2 of 5 | 0 / 3 / 0 | 0.009 |
+| llm_two_step | 5 | 109.6 | 107 | 1 of 5 | 1 / 0 / 3 | 0.020 |
+| jev_choice | 5 | 78.2 | 94 | 0 of 5 | 0 / 5 / 0 | - |
+| llm_choice | 5 | 72.6 | 73 | 0 of 5 | 0 / 2 / 3 | - |
+| fly | 5 | 68.0 | 64 | 0 of 5 | 0 / 5 / 0 | - |
+| llm (one-shot) | 5 | 56.6 | 52 | 0 of 5 | 2 / 0 / 3 | - |
+| jev_reader | 5 | 49.6 | 45 | 0 of 5 | 5 / 0 / 0 | 0.008 |
+
+(Yardsticks on the same game, `runs/20260921-155758`: solver 150, always-jump 39, random 24.)
+
+What these five tracks suggest (an impression, not a result): looking two moves ahead is where the rows are, but
+only when the answers are sharp: `jev_two_step` finishes 4 of 5, while its Haiku twin, asked the same questions under
+the same rule, averages 110 rows with a Brier nearly three times Jev's, and falls below its own one-step twin. On
+the pointed question sets Jev's answers are the better calibrated of the two models (Brier 0.007–0.009 against
+0.017–0.020); on the reader set it is the other way round (`llm_reader` 0.003 finishes both its tracks, `jev_reader`
+dies in every track because one misread tile gives the planner a wrong picture). The one-shot Choice is weak for both
+models. `llm_reader` is the priciest player by far (about 0.0063 USD and 3 s a row).
