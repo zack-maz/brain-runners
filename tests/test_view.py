@@ -137,3 +137,11 @@ def test_view_usage_errors(tmp_path, capsys):
 def test_the_benchmark_page_is_filled_the_same_way():
     page = render_html({"players": [{"player": "</script>"}]}, page_name="bench.html")
     assert '"player":"\\u003c/script>"' in page and "<script src=" not in page and '<link rel="stylesheet"' not in page
+
+
+def test_the_benchmark_page_makes_no_network_request_and_names_only_existing_scripts():
+    page = render_html({}, page_name="bench.html")
+    assert not re.search(r"(src|href)=[\"']?https?:", page) and "@import" not in page
+    source = (VIEWER_DIR / "bench.html").read_text()
+    scripts = re.findall(r'<script src="([^"]+)"></script>', source)
+    assert scripts == ["bench.js", "bench_app.js"] and all((VIEWER_DIR / s).exists() for s in scripts)

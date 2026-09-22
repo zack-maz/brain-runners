@@ -1,0 +1,42 @@
+/* The benchmark page. Tokens and base rules come from viewer.css; blue (--accent) marks the player in focus. */
+body { padding-bottom: 64px; }
+.note.first { margin: 0 0 20px; }
+.chart { display: block; width: 100%; max-width: 900px; height: auto; overflow: visible; }
+.pair-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: var(--gutter); }
+.pair-charts h2.label { margin-bottom: 20px; }
+
+#players th, #players td, #pairs th, #pairs td { padding: 6px 14px 6px 0; text-align: right; white-space: nowrap;
+  border-bottom: 1px solid var(--hairline); }
+#players th, #pairs th { font: 400 var(--size-label)/1.4 var(--font-mono); letter-spacing: var(--tracking-label);
+  text-transform: uppercase; color: var(--muted); }
+#players th:first-child, #players td:first-child, #pairs td:nth-child(-n+2), #pairs th:nth-child(-n+2),
+#pairs td.verdict, #pairs th.verdict { text-align: left; }
+#players tbody tr { cursor: pointer; }
+#players tbody tr:hover td { color: var(--bright); }
+#players tr[aria-current="true"] td:first-child { color: var(--accent); }
+#players tr[aria-current="true"] td { color: var(--bright); }
+#pairs tr.focus td { color: var(--bright); }
+.muted-cell { color: var(--muted); }
+.ci { vertical-align: middle; }
+.ci .track { stroke: var(--hairline); stroke-width: 1; }
+.ci .range { stroke: var(--text); stroke-width: 2; }
+.ci .mean { fill: var(--bright); }
+tr[aria-current="true"] .ci .range { stroke: var(--accent); }
+tr[aria-current="true"] .ci .mean { fill: var(--accent); }
+
+.chart .axis { stroke: var(--line-strong); stroke-width: 1; }
+.chart .grid { stroke: var(--hairline); stroke-width: 1; }
+.chart text { font: 400 11px var(--font-mono); letter-spacing: 0.04em; fill: var(--muted); }
+.chart .line { fill: none; stroke: var(--line-strong); stroke-width: 1.5; cursor: pointer; }
+.chart .line:hover { stroke: var(--muted); }
+.chart .line.focus { stroke: var(--accent); stroke-width: 2.5; }
+.chart .dot { fill: var(--text); cursor: pointer; }
+.chart .whisker { stroke: var(--muted); stroke-width: 1; }
+.chart .dot.focus { fill: var(--accent); }
+.chart .whisker.focus { stroke: var(--accent); }
+.chart text.name { fill: var(--text); }
+.chart text.name.focus { fill: var(--accent); }
+.chart text.strip { fill: var(--muted); }
+
+.notes { max-width: var(--measure); margin: 0; padding: 0 0 0 18px; font-size: var(--size-small); color: var(--muted); }
+.notes li + li { margin-top: 8px; }
