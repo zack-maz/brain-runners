@@ -36,6 +36,8 @@ Branch: `phase6-updates`.
 - Item 10, the GLM Flash twins (decisions 33–34): `glm_composed`, `glm_choice`, `glm_two_step` and `glm_reader` on
   `glm-4.5-flash`, the same questions and rules as their Jev and Haiku twins. Built; track 1000 recorded, the rest
   parked while the free tier throttles (`docs/COSTS.md`).
+- Items 4, 5, 8, 9, the page: approved design (decision 35,
+  `docs/superpowers/specs/2026-09-22-page-control-design.md`), to be built as updates 3a and 3b. Not built.
 - Item 7, the benchmark (decision 31, `docs/superpowers/specs/2026-09-22-benchmark-design.md`): built; `python -m
   bakeoff bench` scores recorded runs with intervals, pairs, time and cost per row, and writes its own page.
 

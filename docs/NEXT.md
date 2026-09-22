@@ -33,8 +33,11 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 
 ## Where to resume (in this order)
 
-1. The page: items 4, 5, 8 and 9 (per-mind live log tabs, pick seed and players from the page, GLM Flash among
-   them, the analysis on its own tab, which can reuse `bench.json`). Its own spec.
+1. The page (items 4, 5, 8, 9; decision 35, design `docs/superpowers/specs/2026-09-22-page-control-design.md`,
+   approved): **update 3a** first, the control channel and the lobby (`/state`, `/run`, `/cancel`, the local token,
+   the session cap, `--start`), then **3b**, the logs in the mind panels, the Run and Analysis tabs and the player
+   picker. Each gets a plan; the house workflow is to prototype it in a scratch clone first
+   ([[prototyped-plans-workflow]] in the memory notes; prototypes kept as local `proto/*` branches).
 2. **Parked**: GLM Flash's tracks 1001–1004 (decision 34), while Zhipu's free tier throttles. To pick it up, check
    it answers (a few requests through `bakeoff.clients.glm.HttpTransport`), then
    `uv run python -m bakeoff run --players glm_composed,glm_choice,glm_two_step --seeds 5 --seed-start 1000 --max-requests 700`

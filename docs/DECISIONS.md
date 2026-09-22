@@ -175,6 +175,15 @@
     is recorded (`docs/COSTS.md`), but Zhipu's free tier throttles: about one request in five got through, and the
     run of tracks 1001–1004 aborted on six refusals in a row. Item 10 is part done; pick it up when the quota
     recovers. The page work (items 4, 5, 8, 9) comes next, with GLM among the selectable players.
+35. **The page runs the show** (the user, 2026-09-22; items 4, 5, 8, 9; design
+    `docs/superpowers/specs/2026-09-22-page-control-design.md`). `bakeoff live` opens a lobby: the page picks the
+    track and the runners, starts and cancels runs, and can set up another when one ends (the old flags stay, plus
+    `--start`). The page may start paid runs after showing the worst-case cost and asking, but the command keeps the
+    ceiling: `--max-requests` is the session's cap per paid player and `--tournament` is still needed below seed
+    1000, and the server refuses anything beyond that. Each mind panel gains an expandable running log (item 4);
+    the page splits into Run and Analysis, the latter holding the findings, the scoreboard and the benchmark's
+    charts from `bench.json` (item 8); one player picker governs live runs and replays (item 9). Built as 3a (the
+    server and the lobby) and 3b (the panels and the tabs), each with its own plan.
 
 Where we are and what comes next: `docs/NEXT.md`.
 
