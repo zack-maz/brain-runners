@@ -38,7 +38,7 @@ difficulty by row 100, `v1` is the old 300-row game, pinned tile for tile; runs 
 mixes two; everything recorded so far is v1 (`--game v1` replays it). Update 2a, the Jev family, is built (plan
 `...-update2a-jev-family.md`): `bakeoff/players/question_sets.py` (composed, choice, two_step, reader: questions and a
 rule, ours) played by `jev_<set>` and by Claude Haiku twins `llm_<set>` (`set_players.py`); the report's `brier_all`;
-its paid runs are done (five v2 practice tracks, `docs/COSTS.md`). Resume from `docs/NEXT.md`; one PR "Opus v1" when
+its paid runs are done (five v2 practice tracks, `docs/COSTS.md`). Update 2b, the fly, stopped at its probe (spike 03, decision 30). Resume from `docs/NEXT.md`; one PR "Opus v1" when
 all updates are done. Then phase 6, the tournament and the write-up, which needs a new budget go-ahead. Each phase
 gets its own plan.
 

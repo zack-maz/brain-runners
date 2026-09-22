@@ -18,17 +18,20 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
   safety, `jev_composed`'s phase 5 cache (still 247 rows on v1 track 1000, all from cache) and the rules all hold.
   Fixed: the docs name what still differs between the two models; a question set that needs more vision is now a
   usage error before anything is played; `brier_all` leaves out answers outside 0 to 1.
+- **Update 2b, the fly** (decisions 29–30): `fly_trained` dropped by the user; `fly_rich` stopped at its probe (spike
+  03, branch `spike/fly-bands`, local): the wiring carries "where" only as strength, and band input made the fly
+  worse. `fly` stays the only fly.
 
 ## Where to resume (in this order)
 
-1. Update 2b, `fly_rich` only (decision 29): the probe first (branch `spike/fly-bands`, `spikes/03-fly-bands/`), then
-   its spec, plan and build if the probe passes.
-2. Item 10, the GLM Flash twin (the user will add a Zhipu key to `.env` later), then item 7 (the benchmark), then
-   the page: items 4, 5, 8 and 9 (per-mind live log tabs, pick seed and players from the page, GLM Flash among them,
+1. Item 7, the benchmark (time, cost and performance, and a sound way to say which player is better); it also
+   gives the missing command that scores several run directories as one table.
+2. Item 10, the GLM Flash twin, once the user has added a Zhipu key to `.env` (not there on 2026-09-22).
+3. The page: items 4, 5, 8 and 9 (per-mind live log tabs, pick seed and players from the page, GLM Flash among them,
    the analysis on its own tab).
-3. When all updates are done: refresh `docs/EXPLAINER.html` (it knows game v2, not yet the Jev family), then one PR
+4. When all updates are done: refresh `docs/EXPLAINER.html` (it knows game v2, not yet the Jev family), then one PR
    titled **"Opus v1"** from `phase6-updates` (the user's instruction; not before).
-4. Then phase 6, the tournament and the write-up. It starts by settling which seeds (see "Open"), and it needs a new
+5. Then phase 6, the tournament and the write-up. It starts by settling which seeds (see "Open"), and it needs a new
    budget go-ahead: the tournament is the first paid use of seeds below 1000 (`--tournament`).
 
 ## To look at it
@@ -66,6 +69,9 @@ states. The Brier comparison between the models must carry all three. `brier_all
 not sets with each other (the reader's tiles are about 90% floor). `jev_reader` dies because it misses the gap straight
 ahead (44% of them), a failure of the reader's wording or of the 42-question request, not of Jev's reading: the
 composed wording for the same tile was never missed. The fly on v2 still runs on thresholds frozen on v1 tracks.
+
+From update 2b: spike 03's result (decision 30): the looming cells, ordered by where their inputs sit in the eye,
+change only how hard the fly turns or jumps, never what it does; band input made it worse.
 
 All of this is one to five practice tracks: an impression, not a result.
 

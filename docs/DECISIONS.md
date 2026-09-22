@@ -148,6 +148,12 @@
     path plus random detours) by a rule fixed beforehand, then frozen; `fly_rich` then plays 1000–1019 once. A probe
     comes first: find an ordering of the cells that follows their view and check that the brain's output differs by
     band; if it does not, `fly_rich` is not built and that is the result. `fly` is never touched.
+30. **Update 2b stops at the probe** (2026-09-22, spike 03, branch `spike/fly-bands`, `spikes/03-fly-bands/REPORT.md`).
+    Ordered by the eye positions of their columnar inputs, each eye's looming cells respond by band only in strength
+    (dorsal bands drive the Giant Fiber about 30% harder, one azimuth end turns about half as hard), never with a
+    different action. The user chose a play test with a rule fixed beforehand; on v2 practice seeds 1100-1104 with
+    the frozen v1 thresholds the band flies survived 21.6 and 29.6 rows against `fly`'s 58.2 and never jumped. So
+    `fly_rich` is not built; `fly` stays the only fly, and the report is the result for the write-up.
 
 Where we are and what comes next: `docs/NEXT.md`.
 
