@@ -21,8 +21,8 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 
 ## Where to resume (in this order)
 
-1. Update 2b, the fly (decision 25): `fly_rich` (richer input, untrained, calibrated once on practice seeds), then
-   `fly_trained` (a readout of ours on the same wiring). Its own spec.
+1. Update 2b, `fly_rich` only (decision 29): the probe first (branch `spike/fly-bands`, `spikes/03-fly-bands/`), then
+   its spec, plan and build if the probe passes.
 2. Item 10, the GLM Flash twin (the user will add a Zhipu key to `.env` later), then item 7 (the benchmark), then
    the page: items 4, 5, 8 and 9 (per-mind live log tabs, pick seed and players from the page, GLM Flash among them,
    the analysis on its own tab).

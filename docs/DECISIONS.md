@@ -140,6 +140,14 @@
 28. **This file is the log only** (the user, 2026-09-21): numbered decisions, only ever added to. Where things
     stand, the resume list, the open items and what the write-up must carry moved to `docs/NEXT.md`, which is
     rewritten as the state changes.
+29. **Update 2b is `fly_rich` only** (the user, 2026-09-22): `fly_trained` is dropped for now. Aim: honest science,
+    what the real wiring can do with better input. The input says where a threat is, not just which side: each eye's
+    looming cells (LPLC2, LC4) are cut into bands, and each visible gap drives the band facing its lane with the
+    frozen v1 formula; the tile-to-band mapping is ours and labelled. Readout and rule unchanged; only the two
+    thresholds are chosen again, from one recording of the real brain on v2 practice seeds 1100–1299 (the solver's
+    path plus random detours) by a rule fixed beforehand, then frozen; `fly_rich` then plays 1000–1019 once. A probe
+    comes first: find an ordering of the cells that follows their view and check that the brain's output differs by
+    band; if it does not, `fly_rich` is not built and that is the result. `fly` is never touched.
 
 Where we are and what comes next: `docs/NEXT.md`.
 
