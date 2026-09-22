@@ -21,11 +21,14 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 - **Update 2b, the fly** (decisions 29–30): `fly_trained` dropped by the user; `fly_rich` stopped at its probe (spike
   03, branch `spike/fly-bands`, local): the wiring carries "where" only as strength, and band input made the fly
   worse. `fly` stays the only fly.
+- **Item 7, the benchmark** (decision 31): approved design, `docs/superpowers/specs/2026-09-22-benchmark-design.md`;
+  being prototyped now, not built yet.
 
 ## Where to resume (in this order)
 
-1. Item 7, the benchmark (time, cost and performance, and a sound way to say which player is better); it also
-   gives the missing command that scores several run directories as one table.
+1. Item 7, the benchmark (decision 31, design `docs/superpowers/specs/2026-09-22-benchmark-design.md`): time, cost
+   and performance, and a sound way to say which player is better; it also gives the missing command that scores
+   several run directories as one table.
 2. Item 10, the GLM Flash twin, once the user has added a Zhipu key to `.env` (not there on 2026-09-22).
 3. The page: items 4, 5, 8 and 9 (per-mind live log tabs, pick seed and players from the page, GLM Flash among them,
    the analysis on its own tab).
@@ -94,8 +97,8 @@ All of this is one to five practice tracks: an impression, not a result.
   rule of the game that also lives in JavaScript. The live `episode` event carries the question sets known at that
   moment; a player that changed its questions mid-episode would show nothing under "What it was asked" for the later
   ones (no player does).
-- There is no command that scores several run directories as one table; the update 2a scoreboard in `docs/COSTS.md`
-  was merged by a throwaway script. Worth folding into item 7 (the benchmark).
+- There was no command that scores several run directories as one table; the update 2a scoreboard in
+  `docs/COSTS.md` was merged by a throwaway script. Now item 7's job (decision 31, `python -m bakeoff bench`).
 - Left from the final review of update 2a (Minor): `jev_composed` accepts any finite answer while `llm_composed`
   requires 0 to 1, and `jev_composed` logs no `info.set` (leave its class alone: its cache and records must not
   change); the reader LLM's `max_tokens` (256 + 12 per question, about 50% headroom) is untested on larger visions;

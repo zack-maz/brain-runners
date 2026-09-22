@@ -33,7 +33,7 @@ Per player, over its complete episodes:
 | column | meaning |
 | --- | --- |
 | `seeds` | complete episodes |
-| `mean_rows`, `ci_low`, `ci_high` | mean rows survived and its 95% percentile bootstrap interval (resampling seeds, 10,000 draws, `numpy.random.default_rng(0)`, so a rerun prints the same numbers) |
+| `mean_rows`, `ci_low`, `ci_high` | mean rows survived and its 95% percentile bootstrap interval (resampling seeds, 10,000 draws, `numpy.random.default_rng(0)`, so a rerun prints the same numbers); no interval below 5 seeds (`MIN_SEEDS`) |
 | `median_rows`, `finished` | median rows; share of tracks finished |
 | `survival` | share of episodes still alive at each row 0 to the track length (a finisher counts at every row) |
 | `decisions_per_row` | decisions made / rows survived, over all its episodes (a jump covers two rows) |
@@ -49,8 +49,12 @@ Per pair of players (A, B), over the seeds both completed:
 | `common_seeds` | seeds both played |
 | `mean_diff`, `ci_low`, `ci_high` | mean of (A's rows − B's rows) per seed, paired bootstrap 95% interval (same generator) |
 | `wins`, `ties`, `losses` | seeds where A survived longer, as long, shorter |
-| `verdict` | "A ahead" if the interval is above 0, "B ahead" if below, otherwise "can't tell yet"; with fewer than 2 common seeds always "can't tell yet" |
-| `seeds_needed` | seeds at which the interval would exclude 0 if the difference and its spread stayed as seen: ceil((1.96 · sd / mean_diff)²) with sd the sample standard deviation of the per-seed differences, at least 2; "-" with fewer than 2 common seeds or a mean difference of 0 |
+| `verdict` | "A ahead" if the interval is above 0, "B ahead" if below, otherwise "can't tell yet"; with fewer than 5 common seeds "too few seeds (n)" |
+| `seeds_needed` | seeds at which the interval would exclude 0 if the difference and its spread stayed as seen: ceil((1.96 · sd / mean_diff)²) with sd the sample standard deviation of the per-seed differences, at least 5; "-" with fewer than 2 common seeds or a mean difference of 0 |
+
+**Why 5 seeds** (found while prototyping on update 2a's runs): a bootstrap of 2 values only returns their range, so
+`llm_reader`, on 2 tracks, came out "ahead" of players it had beaten by 13 and 18 rows. Below 5 seeds there is no
+interval and no verdict, and the page says why.
 
 By default every pair among the players is reported; `--pair A,B` (repeatable) limits the terminal table, the page
 shows all. `seeds_needed` is an estimate from the seeds seen so far and the page says so.

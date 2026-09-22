@@ -4,13 +4,16 @@ An LLM (Claude Haiku 4.5), Jev (TypeSafe System One) and an untrained fruit-fly 
 simulation play the same seeded runs of a "Run"-style tunnel game; output is a watchable replay
 tournament. Read these before doing anything:
 
-0. `docs/EXPLAINER.html` — the plain-language tour of the whole project, high level first, then technical.
+0. `docs/EXPLAINER.html` — the plain-language tour of the whole project, high level first, then technical
+   (dated 2026-09-21: predates the Jev family; refreshed when all updates are done).
 1. `docs/NEXT.md` — where things stand and what to do next, in order (rewritten as the state changes).
    `docs/DECISIONS.md` — what the user has decided, numbered, only ever added to.
 2. `docs/superpowers/specs/2026-09-19-tunnel-run-design.md` — the approved design (binding), extended by
    `docs/superpowers/specs/2026-09-20-demo-player-design.md` (the demo player; also binding).
 3. `docs/RESEARCH.md` — fly-brain resources. Spike results: branch `spike/fly-steering`,
-   `spikes/01-fly-steering/REPORT.md` (throwaway code; port ideas, do not merge it).
+   `spikes/01-fly-steering/REPORT.md` (throwaway code; port ideas, do not merge it). Also spike 02, branch
+   `spike/jev-questions`, `spikes/02-jev-questions/REPORT.md` (why Jev's one-shot Choice fails), and spike 03,
+   branch `spike/fly-bands`, `spikes/03-fly-bands/REPORT.md` (update 2b's probe result).
 
 ## Status
 
@@ -31,7 +34,7 @@ demo player, the project's main tool (design: `docs/superpowers/specs/2026-09-20
 three pixel runners, the mind strip, blue as the cursor, the user's brand, one offline file. Phase 5c built (plan:
 `...-phase5c-go-live.md`): `python -m bakeoff live` plays a track in lockstep in real time, records a normal run
 directory and streams it into the same page from a loopback server; first real go-live on practice seed 1001
-(`runs/20260921-132459`). Phase 5 is merged (PR #4). Before phase 6 come eight
+(`runs/20260921-132459`). Phase 5 is merged (PR #4). Before phase 6 come ten
 updates (`docs/UPDATES.md`, decision 20), on branch `phase6-updates`. Update 1, game v2, is built (plan
 `...-update1-game-v2.md`): named game versions in `bakeoff/game/rules.py`; `v2` (default) is 150 rows at full
 difficulty by row 100, `v1` is the old 300-row game, pinned tile for tile; runs record their game and `view` never

@@ -1,4 +1,4 @@
-# First measured costs (phase 3)
+# Measured runs and costs
 
 2026-09-20. One track each, practice seed 1000, each player run alone, SDK retries off, code at `89dcb7a`.
 Run ids: `20260920-102909` (jev), `20260920-102919` (llm). Runs and the response cache are git-ignored; the
@@ -22,7 +22,7 @@ prices are not known: the report therefore still shows Jev's `cost_usd` as `-`.
 A replay of both players afterwards (`20260920-103208`, no `--max-requests`) made 0 requests, was answered by
 24 + 200 cache hits and reproduced both runs row for row: re-runs and replays are free.
 
-## Projection for the tournament
+## Projection for the tournament (phase 3, game v1: at most 300 rows a track)
 
 20 seeds, one request per row survived, at most 300 rows per track.
 
@@ -32,6 +32,10 @@ A replay of both players afterwards (`20260920-103208`, no `--max-requests`) mad
 | llm | 3.56 | 2.38 (20 x 200 requests) |
 
 One track is a weak basis for the second column: a player that survives longer costs more.
+
+This projection is phase 3's, on game v1 (300 rows a track). On v2 (150 rows a track, this file's `llm` rate of
+0.00059 USD a request) the one-shot LLM's worst case for 20 tracks is about 1.78 USD (20 x 150 requests); the
+priciest twin, `llm_reader` (about 0.0063 USD a row, "Update 2a" above), would be about 19 USD for 20 x 150 rows.
 
 ## What else the track showed (one track: an impression, not a result)
 

@@ -12,9 +12,11 @@ Every contestant plays the same seeded rounds. The output is a watchable tournam
 replays with each player's "mind" shown next to the game (Jev's probabilities, the LLM's
 answer, the fly's neurons firing) and a scoreboard across games.
 
-Status: phases 1 to 5 of 6 built (phase 6 is the tournament and the write-up); eight updates come first
-(`docs/UPDATES.md`), of which game v2 is built. The untrained fly plays: on seeds 0–19 of game v1 it survives 127
-rows on average (random 35, always-jump 48, solver 300; `calibration/RESULTS.md`).
+Status: phases 1 to 5 of 6 built (phase 6 is the tournament and the write-up); ten updates come first
+(`docs/UPDATES.md`). Game v2 is built; update 2a, the Jev family and its LLM twins, is built and its paid runs
+are done; update 2b, the fly, stopped at its probe. Next: the benchmark (item 7). Details in `docs/NEXT.md`. The
+untrained fly plays: on seeds 0–19 of game v1 it survives 127 rows on average (random 35, always-jump 48, solver
+300; `calibration/RESULTS.md`).
 
 The game comes in versions (`bakeoff/game/rules.py`): `v1`, the 300-row game phases 1 to 5 were played on, and
 `v2`, the default, 150 rows that reach full difficulty by row 100. `--game v1` plays the old one; `--lookahead` and
@@ -25,7 +27,7 @@ are in `docs/COSTS.md`.
 
     uv run pytest                                    # fast tests, 5 s; `-m slow` runs the real brain (1 GB)
     uv run python -m scripts.fetch_fly_data          # once: 400 MB into data/
-    uv run python -m bakeoff run --players fly,always_jump,random,solver --seeds 20
+    uv run python -m bakeoff run --players fly,always_jump,random,solver --seeds 20 --seed-start 1000
     uv run python -m bakeoff report runs/<run_id>
     uv run python -m bakeoff view runs/<run_id> [runs/<other_run_id> ...]   # writes replay.html
 
@@ -73,9 +75,11 @@ alone.
 `view` writes one self-contained HTML file (no server, no network, fonts embedded): the demo player. The
 fly, the composed Jev and the LLM run one tunnel together as pixel figures (fixed camera, everyone on the
 same row at the same time), with a strip of panels underneath showing what each had in mind (the fly's
-spikes and read-out signals, Jev's four answers, the LLM's answer). Blue is the cursor: it marks the mind
-in focus and the tiles that mind was shown, and with auto on it cuts to whoever faces a gap (keys 1, 2, 3
-or a click choose by hand; space plays, the arrows step a row). Below are the level table (rows survived
+spikes and read-out signals, Jev's four answers, the LLM's answer). Any other players in the merged run
+directories (the question-set players, `jev` one-shot) join the same tunnel with their own tags. Blue is
+the cursor: it marks the mind in focus and the tiles that mind was shown, and with auto on it cuts to
+whoever faces a gap (a click chooses by hand, or keys 1 to 9 pick the runner in that position; space
+plays, the arrows step a row). Below are the level table (rows survived
 per track; it picks the track and shows or hides runners, baselines and the one-shot Jev included), the
 scoreboard, and what in the set-up is ours rather than the fly's or TypeSafe's. The look is the user's
 brand (`~/Documents/PROJECTS/BRAND/brand.css`). Several run directories are merged, since the fly and

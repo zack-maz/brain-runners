@@ -69,7 +69,7 @@
 <body>
 <main>
 
-<span class="label">brain-bakeoff · explainer · 2026-09-21</span>
+<span class="label">brain-bakeoff · explainer · written 2026-09-21, after phase 5; being refreshed after the updates</span>
 <h1>Three minds, one tunnel</h1>
 <p class="lede">A fruit fly's brain, a small AI that answers yes/no questions, and a chatbot all play the same
 video game. We watch how each one thinks while it plays.</p>
@@ -191,9 +191,16 @@ gap in row 1 and lands safely on row 2.</figcaption>
     <h3>Claude Haiku 4.5</h3>
     <p>A regular chatbot-style model. It gets the rules and a description of the rows ahead, and answers with
     one move.</p>
-    <p>It is told exactly the same rules, in the same words, as Jev.</p>
+    <p>The one-shot LLM (<code>llm</code>) is told exactly the same rules, in the same words, as the one-shot Jev.
+    Its question-set twins (<code>llm_composed</code> and so on) ask the same questions as their Jev, under the
+    same rule, but three things still differ between the two models &mdash; see below.</p>
   </div>
 </div>
+
+<p>Beside the composed Jev shown above, there are seven more question-set players: two more ways to ask Jev
+(<code>jev_choice</code>, <code>jev_two_step</code>, <code>jev_reader</code>) and a Claude Haiku twin for every
+set, including the composed one (<code>llm_composed</code>, <code>llm_choice</code>, <code>llm_two_step</code>,
+<code>llm_reader</code>), covered in section 10.</p>
 
 <p>There are also three <strong>yardsticks</strong> that are not contestants: <code>random</code> (picks any
 move), <code>always_jump</code>, and <code>solver</code>, a perfect little search program that plays with the
@@ -282,16 +289,27 @@ budget stops at its first question), and the fly is simulated again for real (ab
   <li><span class="label">Phase 5 · the demo</span>5a the composed Jev; 5b the demo player in your brand's
   look; 5c going live. Merged 2026-09-21.</li>
   <li><span class="label">Update 1 · game v2</span>Named game versions; v2 is 150 rows and gets hard by row 100.
-  First of eight updates that come before the tournament (<code>docs/UPDATES.md</code>).</li>
-  <li class="next"><span class="label">Next</span>The rest of the eight updates, then phase 6: the tournament and the
-  write-up.</li>
+  First of ten updates that come before the tournament (<code>docs/UPDATES.md</code>).</li>
+  <li><span class="label">Update 2a · the Jev family</span>Three more ways to ask Jev (<code>jev_choice</code>,
+  <code>jev_two_step</code>, <code>jev_reader</code>) and a Claude Haiku twin for each. Built, reviewed, and its
+  paid runs are done.</li>
+  <li><span class="label">Update 2b · the fly</span>A trained fly was dropped; a richer-input fly
+  (<code>fly_rich</code>) stopped at its probe: the wiring carries "where" only as strength, and it played worse.
+  <code>fly</code> stays the only fly.</li>
+  <li><span class="label">Item 7 · the benchmark</span>An approved design for one report that says who is better,
+  with confidence, and the cost/performance trade-off. Being prototyped now, not built yet.</li>
+  <li class="next"><span class="label">Next</span>Build the benchmark (item 7), then the GLM Flash twin (item 10),
+  then the page (items 4, 5, 8, 9); then phase 6: the tournament and the write-up.</li>
 </ol>
 
 <h2 id="next">7. What's next</h2>
 
-<p><strong>First, the eight updates</strong> in <code>docs/UPDATES.md</code> (decision 20): a better or trained fly,
-more Jev variants, one live log tab per mind, any seed from the page, a benchmark for time, cost and
-performance, and the analysis moved to its own tab. The game changes (v2) are done.</p>
+<p><strong>First, the ten updates</strong> in <code>docs/UPDATES.md</code> (decision 20): a better or trained fly,
+more Jev variants, six rows of vision, one live log tab per mind, any seed from the page, a faster difficulty
+ramp, a benchmark for time, cost and performance, the analysis moved to its own tab, selectable players and a
+GLM Flash twin. Done so far: the game changes (v2), the Jev family and its LLM twins (paid runs finished), and
+the fly's richer-input probe (stopped there; no new fly built). Next: the benchmark (item 7, approved design,
+being prototyped), then GLM Flash (item 10, needs a key), then the page (items 4, 5, 8, 9).</p>
 
 <p><strong>Then phase 6: the tournament and a short write-up.</strong> All players play the same set of
 tournament tracks (seeds below 1000, which no paid player has ever seen and nothing was tuned on), then a
@@ -301,9 +319,11 @@ scoreboard and a write-up with the honest caveats.</p>
 <ol>
   <li><strong>Which seeds.</strong> Reuse seeds 0–19 (the fly already played them once, untuned; its
   results there exist and would repeat exactly) or take fresh seeds below 1000.</li>
-  <li><strong>A budget go-ahead.</strong> Worst case for 20 tracks of 150 rows (game v2): about 1.80 USD for the LLM
-  and about 0.10 USD each for the Jev players (estimates; a player that dies early costs less). The fly is free
-  but takes about 4 minutes per track and must run on its own.</li>
+  <li><strong>A budget go-ahead.</strong> Worst case for 20 tracks of 150 rows (game v2): about 1.78 USD for the
+  one-shot LLM and about 0.10 USD each for the Jev players (estimates; a player that dies early costs less). The
+  priciest question-set twin, <code>llm_reader</code>, would be about 19 USD for 20 tracks on its own (about
+  0.0063 USD a row, measured in update 2a). The fly is free but takes about 4 minutes per track and must run on
+  its own.</li>
 </ol>
 
 <!-- ============================================================ -->
@@ -321,7 +341,7 @@ one way:</p>
     <g stroke="#2A2F35" fill="#0D0F12">
       <rect x="10" y="20" width="120" height="44"/><rect x="170" y="20" width="120" height="44"/>
       <rect x="330" y="20" width="120" height="44"/><rect x="490" y="20" width="190" height="44"/>
-      <rect x="490" y="110" width="190" height="80"/>
+      <rect x="490" y="110" width="190" height="96"/>
       <rect x="250" y="130" width="180" height="44"/>
       <rect x="10" y="240" width="150" height="44"/><rect x="190" y="240" width="150" height="44"/>
       <rect x="370" y="240" width="150" height="44"/><rect x="550" y="240" width="130" height="44"/>
@@ -335,6 +355,7 @@ one way:</p>
     <text x="502" y="148" fill="#7C848D" font-size="10">fly · jev_composed · llm</text>
     <text x="502" y="164" fill="#7C848D" font-size="10">jev · random · always_jump</text>
     <text x="502" y="180" fill="#7C848D" font-size="10">solver   → Decision</text>
+    <text x="502" y="196" fill="#7C848D" font-size="10">+ 7 question-set players</text>
     <text x="262" y="150">runner.py / live.py</text><text x="262" y="166" fill="#7C848D" font-size="10">play_row: one record per move</text>
     <text x="22" y="150">runs/&lt;id&gt;/</text><text x="22" y="166" fill="#7C848D" font-size="10">meta.json · &lt;player&gt;.jsonl</text>
     <text x="22" y="260">report.py</text><text x="22" y="276" fill="#7C848D" font-size="10">scoreboard (text)</text>
@@ -441,8 +462,8 @@ run on track 1001 was move for move the same as the batch run two days earlier.<
 
 <h2 id="paid">10. Jev and the LLM, in detail</h2>
 
-<p>Both are told the same rules in the same words (<code>bakeoff/players/briefing.py</code>, written before
-any paid request) and receive the same JSON view:</p>
+<p>The one-shot pair, Jev and the LLM, are both told the same rules in the same words
+(<code>bakeoff/players/briefing.py</code>, written before any paid request) and receive the same JSON view:</p>
 
 <pre><code>{
   "lane": 4, "lanes": 12, "rows_survived": 37,
@@ -481,6 +502,15 @@ wanders: on safe rows answers like 0.03 and 0.04 rarely tie, so the "safest" mov
 states of track 1000 its Choice landed on a gap 29% of the time, about the same as always staying (33%). Jev's
 questions in one request run in parallel and can't see each other's answers, so the Nouls couldn't help the
 Choice. TypeSafe's own docs call the broad question the anti-pattern.</p>
+
+<h3>Update 2a: the question-set twins</h3>
+<p><code>jev_choice</code>, <code>jev_two_step</code> and <code>jev_reader</code> ask Jev three other ways; each has a
+Claude Haiku twin (<code>llm_choice</code>, <code>llm_two_step</code>, <code>llm_reader</code>) asked the same
+questions under the same rule. The model is not the only difference between a twin and its Jev: the LLM twin is
+also given the briefing of the rules (Jev's yes/no questions carry only the question, except in the choice set),
+Jev's answers in one request are made in parallel and cannot see each other while the LLM writes them in one
+reply, and the LLM's probabilities are numbers it states rather than Jev's own probability. Paid runs are done
+for practice seeds 1000&ndash;1004 (<code>docs/COSTS.md</code>, "Update 2a").</p>
 
 <h3>Money safety</h3>
 <p>Every paid request goes through <code>bakeoff/clients/core.py</code>: first a <strong>disk cache</strong>
@@ -547,7 +577,7 @@ Server-Sent Events, standard library only.</p>
     <tr><td><code>docs/DECISIONS.md</code></td><td>every decision, in order</td></tr>
     <tr><td><code>docs/NEXT.md</code></td><td>where things stand and what comes next</td></tr>
     <tr><td><code>docs/COSTS.md</code></td><td>measured costs and what each paid run showed</td></tr>
-    <tr><td><code>docs/superpowers/</code></td><td>the two binding design specs and one plan per phase</td></tr>
+    <tr><td><code>docs/superpowers/</code></td><td>the five binding design specs and one plan per phase or update</td></tr>
     <tr><td><code>runs/</code>, <code>.cache/</code>, <code>data/</code></td><td>recorded runs, cached answers, fly model data (all git-ignored)</td></tr>
   </tbody>
 </table>
@@ -573,7 +603,8 @@ Server-Sent Events, standard library only.</p>
 </table>
 </div>
 
-<p style="margin-top:48px;color:var(--muted);font-size:14px">Written 2026-09-21, after phase 5 was merged. If
+<p style="margin-top:48px;color:var(--muted);font-size:14px">Written 2026-09-21, after phase 5 was merged; it
+does not yet know the Jev family or the other updates, and is being refreshed once all of them are done. If
 this page and <code>docs/DECISIONS.md</code> disagree, the decisions file wins.</p>
 
 </main>

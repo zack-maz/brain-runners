@@ -1,5 +1,9 @@
 # Fly-brain resources: what a research pass found (2026-09-19)
 
+This is a research pass from 2026-09-19; it is not kept current. The project uses FlyWire v783 connectivity
+(138,639 neurons in the model) and steers with DNa01 + DNb01 (DNa02 is logged only, never decides). For current
+facts about the fly, see `docs/STEP_RECORD.md` and the fly code (`bakeoff/fly/`).
+
 Gathered by a web-research agent; items marked (unverified) are its claims about very
 recent material that nobody here has checked by running code.
 

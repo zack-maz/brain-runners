@@ -43,7 +43,7 @@ use the next record's `row`/`lane`, or derive the landing tile as below.
 | `chosen_action` | string or null | what the player asked for. May be an invalid string, or null if it gave none |
 | `executed_action` | string | what the game ran: `left`, `right`, `jump` or `stay`. Equals `chosen_action` unless a fallback applied |
 | `solver_action` | string | the reference solver's move on the same senses: the first action, in the order `stay, left, right, jump`, with the maximum depth |
-| `solver_depths` | object | for each of `stay`, `left`, `right`, `jump`, the furthest visible row (1..6) its best continuation reaches; 0 if the first move is not known-safe. Ties are normal |
+| `solver_depths` | object | for each of `stay`, `left`, `right`, `jump`, the furthest visible row (1..6, the game's `lookahead`, 6 by default; decision 22) its best continuation reaches; 0 if the first move is not known-safe. Ties are normal |
 | `gated` | bool | the player was blocked by a threshold and produced no move (fallback applies) |
 | `invalid` | bool | the chosen action was not one of the four (fallback applies) |
 | `error` | string or null | player error text (API failure etc.); the fallback applies |
@@ -64,9 +64,12 @@ runner executes `stay`. It is never the solver's move.
 ### `senses`
 
 `{lane, lanes, rows_survived, ahead, actions}`. `lane` and `rows_survived` are at decision time
-(so `senses.lane == lane`). `lanes` is 12. `ahead` has 6 entries, `{row: 1..6, gaps_relative: [...]}`:
-the gap lanes `row` rows ahead as offsets from the runner's lane, only within 3 lanes either side
-(`-3..3`), lane wrap already applied. `actions` maps each action to a description.
+(so `senses.lane == lane`). `lanes` is 12, the tunnel's width (a separate `Rules` field, not changed by
+vision experiments). `ahead` has 6 entries, `{row: 1..6, gaps_relative: [...]}`: the gap lanes `row` rows
+ahead as offsets from the runner's lane, only within 3 lanes either side (`-3..3`), lane wrap already
+applied. The 6 rows and the 3 lanes either side are the game's default `lookahead` and `window`
+(`bakeoff/game/rules.py`); a run with a different vision (`--lookahead`, `--window`, decision 22) shows
+more or fewer entries here. `actions` maps each action to a description.
 
 ### `info` of the fly
 

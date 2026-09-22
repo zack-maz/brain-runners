@@ -31,8 +31,10 @@ Branch: `phase6-updates`.
   plan `docs/superpowers/plans/2026-09-21-update1-game-v2.md`). Vision stays 6 rows × 3 lanes and is now a setting;
   v2 is 150 rows at full difficulty by row 100; v1 stays playable.
 - Item 2 (update 2a): `jev_choice`, `jev_two_step`, `jev_reader` and an LLM twin for every question set (decisions
-  25–27; spec `docs/superpowers/specs/2026-09-21-jev-family-design.md`). Code built and reviewed; paid runs part done
+  25–27; spec `docs/superpowers/specs/2026-09-21-jev-family-design.md`). Code built and reviewed; paid runs done
   (`docs/COSTS.md`). Item 1 (the fly) is update 2b: the trained fly dropped for now, `fly_rich` stopped at its probe (decisions 29–30).
+- Item 7, the benchmark: approved design (decision 31, `docs/superpowers/specs/2026-09-22-benchmark-design.md`), not
+  built yet.
 
 ## Where each one stood on 2026-09-21
 
@@ -47,7 +49,7 @@ Branch: `phase6-updates`.
    ahead, asking only when the row ahead is not trivially safe. "Same signals" means the LLM would get the same
    per-action questions or the same composed view, so the comparison is about the model, not the prompt. Testing
    any paid variant needs a budget go-ahead (Jev about 0.00003 USD a request, the LLM about 0.0006; `COSTS.md`).
-3. `LOOKAHEAD = 6` in `bakeoff/game/track.py`; the gap width is at most 3 and a jump covers 2 rows, so the
+3. `LOOKAHEAD = 6` in `bakeoff/game/track.py` (now the `lookahead` field of `Rules` in `bakeoff/game/rules.py`); the gap width is at most 3 and a jump covers 2 rows, so the
    question is how far ahead a player needs to see to always have an escape, and what a shorter or longer view
    costs each player (more rows = longer prompts, more fly input). Changing it changes what every player sees, so
    all cached answers and the scoreboard stop being comparable.
@@ -58,7 +60,8 @@ Branch: `phase6-updates`.
    answers from the cache. The page itself cannot choose a seed or start a run; paid players on an uncached track
    need `--max-requests`, and seeds below 1000 need `--tournament`. A seed picker in the page would need the server
    to accept a request, which also needs the budget guard in the page flow.
-6. Gap density ramps from `START_GAP_RATE = 0.04` to `END_GAP_RATE = 0.16` over `DIFFICULTY_ROWS = 300`. A faster
+6. Gap density ramps from `START_GAP_RATE = 0.04` to `END_GAP_RATE = 0.16` over `DIFFICULTY_ROWS = 300` (now
+   `start_gap_rate`, `end_gap_rate`, `difficulty_rows` fields of `Rules` in `bakeoff/game/rules.py`). A faster
    ramp changes every track, so every past run and cached answer is on an old track; the track version should be
    recorded in the run so old and new runs never mix on one scoreboard.
 7. Runs record cost and the step log (`docs/STEP_RECORD.md`); latency per decision is not yet a first-class
