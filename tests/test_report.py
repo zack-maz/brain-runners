@@ -233,6 +233,13 @@ def test_brier_all_scores_every_question_set_noul_it_can_check():
     assert row["brier_gap_left"] is None
 
 
+def test_brier_leaves_out_an_answer_that_is_not_a_probability():
+    senses = {"ahead": [{"row": r, "gaps_relative": [0] if r == 1 else []} for r in range(1, 7)]}
+    answers = {"tile_r1_c": {"noul": 1.7}, "tile_r2_c": {"noul": -0.2}, "tile_r2_l1": {"noul": 0.4}}
+    (row,) = summarize([step(player="llm_reader", senses=senses, ground_truth={}, answers=answers)])
+    assert row["brier_all"] == pytest.approx(0.4 ** 2)
+
+
 def test_the_four_composed_columns_then_brier_all_close_the_table():
     assert COLUMNS[-5:] == ("brier_gap_left", "brier_gap_stay", "brier_gap_right", "brier_gap_jump", "brier_all")
     (row,) = summarize([step(answers={"gap_ahead": {"type": "noul", "noul": 0.5}}, ground_truth={"gap_ahead": True})])

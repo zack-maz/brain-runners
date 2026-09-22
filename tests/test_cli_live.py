@@ -68,6 +68,8 @@ def test_usage_errors(tmp_path, capsys):
     assert "duplicate player names" in capsys.readouterr().err
     assert main(live_args(tmp_path, "--window", "9")) == 2
     assert "window must be 1 to 5 lanes" in capsys.readouterr().err
+    assert main(live_args(tmp_path, "--lookahead", "3", players="solver,jev_two_step")) == 2
+    assert "the two-step questions need 4 rows" in capsys.readouterr().err
     with socket.socket() as taken:
         taken.bind(("127.0.0.1", 0))
         taken.listen()

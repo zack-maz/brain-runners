@@ -87,15 +87,15 @@ def _truth(step: dict, noul: str) -> bool | None:
 def _brier(steps: list[dict], noul: str | None) -> float | None:
     """Mean squared gap between a logged Noul probability and the truth (0 is perfect, 0.25 is what
     always answering 0.5 scores), for one Noul id, or for every Noul whose truth is known when `noul` is
-    None. Cached answers count: a judgment is a judgment."""
+    None. Cached answers count: a judgment is a judgment; a value outside 0 to 1 is not one."""
     errors = []
     for s in steps:
         answers = s.get("answers") or {}
         for qid in (answers if noul is None else (noul,)):
             answer = answers.get(qid)
             if not isinstance(answer, dict) or isinstance(answer.get("noul"), bool) \
-                    or not isinstance(answer.get("noul"), (int, float)):
-                continue
+                    or not isinstance(answer.get("noul"), (int, float)) or not 0 <= answer["noul"] <= 1:
+                continue  # an answer outside 0 to 1 is not a probability; it made its decision invalid
             truth = _truth(s, qid)
             if truth is not None:
                 errors.append((answer["noul"] - float(truth)) ** 2)

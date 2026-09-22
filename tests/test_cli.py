@@ -42,6 +42,14 @@ def test_an_impossible_vision_is_a_usage_error(tmp_path, capsys):
     assert list(tmp_path.iterdir()) == []
 
 
+def test_a_question_set_that_needs_more_vision_is_a_usage_error_before_anything_is_played(tmp_path, capsys):
+    args = ["run", "--players", "jev_composed,jev_two_step", "--lookahead", "3", "--max-requests", "5",
+            "--seed-start", "1000", "--out", str(tmp_path / "runs"), "--cache", str(tmp_path / "cache")]
+    assert main(args) == 2
+    assert "the two-step questions need 4 rows" in capsys.readouterr().err
+    assert not (tmp_path / "runs").exists() or list((tmp_path / "runs").iterdir()) == []
+
+
 def test_seed_start_offsets_the_seeds(tmp_path):
     assert main(["run", "--players", "solver", "--seeds", "2", "--seed-start", "1000", "--max-rows", "20",
                  "--out", str(tmp_path)]) == 0

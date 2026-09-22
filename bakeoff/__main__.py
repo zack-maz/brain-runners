@@ -75,10 +75,14 @@ def _parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _players(names: str, cache: DiskCache, max_requests: int) -> list:
+def _players(names: str, cache: DiskCache, max_requests: int, rules: Rules) -> list:
     # one budget per paid player: the providers bill separately, and one must not starve the other
-    return [make_player(name, cache=cache, budget=RequestBudget(max_requests)) if name in PAID
-            else make_player(name) for name in (n.strip() for n in names.split(","))]
+    players = [make_player(name, cache=cache, budget=RequestBudget(max_requests)) if name in PAID
+               else make_player(name) for name in (n.strip() for n in names.split(","))]
+    for p in players:  # a question set that cannot be asked on this vision is a usage error, before anyone plays
+        if hasattr(p, "question_set"):
+            p.question_set.build(rules)
+    return players
 
 
 def _spends_on_tournament_seeds(players: list, max_requests: int, first_seed: int, tournament: bool) -> bool:
@@ -102,7 +106,7 @@ def _paid_window_mismatch(players: list, chosen_window: int, requested_window: i
 def _live(args) -> int:
     try:
         rules = _rules(args)
-        players = _players(args.players, DiskCache(args.cache), args.max_requests)
+        players = _players(args.players, DiskCache(args.cache), args.max_requests, rules)
     except KeyError as e:
         print(e.args[0], file=sys.stderr)
         return 2
@@ -200,7 +204,7 @@ def main(argv: list[str] | None = None) -> int:
         return _live(args)
     try:
         rules = _rules(args)
-        players = _players(args.players, DiskCache(args.cache), args.max_requests)
+        players = _players(args.players, DiskCache(args.cache), args.max_requests, rules)
     except KeyError as e:
         print(e.args[0], file=sys.stderr)
         return 2
