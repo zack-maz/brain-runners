@@ -83,7 +83,10 @@ gets its own plan.
 - The page runs the show (update 3a, design `docs/superpowers/specs/2026-09-22-page-control-design.md`): the command
   binds the port and sets the ceiling, the lobby in the browser picks the track and the players and starts and
   cancels the run (`GET /state`, `POST /run`, `POST /cancel`, `GET /events?run=`). Every request but the page itself
-  carries a token minted at startup and embedded in the page. One `LiveSession` per command holds one budget per
+  carries a token minted at startup and embedded in the page (in the header; in the query for the event stream
+  alone, which cannot send headers), so no other page in the browser can drive the run. It is not a defence
+  against a program on this machine: whatever may fetch `/` may read the token out of the page. One
+  `LiveSession` per command holds one budget per
   paid player for the whole session (`SharedBudget` gives each run its own record of what it spent), runs one
   `LiveRun` at a time and keeps serving so another track can be played without restarting. `--start` plays the
   command line's own run at once, as before, and holds its first decision until a browser is listening.

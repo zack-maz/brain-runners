@@ -166,6 +166,21 @@ def test_cancelling_before_the_run_began_leaves_an_interrupted_run_with_no_logs(
     meta = json.loads((live.run_dir / "meta.json").read_text())
     assert meta["status"] == "interrupted" and meta["finished_at"] and live.broadcast.closed
     assert list(live.run_dir.glob("*.jsonl")) == []
+    # and it ends like any other run, so a page watching it stops waiting instead of reconnecting
+    (name, data), = list(live.broadcast.listen())
+    assert name == "end" and data["status"] == "interrupted"
+    assert data["runs"][0]["status"] == "interrupted"
+    assert [row["runs"] for row in data["scoreboard"]["rows"]] == [0]  # nobody played a row
+
+
+def test_stopping_a_run_that_is_waiting_for_a_browser_wakes_it(tmp_path):
+    """`wait_for_listener` parks the run until a page opens the stream. A run nobody will ever watch
+    must still be able to stop, or its directory keeps saying `running` for ever."""
+    live = LiveRun([make_player("solver")], 1001, out_root=tmp_path, max_rows=20, run_id="live")
+    live.prepare()
+    live.stop()
+    assert live.broadcast.wait_for_listener(timeout=5) is True  # woken, with no listener in sight
+    assert live.stopped and not live.broadcast.listeners
 
 
 def test_an_event_is_a_snapshot_later_decisions_do_not_change_what_was_already_sent(tmp_path):

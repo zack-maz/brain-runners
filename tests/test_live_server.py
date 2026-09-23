@@ -44,6 +44,10 @@ def call(httpd, method, path, body=None, host=None, token="tok-123"):
     return response, text
 
 
+def httpd_of(server):
+    return server[0]
+
+
 def get(httpd, path, host=None, token="tok-123"):
     return call(httpd, "GET", path, host=host, token=token)
 
@@ -166,6 +170,14 @@ def test_the_stream_takes_the_token_in_the_query_because_an_event_source_sends_n
     started = payload(httpd, "POST", "/run", {"seed": 1001, "players": ["solver"]})[1]
     assert get(httpd, f"{EVENTS_PATH}?run={started['run_id']}&token=tok-123", token=None)[0].status == 200
     assert get(httpd, f"{EVENTS_PATH}?run={started['run_id']}&token=wrong", token=None)[0].status == 403
+
+
+def test_the_query_token_is_taken_by_the_event_stream_alone(server):
+    """An EventSource cannot send headers, so the stream takes `?token=`. Nothing else does: a token in
+    a URL ends up in places a header does not."""
+    assert get(httpd_of(server), "/state?token=tok-123", token=None)[0].status == 403
+    assert call(httpd_of(server), "POST", "/run?token=tok-123",
+                {"seed": 1001, "players": ["solver"]}, token=None)[0].status == 403
 
 
 def test_nothing_else_is_served(server):

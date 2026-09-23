@@ -9,8 +9,8 @@ import pytest
 from bakeoff.clients.core import RequestBudget, SharedBudget
 from bakeoff.errors import BudgetExhausted
 from bakeoff.game.rules import rules_for
-from bakeoff.players import REGISTRY
-from bakeoff.session import LiveSession, LobbyError, played_before
+from bakeoff.players import PAID, REGISTRY
+from bakeoff.session import PRICE_USD, LiveSession, LobbyError, played_before
 from tests.fakes import slow_player
 
 RULES = rules_for("v2").variant(max_rows=12)
@@ -42,6 +42,42 @@ def test_the_contestants_come_first_in_the_pages_own_order_and_the_yardsticks_la
     assert names[:4] == ["fly", "jev_composed", "llm", "jev"]  # the demo's three, then the one-shot Jev
     assert names[-3:] == ["always_jump", "random", "solver"]  # the free yardsticks
     assert set(names) == set(REGISTRY)
+
+
+def test_every_paid_player_has_its_own_measured_price_and_none_of_them_is_understated():
+    """The page asks the user to agree to this number, so it must not be lower than the real cost.
+    The prices are the measured ones in docs/COSTS.md (update 2a), rounded up; a question set that
+    reads more costs more, so a price belongs to a player, not to a provider."""
+    assert set(PRICE_USD) == set(PAID)
+    assert PRICE_USD["llm_reader"] > PRICE_USD["llm"] * 10  # 0.970 USD over 150 requests, COSTS.md
+    assert PRICE_USD["llm_two_step"] > PRICE_USD["llm_composed"] > PRICE_USD["llm"]
+    assert PRICE_USD["jev_reader"] > PRICE_USD["jev_composed"]
+    assert all(PRICE_USD[name] > 0 for name in PAID if not name.startswith("glm_"))
+    assert all(PRICE_USD[name] == 0.0 for name in PAID if name.startswith("glm_"))  # the free tier
+
+
+def test_a_run_cancelled_before_it_begins_stops_waiting_and_closes_as_interrupted(tmp_path, monkeypatch):
+    """`--start` holds the first decision until a browser is listening. Cancelling while it waits must
+    close the run at once: a directory left saying `running` would be a record that is not true."""
+    lobby = session(tmp_path)
+    started = lobby.start(1001, [slow_player(monkeypatch)], wait_for_page=True)
+    assert started.run.status == "running" and not started.run.broadcast.listeners
+    lobby.cancel()
+    lobby.wait(10)
+    assert started.run.status == "interrupted"
+    meta = json.loads((started.run.run_dir / "meta.json").read_text())
+    assert meta["status"] == "interrupted" and meta["finished_at"]
+    assert not (started.run.run_dir / f"{slow_player(monkeypatch)}.jsonl").exists()  # nothing was decided
+
+
+def test_the_history_of_a_run_that_is_over_is_dropped_when_the_next_one_starts(tmp_path):
+    """Every frame of a track is kept for the page that watches it; a session plays run after run, and
+    only the newest is still watched, so the older histories must not pile up on an 8 GB machine."""
+    lobby = session(tmp_path)
+    first = play(lobby, seed=1001, players=["solver"]).run
+    assert first.broadcast._events  # kept while it is the run on screen
+    play(lobby, seed=1002, players=["solver"])
+    assert first.broadcast._events == []
 
 
 def test_the_cap_the_command_set_is_per_paid_player_for_the_whole_session(tmp_path):

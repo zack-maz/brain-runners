@@ -24,11 +24,15 @@ from bakeoff.replay import CONTESTANTS
 # tournament seeds are below this and must not be paid for, or shape prompts, before the tournament
 FIRST_PRACTICE_SEED = 1000
 
-# USD per live request, measured in docs/COSTS.md. An estimate for what a run may cost at worst, never
-# a bill: the page shows it, the budget enforces the ceiling. GLM Flash is free while its free tier lasts.
-PRICE_USD = {"llm": 0.0006, "llm_composed": 0.0006, "llm_choice": 0.0006, "llm_two_step": 0.0006,
-             "llm_reader": 0.0006, "jev": 0.00003, "jev_composed": 0.00003, "jev_choice": 0.00003,
-             "jev_two_step": 0.00003, "jev_reader": 0.00003,
+# USD per live request, measured in docs/COSTS.md (update 2a) and rounded up, because this number is what
+# the page asks the user to agree to: it must never be lower than what a request really costs. A price per
+# player, not per provider: the same model costs what its question set makes it read and write, and the
+# reader's set is about eleven times the one-shot's. The budget, not this table, enforces the ceiling.
+# Jev's prices are estimates (its provider does not bill per request; COSTS.md explains the token basis).
+# GLM Flash is free while its free tier lasts.
+PRICE_USD = {"llm": 0.0006, "llm_composed": 0.0010, "llm_choice": 0.0009, "llm_two_step": 0.0016,
+             "llm_reader": 0.0065, "jev": 0.00004, "jev_composed": 0.00003, "jev_choice": 0.00004,
+             "jev_two_step": 0.00003, "jev_reader": 0.00012,
              "glm_composed": 0.0, "glm_choice": 0.0, "glm_two_step": 0.0, "glm_reader": 0.0}
 
 # every player here asks its provider once a row, so a track of N rows costs at worst N requests
@@ -181,6 +185,8 @@ class LiveSession:
         a run the page itself started needs no wait, since the stream carries its history)."""
         with self._lock:
             self.check(seed, names)
+            for old in self.finished:  # a session plays run after run; only the newest is still watched
+                old.broadcast.forget()
             players = self._players(names)
             run = LiveRun(players, seed, out_root=self.out_root, rules=self.rules, run_id=self._run_id(),
                           args={**self.args, "seed": seed, "players": ",".join(names)})
@@ -230,10 +236,11 @@ class LiveSession:
 
     def cancel(self) -> None:
         """Stop the run that is going. It closes as a normal run directory with status `interrupted`."""
-        run = self.run
-        if run is None or run.status != "running":
-            raise LobbyError("no run is going")
-        run.stop()
+        with self._lock:  # the same lock `start` holds, so a cancel cannot cross a run beginning
+            run = self.run
+            if run is None or run.status != "running":
+                raise LobbyError("no run is going")
+            run.stop()
 
     def wait(self, timeout: float | None = None) -> None:
         """Waits for the run that is going, if any (the command's own thread does this)."""

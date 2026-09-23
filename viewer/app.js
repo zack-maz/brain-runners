@@ -413,7 +413,8 @@
     }
   }
 
-  const chosenSeed = () => Math.round(Number($("seed").value));
+  // an empty box is no track at all, not track 0: Number("") is 0 and would silently start a run
+  const chosenSeed = () => ($("seed").value.trim() === "" ? NaN : Math.round(Number($("seed").value)));
 
   async function refreshState() {
     const { ok, body } = await control("/state?seed=" + encodeURIComponent(chosenSeed()));
@@ -472,8 +473,8 @@
   function pressedStart() {
     const state = lobby.state;
     if (!state || Lobby.whyNot(state, lobby.chosen, chosenSeed())) return;
-    // a run with a paid player in it is confirmed once, with its worst case on the button
-    if (Lobby.estimate(state, lobby.chosen).lines.length && !lobby.armed) {
+    // a run that can really spend is confirmed once, with its worst case on the button
+    if (Lobby.spends(state, lobby.chosen) && !lobby.armed) {
       lobby.armed = true;
       return renderLobby();
     }

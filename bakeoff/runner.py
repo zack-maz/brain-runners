@@ -82,7 +82,10 @@ def _preflight(players: list[Player]) -> None:
 
 
 def _requests(players: list[Player]) -> dict:
-    """Live requests spent against each paid player's cap (failed requests included)."""
+    """Live requests spent against each paid player's cap (failed requests included). In a `bakeoff live`
+    session the cap belongs to the session, so `max` here is what was left of it when this run began,
+    while `args.max_requests` is the cap the command set: a second run of a session shows the smaller
+    number, and `used` is always what this run alone spent."""
     return {p.name: {"max": p.budget.max_requests, "used": p.budget.used}
             for p in players if getattr(p, "budget", None) is not None}
 

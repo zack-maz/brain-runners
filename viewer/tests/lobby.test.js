@@ -36,7 +36,7 @@ test("the estimate names each paid player, its worst case and whether the track 
   const played = state({ players: [player("llm", { paid: true, price_usd: 0.0006, requests_left: 150, played_before: true })] });
   const text = Lobby.estimateText(played, ["llm"]);
   assert.match(text, /At worst this run of 150 rows spends 0.09 USD/);
-  assert.match(text, /LLM 150 requests at worst, 0.09 USD, played before \(cached answers cost nothing\)/);
+  assert.match(text, /LLM 150 requests at worst, 0.09 USD, played before \(some answers may be cached\)/);
 });
 
 test("money is written so that a fraction of a cent is still readable", () => {
@@ -82,6 +82,17 @@ test("a name or a reason from the server is text, never markup", () => {
   assert.match(html, /&#60;script&#62;/);
   assert.equal(Lobby.estimateText(state({ players: [player(evil, { paid: true, price_usd: 1, requests_left: 2 })] }),
                                   [evil]).includes("<script>"), false);
+});
+
+test("with nothing left of the cap the page says what a paid player can still do, and asks nothing", () => {
+  // a cap of 0 is the default: paid players replay what is cached and stop at their first uncached
+  // question, so the run cannot spend and there is nothing to confirm
+  const spent = state({ players: [player("llm", { paid: true, price_usd: 0.0065, requests_left: 0 })] });
+  assert.match(Lobby.estimateText(spent, ["llm"]), /No request left of this command's cap/);
+  assert.match(Lobby.estimateText(spent, ["llm"]), /stop at their first uncached question/);
+  assert.equal(Lobby.spends(spent, ["llm"]), false);
+  assert.equal(Lobby.spends(state(), ["llm"]), true);
+  assert.equal(Lobby.spends(state(), ["fly", "solver"]), false);
 });
 
 test("the ceiling is written out, cap or no cap", () => {

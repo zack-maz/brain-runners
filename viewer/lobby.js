@@ -47,7 +47,11 @@
     if (!lines.length) return "No paid player: this run spends nothing.";
     const each = lines.map((line) => tagOf(line.player) + " " + line.requests + " request" +
       (line.requests === 1 ? "" : "s") + " at worst, " + (line.free ? "0 USD (free tier)" : usd(line.usd)) +
-      (line.played_before ? ", played before (cached answers cost nothing)" : ""));
+      (line.played_before ? ", played before (some answers may be cached)" : ""));
+    if (!lines.some((line) => line.requests > 0)) {
+      return "No request left of this command's cap: the paid players replay what is already cached and stop " +
+        "at their first uncached question. This run spends nothing.";
+    }
     return "At worst this run of " + rows + " rows spends " + usd(total_usd) + ": " + each.join(" · ") +
       ". Cached answers are free, so the real cost is usually lower.";
   }
@@ -74,7 +78,7 @@
       } else {
         notes.push("free");
       }
-      if (player.played_before) notes.push("played before");
+      if (player.played_before) notes.push("played before");  // this track, this game: some answers may be cached
       return '<label class="pick' + (player.why_not ? " blocked" : "") + '">' +
         '<input type="checkbox" name="player" value="' + esc(player.name) + '"' + (on ? " checked" : "") +
         (player.why_not ? " disabled" : "") + ">" +
@@ -97,7 +101,11 @@
     return cap + " " + seeds + " Nothing on this page can raise either.";
   }
 
-  const api = { usd, estimate, estimateText, whyNot, playerList, ceilingText };
+  // Does starting this run need confirming? Only when it can really spend: a run that has no request
+  // left of the cap spends nothing whatever it asks for.
+  const spends = (state, chosen) => estimate(state, chosen).lines.some((line) => line.requests > 0);
+
+  const api = { usd, estimate, estimateText, whyNot, playerList, ceilingText, spends };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Lobby = api;
 })(typeof window !== "undefined" ? window : globalThis);

@@ -3,7 +3,10 @@ control channel the page drives the session with, and the event stream (Server-S
 nothing else: no files, no other method, no other host.
 
 Every request but the page itself carries the session's token, minted at startup and embedded in the
-page, so another program on this machine cannot drive the run.
+page, so no page in this browser but ours can drive the run (another tab, or a site that knows the port,
+has no way to read the token). It is not a defence against a program on this machine: anything that may
+read `GET /` may read the token out of the page, as anything that may read the run directory may read
+the run.
 
 | route | what it does |
 | --- | --- |
@@ -43,9 +46,12 @@ def serve(page: str | None, session: LiveSession, port: int = 8000) -> Threading
             return False
 
         def _token(self) -> bool:
-            """The token is in the header, or in `token=` for the event stream (an EventSource sends
-            no headers). A wrong one is 403: another program on this machine is not the page."""
-            sent = self.headers.get(TOKEN_HEADER) or self._query().get("token")
+            """The token is in the header, and in `token=` for the event stream alone, because an
+            EventSource sends no headers. A wrong one is 403. The query form is kept to the stream so
+            the token stays out of the places a URL ends up."""
+            sent = self.headers.get(TOKEN_HEADER)
+            if sent is None and self._route == EVENTS_PATH:
+                sent = self._query().get("token")
             if sent == self.server.session.token:
                 return True
             self.send_error(403)

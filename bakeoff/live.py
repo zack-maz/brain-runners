@@ -34,6 +34,7 @@ class Broadcast:
         self._events: list[tuple[str, dict]] = []
         self._changed = threading.Condition()
         self.closed = False
+        self.abandoned = False  # nobody is coming: stop waiting for a browser
         self.listeners = 0
 
     def emit(self, name: str, data: dict) -> None:
@@ -49,9 +50,23 @@ class Broadcast:
             self.closed = True
             self._changed.notify_all()
 
+    def abandon(self) -> None:
+        """Nobody is coming (the run was cancelled before it began): wake whoever waits for a browser.
+        Not `close()`: the run still has a directory to close and a last event to send."""
+        with self._changed:
+            self.abandoned = True
+            self._changed.notify_all()
+
     def wait_for_listener(self, timeout: float | None = None) -> bool:
         with self._changed:
-            return self._changed.wait_for(lambda: self.listeners > 0 or self.closed, timeout)
+            return self._changed.wait_for(lambda: self.listeners > 0 or self.closed or self.abandoned, timeout)
+
+    def forget(self) -> None:
+        """Drop the history of a run that is over. A session plays run after run and each history is
+        every frame of a track; only the run on screen can still be asked for."""
+        with self._changed:
+            if self.closed:
+                self._events = []
 
     def listen(self, poll_seconds: float = 15.0) -> Iterator[tuple[str, dict] | None]:
         """Yields (name, data); None when nothing happened for `poll_seconds` (time for a keep-alive).
@@ -118,14 +133,20 @@ class LiveRun:
     def stop(self) -> None:
         """Ask a run that has begun to stop. It is checked between decisions, so a decision already
         in flight (a paid request) is finished and recorded first; the run then closes as a normal
-        run directory with status `interrupted`."""
+        run directory with status `interrupted`. A run that has not begun (it is waiting for a browser)
+        is woken, so it closes at once instead of waiting for a page that will never come."""
         self._stop.set()
+        self.broadcast.abandon()
 
     def cancel(self) -> None:
-        """The operator gave up before the run began (Ctrl-C while waiting for a browser)."""
+        """The run was given up before it began (Ctrl-C, or Cancel, while waiting for a browser). It
+        ends like any other run: the same `end` event, so a page that is watching stops waiting and
+        goes back to its lobby instead of reconnecting to a stream that will never say anything."""
         self.status = "interrupted"
         self.meta.update(status=self.status, finished_at=_now())
         self._write_meta()
+        replay = build_replay([self.run_dir])  # the same last event as a run that played: read from disk
+        self.broadcast.emit("end", {"status": self.status, "runs": replay["runs"], "scoreboard": replay["scoreboard"]})
         self.broadcast.close()
 
     def _write_meta(self) -> None:
