@@ -5,22 +5,21 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-import threading
 import time
 from pathlib import Path
 
 from bakeoff.clients.core import DEFAULT_CACHE_DIR, DiskCache, RequestBudget
-from bakeoff.game.rules import DEFAULT, RULES, Rules, rules_for
-from bakeoff.live import LiveRun
+from bakeoff.game.rules import DEFAULT, RULES, Rules, resolve, rules_for
 from bakeoff.live_server import EVENTS_PATH, HOST, serve
 from bakeoff.players import PAID, REGISTRY, make_player
-from bakeoff.replay import build_replay
 from bakeoff.report import format_table, load_meta, load_steps, summarize
+from bakeoff.replay import build_replay, empty_replay
 from bakeoff.runner import RunAborted, Runner
+from bakeoff.session import FIRST_PRACTICE_SEED, LiveSession, LobbyError
 from bakeoff.view import render_html
 
-# tournament seeds are below this and must not be paid for, or shape prompts, before the tournament
-FIRST_PRACTICE_SEED = 1000
+DEMO_PLAYERS = "fly,jev_composed,llm"  # the demo's three: what the lobby offers first
+DEMO_SEED = 1001
 
 
 def _add_game_arguments(parser: argparse.ArgumentParser) -> None:
@@ -68,8 +67,10 @@ def _parser() -> argparse.ArgumentParser:
                        help="show only these pairs in the terminal (repeatable); the page shows every pair")
     live = sub.add_parser("live", help="play one track in real time and watch it in the browser (loopback only); "
                                        "the run is recorded like any other")
-    live.add_argument("--players", default="fly,jev_composed,llm", help=f"comma-separated; available: {sorted(REGISTRY)}")
-    live.add_argument("--seed", type=int, default=1001, help="the track; practice seeds are 1000 and up")
+    live.add_argument("--players", help=f"comma-separated; available: {sorted(REGISTRY)}. Without it the page "
+                                        f"opens in the lobby with the demo's three ready ({DEMO_PLAYERS})")
+    live.add_argument("--seed", type=int, help=f"the track; practice seeds are 1000 and up (default {DEMO_SEED} in "
+                                               "the lobby, where the page may choose another)")
     _add_game_arguments(live)
     live.add_argument("--max-rows", type=int, help="play a prefix of the track (default: the whole track)")
     live.add_argument("--out", default="runs")
@@ -78,6 +79,9 @@ def _parser() -> argparse.ArgumentParser:
                            "replays the cache, which makes a free live run of a track that was already played")
     live.add_argument("--cache", default=str(DEFAULT_CACHE_DIR), help="response cache directory")
     live.add_argument("--tournament", action="store_true", help="allows live paid requests on seeds below 1000")
+    live.add_argument("--start", action="store_true",
+                      help="play at once with --players on --seed, as before; without it the page opens in the "
+                           "lobby and starts the run when you say so")
     live.add_argument("--port", type=int, default=8000, help="the page is served on 127.0.0.1 only (default port 8000)")
     live.add_argument("--no-wait", action="store_true",
                       help="do not wait for a browser before the run, and do not keep serving after it")
@@ -113,66 +117,108 @@ def _paid_window_mismatch(players: list, chosen_window: int, requested_window: i
 
 
 def _live(args) -> int:
-    try:
-        rules = _rules(args)
-        players = _players(args.players, DiskCache(args.cache), args.max_requests, rules)
-    except KeyError as e:
-        print(e.args[0], file=sys.stderr)
+    """The page runs the show: the command sets the ceiling, binds the loopback port and keeps serving;
+    the lobby in the browser picks the track and the players. `--start` plays at once, as before."""
+    try:  # the session plays every run of this command, so --max-rows belongs to its rules
+        rules = resolve(_rules(args), args.max_rows)
+    except (KeyError, ValueError) as e:
+        print(e.args[0] if isinstance(e, KeyError) else e, file=sys.stderr)
         return 2
-    except ValueError as e:
+    if args.no_wait and not args.start:
+        print("--no-wait needs --start: without it the page starts the run and there is nothing to wait for",
+              file=sys.stderr)
+        return 2
+    seed = DEMO_SEED if args.seed is None else args.seed
+    names = [n.strip() for n in (args.players or DEMO_PLAYERS).split(",")]
+    run_args = {"command": "live", "game": args.game, "lookahead": args.lookahead, "window": args.window,
+                "max_rows": args.max_rows, "max_requests": args.max_requests, "cache": args.cache,
+                "tournament": args.tournament, "port": args.port}
+    # a vision the paid players' briefing does not match: they may not play this session at all
+    blocked = (WINDOW_RULE.format(chosen=RULES[args.game].window, requested=args.window)
+               if args.window is not None and args.window != RULES[args.game].window else None)
+    session = LiveSession(rules, out_root=args.out, cache_dir=args.cache, max_requests=args.max_requests,
+                          tournament=args.tournament, args=run_args, paid_blocked=blocked, ready=(seed, names))
+    try:
+        session.check(seed, names)  # what the command line asks for, refused before anything is bound
+    except LobbyError as e:
         print(e, file=sys.stderr)
         return 2
-    if _spends_on_tournament_seeds(players, args.max_requests, args.seed, args.tournament):
-        print(SEED_RULE.format(flag="--seed"), file=sys.stderr)
-        return 2
-    if _paid_window_mismatch(players, RULES[args.game].window, args.window):
-        print(WINDOW_RULE.format(chosen=RULES[args.game].window, requested=args.window), file=sys.stderr)
-        return 2
-    run_args = {"command": "live", "players": args.players, "seed": args.seed, "game": args.game,
-                "lookahead": args.lookahead, "window": args.window, "max_rows": args.max_rows,
-                "max_requests": args.max_requests, "cache": args.cache, "tournament": args.tournament, "port": args.port}
     try:
-        live = LiveRun(players, args.seed, out_root=args.out, rules=rules, max_rows=args.max_rows, args=run_args)
-        server = serve(None, live.broadcast, args.port)  # before anything is on disk: a busy port leaves nothing behind
-    except ValueError as e:
-        print(e, file=sys.stderr)
-        return 2
+        server = serve(None, session, args.port)  # before anything is on disk: a busy port leaves nothing behind
     except OSError as e:
         print(f"cannot listen on {HOST}:{args.port}: {e}", file=sys.stderr)
         return 2
     try:
         try:
-            server.page = render_html(live.prepare(), live=EVENTS_PATH)
-        except FileExistsError:
-            print(f"run directory already exists: {live.run_dir}", file=sys.stderr)
-            return 2
+            server.page = render_html(empty_replay(rules), live=EVENTS_PATH, token=session.token)
         except ValueError as e:
             print(e, file=sys.stderr)
             return 2
         print(f"watch: http://{HOST}:{server.server_address[1]}/", flush=True)
-        try:
-            if not args.no_wait:
-                print("waiting for a browser to open the page (Ctrl-C to give up)", flush=True)
-                live.broadcast.wait_for_listener()
-        except KeyboardInterrupt:
-            live.cancel()
-            print("run interrupted before it began", file=sys.stderr)
-            return 1
-        live.run()
-        if live.status != "completed":
-            print(f"run {live.status}" + (f": {live.error}" if live.error else ""), file=sys.stderr)
-        print(f"run directory: {live.run_dir}")
-        _print_report(live.run_dir)
-        if not args.no_wait and live.status != "interrupted":
-            print(f"still serving the page; Ctrl-C to stop. Replay it later: python -m bakeoff view {live.run_dir}", flush=True)
-            try:
-                threading.Event().wait()
-            except KeyboardInterrupt:
-                pass
-        return 0 if live.status == "completed" else 1
+        if args.start:
+            return _play_now(session, seed, names, args)
+        print(f"the page runs the show: pick a track and the players there (Ctrl-C to stop). "
+              f"Ready: {','.join(names)} on track {seed}", flush=True)
+        return _serve_until_interrupted(session)
     finally:
-        server.shutdown()
-        server.server_close()
+        _shutdown(server, session)
+
+
+def _play_now(session, seed: int, names: list[str], args) -> int:
+    """`--start`: the command line's own run, played at once. Today's behaviour."""
+    try:
+        started = session.start(seed, names, wait_for_page=not args.no_wait)
+    except LobbyError as e:
+        print(e, file=sys.stderr)
+        return 2
+    except FileExistsError:
+        print(f"run directory already exists: {session.out_root}", file=sys.stderr)
+        return 2
+    if not args.no_wait:
+        print("waiting for a browser to open the page (Ctrl-C to give up)", flush=True)
+    try:  # the run itself holds its first decision until the page is listening
+        session.wait()
+    except KeyboardInterrupt:
+        started.run.stop()
+        session.wait(30)
+    run = started.run
+    if run.status != "completed":
+        print(f"run {run.status}" + (f": {run.error}" if run.error else ""), file=sys.stderr)
+    _report_run(run)
+    if not args.no_wait and run.status != "interrupted":
+        print("still serving the page; pick another track there, or Ctrl-C to stop.", flush=True)
+        _serve_until_interrupted(session, printed={run.run_id})
+    return 0 if run.status == "completed" else 1
+
+
+def _serve_until_interrupted(session, printed: set | None = None) -> int:
+    """Keeps serving while the page starts runs, reporting each one as it closes, until Ctrl-C."""
+    printed = set() if printed is None else printed
+    try:
+        while True:
+            for run in list(session.finished):
+                if run.run_id not in printed:
+                    printed.add(run.run_id)
+                    if run.status != "completed":
+                        print(f"run {run.status}" + (f": {run.error}" if run.error else ""), file=sys.stderr)
+                    _report_run(run)
+            time.sleep(0.2)
+    except KeyboardInterrupt:
+        return 0
+
+
+def _report_run(run) -> None:
+    print(f"run directory: {run.run_dir}")
+    _print_report(run.run_dir)
+    print(f"replay it later: python -m bakeoff view {run.run_dir}", flush=True)
+
+
+def _shutdown(server, session) -> None:
+    if session.run is not None and session.run.status == "running":
+        session.run.stop()
+        session.wait(30)
+    server.shutdown()
+    server.server_close()
 
 
 def _print_report(run_dir) -> None:
