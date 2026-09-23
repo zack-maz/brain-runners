@@ -8,6 +8,7 @@
   const embedded = JSON.parse(document.getElementById("replay-data").textContent);
   if (!embedded) return;
   const liveUrl = document.body.dataset.live || null;
+  const token = document.body.dataset.token || null; // every control request carries it; a replay has none
 
   const $ = (id) => document.getElementById(id);
   const esc = Minds.esc;
@@ -82,6 +83,7 @@
       if (end.scoreboard) store.scoreboard = end.scoreboard;
       notice(end.status === "completed" ? null : "The run ended: " + end.status, false);
       renderAll();
+      if (liveUrl) refreshState(); // the run is over: the lobby comes back, with the run still on screen
     },
     onError(message) {
       if (store.ended) return;
@@ -397,6 +399,118 @@
     if (nth) focusOn(nth.episode.player, true);
   });
 
+  // ---- the lobby: the page starts the runs ----------------------------------------------------
+  const lobby = { state: null, chosen: [], armed: false, refusal: null, watching: null, source: null, timer: null };
+
+  async function control(path, options) {
+    const settings = options || {};
+    try {
+      const response = await fetch(path, { ...settings, headers: { "X-Bakeoff-Token": token, ...(settings.headers || {}) } });
+      const body = await response.json().catch(() => ({ error: "the server answered something that is not JSON" }));
+      return { ok: response.ok, body };
+    } catch (e) { // the command was stopped, or the machine went to sleep
+      return { ok: false, body: { error: "no answer from the run: is `bakeoff live` still going?" } };
+    }
+  }
+
+  const chosenSeed = () => Math.round(Number($("seed").value));
+
+  async function refreshState() {
+    const { ok, body } = await control("/state?seed=" + encodeURIComponent(chosenSeed()));
+    if (ok) applyState(body);
+    else { lobby.refusal = body.error; renderLobby(); }
+  }
+
+  function applyState(state) {
+    if (lobby.state == null) { // the first answer: the lobby opens with what the command line offered
+      lobby.chosen = (state.ready || {}).players || [];
+      if ((state.ready || {}).seed != null) $("seed").value = state.ready.seed;
+    }
+    lobby.state = state;
+    const run = state.run;
+    if (run && run.replay && lobby.watching !== run.run_id) watch(run);
+    renderLobby();
+  }
+
+  function watch(run) { // one stream per run, so a stream never runs on into the next one
+    lobby.watching = run.run_id;
+    if (lobby.source) lobby.source.close();
+    resetTo(run.replay);
+    notice("Waiting for the first decision…", false);
+    lobby.source = Feed.fromStream(liveUrl + "?run=" + encodeURIComponent(run.run_id) +
+                                   "&token=" + encodeURIComponent(token), handlers);
+  }
+
+  function resetTo(replay) { // a new run: the page starts again from that run's empty replay
+    Object.assign(store, { game: null, runs: [], players: [], seeds: [], tracks: {}, episodes: [],
+                           scoreboard: null, ended: false, error: null });
+    Object.assign(view, { seed: null, shown: new Set(), focus: null, auto: true, heldSince: 0, t: 0,
+                          playing: false, following: true, runners: [], panels: {} });
+    Feed.fromEmbedded(replay, handlers);
+    renderAll();
+  }
+
+  function renderLobby() {
+    const state = lobby.state;
+    if (!state) return;
+    const running = state.status === "running";
+    $("picks").innerHTML = Lobby.playerList(state, lobby.chosen);
+    $("estimate").textContent = Lobby.estimateText(state, lobby.chosen);
+    $("ceiling").textContent = Lobby.ceilingText(state);
+    const why = lobby.refusal || Lobby.whyNot(state, lobby.chosen, chosenSeed());
+    $("lobby-why").hidden = !why;
+    $("lobby-why").textContent = why || "";
+    const cost = Lobby.estimate(state, lobby.chosen);
+    $("start").disabled = !!why;
+    $("start").textContent = !lobby.armed ? "Start"
+      : "Confirm: start and spend at most " + Lobby.usd(cost.total_usd);
+    $("start").dataset.armed = String(lobby.armed);
+    $("cancel").hidden = !running;
+    $("seed").disabled = running;
+  }
+
+  function pressedStart() {
+    const state = lobby.state;
+    if (!state || Lobby.whyNot(state, lobby.chosen, chosenSeed())) return;
+    // a run with a paid player in it is confirmed once, with its worst case on the button
+    if (Lobby.estimate(state, lobby.chosen).lines.length && !lobby.armed) {
+      lobby.armed = true;
+      return renderLobby();
+    }
+    startRun();
+  }
+
+  async function startRun() {
+    lobby.armed = false;
+    lobby.refusal = null;
+    const { ok, body } = await control("/run", { method: "POST", headers: { "Content-Type": "application/json" },
+                                                 body: JSON.stringify({ seed: chosenSeed(), players: lobby.chosen }) });
+    if (!ok) lobby.refusal = body.error || "the run was refused";
+    if (ok && body.state) applyState(body.state);
+    else renderLobby();
+  }
+
+  $("lobby-form").addEventListener("submit", (event) => { event.preventDefault(); pressedStart(); });
+  $("picks").addEventListener("change", () => {
+    lobby.chosen = [...$("picks").querySelectorAll("input[name=player]:checked")].map((input) => input.value);
+    lobby.armed = false;
+    lobby.refusal = null;
+    renderLobby();
+  });
+  $("seed").addEventListener("input", () => { // another track: another set of prices and refusals
+    lobby.armed = false;
+    lobby.refusal = null;
+    renderLobby();
+    clearTimeout(lobby.timer);
+    lobby.timer = setTimeout(refreshState, 300);
+  });
+  $("cancel").addEventListener("click", async () => {
+    const { ok, body } = await control("/cancel", { method: "POST" });
+    if (!ok) lobby.refusal = body.error || "the run could not be stopped";
+    if (ok && body.state) applyState(body.state);
+    else renderLobby();
+  });
+
   // ---- the sections underneath --------------------------------------------------------------
   function renderBelow() {
     const board = store.scoreboard || { columns: [], rows: [], same_seeds: true };
@@ -441,10 +555,10 @@
   window.addEventListener("resize", () => { resize(); draw(); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw); // the canvas tags use the embedded mono
   if (liveUrl) {
-    notice("Waiting for the first decision…", false);
     const clear = handlers.onFrame;
     // a frame means the stream is alive: the waiting or the lost-connection notice goes, a real error stays
     handlers.onFrame = (...args) => { if (store.error == null) notice(null); clear(...args); };
-    Feed.fromStream(liveUrl, handlers);
+    $("lobby").hidden = false; // the page runs the show; a replay file has no server and no controls
+    refreshState();
   }
 })();

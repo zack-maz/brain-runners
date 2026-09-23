@@ -25,6 +25,22 @@
       Everyone is on the same row at the same time: a jump covers two rows, so it takes two ticks.</p>
   </section>
 
+  <section id="lobby" aria-label="Start a run" hidden>
+    <h2 class="label">Start a run</h2>
+    <form id="lobby-form">
+      <div class="lobby-top">
+        <label class="label" for="seed">Track</label>
+        <input id="seed" type="number" min="0" step="1" value="1001" inputmode="numeric">
+        <button id="start" type="submit" class="label">Start</button>
+        <button id="cancel" type="button" class="label" hidden>Cancel the run</button>
+      </div>
+      <div id="picks" role="group" aria-label="Who runs"></div>
+      <p class="note" id="estimate"></p>
+      <p class="note warn" id="lobby-why" hidden></p>
+      <p class="note" id="ceiling"></p>
+    </form>
+  </section>
+
   <section aria-label="Levels">
     <h2 class="label">Levels</h2>
     <div class="scroll"><table id="matrix"></table></div>
@@ -115,6 +131,7 @@
 <script src="stage.js"></script>
 <script src="minds.js"></script>
 <script src="feed.js"></script>
+<script src="lobby.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

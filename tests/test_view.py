@@ -59,7 +59,7 @@ def test_the_page_keeps_every_caveat_about_the_fly_and_about_jevs_questions():
 
 def test_every_script_the_page_names_exists_and_app_comes_last():
     names = re.findall(r'<script src="([^"]+)"></script>', (VIEWER_DIR / "index.html").read_text())
-    assert names == ["timeline.js", "tunnel.js", "sprites.js", "stage.js", "minds.js", "feed.js", "app.js"]
+    assert names == ["timeline.js", "tunnel.js", "sprites.js", "stage.js", "minds.js", "feed.js", "lobby.js", "app.js"]
     assert all((VIEWER_DIR / name).is_file() for name in names)
 
 
