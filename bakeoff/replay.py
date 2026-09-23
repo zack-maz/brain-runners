@@ -25,6 +25,14 @@ META_KEYS = ("status", "git_sha", "git_dirty", "started_at", "finished_at", "pla
              "models", "requests")
 
 
+def empty_replay(rules: Rules) -> dict:
+    """The replay a page starts from before anything has been played: the game and nothing else.
+    `bakeoff live` embeds it, and a run that begins fills it through the event stream."""
+    return {"replay_version": REPLAY_VERSION, "game": rules.to_json(), "runs": [], "players": [], "seeds": [],
+            "tracks": {}, "episodes": [],
+            "scoreboard": {"columns": ["run_id", *COLUMNS], "rows": [], "same_seeds": True}}
+
+
 def landing(row: int, lane: int, executed_action: str, lanes: int) -> list[int]:
     """The tile a move lands on (docs/STEP_RECORD.md, "The landing tile"). On a death the runner
     never reaches it; the viewer draws the fall there."""

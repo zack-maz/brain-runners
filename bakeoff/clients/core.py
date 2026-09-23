@@ -64,9 +64,28 @@ class RequestBudget:
         self.max_requests = max_requests
         self.used = 0
 
+    @property
+    def remaining(self) -> int:
+        return max(0, self.max_requests - self.used)
+
     def spend(self) -> None:
         if self.used >= self.max_requests:
             raise BudgetExhausted(f"request cap of {self.max_requests} reached")
+        self.used += 1
+
+
+class SharedBudget(RequestBudget):
+    """One run's view of a budget that outlives it (a `bakeoff live` session may play several runs).
+    It spends from the shared budget, so the ceiling the command set can never be raised, but counts
+    its own requests: the run's `meta.json` then records what that run spent, not the session's total.
+    Its own cap is what was left when the run began."""
+
+    def __init__(self, shared: RequestBudget):
+        super().__init__(shared.remaining)
+        self.shared = shared
+
+    def spend(self) -> None:
+        self.shared.spend()  # raises BudgetExhausted when the session's cap is reached
         self.used += 1
 
 

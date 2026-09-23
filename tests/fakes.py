@@ -89,3 +89,35 @@ def glm_reply(text='{"action": "stay"}', finish_reason="stop", model="glm-4.5-fl
     return {"id": "1", "model": model, "choices": [{"index": 0, "finish_reason": finish_reason,
                                                     "message": {"role": "assistant", "content": text}}],
             "usage": {"prompt_tokens": 480, "completion_tokens": 7, "total_tokens": 487}}
+
+
+class SlowPlayer:
+    """A free player that takes its time, so a test can cancel a run while it is going. Registered
+    under a name of its own by `slow_player()`; it never asks anyone anything."""
+
+    name = "slow"
+
+    def __init__(self, seconds: float = 0.05):
+        self.seconds = seconds
+
+    def reset(self, game, seed) -> None:
+        pass
+
+    def act(self, senses: dict):
+        import time
+
+        from bakeoff.players.base import Decision
+
+        time.sleep(self.seconds)
+        return Decision(chosen_action="stay")
+
+    def observe(self, executed_action: str) -> None:
+        pass
+
+
+def slow_player(monkeypatch, seconds: float = 0.05) -> str:
+    """Puts `SlowPlayer` in the registry for one test and gives back its name."""
+    from bakeoff.players import REGISTRY
+
+    monkeypatch.setitem(REGISTRY, SlowPlayer.name, lambda: SlowPlayer(seconds))
+    return SlowPlayer.name

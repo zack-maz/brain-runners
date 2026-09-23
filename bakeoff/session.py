@@ -1,0 +1,242 @@
+"""The session behind `bakeoff live`: what the page is allowed to start, and what it costs.
+
+One session per command. It holds the ceiling the command set (one `RequestBudget` per paid player
+for the whole session, never raised by anything the page sends), and it runs at most one `LiveRun`
+at a time. The page asks it what can be run (`state`), starts a run (`start`) and stops it
+(`cancel`); every refusal names its reason.
+"""
+
+from __future__ import annotations
+
+import json
+import secrets
+import threading
+import time
+from dataclasses import dataclass
+from pathlib import Path
+
+from bakeoff.clients.core import DiskCache, RequestBudget, SharedBudget
+from bakeoff.game.rules import Rules
+from bakeoff.live import LiveRun
+from bakeoff.players import PAID, REGISTRY, make_player
+from bakeoff.replay import CONTESTANTS
+
+# tournament seeds are below this and must not be paid for, or shape prompts, before the tournament
+FIRST_PRACTICE_SEED = 1000
+
+# USD per live request, measured in docs/COSTS.md. An estimate for what a run may cost at worst, never
+# a bill: the page shows it, the budget enforces the ceiling. GLM Flash is free while its free tier lasts.
+PRICE_USD = {"llm": 0.0006, "llm_composed": 0.0006, "llm_choice": 0.0006, "llm_two_step": 0.0006,
+             "llm_reader": 0.0006, "jev": 0.00003, "jev_composed": 0.00003, "jev_choice": 0.00003,
+             "jev_two_step": 0.00003, "jev_reader": 0.00003,
+             "glm_composed": 0.0, "glm_choice": 0.0, "glm_two_step": 0.0, "glm_reader": 0.0}
+
+# every player here asks its provider once a row, so a track of N rows costs at worst N requests
+REQUESTS_PER_ROW = 1
+
+
+def _order(names) -> list[str]:
+    """The contestants first, in the page's own order, then the free yardsticks."""
+    rest = sorted(set(names) - set(CONTESTANTS))
+    return [name for name in CONTESTANTS if name in names] + rest
+
+
+class LobbyError(Exception):
+    """The page asked for something the session will not do. The message is shown to the user."""
+
+
+@dataclass
+class Started:
+    """What `start` gives back: the run and the empty replay the page resets itself from."""
+
+    run: LiveRun
+    replay: dict
+
+
+def played_before(out_root: Path | str, game_version: str) -> dict[str, list[int]]:
+    """(player, seed) pairs already recorded under this game version, from the run directories'
+    `meta.json`. Their answers are in the response cache, so replaying them spends nothing. Coarse:
+    a player that died on row 3 of a track is listed for it, and only the rows it reached are cached."""
+    played: dict[str, set[int]] = {}
+    for meta_path in sorted(Path(out_root).glob("*/meta.json")):
+        try:
+            meta = json.loads(meta_path.read_text())
+        except (OSError, ValueError):
+            continue  # a half-written or unreadable directory tells us nothing
+        if (meta.get("game") or {}).get("version") != game_version:
+            continue  # another game is another set of questions, so another set of cached answers
+        for player in meta.get("players") or []:
+            played.setdefault(player, set()).update(meta.get("seeds") or [])
+    return {player: sorted(seeds) for player, seeds in played.items()}
+
+
+class LiveSession:
+    """The command's ceiling and the page's lobby. Thread-safe: the run loop is a thread of its own."""
+
+    def __init__(self, rules: Rules, out_root: Path | str = "runs", cache_dir: Path | str = ".cache/responses",
+                 max_requests: int = 0, tournament: bool = False, args: dict | None = None,
+                 token: str | None = None, paid_blocked: str | None = None,
+                 ready: tuple[int, list[str]] | None = None):
+        self.rules, self.out_root, self.cache = rules, Path(out_root), DiskCache(cache_dir)
+        self.max_requests, self.tournament = max_requests, tournament
+        # why no paid player may play at all this session, if any (a vision the briefing does not match)
+        self.paid_blocked = paid_blocked
+        # what the command line offered: the lobby opens with this track and these players ticked
+        self.ready_seed, self.ready_players = ready or (FIRST_PRACTICE_SEED + 1, [])
+        self.args = args or {}
+        self.token = token or secrets.token_urlsafe(16)
+        # one budget per paid player for the whole session: the command's cap is per player per session,
+        # so a second run from the page spends what the first one left
+        self.budgets: dict[str, RequestBudget] = {name: RequestBudget(max_requests) for name in PAID}
+        self.run: LiveRun | None = None
+        self.finished: list[LiveRun] = []
+        self._thread: threading.Thread | None = None
+        self._lock = threading.Lock()
+
+    # ---- what can be run ---------------------------------------------------------------------
+    @property
+    def status(self) -> str:
+        if self.run is None:
+            return "lobby"
+        return "running" if self.run.status == "running" else "finished"
+
+    def state(self, seed: int | None = None) -> dict:
+        """Everything the lobby needs: the players with their price and their budget, the seed rule,
+        the game, and what is happening now."""
+        played = played_before(self.out_root, self.rules.version)
+        players = []
+        for name in _order(REGISTRY):
+            paid = name in PAID
+            players.append({
+                "name": name, "paid": paid,
+                "price_usd": PRICE_USD.get(name) if paid else 0.0,
+                "requests_left": self.budgets[name].remaining if paid else None,
+                "played_before": seed is not None and seed in played.get(name, []),
+                # why this player cannot play this track, so the page can say so before anything is asked
+                "why_not": None if seed is None else self.why_not(name, seed),
+            })
+        run = self.run
+        return {
+            "status": self.status,
+            "game": self.rules.to_json(), "max_rows": self.rules.max_rows,
+            "requests_per_row": REQUESTS_PER_ROW,
+            "max_requests": self.max_requests, "tournament": self.tournament,
+            "first_practice_seed": FIRST_PRACTICE_SEED,
+            "seed": seed,
+            "ready": {"seed": self.ready_seed, "players": list(self.ready_players)},
+            "players": players,
+            # `replay` is the empty replay of this run: the page resets itself to it and fills it from
+            # the event stream, whether the page started the run or the command line did (--start)
+            "run": None if run is None else {"run_id": run.run_id, "run_dir": str(run.run_dir),
+                                             "seed": run.seed, "players": [p.name for p in run.players],
+                                             "status": run.status, "error": run.error, "replay": run.replay},
+        }
+
+    # ---- starting and stopping ---------------------------------------------------------------
+    def why_not(self, name: str, seed: int) -> str | None:
+        """Why this player may not play this track, or None. The one place that rule lives: `check`
+        refuses with it and `state` shows it."""
+        if name not in PAID:
+            return None
+        if self.paid_blocked:
+            return self.paid_blocked
+        if seed < FIRST_PRACTICE_SEED and not self.tournament:
+            return (f"paid players may not play seeds below {FIRST_PRACTICE_SEED} (tournament seeds); "
+                    "this command was not started with --tournament")
+        if self.max_requests > 0 and self.budgets[name].remaining == 0:
+            return f"{name} has no requests left of this session's cap of {self.max_requests}"
+        return None
+
+    def check(self, seed: int, names: list[str]) -> None:
+        """Raises `LobbyError` naming the first reason this run will not be started."""
+        if self.status == "running":
+            raise LobbyError("a run is already going; cancel it first")
+        if not isinstance(seed, int) or isinstance(seed, bool):
+            raise LobbyError("the track must be a whole number")
+        if seed < 0:
+            raise LobbyError("the track must not be negative")
+        if not names:
+            raise LobbyError("choose at least one player")
+        unknown = [n for n in names if n not in REGISTRY]
+        if unknown:
+            raise LobbyError(f"unknown player {unknown[0]!r}; choose from {sorted(REGISTRY)}")
+        duplicates = sorted({n for n in names if names.count(n) > 1})
+        if duplicates:
+            raise LobbyError(f"duplicate player names: {duplicates}")
+        refused = [self.why_not(name, seed) for name in names]
+        if any(refused):
+            raise LobbyError(next(reason for reason in refused if reason))
+        for name in names:  # a question set that cannot be asked on this vision, before anyone plays
+            question_set = getattr(REGISTRY[name], "question_set", None)
+            if question_set is not None:
+                try:
+                    question_set.build(self.rules)
+                except ValueError as e:
+                    raise LobbyError(f"{name}: {e}") from e
+
+    def start(self, seed: int, names: list[str], wait_for_page: bool = False) -> Started:
+        """Validates, builds the players on the session's budgets, prepares the run directory and
+        plays it in a thread. Returns the run and the empty replay the page starts from.
+        `wait_for_page`: hold the first decision until a browser is listening (`bakeoff live --start`;
+        a run the page itself started needs no wait, since the stream carries its history)."""
+        with self._lock:
+            self.check(seed, names)
+            players = self._players(names)
+            run = LiveRun(players, seed, out_root=self.out_root, rules=self.rules, run_id=self._run_id(),
+                          args={**self.args, "seed": seed, "players": ",".join(names)})
+            replay = run.prepare()  # the directory and meta.json: a failure here starts nothing
+            self.run = run
+            self._thread = threading.Thread(target=self._play, args=(run, wait_for_page), daemon=True)
+            self._thread.start()
+            return Started(run, replay)
+
+    def _run_id(self) -> str:
+        """The usual timestamp, with a counter when a session plays two runs in the same second."""
+        stamp = run_id = time.strftime("%Y%m%d-%H%M%S")
+        nth = 1
+        while (self.out_root / run_id).exists():
+            nth += 1
+            run_id = f"{stamp}-{nth}"
+        return run_id
+
+    def _play(self, run: LiveRun, wait_for_page: bool = False) -> None:
+        try:
+            if wait_for_page:
+                run.broadcast.wait_for_listener()
+            if run.stopped:  # cancelled while it waited: the directory closes without a decision
+                run.cancel()
+            else:
+                run.run()
+        finally:
+            self.finished.append(run)
+
+    def _players(self, names: list[str]) -> list:
+        players = []
+        for name in names:
+            if name in PAID:
+                # a view of the session's budget: it spends from the session's cap but a run's meta.json
+                # records only what that run spent, against what it could have spent
+                players.append(make_player(name, cache=self.cache, budget=SharedBudget(self.budgets[name])))
+            else:
+                players.append(make_player(name))
+        return players
+
+    def find(self, run_id: str | None) -> LiveRun | None:
+        """The run with this id, whether it is still going or already closed; without an id, the
+        run going now (or the last one). The page opens one event stream per run and names it."""
+        if not run_id:
+            return self.run
+        return next((run for run in [*self.finished, self.run] if run is not None and run.run_id == run_id), None)
+
+    def cancel(self) -> None:
+        """Stop the run that is going. It closes as a normal run directory with status `interrupted`."""
+        run = self.run
+        if run is None or run.status != "running":
+            raise LobbyError("no run is going")
+        run.stop()
+
+    def wait(self, timeout: float | None = None) -> None:
+        """Waits for the run that is going, if any (the command's own thread does this)."""
+        thread = self._thread
+        if thread is not None:
+            thread.join(timeout)

@@ -16,11 +16,14 @@ from bakeoff.game.engine import Game
 from bakeoff.game.rules import Rules, resolve
 from bakeoff.game.track import generate_track
 from bakeoff.players.base import Player
-from bakeoff.replay import META_KEYS, REPLAY_VERSION, build_replay, frame_of, summary_of
-from bakeoff.report import COLUMNS
+from bakeoff.replay import META_KEYS, build_replay, empty_replay, frame_of, summary_of
 from bakeoff.runner import _close, _now, _preflight, _requests, new_meta, play_row
 
 MAX_CONSECUTIVE_ERRORS = 5  # as the runner: a provider that keeps failing ends the run
+
+
+class Cancelled(Exception):
+    """`stop()` was called: the operator, or the page, gave up on a run that had begun."""
 
 
 class Broadcast:
@@ -93,6 +96,8 @@ class LiveRun:
         self.args = args or {}
         self.broadcast = broadcast if broadcast is not None else Broadcast()
         self.status = "running"
+        self.replay: dict | None = None  # the empty replay a page starts from, filled by prepare()
+        self._stop = threading.Event()
         self.error: str | None = None  # why the run stopped early, when a cap or a failing provider stopped it
         self.meta: dict | None = None
 
@@ -102,10 +107,19 @@ class LiveRun:
         self.run_dir.mkdir(parents=True, exist_ok=False)
         self.meta = new_meta(self.run_id, self.players, [self.seed], self.rules, self.args)
         self._write_meta()
-        return {"replay_version": REPLAY_VERSION, "game": self.rules.to_json(),
-                "runs": [{"run_id": self.run_id, **{k: self.meta.get(k) for k in META_KEYS}}],
-                "players": [], "seeds": [self.seed], "tracks": {}, "episodes": [],
-                "scoreboard": {"columns": ["run_id", *COLUMNS], "rows": [], "same_seeds": True}}
+        self.replay = {**empty_replay(self.rules), "seeds": [self.seed],
+                       "runs": [{"run_id": self.run_id, **{k: self.meta.get(k) for k in META_KEYS}}]}
+        return self.replay
+
+    @property
+    def stopped(self) -> bool:
+        return self._stop.is_set()
+
+    def stop(self) -> None:
+        """Ask a run that has begun to stop. It is checked between decisions, so a decision already
+        in flight (a paid request) is finished and recorded first; the run then closes as a normal
+        run directory with status `interrupted`."""
+        self._stop.set()
 
     def cancel(self) -> None:
         """The operator gave up before the run began (Ctrl-C while waiting for a browser)."""
@@ -132,6 +146,8 @@ class LiveRun:
             row = 0
             while not all(game.over for game in games.values()):
                 for player in self.players:
+                    if self._stop.is_set():
+                        raise Cancelled("cancelled")
                     game = games[player.name]
                     if game.over or game.row != row:
                         continue  # fallen, finished, or in the air over this row
@@ -156,6 +172,8 @@ class LiveRun:
         except RunAborted as abort:  # a cap was reached (budget_exhausted) or a provider kept failing
             self.status, self.error = abort.status, str(abort)
             self.broadcast.emit("error", {"message": self.error})
+        except Cancelled:  # the page pressed cancel, or the operator did
+            self.status = "interrupted"
         except BaseException as e:  # Ctrl-C, or our bug: the directory is still a valid, incomplete run
             self.status = "interrupted"
             if not isinstance(e, KeyboardInterrupt):
