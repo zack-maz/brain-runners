@@ -23,6 +23,18 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
   worse. `fly` stays the only fly.
 - **Item 10, GLM Flash** (decisions 33–34): the four `glm_<set>` players are built and track 1000 is recorded;
   tracks 1001–1004 are parked while the free tier throttles (`docs/COSTS.md`, "Item 10").
+- **Update 3a, the page runs the show** (items 4, 5, 8, 9 in part; decision 35, design
+  `docs/superpowers/specs/2026-09-22-page-control-design.md`, sections A, B, C): built 2026-09-23, plan
+  `docs/superpowers/plans/2026-09-22-update3a-page-control.md`. `bakeoff live` now binds the port and sets the
+  ceiling while the lobby in the browser picks the track and the players, starts and cancels the run, and sets up
+  another one when it ends. `bakeoff/session.py` holds one budget per paid player for the whole session; the control
+  routes (`/state`, `/run`, `/cancel`, `/events?run=`) sit behind a token embedded in the page; `--start` keeps the
+  old behaviour. Prototyped first (`proto/page-3a`), five implementer tasks all byte-identical to it, then a
+  whole-update design review ("ready with fixes"; report in the git-ignored
+  `.superpowers/sdd/2026-09-22-update3a-page-control/`). Its two critical findings are fixed in `c55d64b`: every
+  paid player now carries its own measured price (the confirmed worst case was up to eleven times too low for
+  `llm_reader`), and a run cancelled while it waited for a browser now wakes and closes as `interrupted` instead of
+  leaving a `meta.json` that says `running` for ever.
 - **Item 7, the benchmark** (decision 31, spec `docs/superpowers/specs/2026-09-22-benchmark-design.md`): built
   2026-09-22. `python -m bakeoff bench RUN_DIR[:PLAYER,...] ...` scores recorded runs (spends nothing), prints the
   tables and writes `bench.json` and an offline `bench.html`. Prototyped, then its five tested commits taken as they
@@ -33,11 +45,14 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 
 ## Where to resume (in this order)
 
-1. The page (items 4, 5, 8, 9; decision 35, design `docs/superpowers/specs/2026-09-22-page-control-design.md`,
-   approved): **update 3a** first, the control channel and the lobby (`/state`, `/run`, `/cancel`, the local token,
-   the session cap, `--start`), then **3b**, the logs in the mind panels, the Run and Analysis tabs and the player
-   picker. Each gets a plan; the house workflow is to prototype it in a scratch clone first
-   ([[prototyped-plans-workflow]] in the memory notes; prototypes kept as local `proto/*` branches).
+1. **Update 3b**, the rest of the page (design sections D, E, F): the running log in every mind panel, the Run and
+   Analysis tabs (the benchmark drawn from a `bench.json` written into the page), and the player picker that shows
+   and hides runners in a replay as well as choosing who runs live. It gets its own plan; the house workflow is to
+   prototype it in a scratch clone first ([[prototyped-plans-workflow]] in the memory notes; prototypes kept as local
+   `proto/*` branches, `proto/page-3a` is 3a's). Worth carrying over from 3a's review while writing it: the lobby
+   never polls `/state`, so the page's freshness depends on the `end` event arriving; and `bakeoff live` still says
+   "another program on this machine cannot drive the run" in the design text, which is not what the token does (any
+   local program that can fetch `/` can read it) — the code and `CLAUDE.md` now say so, the spec does not.
 2. **Parked**: GLM Flash's tracks 1001–1004 (decision 34), while Zhipu's free tier throttles. To pick it up, check
    it answers (a few requests through `bakeoff.clients.glm.HttpTransport`), then
    `uv run python -m bakeoff run --players glm_composed,glm_choice,glm_two_step --seeds 5 --seed-start 1000 --max-requests 700`
@@ -62,12 +77,18 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 - Update 2a as one scoreboard with intervals and pairs: `uv run python -m bakeoff bench runs/20260921-165433 "runs/20260921-171044:jev_composed,jev_choice,jev_two_step,jev_reader" runs/20260921-185546 runs/20260921-191326 runs/20260921-192037` (writes `bench.html`).
 - `live` without `--game v1` plays v2. With a cap of 0 a paid player replays what is cached and stops at its first
   uncached question.
+- The lobby: `uv run python -m bakeoff live --port 8765 --out /tmp/lobby --players solver,random`, then open the
+  address it prints and start a run from the page; it keeps serving, so another track can be set up when one ends.
+  `--start` plays the command line's own run at once, as before, and waits for the browser before its first
+  decision. A track that was played before replays from the cache and spends nothing.
 
 ## Tooling
 
 Plans are generated from a prototype (`.superpowers/tools/genplan.py`; prototypes kept as local branches
-`proto/game-v2`, `proto/jev-family`). The SDD ledger of update 2a is `.superpowers/sdd/2026-09-21-update2a-jev-family/`
-(git-ignored).
+`proto/game-v2`, `proto/jev-family`, `proto/page-3a`). The SDD ledgers are `.superpowers/sdd/<date>-<name>/`
+(git-ignored): update 2a's, and update 3a's, which holds its briefs, its per-task diffs and its review report.
+`.superpowers/tools/mkbriefs.py` writes the briefs and the commit-message files (its trailer names the model of
+the session that dispatches, so check it before a new run of tasks).
 
 ## What the write-up must carry
 
