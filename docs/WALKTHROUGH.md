@@ -170,8 +170,13 @@ The same page serves a saved replay and a live run; a replay simply has no lobby
   a replay's ending away; scrub back and the later lines come off. One log is open at a time, and it keeps your
   place while new rows arrive.
 - **Players**, two labelled rows of one control:
-  - *Who runs next* — the ticks that choose who plays the next run, with each player's price, what is left of the
-    cap, and whether that track was played before (so some answers may be cached). Live only.
+  - *Who runs next* — the ticks that choose who plays the next run, laid out as the bakeoff really is: a row per
+    **question set** (what a player is asked, and the rule its answers go through) crossed with a column per
+    **model** (who is asked), so `jev_composed`, `haiku_composed` and `glm_composed` sit side by side and an empty
+    crossing shows as `—`. Each row says what that set asks; each column says what that model is and how it
+    answers. Below the grid are the players that are apart: the fly, which is asked nothing, and the yardsticks.
+    Every cell carries its price, what is left of the cap, and whether that track was played before (so some
+    answers may be cached). Live only.
   - *Who is in the tunnel* — shows and hides runners in what is on screen. A player that never ran the track in
     view cannot be turned on, and says so.
 - **The transport** at the bottom: play, step, speed, and `LIVE`/`AUTO`. Keys: space plays, ← → step a row,

@@ -102,3 +102,58 @@ test("the ceiling is written out, cap or no cap", () => {
   assert.match(Lobby.ceilingText(state({ tournament: true })), /Seeds below 1000 are allowed here/);
   assert.match(Lobby.ceilingText(state()), /Nothing on this page can raise either\./);
 });
+
+// ---- the grid: question sets down, models across -------------------------------------------------
+
+const ALL = ["fly", "solver", "random", "always_jump", "jev", "haiku",
+             "jev_composed", "haiku_composed", "glm_composed",
+             "jev_choice", "haiku_choice", "glm_choice",
+             "jev_two_step", "haiku_two_step", "glm_two_step",
+             "jev_reader", "haiku_reader", "glm_reader"];
+const everyone = (extra) => state({ players: ALL.map((n) => player(n, { paid: !["fly", "solver", "random", "always_jump"].includes(n) })), ...extra });
+
+test("playerAt names the player at each crossing, and nothing where there is none", () => {
+  assert.equal(Lobby.playerAt("composed", "jev"), "jev_composed");
+  assert.equal(Lobby.playerAt("composed", "haiku"), "haiku_composed");
+  assert.equal(Lobby.playerAt("two_step", "glm"), "glm_two_step");
+  assert.equal(Lobby.playerAt("", "jev"), "jev");
+  assert.equal(Lobby.playerAt("", "haiku"), "haiku");
+  assert.equal(Lobby.playerAt("", "glm"), null); // GLM never had a one-shot
+});
+
+test("every player the server offers appears exactly once", () => {
+  const html = Lobby.playerList(everyone(), []);
+  for (const name of ALL) {
+    const seen = html.split('value="' + name + '"').length - 1;
+    assert.equal(seen, 1, name + " appears " + seen + " times");
+  }
+});
+
+test("a player nobody planned for still shows up rather than vanishing", () => {
+  const html = Lobby.playerList(everyone({ players: [player("fly"), player("brand_new_mind")] }), []);
+  assert.match(html, /value="brand_new_mind"/);
+});
+
+test("the grid says what each question set asks and what each model is", () => {
+  const html = Lobby.playerList(everyone(), []);
+  assert.match(html, /Four yes\/no questions/);
+  assert.match(html, /Eight questions, two moves ahead/);
+  assert.match(html, /Reads every tile/);
+  assert.match(html, /Jev/);
+  assert.match(html, /Claude Haiku/);
+  assert.match(html, /GLM Flash/);
+  assert.match(html, /Asked nothing/);            // the fly
+  assert.match(html, /Yardsticks, not contestants/);
+});
+
+test("a crossing with no player is an em dash, not an empty box", () => {
+  const html = Lobby.playerList(everyone(), []);
+  assert.match(html, /<td class="none"[^>]*>—<\/td>/);
+});
+
+test("a column no player fills is left out altogether", () => {
+  const withoutGlm = everyone({ players: ALL.filter((n) => !n.startsWith("glm")).map((n) => player(n)) });
+  const html = Lobby.playerList(withoutGlm, []);
+  assert.equal(html.includes("GLM Flash"), false);
+  assert.match(html, /Claude Haiku/);
+});
