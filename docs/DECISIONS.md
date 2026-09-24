@@ -185,6 +185,13 @@
     charts from `bench.json` (item 8); one player picker governs live runs and replays (item 9). Built as 3a (the
     server and the lobby) and 3b (the panels and the tabs), each with its own plan.
 
+36. **Update 3b's two open questions** (the user, 2026-09-23). The Analysis tab draws the benchmark with the same
+    code as the standalone page: `viewer/bench_app.js` becomes a renderer mounted into a container, used by both
+    `bench.html` and the Analysis tab, so there is one drawing code and one set of tests. And a live run's numbers
+    come from the server: when a run ends, it scores that run directory with `bakeoff/bench.py` and sends the
+    numbers with the end event, so the Analysis tab fills in without a reload (the spec's "live runs show it once
+    the run has ended").
+
 Where we are and what comes next: `docs/NEXT.md`.
 
 ## Prior art to reuse
