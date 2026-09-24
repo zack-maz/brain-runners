@@ -121,15 +121,28 @@ test("playerAt names the player at each crossing, and nothing where there is non
   assert.equal(Lobby.playerAt("", "glm"), "glm");
 });
 
-test("each column says which model it really asks, above what the model is", () => {
-  const withModels = everyone({ players: ALL.map((n) => player(n, {
-    paid: n.startsWith("jev") || n.startsWith("haiku") || n.startsWith("glm"),
-    model: n.startsWith("jev") ? "jev-latest" : n.startsWith("haiku") ? "claude-haiku-4-5-20251001"
-      : n.startsWith("glm") ? "glm-4.5-flash" : null })) });
-  const html = Lobby.playerList(withModels, []);
+const modelled = (extra) => everyone({ players: ALL.map((n) => player(n, {
+  paid: /^(jev|haiku|glm)/.test(n),
+  model: n.startsWith("jev") ? "jev-latest" : n.startsWith("haiku") ? "claude-haiku-4-5-20251001"
+    : n.startsWith("glm") ? "glm-4.5-flash" : null,
+  model_answered: n.startsWith("jev") ? "jev-1.13.0" : n.startsWith("haiku") ? "claude-haiku-4-5-20251001"
+    : n.startsWith("glm") ? "glm-4.5-flash" : null })), ...extra });
+
+test("each column says which model version it really used, above what the model is", () => {
+  const html = Lobby.playerList(modelled(), []);
   assert.match(html, /Claude Haiku 4\.5<\/span><span class="note mono">claude-haiku-4-5-20251001<\/span>/);
   assert.match(html, /GLM-4\.5 Flash<\/span><span class="note mono">glm-4\.5-flash<\/span>/);
-  assert.match(html, /Jev<\/span><span class="note mono">jev-latest<\/span>/);
+});
+
+test("a moving name shows the version it answered as, and says what was asked for", () => {
+  const html = Lobby.playerList(modelled(), []);
+  assert.match(html, /jev-1\.13\.0<span class="muted"> asked as jev-latest<\/span>/);
+  assert.equal(html.includes('mono">jev-latest'), false);
+});
+
+test("a column with no answer yet falls back to the name it asks for", () => {
+  const nothingPlayed = everyone({ players: ALL.map((n) => player(n, { model: /^jev/.test(n) ? "jev-latest" : null })) });
+  assert.match(Lobby.playerList(nothingPlayed, []), /<span class="note mono">jev-latest<\/span>/);
 });
 
 test("a column whose players never say their model keeps its header, without a version", () => {

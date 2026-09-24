@@ -91,14 +91,29 @@
       players: ["solver", "random", "always_jump"] },
   ];
 
-  // The exact model the column's players ask, as the server reports it (bakeoff/session.py:model_of),
-  // so the header can never claim a version this command would not really use.
+  // The model the column really uses, as the server reports it (bakeoff/session.py): `model` is what the
+  // client asks for and `model_answered` is what the newest recorded run came back as. Jev is asked for by a
+  // moving name (`jev-latest`), so the version is only knowable from an answer; the page shows that version
+  // and says what was asked for. Nothing here is typed by hand, so no header can claim a version a run
+  // would not really use.
   function modelOf(byName, model) {
     for (const set of SETS) {
       const player = byName.get(playerAt(set.key, model.key));
-      if (player && player.model) return player.model;
+      if (!player) continue;
+      const asked = player.model || null;
+      const answered = player.model_answered || null;
+      if (asked || answered) return { asked, answered };
     }
     return null;
+  }
+
+  // one short mono line: the version, and the name it is asked for when that name is not the version
+  function modelLine(model) {
+    if (!model) return "";
+    const shown = model.answered || model.asked;
+    const asked = model.answered && model.asked && model.answered !== model.asked ? model.asked : null;
+    return '<span class="note mono">' + esc(shown) +
+      (asked ? '<span class="muted"> asked as ' + esc(asked) + "</span>" : "") + "</span>";
   }
 
   // the name of the player at (set, model), or null where there is none
@@ -144,9 +159,8 @@
     const models = MODELS.filter((m) => SETS.some((s) => byName.has(playerAt(s.key, m.key))));
     let html = '<table class="players"><thead><tr><th class="what"><span class="label">What it is asked</span></th>' +
       models.map((m) => {
-        const model = modelOf(byName, m);
         return '<th><span class="label">' + esc(m.title) + "</span>" +
-          (model ? '<span class="note mono">' + esc(model) + "</span>" : "") +
+          modelLine(modelOf(byName, m)) +
           '<span class="note">' + esc(m.says) + "</span></th>";
       }).join("") + "</tr></thead><tbody>";
     for (const set of SETS) {
@@ -188,7 +202,7 @@
   // left of the cap spends nothing whatever it asks for.
   const spends = (state, chosen) => estimate(state, chosen).lines.some((line) => line.requests > 0);
 
-  const api = { usd, estimate, estimateText, whyNot, playerList, playerAt, modelOf, SETS, MODELS, APART, ceilingText, spends };
+  const api = { usd, estimate, estimateText, whyNot, playerList, playerAt, modelOf, modelLine, SETS, MODELS, APART, ceilingText, spends };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Lobby = api;
 })(typeof window !== "undefined" ? window : globalThis);

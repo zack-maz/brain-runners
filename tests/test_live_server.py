@@ -100,7 +100,11 @@ def test_state_says_what_can_be_run(server):
 def test_a_run_started_from_the_page_streams_its_frames_and_ends_in_the_lobby(server):
     httpd, session = server
     status, started = payload(httpd, "POST", "/run", {"seed": 1001, "players": ["solver", "random"]})
-    assert status == 200 and started["ok"] is True and started["state"]["status"] == "running"
+    # the snapshot is taken after the run began, and a 12-row run of two free players may already be
+    # over by then: what the reply promises is the run, not that it is still going
+    assert status == 200 and started["ok"] is True
+    assert started["state"]["status"] in ("running", "finished")
+    assert started["state"]["run"]["run_id"] == started["run_id"]
     assert started["state"]["run"]["replay"]["seeds"] == [1001]  # what the page resets itself to
     assert started["state"]["run"]["replay"]["runs"][0]["run_id"] == started["run_id"]
     session.wait(30)  # the whole run, so the history the stream replays is settled and the read cannot race

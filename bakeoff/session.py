@@ -19,7 +19,7 @@ from bakeoff.clients.core import DiskCache, RequestBudget, SharedBudget
 from bakeoff.game.rules import Rules
 from bakeoff.live import LiveRun
 from bakeoff.players import PAID, REGISTRY, make_player
-from bakeoff.players.names import canonical
+from bakeoff.players.names import RENAMED, canonical
 from bakeoff.replay import CONTESTANTS
 
 # tournament seeds are below this and must not be paid for, or shape prompts, before the tournament
@@ -45,6 +45,44 @@ def model_of(name: str) -> str | None:
     model, so this is what a run really uses, and the page says it rather than a name typed by hand."""
     client = getattr(REGISTRY.get(name), "client_class", None)
     return getattr(client, "default_model", None)
+
+
+# the names a player's records may be filed under: its own, and the one it was renamed from (decision 39)
+_WAS = {new: old for old, new in RENAMED.items()}
+
+
+def _first_model(path: Path) -> str | None:
+    """The model the first complete record in a log answered as. Only the first lines are read: every row of
+    one episode is answered by the same model."""
+    try:
+        with path.open() as log:
+            for line in log:
+                try:
+                    model = (json.loads(line).get("info") or {}).get("model")
+                except (ValueError, AttributeError):
+                    continue  # a truncated last line, or a record with no info
+                if model:
+                    return model
+    except OSError:
+        return None
+    return None
+
+
+def answered_models(out_root: Path | str) -> dict[str, str]:
+    """Each player's model as it last answered, from the newest run that recorded it. Jev's client asks for
+    `jev-latest`, so the version is only knowable from an answer; the page says this one rather than pin the
+    client, which would change the cache key and orphan every answer already paid for. One pass, newest run
+    first, reading only the head of each log."""
+    models: dict[str, str] = {}
+    for run_dir in sorted(Path(out_root).glob("*/"), reverse=True):
+        for path in sorted(run_dir.glob("*.jsonl")):
+            player = canonical(path.stem)
+            if player in models:
+                continue  # a newer run has already answered for it
+            model = _first_model(path)
+            if model:
+                models[player] = model
+    return models
 
 
 def _order(names) -> list[str]:
@@ -116,6 +154,7 @@ class LiveSession:
         """Everything the lobby needs: the players with their price and their budget, the seed rule,
         the game, and what is happening now."""
         played = played_before(self.out_root, self.rules.version)
+        answered = answered_models(self.out_root)
         players = []
         for name in _order(REGISTRY):
             paid = name in PAID
@@ -123,6 +162,8 @@ class LiveSession:
                 "name": name, "paid": paid,
                 "price_usd": PRICE_USD.get(name) if paid else 0.0,
                 "model": model_of(name) if paid else None,
+                # what it answered as last: the asked-for name may be a moving one (`jev-latest`)
+                "model_answered": answered.get(name) if paid else None,
                 "requests_left": self.budgets[name].remaining if paid else None,
                 "played_before": seed is not None and seed in played.get(name, []),
                 # why this player cannot play this track, so the page can say so before anything is asked

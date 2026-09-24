@@ -10,7 +10,7 @@ from bakeoff.clients.core import RequestBudget, SharedBudget
 from bakeoff.errors import BudgetExhausted
 from bakeoff.game.rules import rules_for
 from bakeoff.players import PAID, REGISTRY
-from bakeoff.session import PRICE_USD, LiveSession, LobbyError, model_of, played_before
+from bakeoff.session import PRICE_USD, LiveSession, LobbyError, answered_models, model_of, played_before
 from tests.fakes import slow_player
 
 RULES = rules_for("v2").variant(max_rows=12)
@@ -47,6 +47,25 @@ def test_every_paid_player_says_which_model_it_asks(tmp_path):
     assert by_name["jev"]["model"] == "jev-latest" and by_name["jev_composed"]["model"] == "jev-latest"
     assert by_name["fly"]["model"] is None and by_name["solver"]["model"] is None  # nothing is asked
     assert all(p["model"] == model_of(p["name"]) for p in session(tmp_path).state()["players"] if p["paid"])
+    assert all(p["model_answered"] is None for p in session(tmp_path).state()["players"])  # nothing recorded yet
+
+
+def test_a_player_also_says_which_version_it_last_answered_as(tmp_path):
+    """Jev's client asks for `jev-latest`, so only an answer knows the version. It comes from the newest
+    run that recorded the player, under the name that run filed it under (an old `llm*` file counts)."""
+    out = tmp_path / "runs"
+    for name, run, model in [("jev.jsonl", "20260101-000000", "jev-1.12.0"),
+                             ("jev.jsonl", "20260202-000000", "jev-1.13.0"),
+                             ("llm.jsonl", "20260101-000000", "claude-haiku-4-5-20251001")]:
+        (out / run).mkdir(parents=True, exist_ok=True)
+        (out / run / name).write_text(json.dumps({"player": name[:-6], "info": {"model": model}}) + "\n")
+    models = answered_models(out)
+    assert models["jev"] == "jev-1.13.0"                       # the newest run wins
+    assert models["haiku"] == "claude-haiku-4-5-20251001"      # recorded before the rename, as llm.jsonl
+    assert "glm" not in models                                 # never played
+    by_name = {p["name"]: p for p in session(tmp_path).state()["players"]}
+    assert by_name["jev"]["model_answered"] == "jev-1.13.0" and by_name["jev"]["model"] == "jev-latest"
+    assert by_name["solver"]["model_answered"] is None
 
 
 def test_the_contestants_come_first_in_the_pages_own_order_and_the_yardsticks_last(tmp_path):
