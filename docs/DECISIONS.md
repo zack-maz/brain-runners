@@ -192,6 +192,12 @@
     numbers with the end event, so the Analysis tab fills in without a reload (the spec's "live runs show it once
     the run has ended").
 
+37. **The level table stops toggling players** (the user, 2026-09-23; update 3b, spec section F). The new picker
+    over the tunnel is the one control over who is in it: it shows and hides a replay's runners, and a player that
+    did not run the track in view can never be turned on. The level table keeps only its track buttons, and picking
+    a track returns to the Run tab, where the track is watched. Two controls over the same thing could disagree;
+    one cannot.
+
 Where we are and what comes next: `docs/NEXT.md`.
 
 ## Prior art to reuse
