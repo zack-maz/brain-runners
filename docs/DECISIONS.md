@@ -226,6 +226,19 @@
     the only difference. Its one departure is reading the reply — GLM wraps its JSON in a markdown fence, which is
     stripped for the parse only, so the log still keeps the answer as it came. Free tier, so its price is 0, and it
     spends nothing until someone plays it with `--max-requests`.
+41. **`fly2`, a second pure fly** (the user, 2026-09-24; research in `docs/research/2026-09-24-fly/`, design in
+    `docs/superpowers/specs/2026-09-24-fly2-design.md`, branch `fly2`). The research found that the input is the
+    bottleneck: the best table on `fly`'s two eye totals scores 66.7 rows on v2 held-out seeds, and the fly already
+    scores 66.0. The user chose the following:
+    - **Pure first:** the fly is improved within decision 2. A trained fly comes later as a separate, labelled player.
+    - **Both flies selectable:** `fly` stays unchanged and `fly2` plays beside it.
+    - **A rule picks the input:** it chooses among three candidate mappings (a straight-ahead channel, narrow eyes, a
+      sideways LPLC4/LC22 channel), each measured on the real brain, with the rule fixed before any measurement,
+      practice seeds 1000–1199 only, and the winner played once on 1200–1399.
+    - **The readout and rule, ours and labelled:** turn from DNa02 + DNa01 + DNg13 (DNb01 dropped), the Giant Fiber
+      for the jump, and dodge before jump.
+    - **Controls reported with the result:** no brain, shuffled wiring, and `fly`.
+    - **A probe first (spike 04):** if no candidate turns away from the gap's side, the update stops there.
 
 Where we are and what comes next: `docs/NEXT.md`.
 

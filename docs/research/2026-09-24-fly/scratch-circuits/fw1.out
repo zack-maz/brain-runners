@@ -1,0 +1,57 @@
+Installed 6 packages in 111ms
+| type (left)   |   n |   flow step (median) | infomap module    | leiden_fine      | input neuropils                   | output neuropils                 |
+|:--------------|----:|---------------------:|:------------------|:-----------------|:----------------------------------|:---------------------------------|
+| LPLC2         | 108 |                    7 | F77 · OL_L 30%    | m49 · OL_L 92%   | LO_R 52%, LOP_R 36%, PVLP_R 10%   | PVLP_R 78%, LO_R 15%, LOP_R 7%   |
+| LC4           |  54 |                    6 | F77 · OL_L 30%    | m6 · OL_L 93%    | LO_R 94%, PVLP_R 5%, ME_R 1%      | PVLP_R 72%, LO_R 28%, WED_R 0%   |
+| LPLC1         |  68 |                    7 | F14 · VLNP_L 58%  | m9 · OL_L 97%    | LO_R 74%, LOP_R 18%, PLP_R 4%     | LO_R 49%, PLP_R 23%, PVLP_R 22%  |
+| LC6           |  65 |                    8 | F102 · OL_L 36%   | m57 · OL_L 43%   | LO_R 79%, PVLP_R 18%, PLP_R 2%    | PVLP_R 76%, LO_R 14%, PLP_R 8%   |
+| LC9           |  87 |                    8 | F14 · VLNP_L 58%  | m45 · VLNP_L 53% | PVLP_R 49%, LO_R 39%, LAL_R 3%    | LO_R 52%, PVLP_R 38%, LAL_R 3%   |
+| LC11          |  66 |                    7 | F14 · VLNP_L 58%  | m38 · VLNP_L 78% | LO_R 92%, PVLP_R 5%, PLP_R 2%     | PVLP_R 53%, LO_R 27%, PLP_R 20%  |
+| LC12          | 198 |                    7 | F14 · VLNP_L 58%  | m38 · VLNP_L 78% | LO_R 73%, PVLP_R 27%, ME_R 0%     | PVLP_R 98%, LO_R 2%, ME_R 0%     |
+| LC15          |  52 |                    8 | F14 · VLNP_L 58%  | m38 · VLNP_L 78% | LO_R 84%, PVLP_R 15%, AVLP_R 1%   | PVLP_R 69%, LO_R 25%, AVLP_R 6%  |
+| LC16          |  77 |                    7 | F122 · OL_L 65%   | m57 · OL_L 43%   | LO_R 81%, PVLP_R 18%, PLP_R 0%    | PVLP_R 82%, LO_R 16%, PLP_R 2%   |
+| LC17          | 134 |                    7 | F14 · VLNP_L 58%  | m38 · VLNP_L 78% | LO_R 87%, PVLP_R 12%, AVLP_R 0%   | PVLP_R 93%, LO_R 4%, AVLP_R 2%   |
+| LC18          |  96 |                    7 | F14 · VLNP_L 58%  | m38 · VLNP_L 78% | LO_R 80%, PVLP_R 19%, ME_R 1%     | PVLP_R 84%, LO_R 16%, ME_R 0%    |
+| LC21          |  68 |                    7 | F14 · VLNP_L 58%  | m38 · VLNP_L 78% | LO_R 90%, PVLP_R 10%, PLP_R 0%    | PVLP_R 65%, LO_R 32%, PLP_R 3%   |
+| LC22          |  43 |                    7 | F64 · OL_L 76%    | m51 · OL_L 50%   | LO_R 87%, SPS_R 10%, PLP_R 3%     | SPS_R 48%, LO_R 36%, PLP_R 16%   |
+| LC26          |  26 |                    9 | F150 · VLNP_L 84% | m30 · SNP_L 32%  | LO_R 75%, PVLP_R 18%, PLP_R 6%    | PVLP_R 78%, PLP_R 18%, LO_R 5%   |
+| LPLC4         |  56 |                    7 | F64 · OL_L 76%    | m51 · OL_L 50%   | LO_R 65%, LOP_R 16%, SPS_R 9%     | PLP_R 42%, SPS_R 36%, LO_R 19%   |
+| LLPC1         | 106 |                    7 | F48 · VMNP_L 24%  | m44 · VLNP_L 23% | LOP_R 61%, LO_R 29%, ME_R 5%      | PLP_R 63%, LOP_R 18%, LO_R 11%   |
+| LLPC2         | 120 |                    7 | F79 · OL_L 31%    | m44 · VLNP_L 23% | LOP_R 60%, LO_R 26%, PLP_R 11%    | PLP_R 68%, LO_R 18%, LOP_R 11%   |
+| LLPC3         | 102 |                    8 | F79 · OL_L 31%    | m44 · VLNP_L 23% | LOP_R 56%, LO_R 30%, PLP_R 11%    | PLP_R 54%, LO_R 26%, LOP_R 20%   |
+| LC10a         | 115 |                    9 | F57 · VLNP_L 62%  | m41 · VLNP_L 32% | LO_R 69%, AOTU_R 30%, SLP_R 0%    | AOTU_R 90%, LO_R 10%, SLP_R 1%   |
+| HSS           |   1 |                   10 | F2 · OL_L 99%     | m3 · OL_L 99%    | LOP_R 99%, ME_R 1%, IPS_R 0%      | IPS_R 57%, LOP_R 42%, ME_R 0%    |
+| VS2           |   1 |                    5 | F141 · OL_L 88%   | m11 · OL_L 87%   | LOP_R 50%, ME_R 50%               |                                  |
+| H2            |   1 |                  255 |                   |                  |                                   |                                  |
+| DNp01         |   1 |                    5 | F77 · OL_L 30%    | m45 · VLNP_L 53% | PVLP_R 42%, AMMC_R 21%, GOR_R 20% | PVLP_R 56%, GOR_R 14%, WED_R 13% |
+| DNp02         |   1 |                    4 | F77 · OL_L 30%    | m34 · PENP 55%   | PVLP_R 46%, AMMC_R 41%, WED_R 12% |                                  |
+| DNp04         |   1 |                    6 | F77 · OL_L 30%    | m38 · VLNP_L 78% | PVLP_R 91%, AVLP_R 6%, GOR_R 1%   | PVLP_R 76%, AVLP_R 21%, GOR_R 2% |
+| DNp11         |   1 |                    6 | F77 · OL_L 30%    | m45 · VLNP_L 53% | LO_R 53%, PVLP_R 26%, AMMC_R 8%   | LO_R 63%, PVLP_R 21%, PLP_R 8%   |
+| DNp06         |   1 |                    5 | F14 · VLNP_L 58%  | m45 · VLNP_L 53% | AVLP_R 39%, PVLP_R 33%, PLP_R 9%  |                                  |
+| DNp03         |   1 |                    7 | F45 · PENP 33%    | m51 · OL_L 50%   | PLP_R 63%, PVLP_R 26%, SPS_R 10%  | IPS_L 64%, PLP_R 18%, PVLP_R 9%  |
+| DNp05         |   1 |                    6 | F77 · OL_L 30%    | m51 · OL_L 50%   | PVLP_R 34%, SPS_R 30%, PLP_R 14%  |                                  |
+| DNp09         |   1 |                    6 | F14 · VLNP_L 58%  | m45 · VLNP_L 53% | PVLP_R 34%, AVLP_R 22%, ICL_R 17% | IPS_R 49%, WED_R 21%, VES_R 17%  |
+| MDN           |   2 |                    6 | F36 · PENP 62%    | m47 · LX_L 33%   | LAL_R 31%, LAL_L 30%, VES_L 12%   | IPS_L 66%, WED_L 16%, SPS_L 11%  |
+| DNa01         |   1 |                    5 | F36 · PENP 62%    | m40 · PENP 59%   | VES_R 42%, LAL_R 24%, IPS_R 10%   | VES_R 37%, LAL_R 21%, SPS_R 19%  |
+| DNa02         |   1 |                    7 | F45 · PENP 33%    | m47 · LX_L 33%   | LAL_R 37%, SPS_R 19%, VES_R 17%   |                                  |
+| DNa03         |   1 |                    8 |                   | m47 · LX_L 33%   | LAL_R 67%, VES_R 10%, IPS_R 8%    |                                  |
+| DNa04         |   1 |                    7 | F45 · PENP 33%    | m39 · PENP 36%   | SPS_R 63%, IPS_R 16%, PLP_R 6%    | SPS_R 67%, EPA_R 9%, IPS_R 8%    |
+| DNa05         |   1 |                    6 | F45 · PENP 33%    | m39 · PENP 36%   | SPS_R 72%, IPS_R 27%, LAL_R 0%    | SPS_R 83%, IPS_R 17%             |
+| DNa07         |   1 |                    7 | F60 · PENP 81%    | m9 · OL_L 97%    | PLP_R 48%, SPS_R 32%, PVLP_R 19%  | IPS_R 69%, PLP_R 22%, PVLP_R 6%  |
+| DNa08         |   1 |                    7 | F45 · PENP 33%    | m41 · VLNP_L 32% | AOTU_R 32%, VES_R 29%, LAL_R 25%  | VES_R 32%, LAL_R 30%, IPS_R 22%  |
+| DNb01         |   1 |                    7 | F45 · PENP 33%    | m39 · PENP 36%   | SPS_R 40%, LAL_R 19%, IPS_R 18%   | IPS_L 50%, SPS_L 38%, VES_L 6%   |
+| DNb05         |   1 |                    4 | F64 · OL_L 76%    | m51 · OL_L 50%   | PLP_R 30%, AL_R 25%, SPS_R 20%    | PLP_R 32%, WED_R 23%, PVLP_R 16% |
+| DNb06         |   1 |                    5 | F99 · VMNP_R 49%  | m29 · PENP 37%   | IPS_R 75%, SPS_R 25%, VES_R 0%    | SPS_R 52%, IPS_R 48%             |
+| DNg13         |   1 |                    6 | F36 · PENP 62%    | m47 · LX_L 33%   | VES_R 46%, LAL_R 22%, IPS_R 9%    | VES_R 52%, LAL_R 29%, IPS_R 7%   |
+| DNg11         |   3 |                    6 | F95 · VMNP_R 49%  | m29 · PENP 37%   | SPS_R 68%, IPS_R 25%, IB_R 6%     | IPS_L 94%, SPS_R 6%, IPS_R 0%    |
+| DNae004       |   1 |                    7 | F45 · PENP 33%    | m39 · PENP 36%   | SPS_R 63%, IPS_R 35%, GOR_R 1%    | IPS_R 72%, SPS_R 23%, VES_R 5%   |
+| DNae002       |   1 |                    7 | F45 · PENP 33%    | m39 · PENP 36%   | SPS_R 41%, IPS_R 26%, LAL_R 13%   | SPS_R 65%, IPS_R 13%, LAL_R 7%   |
+| DNg41         |   1 |                    6 | F45 · PENP 33%    | m39 · PENP 36%   | IPS_R 97%, SPS_R 3%, IPS_L 0%     | IPS_L 97%, WED_L 2%, IPS_R 1%    |
+| DNb03         |   2 |                    6 | F45 · PENP 33%    | m39 · PENP 36%   | IPS_R 99%, LAL_R 0%, VES_R 0%     | IPS_R 100%                       |
+| DNp15         |   1 |                    5 | F68 · OL_L 99%    | m39 · PENP 36%   | IPS_R 94%, SPS_R 6%               |                                  |
+| DNp35         |   1 |                    6 | F14 · VLNP_L 58%  | m38 · VLNP_L 78% | PVLP_R 43%, AVLP_R 19%, PLP_R 19% | PVLP_R 31%, VES_R 21%, PLP_R 19% |
+| DNp37         |   1 |                    5 | F97 · SNP_R 27%   | m60 · VLNP_L 25% | SIP_R 64%, SCL_R 10%, AVLP_R 10%  | SIP_R 54%, AVLP_R 18%, SCL_R 6%  |
+| DNg82         |   2 |                    7 | F45 · PENP 33%    | m51 · OL_L 50%   | SPS_R 69%, EPA_R 10%, PLP_R 9%    | PLP_R 65%, SPS_R 30%, EPA_R 4%   |
+| DNa15         |   1 |                    7 | F45 · PENP 33%    | m39 · PENP 36%   | SPS_R 43%, IPS_R 34%, LAL_R 13%   | SPS_R 52%, IPS_R 34%, LAL_R 11%  |
+| aSP22         |   1 |                    6 | F36 · PENP 62%    | m41 · VLNP_L 32% | SPS_R 24%, SIP_R 14%, SMP_R 10%   | SPS_R 31%, EPA_R 11%, IPS_R 9%   |
+| DNg71         |   1 |                    6 | F45 · PENP 33%    | m39 · PENP 36%   | IPS_R 60%, SPS_R 40%, IPS_L 0%    | IPS_L 86%, IPS_R 11%, SPS_R 3%   |

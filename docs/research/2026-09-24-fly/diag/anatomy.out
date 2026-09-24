@@ -1,0 +1,168 @@
+
+=== v1: 20 deaths, 2194 decisions
+{'act_jump': 185, 'act_left': 406, 'act_right': 431, 'act_stay': 1172, 'decisions': 2194, 'jump_unsafe': 20, 'jump_when_c1_c2_both_gap': 8, 'jump_when_stay_safe': 86, 'jumps': 185, 'solver_agree': 1175, 'subopt_depth': 20, 'unsafe': 20, 'unsafe_with_safe_alt': 20}
+unsafe with a safe alternative: 20 of 2194 decisions (0.91%); jumps 185, of them onto a gap 20; solver agreement 0.536; action with shorter solver depth 20
+causes {'jumped_into_gap': 20}
+fatal situations {'gap one side, centre open, C2 gap': 5, 'row1 clear, C2 gap': 7, 'gap straight ahead only, C2 gap': 5, 'gap ahead + one side, C2 gap': 3}
+safe alternative at fatal decision {'safe alternative existed': 20}
+
+last 5 decisions of every death (tiles = L1 C1 R1 C2 landing tiles, X = gap):
+-- 20260919-151934 seed 1000: died at row 58 (jumped_into_gap)
+   row  53 tiles .... rows1-3 [- | 2 | -] in=(0,25) turn=+0 GF=50 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  54 tiles .... rows1-3 [2 | - | -] in=(0,250) turn=-100 GF=155 did=left  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  55 tiles .... rows1-3 [- | - | -2,1] in=(25,25) turn=+0 GF=90 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  56 tiles .... rows1-3 [- | -2,1 | 0] in=(50,50) turn=+0 GF=125 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  57 tiles ..XX rows1-3 [-2,1 | 0 | -] in=(250,250) turn=+10 GF=210 did=jump  solver=stay  depths={'stay': 6, 'left': 6, 'right': 0, 'jump': 0}
+-- 20260919-151934 seed 1001: died at row 212 (jumped_into_gap)
+   row 205 tiles XX.. rows1-3 [-2,-1,0 | - | 3] in=(250,250) turn=+10 GF=220 did=jump  solver=right depths={'stay': 0, 'left': 0, 'right': 6, 'jump': 6}
+   row 207 tiles .... rows1-3 [3 | - | -3,-2,-1,0,1,2,3] in=(50,250) turn=-80 GF=180 did=left  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 208 tiles ...X rows1-3 [-3 | -3,-2,-1,0,1,2,3 | -] in=(250,125) turn=+70 GF=190 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 0}
+   row 209 tiles XXX. rows1-3 [-3,-2,-1,0,1,2,3 | - | -2,3] in=(250,250) turn=+30 GF=210 did=jump  solver=jump  depths={'stay': 0, 'left': 0, 'right': 0, 'jump': 6}
+   row 211 tiles ...X rows1-3 [-2,3 | 0,1,2 | -3,-2,-1] in=(250,250) turn=+10 GF=215 did=jump  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 0}
+-- 20260919-151934 seed 1002: died at row 113 (jumped_into_gap)
+   row 108 tiles .... rows1-3 [- | - | -] in=(0,0) turn=+0 GF=0 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 109 tiles .... rows1-3 [- | - | -3] in=(0,0) turn=+0 GF=0 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 110 tiles .... rows1-3 [- | -3 | 1] in=(25,25) turn=+0 GF=75 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 111 tiles .... rows1-3 [-3 | 1 | -2,1] in=(250,50) turn=+100 GF=175 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 112 tiles .X.X rows1-3 [0 | -3,0 | -] in=(250,250) turn=+0 GF=215 did=jump  solver=left  depths={'stay': 0, 'left': 6, 'right': 6, 'jump': 0}
+-- 20260919-151934 seed 1003: died at row 150 (jumped_into_gap)
+   row 143 tiles .... rows1-3 [-3,-2,3 | - | -] in=(250,250) turn=+0 GF=210 did=jump  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 145 tiles .... rows1-3 [- | - | -3,3] in=(25,25) turn=+0 GF=85 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 146 tiles .... rows1-3 [- | -3,3 | -3,-2] in=(50,50) turn=+0 GF=115 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 147 tiles .... rows1-3 [-3,3 | -3,-2 | -3,2,3] in=(250,250) turn=+0 GF=215 did=jump  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 149 tiles ...X rows1-3 [-3,2,3 | 0 | -2,-1,0,2] in=(250,250) turn=-10 GF=210 did=jump  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 0}
+-- 20260919-151934 seed 1004: died at row 130 (jumped_into_gap)
+   row 123 tiles ..X. rows1-3 [1,2,3 | 2,3 | 3] in=(0,250) turn=-90 GF=160 did=left  solver=stay  depths={'stay': 6, 'left': 6, 'right': 0, 'jump': 6}
+   row 124 tiles .... rows1-3 [-3,3 | - | -] in=(250,250) turn=+0 GF=215 did=jump  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 126 tiles .... rows1-3 [- | -3,-2 | 2,3] in=(75,25) turn=+50 GF=140 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 127 tiles .... rows1-3 [-3,3 | 1,2 | 0,1] in=(250,250) turn=+10 GF=210 did=jump  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 129 tiles .XXX rows1-3 [0,1 | 0,1 | -] in=(250,250) turn=+10 GF=210 did=jump  solver=left  depths={'stay': 0, 'left': 6, 'right': 0, 'jump': 0}
+-- 20260919-151934 seed 1005: died at row 84 (jumped_into_gap)
+   row  79 tiles .... rows1-3 [2,3 | -2 | -3,-1] in=(50,250) turn=-90 GF=170 did=left  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  80 tiles X..X rows1-3 [-1 | -3,-2,0 | -1] in=(250,50) turn=+90 GF=170 did=right solver=stay  depths={'stay': 6, 'left': 0, 'right': 6, 'jump': 0}
+   row  81 tiles X... rows1-3 [-3,-1 | -2 | 1,2] in=(250,25) turn=+120 GF=165 did=right solver=stay  depths={'stay': 6, 'left': 0, 'right': 6, 'jump': 6}
+   row  82 tiles ...X rows1-3 [-3 | 0,1 | -1,1] in=(250,75) turn=+100 GF=185 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 0}
+   row  83 tiles XX.X rows1-3 [-1,0 | -2,0 | -2] in=(250,250) turn=-10 GF=210 did=jump  solver=right depths={'stay': 0, 'left': 0, 'right': 6, 'jump': 0}
+-- 20260919-151934 seed 1006: died at row 174 (jumped_into_gap)
+   row 169 tiles ...X rows1-3 [- | -1,0 | -] in=(75,50) turn=+40 GF=135 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 0}
+   row 170 tiles X... rows1-3 [-2,-1 | - | -1] in=(250,0) turn=+110 GF=155 did=right solver=stay  depths={'stay': 6, 'left': 0, 'right': 6, 'jump': 6}
+   row 171 tiles .... rows1-3 [- | -2 | -2,0,2,3] in=(50,50) turn=+20 GF=125 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 172 tiles .... rows1-3 [-3 | -3,-1,1,2 | 1,2,3] in=(250,100) turn=+90 GF=190 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 173 tiles .XXX rows1-3 [-2,0,1 | 0,1,2,3 | 0,1,2] in=(250,250) turn=-20 GF=210 did=jump  solver=left  depths={'stay': 0, 'left': 6, 'right': 0, 'jump': 0}
+-- 20260919-151934 seed 1007: died at row 184 (jumped_into_gap)
+   row 179 tiles .... rows1-3 [- | -2 | -] in=(25,0) turn=+0 GF=65 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 180 tiles .... rows1-3 [-2 | - | -] in=(250,0) turn=+130 GF=160 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 181 tiles .... rows1-3 [- | - | 2] in=(0,25) turn=+0 GF=55 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 182 tiles .... rows1-3 [- | 2 | -1,1,2,3] in=(25,75) turn=-30 GF=120 did=left  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 183 tiles ...X rows1-3 [-3,3 | -3,0,2,3 | 2,3] in=(250,250) turn=+0 GF=220 did=jump  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 0}
+-- 20260919-151934 seed 1008: died at row 91 (jumped_into_gap)
+   row  85 tiles .... rows1-3 [- | - | -] in=(0,0) turn=+0 GF=0 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  86 tiles .... rows1-3 [- | - | 0] in=(0,0) turn=+0 GF=0 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  87 tiles ...X rows1-3 [- | 0 | -] in=(25,25) turn=+0 GF=80 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 0}
+   row  88 tiles .X.. rows1-3 [0 | - | -2,2] in=(250,250) turn=+30 GF=210 did=jump  solver=left  depths={'stay': 0, 'left': 6, 'right': 6, 'jump': 6}
+   row  90 tiles ...X rows1-3 [-2,2 | 0 | -] in=(250,250) turn=-20 GF=210 did=jump  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 0}
+-- 20260919-151934 seed 1009: died at row 113 (jumped_into_gap)
+   row 108 tiles .... rows1-3 [- | - | 3] in=(0,25) turn=+0 GF=60 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 109 tiles .... rows1-3 [- | 3 | 2] in=(0,50) turn=-10 GF=85 did=left  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 110 tiles .... rows1-3 [- | 3 | -1] in=(25,25) turn=+0 GF=80 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 111 tiles .... rows1-3 [3 | -1 | -1,0] in=(50,250) turn=-80 GF=165 did=left  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 112 tiles .X.X rows1-3 [0 | 0,1 | -] in=(250,250) turn=+20 GF=210 did=jump  solver=left  depths={'stay': 0, 'left': 6, 'right': 6, 'jump': 0}
+-- 20260919-151934 seed 1010: died at row 103 (jumped_into_gap)
+   row  98 tiles .... rows1-3 [- | - | -1] in=(25,0) turn=+0 GF=45 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  99 tiles .... rows1-3 [- | -1 | -1,0] in=(50,25) turn=+30 GF=120 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 100 tiles .... rows1-3 [-2 | -2,-1 | 0] in=(250,25) turn=+100 GF=165 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 101 tiles .... rows1-3 [-3,-2 | -1,3 | 1] in=(250,50) turn=+80 GF=170 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 102 tiles ...X rows1-3 [-2,2,3 | 0 | 2,3] in=(250,250) turn=-10 GF=210 did=jump  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 0}
+-- 20260919-151934 seed 1011: died at row 113 (jumped_into_gap)
+   row 107 tiles .... rows1-3 [3 | 1 | 0,1] in=(25,250) turn=-90 GF=170 did=left  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 108 tiles .... rows1-3 [2 | 1,2 | -1] in=(25,250) turn=-70 GF=165 did=left  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 109 tiles ...X rows1-3 [2,3 | -3,0 | -2] in=(75,250) turn=-70 GF=175 did=left  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 0}
+   row 110 tiles ..X. rows1-3 [-3,-2,1 | -1 | -3,1] in=(250,250) turn=+30 GF=210 did=jump  solver=stay  depths={'stay': 6, 'left': 6, 'right': 0, 'jump': 6}
+   row 112 tiles ..XX rows1-3 [-3,1 | -3,-1,0 | -2,1] in=(250,250) turn=+20 GF=215 did=jump  solver=stay  depths={'stay': 6, 'left': 6, 'right': 0, 'jump': 0}
+-- 20260919-151934 seed 1012: died at row 75 (jumped_into_gap)
+   row  70 tiles .... rows1-3 [-3 | 2 | -] in=(250,25) turn=+120 GF=165 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  71 tiles ..X. rows1-3 [1 | - | -] in=(0,250) turn=-70 GF=160 did=left  solver=stay  depths={'stay': 6, 'left': 6, 'right': 0, 'jump': 6}
+   row  72 tiles .... rows1-3 [- | - | 2] in=(0,0) turn=+0 GF=0 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  73 tiles .... rows1-3 [- | 2 | -1] in=(0,25) turn=-10 GF=50 did=left  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  74 tiles ...X rows1-3 [-3,3 | 0 | -] in=(250,250) turn=+0 GF=215 did=jump  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 0}
+-- 20260919-151934 seed 1013: died at row 118 (jumped_into_gap)
+   row 113 tiles .... rows1-3 [- | - | -3,-2] in=(25,0) turn=+0 GF=55 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 114 tiles .... rows1-3 [- | -3,-2 | -3] in=(75,0) turn=+80 GF=115 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 115 tiles .... rows1-3 [-3 | - | 0] in=(250,25) turn=+90 GF=170 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 116 tiles .... rows1-3 [3 | -1 | -1,0] in=(50,250) turn=-60 GF=170 did=left  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 117 tiles .X.X rows1-3 [0 | 0,1 | 1] in=(250,250) turn=+0 GF=225 did=jump  solver=left  depths={'stay': 0, 'left': 6, 'right': 6, 'jump': 0}
+-- 20260919-151934 seed 1014: died at row 7 (jumped_into_gap)
+   row   1 tiles .... rows1-3 [- | - | -] in=(0,0) turn=+0 GF=0 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row   2 tiles .... rows1-3 [- | - | 0] in=(0,0) turn=+0 GF=0 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row   3 tiles ...X rows1-3 [- | 0 | -] in=(25,25) turn=+10 GF=85 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 0}
+   row   4 tiles X... rows1-3 [-1,3 | - | -2,3] in=(250,250) turn=+10 GF=210 did=jump  solver=stay  depths={'stay': 6, 'left': 0, 'right': 6, 'jump': 6}
+   row   6 tiles ...X rows1-3 [-2,3 | 0 | -] in=(250,250) turn=+10 GF=210 did=jump  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 0}
+-- 20260919-151934 seed 1015: died at row 126 (jumped_into_gap)
+   row 121 tiles .... rows1-3 [- | -3,-2 | -] in=(75,0) turn=+50 GF=115 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 122 tiles .... rows1-3 [-3 | - | -] in=(250,0) turn=+110 GF=155 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 123 tiles .... rows1-3 [- | - | -2,0,2] in=(25,25) turn=+0 GF=85 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 124 tiles ...X rows1-3 [- | -2,0,2 | 0] in=(75,75) turn=+0 GF=145 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 0}
+   row 125 tiles .X.X rows1-3 [-2,0,2 | 0 | -] in=(250,250) turn=+20 GF=210 did=jump  solver=left  depths={'stay': 0, 'left': 6, 'right': 6, 'jump': 0}
+-- 20260919-151934 seed 1016: died at row 90 (jumped_into_gap)
+   row  84 tiles .... rows1-3 [2 | -1 | -] in=(25,250) turn=-80 GF=165 did=left  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  85 tiles .X.. rows1-3 [0 | - | -1] in=(250,250) turn=+0 GF=210 did=jump  solver=left  depths={'stay': 0, 'left': 6, 'right': 6, 'jump': 6}
+   row  87 tiles X... rows1-3 [-1 | - | 1] in=(250,25) turn=+90 GF=175 did=right solver=stay  depths={'stay': 6, 'left': 0, 'right': 6, 'jump': 6}
+   row  88 tiles ...X rows1-3 [- | 0 | 0] in=(50,50) turn=+0 GF=115 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 0}
+   row  89 tiles .X.X rows1-3 [0 | 0 | 1] in=(250,250) turn=+10 GF=215 did=jump  solver=left  depths={'stay': 0, 'left': 6, 'right': 6, 'jump': 0}
+-- 20260919-151934 seed 1017: died at row 209 (jumped_into_gap)
+   row 204 tiles .... rows1-3 [- | -3 | -] in=(50,0) turn=+30 GF=90 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 205 tiles .... rows1-3 [- | - | 3] in=(0,25) turn=+0 GF=55 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 206 tiles .... rows1-3 [- | 3 | -2,1,2,3] in=(25,75) turn=-40 GF=120 did=left  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 207 tiles .... rows1-3 [-3 | -1,2,3 | 0,1,2] in=(250,100) turn=+50 GF=185 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 208 tiles ..XX rows1-3 [-2,1,2,3 | -1,0,1 | 1,2] in=(250,250) turn=+20 GF=220 did=jump  solver=stay  depths={'stay': 6, 'left': 6, 'right': 0, 'jump': 0}
+-- 20260919-151934 seed 1018: died at row 93 (jumped_into_gap)
+   row  88 tiles .... rows1-3 [- | -3 | 2] in=(25,25) turn=+0 GF=90 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  89 tiles .... rows1-3 [-3 | 2 | 2] in=(250,50) turn=+110 GF=175 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  90 tiles ..X. rows1-3 [1 | 1 | -1] in=(25,250) turn=-100 GF=165 did=left  solver=stay  depths={'stay': 6, 'left': 6, 'right': 0, 'jump': 6}
+   row  91 tiles ...X rows1-3 [2 | 0 | -1,2] in=(50,250) turn=-90 GF=165 did=left  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 0}
+   row  92 tiles ..XX rows1-3 [-3,1 | 0,3 | 2] in=(250,250) turn=+20 GF=220 did=jump  solver=stay  depths={'stay': 6, 'left': 6, 'right': 0, 'jump': 0}
+-- 20260919-151934 seed 1019: died at row 116 (jumped_into_gap)
+   row 111 tiles .... rows1-3 [2 | - | -] in=(0,250) turn=-80 GF=155 did=left  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 112 tiles .... rows1-3 [- | -3 | -] in=(50,0) turn=+40 GF=85 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 113 tiles .... rows1-3 [- | - | -3,-2,2] in=(25,25) turn=+0 GF=80 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 114 tiles .... rows1-3 [- | -3,-2,2 | 1,2] in=(75,50) turn=+30 GF=130 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 115 tiles ..XX rows1-3 [-3,1 | 0,1 | -] in=(250,250) turn=-10 GF=210 did=jump  solver=stay  depths={'stay': 6, 'left': 6, 'right': 0, 'jump': 0}
+
+=== v2: 5 deaths, 319 decisions
+{'act_jump': 26, 'act_left': 75, 'act_right': 55, 'act_stay': 163, 'decisions': 319, 'jump_unsafe': 5, 'jump_when_c1_c2_both_gap': 2, 'jump_when_stay_safe': 14, 'jumps': 26, 'solver_agree': 163, 'subopt_depth': 5, 'unsafe': 5, 'unsafe_with_safe_alt': 5}
+unsafe with a safe alternative: 5 of 319 decisions (1.57%); jumps 26, of them onto a gap 5; solver agreement 0.511; action with shorter solver depth 5
+causes {'jumped_into_gap': 5}
+fatal situations {'gap straight ahead only, C2 gap': 2, 'gap one side, centre open, C2 gap': 2, 'row1 clear, C2 gap': 1}
+safe alternative at fatal decision {'safe alternative existed': 5}
+
+last 5 decisions of every death (tiles = L1 C1 R1 C2 landing tiles, X = gap):
+-- 20260921-192037 seed 1000: died at row 64 (jumped_into_gap)
+   row  59 tiles .... rows1-3 [- | -3 | -] in=(25,0) turn=+10 GF=60 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  60 tiles .... rows1-3 [- | - | -] in=(0,0) turn=+0 GF=0 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  61 tiles .... rows1-3 [- | - | 0] in=(25,25) turn=+0 GF=80 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  62 tiles ...X rows1-3 [- | 0 | 0,1] in=(50,50) turn=+0 GF=120 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 0}
+   row  63 tiles .X.X rows1-3 [0 | 0,1 | 2,3] in=(250,250) turn=+40 GF=210 did=jump  solver=left  depths={'stay': 0, 'left': 6, 'right': 6, 'jump': 0}
+-- 20260921-192037 seed 1001: died at row 29 (jumped_into_gap)
+   row  23 tiles .... rows1-3 [- | -1,3 | -] in=(25,25) turn=+0 GF=90 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  24 tiles X... rows1-3 [-1,3 | - | 3] in=(250,250) turn=+20 GF=215 did=jump  solver=stay  depths={'stay': 6, 'left': 0, 'right': 6, 'jump': 6}
+   row  26 tiles .... rows1-3 [3 | - | -1] in=(25,250) turn=-90 GF=170 did=left  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  27 tiles ...X rows1-3 [- | 0 | 0] in=(50,50) turn=+0 GF=115 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 0}
+   row  28 tiles .X.X rows1-3 [0 | 0 | -] in=(250,250) turn=+20 GF=215 did=jump  solver=left  depths={'stay': 0, 'left': 6, 'right': 6, 'jump': 0}
+-- 20260921-192037 seed 1002: died at row 45 (jumped_into_gap)
+   row  40 tiles .... rows1-3 [-3 | - | 3] in=(250,25) turn=+80 GF=165 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  41 tiles .... rows1-3 [3 | 2,3 | 2,3] in=(0,250) turn=-90 GF=160 did=left  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  42 tiles .... rows1-3 [3 | 3 | -1,3] in=(25,250) turn=-80 GF=165 did=left  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  43 tiles ...X rows1-3 [- | 0 | 1,2,3] in=(50,50) turn=+20 GF=125 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 0}
+   row  44 tiles X..X rows1-3 [-1,3 | 0,1,2,3 | -3] in=(250,250) turn=+20 GF=215 did=jump  solver=stay  depths={'stay': 6, 'left': 0, 'right': 6, 'jump': 0}
+-- 20260921-192037 seed 1003: died at row 114 (jumped_into_gap)
+   row 108 tiles .... rows1-3 [- | -3,-2,2,3 | 0] in=(75,75) turn=+20 GF=140 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 109 tiles ..X. rows1-3 [-3,1,2 | -1 | -2] in=(250,250) turn=+10 GF=210 did=jump  solver=stay  depths={'stay': 6, 'left': 6, 'right': 0, 'jump': 6}
+   row 111 tiles .... rows1-3 [-2 | -3 | -1,3] in=(250,25) turn=+110 GF=165 did=right solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 112 tiles .... rows1-3 [- | -2,2,3 | -1,0,2,3] in=(50,100) turn=-40 GF=145 did=left  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row 113 tiles X..X rows1-3 [-1,3 | 0,1,3 | -3,-2,0] in=(250,250) turn=+40 GF=215 did=jump  solver=stay  depths={'stay': 6, 'left': 0, 'right': 6, 'jump': 0}
+-- 20260921-192037 seed 1004: died at row 88 (jumped_into_gap)
+   row  83 tiles .... rows1-3 [- | - | -] in=(25,0) turn=+0 GF=65 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  84 tiles .... rows1-3 [- | - | -3,-2] in=(25,0) turn=+0 GF=55 did=stay  solver=stay  depths={'stay': 6, 'left': 6, 'right': 6, 'jump': 6}
+   row  85 tiles .... rows1-3 [- | -3,-2 | -3,-2,-1] in=(100,25) turn=+60 GF=135 did=right solver=stay  depths={'stay': 6, 'left': 3, 'right': 6, 'jump': 3}
+   row  86 tiles .... rows1-3 [-3 | -3,-2 | -2,-1,0,1] in=(250,25) turn=+90 GF=160 did=right solver=stay  depths={'stay': 6, 'left': 2, 'right': 6, 'jump': 2}
+   row  87 tiles ...X rows1-3 [-3,3 | -3,-2,-1,0,3 | -3,-2,-1] in=(250,250) turn=+20 GF=215 did=jump  solver=stay  depths={'stay': 6, 'left': 1, 'right': 6, 'jump': 0}
