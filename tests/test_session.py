@@ -10,7 +10,7 @@ from bakeoff.clients.core import RequestBudget, SharedBudget
 from bakeoff.errors import BudgetExhausted
 from bakeoff.game.rules import rules_for
 from bakeoff.players import PAID, REGISTRY
-from bakeoff.session import PRICE_USD, LiveSession, LobbyError, played_before
+from bakeoff.session import PRICE_USD, LiveSession, LobbyError, model_of, played_before
 from tests.fakes import slow_player
 
 RULES = rules_for("v2").variant(max_rows=12)
@@ -35,6 +35,18 @@ def test_a_fresh_session_is_in_the_lobby_and_lists_every_player_with_its_price(t
     assert by_name["haiku"]["paid"] is True and by_name["haiku"]["price_usd"] == 0.0006
     assert by_name["glm_composed"]["price_usd"] == 0.0  # the free tier costs nothing while it lasts
     assert by_name["haiku"]["requests_left"] == 0  # the default cap spends nothing
+
+
+def test_every_paid_player_says_which_model_it_asks(tmp_path):
+    """The page prints this in its column headers, so it must be what a run really asks for, not a
+    name typed by hand. No command overrides a model, so the client's default is the whole truth."""
+    by_name = {p["name"]: p for p in session(tmp_path).state()["players"]}
+    assert by_name["haiku"]["model"] == "claude-haiku-4-5-20251001"
+    assert by_name["haiku_reader"]["model"] == "claude-haiku-4-5-20251001"
+    assert by_name["glm"]["model"] == "glm-4.5-flash" and by_name["glm_composed"]["model"] == "glm-4.5-flash"
+    assert by_name["jev"]["model"] == "jev-latest" and by_name["jev_composed"]["model"] == "jev-latest"
+    assert by_name["fly"]["model"] is None and by_name["solver"]["model"] is None  # nothing is asked
+    assert all(p["model"] == model_of(p["name"]) for p in session(tmp_path).state()["players"] if p["paid"])
 
 
 def test_the_contestants_come_first_in_the_pages_own_order_and_the_yardsticks_last(tmp_path):

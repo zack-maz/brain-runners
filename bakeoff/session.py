@@ -40,6 +40,13 @@ PRICE_USD = {"haiku": 0.0006, "haiku_composed": 0.0010, "haiku_choice": 0.0009, 
 REQUESTS_PER_ROW = 1
 
 
+def model_of(name: str) -> str | None:
+    """The model a paid player asks, as its client asks for it. Nothing overrides it: no command takes a
+    model, so this is what a run really uses, and the page says it rather than a name typed by hand."""
+    client = getattr(REGISTRY.get(name), "client_class", None)
+    return getattr(client, "default_model", None)
+
+
 def _order(names) -> list[str]:
     """The contestants first, in the page's own order, then the free yardsticks."""
     rest = sorted(set(names) - set(CONTESTANTS))
@@ -115,6 +122,7 @@ class LiveSession:
             players.append({
                 "name": name, "paid": paid,
                 "price_usd": PRICE_USD.get(name) if paid else 0.0,
+                "model": model_of(name) if paid else None,
                 "requests_left": self.budgets[name].remaining if paid else None,
                 "played_before": seed is not None and seed in played.get(name, []),
                 # why this player cannot play this track, so the page can say so before anything is asked

@@ -121,6 +121,23 @@ test("playerAt names the player at each crossing, and nothing where there is non
   assert.equal(Lobby.playerAt("", "glm"), "glm");
 });
 
+test("each column says which model it really asks, above what the model is", () => {
+  const withModels = everyone({ players: ALL.map((n) => player(n, {
+    paid: n.startsWith("jev") || n.startsWith("haiku") || n.startsWith("glm"),
+    model: n.startsWith("jev") ? "jev-latest" : n.startsWith("haiku") ? "claude-haiku-4-5-20251001"
+      : n.startsWith("glm") ? "glm-4.5-flash" : null })) });
+  const html = Lobby.playerList(withModels, []);
+  assert.match(html, /Claude Haiku 4\.5<\/span><span class="note mono">claude-haiku-4-5-20251001<\/span>/);
+  assert.match(html, /GLM-4\.5 Flash<\/span><span class="note mono">glm-4\.5-flash<\/span>/);
+  assert.match(html, /Jev<\/span><span class="note mono">jev-latest<\/span>/);
+});
+
+test("a column whose players never say their model keeps its header, without a version", () => {
+  const html = Lobby.playerList(everyone(), []);   // no model field at all
+  assert.equal(html.includes('class="note mono"'), false);
+  assert.match(html, /Claude Haiku 4\.5/);
+});
+
 test("every player the server offers appears exactly once", () => {
   const html = Lobby.playerList(everyone(), []);
   for (const name of ALL) {
@@ -140,8 +157,8 @@ test("the grid says what each question set asks and what each model is", () => {
   assert.match(html, /Eight questions, two moves ahead/);
   assert.match(html, /Reads every tile/);
   assert.match(html, /Jev/);
-  assert.match(html, /Claude Haiku/);
-  assert.match(html, /GLM Flash/);
+  assert.match(html, /Claude Haiku 4\.5/);
+  assert.match(html, /GLM-4\.5 Flash/);
   assert.match(html, /Asked nothing/);            // the fly
   assert.match(html, /Yardsticks, not contestants/);
 });
@@ -155,6 +172,6 @@ test("a crossing with no player is an em dash, not an empty box", () => {
 test("a column no player fills is left out altogether", () => {
   const withoutGlm = everyone({ players: ALL.filter((n) => !n.startsWith("glm")).map((n) => player(n)) });
   const html = Lobby.playerList(withoutGlm, []);
-  assert.equal(html.includes("GLM Flash"), false);
-  assert.match(html, /Claude Haiku/);
+  assert.equal(html.includes("GLM-4.5 Flash"), false);
+  assert.match(html, /Claude Haiku 4\.5/);
 });

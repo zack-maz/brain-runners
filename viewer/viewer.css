@@ -181,6 +181,9 @@ table.players thead th { background: var(--panel); text-align: left; width: 22%;
 table.players th.what { background: var(--panel); text-align: left; width: 22%; min-width: 180px; }
 table.players th .label { display: block; color: var(--bright); margin-bottom: 4px; }
 table.players th .note { display: block; margin: 0; font-size: var(--size-label-sm); max-width: 34ch; }
+/* the model a column really asks for: a short label, so mono, and above the prose */
+table.players th .note.mono { font-family: var(--font-mono); color: var(--text); margin-bottom: 6px;
+  letter-spacing: var(--tracking-label); overflow-wrap: anywhere; }
 table.players td { min-width: 170px; }
 table.players td.none { color: var(--muted); text-align: center; vertical-align: middle; }
 .apart { margin-top: 20px; }

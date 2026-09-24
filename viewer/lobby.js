@@ -80,8 +80,8 @@
   ];
   const MODELS = [
     { key: "jev", title: "Jev", says: "TypeSafe\u2019s System One model: answers are probabilities, made in parallel, each blind to the others." },
-    { key: "haiku", title: "Claude Haiku", says: "A chat model: it also gets the briefing of the rules, writes every answer in one reply, and states its probabilities as numbers." },
-    { key: "glm", title: "GLM Flash", says: "Sent exactly what Claude Haiku is sent, on Zhipu\u2019s free tier, so the model is what differs." },
+    { key: "haiku", title: "Claude Haiku 4.5", says: "A chat model: it also gets the briefing of the rules, writes every answer in one reply, and states its probabilities as numbers." },
+    { key: "glm", title: "GLM-4.5 Flash", says: "Sent exactly what Claude Haiku is sent, on Zhipu\u2019s free tier, so the model is what differs." },
   ];
   // the players that are not in the grid, and why they are here at all
   const APART = [
@@ -90,6 +90,16 @@
     { key: "yardsticks", title: "Yardsticks, not contestants", says: "What good and bad look like on the same track: a perfect search, a coin, and one that always jumps.",
       players: ["solver", "random", "always_jump"] },
   ];
+
+  // The exact model the column's players ask, as the server reports it (bakeoff/session.py:model_of),
+  // so the header can never claim a version this command would not really use.
+  function modelOf(byName, model) {
+    for (const set of SETS) {
+      const player = byName.get(playerAt(set.key, model.key));
+      if (player && player.model) return player.model;
+    }
+    return null;
+  }
 
   // the name of the player at (set, model), or null where there is none
   function playerAt(set, model) {
@@ -133,8 +143,12 @@
     const placed = new Set();
     const models = MODELS.filter((m) => SETS.some((s) => byName.has(playerAt(s.key, m.key))));
     let html = '<table class="players"><thead><tr><th class="what"><span class="label">What it is asked</span></th>' +
-      models.map((m) => '<th><span class="label">' + esc(m.title) + "</span>" +
-        '<span class="note">' + esc(m.says) + "</span></th>").join("") + "</tr></thead><tbody>";
+      models.map((m) => {
+        const model = modelOf(byName, m);
+        return '<th><span class="label">' + esc(m.title) + "</span>" +
+          (model ? '<span class="note mono">' + esc(model) + "</span>" : "") +
+          '<span class="note">' + esc(m.says) + "</span></th>";
+      }).join("") + "</tr></thead><tbody>";
     for (const set of SETS) {
       const cells = models.map((m) => byName.get(playerAt(set.key, m.key)) || null);
       if (!cells.some(Boolean)) continue;
@@ -174,7 +188,7 @@
   // left of the cap spends nothing whatever it asks for.
   const spends = (state, chosen) => estimate(state, chosen).lines.some((line) => line.requests > 0);
 
-  const api = { usd, estimate, estimateText, whyNot, playerList, playerAt, SETS, MODELS, APART, ceilingText, spends };
+  const api = { usd, estimate, estimateText, whyNot, playerList, playerAt, modelOf, SETS, MODELS, APART, ceilingText, spends };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Lobby = api;
 })(typeof window !== "undefined" ? window : globalThis);

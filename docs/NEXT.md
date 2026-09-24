@@ -70,7 +70,9 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
   - **The lobby is the bakeoff's own grid**: "who runs next" is a row per question set crossed with a column per
     model, each saying what it is, with the fly and the yardsticks below it. `viewer/lobby.js` builds it (pure,
     tested): every offered player appears exactly once, an unexpected one joins the yardsticks, an empty crossing
-    is an em dash.
+    is an em dash. Each column also names the model it really asks (`claude-haiku-4-5-20251001`, `glm-4.5-flash`,
+    `jev-latest`), served by `bakeoff.session.model_of` rather than typed into the page, so it cannot drift from
+    what a run would use.
   - **`glm`, the third one-shot** (decision 40): the grid's one empty cell is filled. GLM Flash is asked the one
     broad question, built as the twin of `haiku` (`bakeoff/players/glm.py`: Haiku's questions byte for byte,
     `GlmClient`, and the markdown fence stripped for the parse only). Free tier, nothing recorded yet: it has not
