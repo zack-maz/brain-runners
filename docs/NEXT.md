@@ -48,6 +48,8 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
   pages, checked in a browser), a second live run showed the first run's numbers, a one-track benchmark did not say
   above the table that it is not a result, a log ran to the end of the episode instead of following the playhead, the
   `end` event could be lost to the benchmark it carries, and the fly's log lines did not say the input is ours.
+  Its last open question is settled (decision 38): the lobby's ticks and the picker are two labelled rows of one
+  "Players" section, because they answer different questions — who runs next, and who is in the tunnel.
 
 - **Item 7, the benchmark** (decision 31, spec `docs/superpowers/specs/2026-09-22-benchmark-design.md`): built
   2026-09-22. `python -m bakeoff bench RUN_DIR[:PLAYER,...] ...` scores recorded runs (spends nothing), prints the
@@ -59,18 +61,14 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 
 ## Where to resume (in this order)
 
-1. **One question for the user, left by update 3b's review** (Minor 8): spec F says one picker chooses who runs live,
-   but what was built keeps the lobby's checkbox list for "who runs next" and the picker for "who is shown in the
-   run on screen". They govern different things, so they cannot disagree, but the binding spec and the build differ.
-   Either record it as a decision or change the build.
-2. **Parked**: GLM Flash's tracks 1001–1004 (decision 34), while Zhipu's free tier throttles. To pick it up, check
+1. **Parked**: GLM Flash's tracks 1001–1004 (decision 34), while Zhipu's free tier throttles. To pick it up, check
    it answers (a few requests through `bakeoff.clients.glm.HttpTransport`), then
    `uv run python -m bakeoff run --players glm_composed,glm_choice,glm_two_step --seeds 5 --seed-start 1000 --max-requests 700`
    and `--players glm_reader --seeds 2 --seed-start 1000 --max-requests 350`. Track 1000 replays free from the cache.
-3. The updates are otherwise done. Refresh `docs/EXPLAINER.html` (it knows game v2, not yet the Jev family, the
+2. The updates are done. Refresh `docs/EXPLAINER.html` (it knows game v2, not yet the Jev family, the
    benchmark or the page that runs the show), then one PR titled **"Opus v1"** from `phase6-updates` (the user's
    instruction; not before).
-4. Then phase 6, the tournament and the write-up. It starts by settling which seeds (see "Open"), and it needs a new
+3. Then phase 6, the tournament and the write-up. It starts by settling which seeds (see "Open"), and it needs a new
    budget go-ahead: the tournament is the first paid use of seeds below 1000 (`--tournament`).
 
 ## To look at it

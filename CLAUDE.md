@@ -78,9 +78,10 @@ gets its own plan.
 - The page has two tabs (update 3b): Run holds the tunnel, the mind strip, the lobby and the transport; Analysis
   holds the levels, the scoreboard, what is ours and the benchmark. Every mind panel carries a running log, one line
   per row up to the row on screen and one log open at a time, appended as the frames arrive so it keeps its scroll
-  and never runs ahead of the tunnel. One picker over the
-  tunnel governs who is in it — the level table only picks the track, and a player that did not run the track in
-  view can never be turned on. `viewer/bench_view.js` is the one drawing code for the benchmark, mounted by both
+  and never runs ahead of the tunnel. One section, "Players", holds both lists as
+  labelled rows (decision 38): who runs next (the lobby's ticks, live only) and who is in the tunnel (shows and
+  hides the runners on screen, live or replay). The level table only picks the track, and a player that did not run
+  the track in view can never be turned on. `viewer/bench_view.js` is the one drawing code for the benchmark, mounted by both
   `bench.html` and the Analysis tab, and `viewer/bench.css` styles it on both pages (keyed to its `data-bench`
   names, not to ids); `bakeoff.bench.benchmark_of` scores runs for a page and answers with a reason instead of
   failing, so `view` embeds the numbers of what it merged and a live run's `end` event carries the benchmark of

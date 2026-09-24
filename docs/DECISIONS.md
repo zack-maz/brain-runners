@@ -198,6 +198,15 @@
     a track returns to the Run tab, where the track is watched. Two controls over the same thing could disagree;
     one cannot.
 
+38. **Two rows in one Players section** (the user, 2026-09-24; update 3b's review, Minor 8). Spec F reads as one
+    control for both jobs; what is built keeps two, because they answer different questions at different moments:
+    *Who runs next* (the lobby's ticks, live only, with each player's price, what is left of the cap and whether the
+    track was played before) and *Who is in the tunnel* (the picker, which shows and hides the runners of whatever
+    is on screen, live or replay). They now sit in one section, "Players", one labelled row under the other, in the
+    same tile style, so they read as one control with two jobs; a saved replay file has no lobby and so shows one
+    row only. Whoever is ticked to play is shown when the run starts, so nobody has to say it twice. A single
+    button would have to mean "play" before a run and "show" during one, which is the misreading this avoids.
+
 Where we are and what comes next: `docs/NEXT.md`.
 
 ## Prior art to reuse

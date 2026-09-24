@@ -32,26 +32,30 @@
       Everyone is on the same row at the same time: a jump covers two rows, so it takes two ticks.</p>
   </section>
 
-  <section id="lobby" aria-label="Start a run" hidden>
-    <h2 class="label">Start a run</h2>
-    <form id="lobby-form">
-      <div class="lobby-top">
-        <label class="label" for="seed">Track</label>
-        <input id="seed" type="number" min="0" step="1" value="1001" inputmode="numeric">
-        <button id="start" type="submit" class="label">Start</button>
-        <button id="cancel" type="button" class="label" hidden>Cancel the run</button>
-      </div>
-      <div id="picks" role="group" aria-label="Who runs"></div>
-      <p class="note" id="estimate"></p>
-      <p class="note warn" id="lobby-why" hidden></p>
-      <p class="note" id="ceiling"></p>
-    </form>
-  </section>
+  <section id="players" aria-label="Players">
+    <h2 class="label">Players</h2>
 
-  <section id="picker" aria-label="Who is in the tunnel">
-    <h2 class="label">Who is in the tunnel</h2>
-    <div id="picks-replay" role="group" aria-label="Show or hide a runner"></div>
-    <p class="note" id="picker-hint"></p>
+    <div id="lobby" hidden>
+      <form id="lobby-form">
+        <div class="lobby-top">
+          <label class="label" for="seed">Track</label>
+          <input id="seed" type="number" min="0" step="1" value="1001" inputmode="numeric">
+          <button id="start" type="submit" class="label">Start</button>
+          <button id="cancel" type="button" class="label" hidden>Cancel the run</button>
+        </div>
+        <h3 class="label row-label" id="runs-next">Who runs next</h3>
+        <div id="picks" role="group" aria-labelledby="runs-next"></div>
+        <p class="note" id="estimate"></p>
+        <p class="note warn" id="lobby-why" hidden></p>
+        <p class="note" id="ceiling"></p>
+      </form>
+    </div>
+
+    <div id="picker">
+      <h3 class="label row-label" id="in-tunnel">Who is in the tunnel</h3>
+      <div id="picks-replay" role="group" aria-labelledby="in-tunnel"></div>
+      <p class="note" id="picker-hint"></p>
+    </div>
   </section>
 </div>
 
