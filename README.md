@@ -12,11 +12,12 @@ Every contestant plays the same seeded rounds. The output is a watchable tournam
 replays with each player's "mind" shown next to the game (Jev's probabilities, the LLM's
 answer, the fly's neurons firing) and a scoreboard across games.
 
-Status: phases 1 to 5 of 6 built (phase 6 is the tournament and the write-up); ten updates come first
-(`docs/UPDATES.md`). Game v2 is built; update 2a, the Jev family and its LLM twins, is built and its paid runs
-are done; update 2b, the fly, stopped at its probe. The benchmark (item 7) is built. Details in `docs/NEXT.md`. The
-untrained fly plays: on seeds 0–19 of game v1 it survives 127 rows on average (random 35, always-jump 48, solver
-300; `calibration/RESULTS.md`).
+Status: phases 1 to 5 of 6 built (phase 6 is the tournament and the write-up), and the ten updates that come
+first (`docs/UPDATES.md`) are done bar one: game v2; the Jev family and its LLM twins with their paid runs (update
+2a); the fly's richer-input probe, stopped there (update 2b); the benchmark (item 7); the GLM Flash twins, parked
+after one track while the free tier throttles (item 10); and the page that runs the show (updates 3a and 3b).
+Details in `docs/NEXT.md`. The untrained fly plays: on seeds 0–19 of game v1 it survives 127 rows on average
+(random 35, always-jump 48, solver 300; `calibration/RESULTS.md`).
 
 The game comes in versions (`bakeoff/game/rules.py`): `v1`, the 300-row game phases 1 to 5 were played on, and
 `v2`, the default, 150 rows that reach full difficulty by row 100. `--game v1` plays the old one; `--lookahead` and
@@ -25,15 +26,16 @@ refuses to mix two games. Jev and the LLM
 (Claude Haiku 4.5) play behind a response cache and a hard request cap; first measured costs
 are in `docs/COSTS.md`.
 
-    uv run pytest                                    # fast tests, 5 s; `-m slow` runs the real brain (1 GB)
+    uv run pytest                                    # fast tests, ~20 s; `-m slow` runs the real brain (1 GB)
     uv run python -m scripts.fetch_fly_data          # once: 400 MB into data/
     uv run python -m bakeoff run --players fly,always_jump,random,solver --seeds 20 --seed-start 1000
     uv run python -m bakeoff report runs/<run_id>
     uv run python -m bakeoff view runs/<run_id> [runs/<other_run_id> ...]   # writes replay.html
     uv run python -m bakeoff bench runs/<run_id>[:player,...] [...]          # writes bench.html and bench.json
 
-    uv run python -m bakeoff live --seed 1001 --players fly,jev_composed,llm --max-requests 150   # watch it happen
-    uv run python -m bakeoff live --game v1 --seed 1001    # free: replays the recorded v1 run's answers from the cache
+    uv run python -m bakeoff live --port 8765             # the lobby: the browser picks the track and the players
+    uv run python -m bakeoff live --start --seed 1001 --players fly,jev_composed,llm --max-requests 150
+    uv run python -m bakeoff live --game v1 --seed 1001 --start   # free: replays that run's answers from the cache
 
 `bench` scores recorded runs and spends nothing. It merges run directories like `view` (one game; each player and
 seed from one directory; `DIR:player,player` takes only those players from a directory) and leaves out episodes a
@@ -47,10 +49,12 @@ come by chance; the page counts the pairs and says so. The page is one offline f
 
 `live` plays one track in real time: every mind decides the same row before anyone moves on (a jumper skips
 the next row; the slowest mind sets the pace, about a row a second with the fly), each decision goes into a
-normal run directory and, through a server on `127.0.0.1` only, into the same page as it happens. It waits
-for a browser to open the page before it starts and keeps serving afterwards until Ctrl-C (`--no-wait` does
-neither). The cap works as in `run`: per paid player, default 0, which makes a free live run of a track whose
-answers are already cached; a live paid run on a seed below 1000 is refused without `--tournament`. `live`
+normal run directory and, through a server on `127.0.0.1` only, into the same page as it happens. The command
+binds the port and sets the ceiling; the page does the rest (updates 3a and 3b): the lobby picks the track and the
+players, shows the worst case before it spends anything, starts and cancels the run, and sets up another when one
+ends. `--start` plays the command line's own run at once instead, waiting for a browser first and serving until
+Ctrl-C (`--no-wait` does neither). The cap is the session's, per paid player, default 0, which makes a free live
+run of a track whose answers are already cached; a live paid run on a seed below 1000 is refused without `--tournament`. `live`
 builds one fly brain; do not start a second fly process next to it. Afterwards `view` replays the directory.
 
 Paid players (`jev`, `jev_composed`, `llm` and the question-set players below) need `TYPESAFE_API_KEY` / `ANTHROPIC_API_KEY` in a git-ignored `.env`
@@ -91,13 +95,15 @@ spikes and read-out signals, Jev's four answers, the LLM's answer). Any other pl
 directories (the question-set players, `jev` one-shot) join the same tunnel with their own tags. Blue is
 the cursor: it marks the mind in focus and the tiles that mind was shown, and with auto on it cuts to
 whoever faces a gap (a click chooses by hand, or keys 1 to 9 pick the runner in that position; space
-plays, the arrows step a row). Below are the level table (rows survived
-per track; it picks the track and shows or hides runners, baselines and the one-shot Jev included), the
-scoreboard, and what in the set-up is ours rather than the fly's or TypeSafe's. The look is the user's
+plays, the arrows step a row). The page has two tabs. **Run** holds the tunnel, the
+mind panels (each with a running log, one line per row, that follows the row on screen), the lobby when there is
+one, and **Players**: who runs next, and who is in the tunnel. **Analysis** holds the level table (rows survived
+per track; it picks the track), the scoreboard, what in the set-up is ours rather than the fly's or TypeSafe's,
+and the benchmark, drawn by the same code as `bench.html`. The look is the user's
 brand (`~/Documents/PROJECTS/BRAND/brand.css`). Several run directories are merged, since the fly and
 the paid players usually run separately; one (player, seed) may appear only once. Viewing costs
 nothing: it reads logs only. The viewer's JavaScript has its own tests, which `uv run pytest` runs
 through `node --test` (skipped when node is not installed).
 
 New here? Open `docs/EXPLAINER.html` in a browser: what this project is and how it works, from the idea down to
-the code. See `docs/DECISIONS.md` for what has been decided and `docs/NEXT.md` for what comes next.
+the code. To use it, `docs/WALKTHROUGH.md` walks through every command, every part of the page and what each costs. See `docs/DECISIONS.md` for what has been decided and `docs/NEXT.md` for what comes next.
