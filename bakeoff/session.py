@@ -34,7 +34,7 @@ FIRST_PRACTICE_SEED = 1000
 PRICE_USD = {"haiku": 0.0006, "haiku_composed": 0.0010, "haiku_choice": 0.0009, "haiku_two_step": 0.0016,
              "haiku_reader": 0.0065, "jev": 0.00004, "jev_composed": 0.00003, "jev_choice": 0.00004,
              "jev_two_step": 0.00003, "jev_reader": 0.00012,
-             "glm_composed": 0.0, "glm_choice": 0.0, "glm_two_step": 0.0, "glm_reader": 0.0}
+             "glm": 0.0, "glm_composed": 0.0, "glm_choice": 0.0, "glm_two_step": 0.0, "glm_reader": 0.0}
 
 # every player here asks its provider once a row, so a track of N rows costs at worst N requests
 REQUESTS_PER_ROW = 1

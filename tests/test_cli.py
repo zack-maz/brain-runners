@@ -223,7 +223,7 @@ def test_the_composed_jev_is_a_paid_player_for_the_seed_rule_and_the_help(tmp_pa
     assert not (tmp_path / "runs").exists()
     with pytest.raises(SystemExit):
         main(["run", "--help"])
-    assert ("EACH paid player (jev, jev_composed, haiku, jev_choice, jev_two_step, jev_reader, haiku_composed, "
+    assert ("EACH paid player (jev, jev_composed, haiku, glm, jev_choice, jev_two_step, jev_reader, haiku_composed, "
             "haiku_choice, haiku_two_step, haiku_reader, glm_composed, glm_choice, glm_two_step, glm_reader)"
             ) in " ".join(capsys.readouterr().out.split())
 

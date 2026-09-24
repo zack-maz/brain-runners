@@ -91,9 +91,9 @@
       players: ["solver", "random", "always_jump"] },
   ];
 
-  // the name of the player at (set, model), or null where there is none (GLM never had a one-shot)
+  // the name of the player at (set, model), or null where there is none
   function playerAt(set, model) {
-    if (set === "") return model === "glm" ? null : model;           // jev, haiku
+    if (set === "") return model;                                    // jev, haiku, glm
     if (set === "composed" && model === "jev") return "jev_composed"; // its own class, same questions
     return model + "_" + set;
   }

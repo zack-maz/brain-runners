@@ -105,7 +105,7 @@ test("the ceiling is written out, cap or no cap", () => {
 
 // ---- the grid: question sets down, models across -------------------------------------------------
 
-const ALL = ["fly", "solver", "random", "always_jump", "jev", "haiku",
+const ALL = ["fly", "solver", "random", "always_jump", "jev", "haiku", "glm",
              "jev_composed", "haiku_composed", "glm_composed",
              "jev_choice", "haiku_choice", "glm_choice",
              "jev_two_step", "haiku_two_step", "glm_two_step",
@@ -118,7 +118,7 @@ test("playerAt names the player at each crossing, and nothing where there is non
   assert.equal(Lobby.playerAt("two_step", "glm"), "glm_two_step");
   assert.equal(Lobby.playerAt("", "jev"), "jev");
   assert.equal(Lobby.playerAt("", "haiku"), "haiku");
-  assert.equal(Lobby.playerAt("", "glm"), null); // GLM never had a one-shot
+  assert.equal(Lobby.playerAt("", "glm"), "glm");
 });
 
 test("every player the server offers appears exactly once", () => {
@@ -147,7 +147,8 @@ test("the grid says what each question set asks and what each model is", () => {
 });
 
 test("a crossing with no player is an em dash, not an empty box", () => {
-  const html = Lobby.playerList(everyone(), []);
+  const short = everyone({ players: ALL.filter((n) => n !== "glm").map((n) => player(n)) });
+  const html = Lobby.playerList(short, []);       // the GLM column stands, its one-shot cell is empty
   assert.match(html, /<td class="none"[^>]*>—<\/td>/);
 });
 

@@ -39,7 +39,7 @@ def test_a_fresh_session_is_in_the_lobby_and_lists_every_player_with_its_price(t
 
 def test_the_contestants_come_first_in_the_pages_own_order_and_the_yardsticks_last(tmp_path):
     names = [p["name"] for p in session(tmp_path).state()["players"]]
-    assert names[:4] == ["fly", "jev_composed", "haiku", "jev"]  # the demo's three, then the one-shot Jev
+    assert names[:5] == ["fly", "jev_composed", "haiku", "jev", "glm"]  # the demo's three, then the other one-shots
     assert names[-3:] == ["always_jump", "random", "solver"]  # the free yardsticks
     assert set(names) == set(REGISTRY)
 
@@ -52,8 +52,8 @@ def test_every_paid_player_has_its_own_measured_price_and_none_of_them_is_unders
     assert PRICE_USD["haiku_reader"] > PRICE_USD["haiku"] * 10  # 0.970 USD over 150 requests, COSTS.md
     assert PRICE_USD["haiku_two_step"] > PRICE_USD["haiku_composed"] > PRICE_USD["haiku"]
     assert PRICE_USD["jev_reader"] > PRICE_USD["jev_composed"]
-    assert all(PRICE_USD[name] > 0 for name in PAID if not name.startswith("glm_"))
-    assert all(PRICE_USD[name] == 0.0 for name in PAID if name.startswith("glm_"))  # the free tier
+    assert all(PRICE_USD[name] > 0 for name in PAID if not name.startswith("glm"))
+    assert all(PRICE_USD[name] == 0.0 for name in PAID if name.startswith("glm"))  # the free tier
 
 
 def test_a_run_cancelled_before_it_begins_stops_waiting_and_closes_as_interrupted(tmp_path, monkeypatch):

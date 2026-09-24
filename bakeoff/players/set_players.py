@@ -16,17 +16,8 @@ from bakeoff.game.rules import DEFAULT, RULES
 from bakeoff.players.base import Decision
 from bakeoff.players.briefing import RULES as BRIEFING
 from bakeoff.players.jev_composed import ORDER
-from bakeoff.players.paid import PaidPlayer
+from bakeoff.players.paid import PaidPlayer, unfenced
 from bakeoff.players.question_sets import CHOICE, COMPOSED, READER, TWO_STEP, QuestionSet, values_of
-
-def unfenced(text: str) -> str:
-    """The answer without a markdown code fence around it. GLM wraps its JSON in ```json ... ```; Claude Haiku
-    does not, so this changes nothing for it and both models are read by the same rule."""
-    stripped = text.strip()
-    if stripped.startswith("```"):
-        stripped = stripped.split("\n", 1)[-1] if "\n" in stripped else stripped
-        stripped = stripped.rsplit("```", 1)[0]
-    return stripped.strip()
 
 
 CHAT_SYSTEM = (BRIEFING + " The user message is the runner's current view as JSON. Answer every question below, "

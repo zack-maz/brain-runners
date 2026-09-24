@@ -8,7 +8,7 @@
     ["DNa01", "steering"], ["DNb01", "steering"], ["DNp01", "Giant Fiber, escape jump"], ["DNa02", "logged only"],
   ];
   // the short uppercase tag a runner carries in the tunnel and on its panel
-  const TAGS = { fly: "FLY", jev_composed: "JEV", haiku: "HAIKU", jev: "JEV ONE-SHOT", solver: "SOLVER", random: "RANDOM", always_jump: "JUMPER",
+  const TAGS = { fly: "FLY", jev_composed: "JEV", haiku: "HAIKU", jev: "JEV ONE-SHOT", glm: "GLM ONE-SHOT", solver: "SOLVER", random: "RANDOM", always_jump: "JUMPER",
     jev_choice: "JEV CHOICE", jev_two_step: "JEV 2-STEP", jev_reader: "JEV READER", haiku_composed: "HAIKU COMPOSED",
     haiku_choice: "HAIKU CHOICE", haiku_two_step: "HAIKU 2-STEP", haiku_reader: "HAIKU READER",
     glm_composed: "GLM COMPOSED", glm_choice: "GLM CHOICE", glm_two_step: "GLM 2-STEP", glm_reader: "GLM READER" };
@@ -253,7 +253,7 @@
     const body = episode.player === "fly" ? flyMind(frame, context)
       : episode.player === "jev" ? jevMind(frame)
       : episode.player === "jev_composed" ? jevComposedMind(frame)
-      : episode.player === "haiku" ? chatMind(frame)
+      : episode.player === "haiku" || episode.player === "glm" ? chatMind(frame)
       : isSetPlayer(episode.player) ? setMind(frame) : "";
     return '<div class="saw">' + sensesGrid(frame, context.window) + verdict(frame) + "</div>" + body + cost(frame) + asked(episode, frame);
   }

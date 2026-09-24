@@ -184,8 +184,17 @@ test("the visor shows how sure Jev was that the move it chose is safe", () => {
 });
 
 test("tags are short and uppercase, and an unknown player still gets one", () => {
-  assert.deepEqual(["fly", "jev_composed", "haiku", "jev"].map(Minds.tagOf), ["FLY", "JEV", "HAIKU", "JEV ONE-SHOT"]);
+  assert.deepEqual(["fly", "jev_composed", "haiku", "jev", "glm"].map(Minds.tagOf),
+    ["FLY", "JEV", "HAIKU", "JEV ONE-SHOT", "GLM ONE-SHOT"]);
   assert.equal(Minds.tagOf("my_bot"), "MY_BOT");
+});
+
+test("the two one-shot chat models get the same panel", () => {
+  const answered = frame({ answers: { text: '{"action": "jump"}', stop_reason: "end_turn" }, chosen_action: "jump" });
+  const haiku = Minds.mind({ player: "haiku", questions: [] }, answered, context());
+  const glm = Minds.mind({ player: "glm", questions: [] }, answered, context());
+  assert.match(glm, /<pre class="answer">/);
+  assert.equal(glm, haiku);
 });
 
 test("a death and an error are marked bad, a stopped run is only a warning", () => {

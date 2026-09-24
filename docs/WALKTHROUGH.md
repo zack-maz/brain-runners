@@ -43,7 +43,7 @@ containing that text, so the keys cannot be echoed by accident.
 | `solver` | perfect search with the same 6-row view — the ceiling | free |
 | `random`, `always_jump` | the floors | free |
 | `fly` | the fruit fly connectome, untrained | free, ~0.7 s a row, ~1 GB of RAM |
-| `jev`, `haiku` | the one-shot pair: one broad question, one move | paid |
+| `jev`, `haiku`, `glm` | the one-shot trio: one broad question, one move | paid / free tier |
 | `jev_composed`, `haiku_composed`, `glm_composed` | "would each move land on a gap?" (4 questions) | paid / free tier |
 | `jev_choice`, `haiku_choice`, `glm_choice` | one Choice over the four moves | paid / free tier |
 | `jev_two_step`, `haiku_two_step`, `glm_two_step` | landing *and* whether it leaves a way on (8 questions) | paid / free tier |

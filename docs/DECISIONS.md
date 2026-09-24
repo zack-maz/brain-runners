@@ -219,6 +219,14 @@
     command still works. The provider ids in `bakeoff/clients/` (`llm`, `jev`, `glm`) are part of the cache path
     and stay as they are.
 
+40. **GLM Flash joins the one broad question, as `glm`** (the user, 2026-09-24). The lobby's grid had one empty
+    cell: every question set was asked of all three models, but the one broad question ("which move?", asked once,
+    with no pointed question under it) was asked only of Jev and Claude Haiku. `glm` fills it, built as the twin of
+    `haiku`: the same briefing and the same one-action schema, `GlmClient` instead of Anthropic's, so the model is
+    the only difference. Its one departure is reading the reply — GLM wraps its JSON in a markdown fence, which is
+    stripped for the parse only, so the log still keeps the answer as it came. Free tier, so its price is 0, and it
+    spends nothing until someone plays it with `--max-requests`.
+
 Where we are and what comes next: `docs/NEXT.md`.
 
 ## Prior art to reuse
