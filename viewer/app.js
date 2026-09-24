@@ -43,7 +43,7 @@
   const store = { game: null, runs: [], players: [], seeds: [], tracks: {}, episodes: [], scoreboard: null, ended: !liveUrl, error: null };
   const view = {
     seed: null, shown: new Set(), focus: null, auto: true, heldSince: 0,
-    t: 0, playing: false, speed: 3, following: !!liveUrl, size: 0, runners: [], panels: {},
+    t: 0, playing: false, speed: 3, following: !!liveUrl, size: 0, runners: [], panels: {}, openLog: null,
   };
 
   const runOf = (episode) => store.runs.find((run) => run.run_id === episode.run_id) || {};
@@ -153,6 +153,7 @@
   // ---- the mind strip -----------------------------------------------------------------------
   function renderStrip() {
     const strip = $("strip");
+    const openLog = view.openLog; // only one log is open at a time; it survives a re-render of the strip
     strip.innerHTML = "";
     view.panels = {};
     view.runners = playing().map((episode) => {
@@ -165,17 +166,43 @@
       panel.dataset.player = episode.player;
       panel.innerHTML = '<header><span class="label tag">' + esc(Minds.tagOf(episode.player)) + '</span><span class="about">' +
         esc(ABOUT[episode.player] || "") + (model ? " · " + esc(model) : "") + '</span></header><div class="body"><p class="status"></p>' +
-        '<div class="decision"></div></div>';
+        '<div class="decision"></div><details class="log"><summary class="label">Its log</summary><ol class="log-lines"></ol></details></div>';
       strip.appendChild(panel);
-      view.panels[episode.player] = { panel, status: panel.querySelector(".status"), decision: panel.querySelector(".decision"), index: -1 };
+      view.panels[episode.player] = { panel, status: panel.querySelector(".status"), decision: panel.querySelector(".decision"),
+                                      log: panel.querySelector(".log"), lines: panel.querySelector(".log-lines"), index: -1, logged: 0 };
       return { episode, track: store.tracks[String(episode.seed)], lookahead: game.lookahead || 6, window: window_,
                context: { windowMs: run.fly ? run.fly.window_ms : null, window: window_, maxHz: game.looming ? game.looming.max_hz : null } };
     });
+    if (openLog && view.panels[openLog]) view.panels[openLog].log.open = true;
     if (!view.runners.length) {
       strip.innerHTML = '<p class="note" style="padding:16px">' + (view.seed == null ? "Nothing has been played yet."
-        : "None of the players shown ran track " + esc(view.seed) + ". Pick a player in the level table to show it.") + "</p>";
+        : "None of the players shown ran track " + esc(view.seed) + ". Pick a player above to show it.") + "</p>";
     }
   }
+
+  // the log of one decision at a time, appended as the frames arrive so the list keeps its scroll
+  function appendLog(player) {
+    const ui = view.panels[player];
+    const episode = episodeOf(player, view.seed);
+    if (!ui || !episode || episode.frames.length <= ui.logged) return;
+    // "at the bottom" before the append decides whether the newest line is scrolled to afterwards
+    const atEnd = ui.lines.scrollTop + ui.lines.clientHeight >= ui.lines.scrollHeight - 4;
+    ui.lines.insertAdjacentHTML("beforeend", Log.lines(episode, episode.frames.slice(ui.logged)));
+    ui.logged = episode.frames.length;
+    if (atEnd) ui.lines.scrollTop = ui.lines.scrollHeight;
+  }
+
+  // one panel's log open at a time: opening one closes the rest
+  $("strip").addEventListener("toggle", (event) => {
+    const log = event.target.closest("details.log");
+    if (!log) return;
+    if (!log.open) {
+      if (view.openLog === log.closest(".mind").dataset.player) view.openLog = null;
+      return;
+    }
+    view.openLog = log.closest(".mind").dataset.player;
+    for (const other of $("strip").querySelectorAll("details.log")) if (other !== log) other.open = false;
+  }, true);
 
   $("strip").addEventListener("click", (event) => {
     if (event.target.closest("summary, details")) return;
@@ -262,6 +289,7 @@
       const status = !store.ended && !episode.complete && s.index === episode.frames.length - 1 && t >= s.frame.landing[0]
         ? "thinking…" : Minds.statusLine(episode, s, s.runner.track.lanes);
       if (ui.status.innerHTML !== status) ui.status.innerHTML = status;
+      appendLog(s.id);
       if (s.index !== ui.index) {
         const open = !!(ui.decision.querySelector("details") || {}).open;
         ui.decision.innerHTML = Minds.mind(episode, s.frame, s.runner.context);
@@ -446,7 +474,7 @@
     Object.assign(store, { game: null, runs: [], players: [], seeds: [], tracks: {}, episodes: [],
                            scoreboard: null, ended: false, error: null });
     Object.assign(view, { seed: null, shown: new Set(), focus: null, auto: true, heldSince: 0, t: 0,
-                          playing: false, following: true, runners: [], panels: {} });
+                          playing: false, following: true, runners: [], panels: {}, openLog: null });
     Feed.fromEmbedded(replay, handlers);
     renderAll();
   }

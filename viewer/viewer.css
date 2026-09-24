@@ -66,6 +66,15 @@ section > h2.label { margin-bottom: 20px; }
 .mind header .about { color: var(--muted); font-size: var(--size-small); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mind .status { min-height: 1.6em; color: var(--text); }
 .mind p { margin-top: 8px; }
+.mind .log { margin-top: 12px; border-top: 1px solid var(--hairline); }
+.log-lines { list-style: none; margin: 0 0 4px; padding: 0; max-height: 220px; overflow-y: auto;
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: var(--size-small); }
+.log-lines li { display: grid; grid-template-columns: 4.5em minmax(0, 7em) minmax(0, 1fr); gap: 10px;
+  padding: 3px 0; border-bottom: 1px solid var(--hairline); }
+.log-lines li:last-child { border-bottom: 0; }
+.log-lines .at { color: var(--muted); }
+.log-lines .said { color: var(--muted); overflow-wrap: anywhere; }
+.log-lines .bad { grid-column: 1 / -1; }
 .mind .saw { display: flex; gap: 16px; align-items: flex-start; margin-top: 10px; }
 .mind .verdict { margin-top: 0; }
 .mind .verdict strong { font-weight: 500; font-size: 20px; letter-spacing: -0.015em; color: var(--bright); }
