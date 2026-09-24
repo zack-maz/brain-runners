@@ -8,7 +8,7 @@ from bakeoff.clients.keys import require_key
 from bakeoff.game.engine import ACTIONS, Game
 from bakeoff.game.track import generate_track
 from bakeoff.players.jev import JevPlayer
-from bakeoff.players.llm import LlmPlayer
+from bakeoff.players.haiku import HaikuPlayer
 from bakeoff.senses import compute_senses
 
 pytestmark = pytest.mark.live
@@ -41,6 +41,6 @@ def test_jev_answers_one_real_request(tmp_path):
 
 
 def test_the_llm_answers_one_real_request(tmp_path):
-    decision = one_decision(LlmPlayer, "ANTHROPIC_API_KEY", tmp_path)
+    decision = one_decision(HaikuPlayer, "ANTHROPIC_API_KEY", tmp_path)
     assert decision.answers["stop_reason"] == "end_turn"
     assert decision.info["model"].startswith("claude-haiku-4-5")

@@ -32,14 +32,14 @@ def test_a_fresh_session_is_in_the_lobby_and_lists_every_player_with_its_price(t
     assert state["game"]["version"] == "v2" and state["max_rows"] == 12 and state["requests_per_row"] == 1
     by_name = {p["name"]: p for p in state["players"]}
     assert by_name["solver"]["paid"] is False and by_name["solver"]["requests_left"] is None
-    assert by_name["llm"]["paid"] is True and by_name["llm"]["price_usd"] == 0.0006
+    assert by_name["haiku"]["paid"] is True and by_name["haiku"]["price_usd"] == 0.0006
     assert by_name["glm_composed"]["price_usd"] == 0.0  # the free tier costs nothing while it lasts
-    assert by_name["llm"]["requests_left"] == 0  # the default cap spends nothing
+    assert by_name["haiku"]["requests_left"] == 0  # the default cap spends nothing
 
 
 def test_the_contestants_come_first_in_the_pages_own_order_and_the_yardsticks_last(tmp_path):
     names = [p["name"] for p in session(tmp_path).state()["players"]]
-    assert names[:4] == ["fly", "jev_composed", "llm", "jev"]  # the demo's three, then the one-shot Jev
+    assert names[:4] == ["fly", "jev_composed", "haiku", "jev"]  # the demo's three, then the one-shot Jev
     assert names[-3:] == ["always_jump", "random", "solver"]  # the free yardsticks
     assert set(names) == set(REGISTRY)
 
@@ -49,8 +49,8 @@ def test_every_paid_player_has_its_own_measured_price_and_none_of_them_is_unders
     The prices are the measured ones in docs/COSTS.md (update 2a), rounded up; a question set that
     reads more costs more, so a price belongs to a player, not to a provider."""
     assert set(PRICE_USD) == set(PAID)
-    assert PRICE_USD["llm_reader"] > PRICE_USD["llm"] * 10  # 0.970 USD over 150 requests, COSTS.md
-    assert PRICE_USD["llm_two_step"] > PRICE_USD["llm_composed"] > PRICE_USD["llm"]
+    assert PRICE_USD["haiku_reader"] > PRICE_USD["haiku"] * 10  # 0.970 USD over 150 requests, COSTS.md
+    assert PRICE_USD["haiku_two_step"] > PRICE_USD["haiku_composed"] > PRICE_USD["haiku"]
     assert PRICE_USD["jev_reader"] > PRICE_USD["jev_composed"]
     assert all(PRICE_USD[name] > 0 for name in PAID if not name.startswith("glm_"))
     assert all(PRICE_USD[name] == 0.0 for name in PAID if name.startswith("glm_"))  # the free tier
@@ -116,7 +116,7 @@ def test_a_track_that_was_played_before_is_marked_so_the_page_knows_it_replays_f
     (1001, [], "choose at least one player"),
     (-3, ["solver"], "must not be negative"),
     ("1001", ["solver"], "must be a whole number"),
-    (7, ["solver", "llm"], "paid players may not play seeds below 1000"),
+    (7, ["solver", "haiku"], "paid players may not play seeds below 1000"),
 ])
 def test_every_refusal_names_its_reason(tmp_path, seed, players, reason):
     with pytest.raises(LobbyError, match=reason):
@@ -125,18 +125,18 @@ def test_every_refusal_names_its_reason(tmp_path, seed, players, reason):
 
 def test_a_free_player_may_play_a_tournament_seed_and_a_paid_one_may_with_the_flag(tmp_path):
     session(tmp_path).check(7, ["solver"])  # nothing is spent, so nothing is at stake
-    session(tmp_path, tournament=True).check(7, ["solver", "llm"])
+    session(tmp_path, tournament=True).check(7, ["solver", "haiku"])
 
 
 def test_a_paid_player_with_no_request_left_of_the_session_cap_is_refused(tmp_path):
     lobby = session(tmp_path, max_requests=2)
-    lobby.budgets["llm"].spend()
-    lobby.check(1001, ["llm"])  # one left
-    lobby.budgets["llm"].spend()
-    with pytest.raises(LobbyError, match="llm has no requests left of this session's cap of 2"):
-        lobby.check(1001, ["llm"])
+    lobby.budgets["haiku"].spend()
+    lobby.check(1001, ["haiku"])  # one left
+    lobby.budgets["haiku"].spend()
+    with pytest.raises(LobbyError, match="haiku has no requests left of this session's cap of 2"):
+        lobby.check(1001, ["haiku"])
     lobby.check(1001, ["jev"])  # the other paid players keep their own budget
-    session(tmp_path).check(1001, ["llm"])  # a cap of 0 still replays the cache, as the command does
+    session(tmp_path).check(1001, ["haiku"])  # a cap of 0 still replays the cache, as the command does
 
 
 def test_only_one_run_at_a_time(tmp_path):

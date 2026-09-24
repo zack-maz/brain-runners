@@ -22,7 +22,7 @@ built (plan: `docs/superpowers/plans/2026-09-19-phase2-fly-player.md`): fly play
 Brian2 model, looming weighting and two thresholds fixed on practice seeds 1000–1199 and frozen
 (`calibration/REPORT.md`; never retune, never let seeds below 1000 influence them). First
 scoreboard in `calibration/RESULTS.md`. Phase 3 built (plan:
-`docs/superpowers/plans/2026-09-20-phase3-paid-players.md`): `jev` and `llm` players behind
+`docs/superpowers/plans/2026-09-20-phase3-paid-players.md`): `jev` and `haiku` players behind
 `bakeoff/clients/core.py` (disk cache, hard cap per paid player, no SDK retries). First costs in
 `docs/COSTS.md`. Phase 4 built (plan: `docs/superpowers/plans/2026-09-20-phase4-replay-viewer.md`):
 `bakeoff/replay.py` merges run directories into one replay object (`docs/REPLAY_DATA.md`) and
@@ -40,7 +40,8 @@ updates (`docs/UPDATES.md`, decision 20), on branch `phase6-updates`. Update 1, 
 difficulty by row 100, `v1` is the old 300-row game, pinned tile for tile; runs record their game and `view` never
 mixes two; everything recorded so far is v1 (`--game v1` replays it). Update 2a, the Jev family, is built (plan
 `...-update2a-jev-family.md`): `bakeoff/players/question_sets.py` (composed, choice, two_step, reader: questions and a
-rule, ours) played by `jev_<set>` and by Claude Haiku twins `llm_<set>` (`set_players.py`); the report's `brier_all`;
+rule, ours) played by `jev_<set>` and by Claude Haiku twins `haiku_<set>` (`set_players.py`; they were
+`llm_<set>` until decision 39, and `bakeoff/players/names.py` still reads the old name everywhere); the report's `brier_all`;
 its paid runs are done (five v2 practice tracks, `docs/COSTS.md`). Update 2b, the fly, stopped at its probe (spike 03, decision 30). Item 7, the benchmark, is built:
 `python -m bakeoff bench` (`bakeoff/bench.py`, page `viewer/bench.html`), decision 31. Item 10, the GLM Flash twins, is
 built and parked after one track (decisions 33–34). Left: the page, items 4, 5, 8 and 9 (decision 35, design

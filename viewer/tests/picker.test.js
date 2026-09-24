@@ -2,8 +2,8 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const { list, hint, toggle } = require("../picker.js");
 
-const players = ["fly", "jev_composed", "llm", "solver"];
-const here = ["fly", "jev_composed", "llm"];
+const players = ["fly", "jev_composed", "haiku", "solver"];
+const here = ["fly", "jev_composed", "haiku"];
 
 test("a shown player's button is pressed, a hidden one's is not", () => {
   const html = list(players, here, new Set(["fly"]), {});
@@ -24,7 +24,7 @@ test("a player name and its description are escaped", () => {
 });
 
 test("hint counts what is shown of what ran the track", () => {
-  assert.equal(hint(players, here, new Set(["fly", "llm"]), 1001), "2 of 3 shown on track 1001.");
+  assert.equal(hint(players, here, new Set(["fly", "haiku"]), 1001), "2 of 3 shown on track 1001.");
   assert.equal(hint(players, here, new Set(), 1001), "Nobody is in the tunnel: pick a player to show it.");
   assert.equal(hint(players, [], new Set(), 1001), "No player ran track 1001.");
   assert.equal(hint([], [], new Set(), null), "Nothing has been played yet.");
@@ -36,7 +36,7 @@ test("hint escapes a seed that is not a number", () => {
 
 test("toggle turns a player on and off without changing the set it was given", () => {
   const shown = new Set(["fly"]);
-  assert.deepEqual([...toggle(shown, here, "llm")], ["fly", "llm"]);
+  assert.deepEqual([...toggle(shown, here, "haiku")], ["fly", "haiku"]);
   assert.deepEqual([...toggle(shown, here, "fly")], []);
   assert.deepEqual([...shown], ["fly"]);
 });

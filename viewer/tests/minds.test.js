@@ -14,7 +14,7 @@ const count = (html, needle) => html.split(needle).length - 1;
 test("text from a log is escaped, never markup", () => {
   assert.equal(Minds.esc('<img src=x onerror="alert(1)">&\''), "&#60;img src=x onerror=&#34;alert(1)&#34;&#62;&#38;&#39;");
   const evil = "</pre><script>alert(1)</script>";
-  const html = Minds.mind({ player: "llm", questions: [{ system: evil }] },
+  const html = Minds.mind({ player: "haiku", questions: [{ system: evil }] },
     frame({ answers: { text: evil, stop_reason: evil }, chosen_action: evil, error: evil, q: 0 }), context());
   assert.equal(html.includes("<script>"), false);
   assert.equal(count(html, "&#60;script&#62;"), 5); // the move, the error, the answer, the stop reason, the question
@@ -184,7 +184,7 @@ test("the visor shows how sure Jev was that the move it chose is safe", () => {
 });
 
 test("tags are short and uppercase, and an unknown player still gets one", () => {
-  assert.deepEqual(["fly", "jev_composed", "llm", "jev"].map(Minds.tagOf), ["FLY", "JEV", "LLM", "JEV ONE-SHOT"]);
+  assert.deepEqual(["fly", "jev_composed", "haiku", "jev"].map(Minds.tagOf), ["FLY", "JEV", "HAIKU", "JEV ONE-SHOT"]);
   assert.equal(Minds.tagOf("my_bot"), "MY_BOT");
 });
 
@@ -225,11 +225,11 @@ test("the status line says how an episode ended", () => {
 });
 
 test("question-set players get the set panel; the composed Jev and the one-shots keep theirs", () => {
-  assert.deepEqual(["jev_choice", "jev_two_step", "jev_reader", "llm_composed", "llm_choice", "llm_two_step", "llm_reader"]
+  assert.deepEqual(["jev_choice", "jev_two_step", "jev_reader", "haiku_composed", "haiku_choice", "haiku_two_step", "haiku_reader"]
     .map(Minds.isSetPlayer), [true, true, true, true, true, true, true]);
-  assert.deepEqual(["jev_composed", "jev", "llm", "fly", "jev_other"].map(Minds.isSetPlayer), [false, false, false, false, false]);
+  assert.deepEqual(["jev_composed", "jev", "haiku", "fly", "jev_other"].map(Minds.isSetPlayer), [false, false, false, false, false]);
   assert.equal(Minds.tagOf("jev_two_step"), "JEV 2-STEP");
-  assert.equal(Minds.tagOf("llm_reader"), "LLM READER");
+  assert.equal(Minds.tagOf("haiku_reader"), "HAIKU READER");
 });
 
 test("the two-step panel shows both answers per move, marks the move made and names the rule as ours", () => {

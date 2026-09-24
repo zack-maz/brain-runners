@@ -23,9 +23,9 @@ const episode = (player, frames) => ({ player, seed: 1000, run_id: "r", complete
 
 test("an embedded replay arrives as meta, then each episode and its frames in order", () => {
   const { calls, handlers } = recorder();
-  const replay = { game: { version: "v2" }, runs: [{ run_id: "r" }], players: ["fly", "llm"], seeds: [1000], tracks: { 1000: TRACK },
+  const replay = { game: { version: "v2" }, runs: [{ run_id: "r" }], players: ["fly", "haiku"], seeds: [1000], tracks: { 1000: TRACK },
                    scoreboard: { columns: ["player"], rows: [], same_seeds: true },
-                   episodes: [episode("fly", [frame(0), frame(1)]), episode("llm", [frame(0)])] };
+                   episodes: [episode("fly", [frame(0), frame(1)]), episode("haiku", [frame(0)])] };
   fromEmbedded(replay, handlers);
   assert.deepEqual(calls.map((c) => c[0]), ["meta", "episode", "frame", "frame", "episode", "frame"]);
   assert.deepEqual(calls[0][1], { game: { version: "v2" }, runs: replay.runs, players: replay.players, seeds: [1000], scoreboard: replay.scoreboard });
@@ -67,7 +67,7 @@ test("history replayed after a reconnect is dropped: no episode twice, no row tw
   source.emit("frame", { player: "fly", seed: 1000, frame: frame(0) });
   source.emit("frame", { player: "fly", seed: 1000, frame: frame(2) });
   source.emit("frame", { player: "fly", seed: 1000, frame: frame(3) });
-  source.emit("frame", { player: "llm", seed: 1000, frame: frame(0) }); // no episode yet: nothing to add it to
+  source.emit("frame", { player: "haiku", seed: 1000, frame: frame(0) }); // no episode yet: nothing to add it to
   assert.deepEqual(calls.map((c) => (c[0] === "frame" ? c[3].row : c[0])), ["episode", 0, 2, 3]);
 });
 

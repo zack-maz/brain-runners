@@ -1,5 +1,9 @@
 # Measured runs and costs
 
+> Names: the Claude Haiku players were called `llm*` when these runs were recorded and are `haiku*` now
+> (decision 39). The tables below are left as they were written; `llm_composed` here is `haiku_composed`
+> in the tool today, and the tool reads the old run directories under the new names.
+
 2026-09-20. One track each, practice seed 1000, each player run alone, SDK retries off, code at `89dcb7a`.
 Run ids: `20260920-102909` (jev), `20260920-102919` (llm). Runs and the response cache are git-ignored; the
 run ids are the paper trail. Before the tracks, `pytest -m live` made one more request per provider.

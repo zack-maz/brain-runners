@@ -12,6 +12,7 @@ import numpy as np
 
 from bakeoff.game.rules import Rules
 from bakeoff.replay import SCHEMA_VERSION
+from bakeoff.players.names import canonical
 from bakeoff.report import PRICES_USD_PER_MTOK, load_meta, load_steps
 
 
@@ -23,11 +24,11 @@ class Source:
 
 
 def parse_source(arg: str) -> Source:
-    """`runs/X` or `runs/X:llm,jev_composed`. The last `:` separates the players, unless what follows it is a path."""
+    """`runs/X` or `runs/X:haiku,jev_composed`. The last `:` separates the players, unless what follows it is a path."""
     path, sep, names = arg.rpartition(":")
     if not sep or "/" in names:
         return Source(Path(arg), None)
-    players = tuple(n.strip() for n in names.split(",") if n.strip())
+    players = tuple(canonical(n.strip()) for n in names.split(",") if n.strip())
     if not players:
         raise ValueError(f"{arg}: no players after ':'")
     return Source(Path(path), players)

@@ -16,20 +16,20 @@
   const $ = (id) => document.getElementById(id);
   const esc = Minds.esc;
   const cell = Minds.cell;
-  const DEMO = ["fly", "jev_composed", "llm"]; // the default view; an older replay has only the one-shot jev
-  const SPRITE = { fly: "fly", jev_composed: "visor", llm: "llm" }; // everyone else is a plain grey block
+  const DEMO = ["fly", "jev_composed", "haiku"]; // the default view; an older replay has only the one-shot jev
+  const SPRITE = { fly: "fly", jev_composed: "visor", haiku: "chat" }; // everyone else is a plain grey block
   const ABOUT = {
     fly: "Fruit fly connectome, untrained",
     jev_composed: "Jev, four yes/no questions a row",
     jev: "Jev, one broad question a row",
-    llm: "Large language model",
+    haiku: "Claude Haiku 4.5",
     jev_choice: "Jev, one question a row, landings named",
     jev_two_step: "Jev, eight yes/no questions a row, looks two moves on",
     jev_reader: "Jev reads every visible tile, code plans",
-    llm_composed: "The LLM, asked the composed Jev's four questions",
-    llm_choice: "The LLM, asked jev_choice's question",
-    llm_two_step: "The LLM, asked jev_two_step's eight questions",
-    llm_reader: "The LLM reads every visible tile, code plans",
+    haiku_composed: "Claude Haiku, asked the composed Jev's four questions",
+    haiku_choice: "Claude Haiku, asked jev_choice's question",
+    haiku_two_step: "Claude Haiku, asked jev_two_step's eight questions",
+    haiku_reader: "Claude Haiku reads every visible tile, code plans",
     glm_composed: "GLM Flash, asked the composed Jev's four questions",
     glm_choice: "GLM Flash, asked jev_choice's question",
     glm_two_step: "GLM Flash, asked jev_two_step's eight questions",

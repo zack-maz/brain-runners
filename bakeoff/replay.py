@@ -15,8 +15,8 @@ REPLAY_VERSION = 1
 SCHEMA_VERSION = 1  # the step record this module reads; the runner writes it (a test keeps the two equal)
 # shown first, in this order: the demo's three (the composed Jev is its Jev), then the one-shot Jev;
 # everyone else in order of appearance
-CONTESTANTS = ("fly", "jev_composed", "llm", "jev", "jev_choice", "llm_choice", "llm_composed", "jev_two_step",
-               "llm_two_step", "jev_reader", "llm_reader",
+CONTESTANTS = ("fly", "jev_composed", "haiku", "jev", "jev_choice", "haiku_choice", "haiku_composed",
+               "jev_two_step", "haiku_two_step", "jev_reader", "haiku_reader",
                "glm_composed", "glm_choice", "glm_two_step", "glm_reader")
 # what a frame leaves out of its step record: the first three name the episode, the others are
 # replaced by `ahead`, `q` and the replay's `tracks`

@@ -18,33 +18,33 @@ def episode(player, seed, rows, finished=False, **extra):
 
 def test_a_source_is_a_directory_with_or_without_players():
     assert parse_source("runs/a") == Source(runs := __import__("pathlib").Path("runs/a"), None)
-    assert parse_source("runs/a:llm, jev_composed") == Source(runs, ("llm", "jev_composed"))
+    assert parse_source("runs/a:haiku, jev_composed") == Source(runs, ("haiku", "jev_composed"))
     with pytest.raises(ValueError, match="no players after ':'"):
         parse_source("runs/a:")
 
 
 def test_load_merges_directories_and_takes_only_the_named_players(tmp_path):
-    a = write_run(tmp_path, "a", episode("fly", 1000, 3) + episode("llm", 1000, 2), {"game": V2, "models": {"llm": "m"}})
-    b = write_run(tmp_path, "b", episode("llm", 1001, 4), {"game": V2, "models": {"llm": "m"}})
+    a = write_run(tmp_path, "a", episode("fly", 1000, 3) + episode("haiku", 1000, 2), {"game": V2, "models": {"haiku": "m"}})
+    b = write_run(tmp_path, "b", episode("haiku", 1001, 4), {"game": V2, "models": {"haiku": "m"}})
     loaded = load([Source(a, ("fly",)), Source(b)])
-    assert [(e.player, e.seed, e.rows, e.run_id) for e in loaded.episodes] == [("fly", 1000, 3, "a"), ("llm", 1001, 4, "b")]
+    assert [(e.player, e.seed, e.rows, e.run_id) for e in loaded.episodes] == [("fly", 1000, 3, "a"), ("haiku", 1001, 4, "b")]
     assert loaded.game.version == "v2" and loaded.run_ids == ("a", "b") and loaded.episodes[1].model == "m"
 
 
 def test_an_episode_that_neither_died_nor_finished_is_set_aside(tmp_path):
-    stopped = [record(player="llm", seed=1000, row=r) for r in range(5)]  # alive at its last record
-    run = write_run(tmp_path, "a", stopped + episode("llm", 1001, 3) + episode("solver", 1000, 150, finished=True))
+    stopped = [record(player="haiku", seed=1000, row=r) for r in range(5)]  # alive at its last record
+    run = write_run(tmp_path, "a", stopped + episode("haiku", 1001, 3) + episode("solver", 1000, 150, finished=True))
     loaded = load([Source(run)])
-    assert [(e.player, e.seed) for e in loaded.incomplete] == [("llm", 1000)]
-    assert [(e.player, e.seed) for e in loaded.episodes] == [("llm", 1001), ("solver", 1000)]
+    assert [(e.player, e.seed) for e in loaded.incomplete] == [("haiku", 1000)]
+    assert [(e.player, e.seed) for e in loaded.episodes] == [("haiku", 1001), ("solver", 1000)]
 
 
 def test_merge_errors_name_what_is_wrong(tmp_path):
-    a = write_run(tmp_path, "a", episode("llm", 1000, 2), {"game": V2})
-    b = write_run(tmp_path, "b", episode("llm", 1000, 3), {"game": V2})
-    with pytest.raises(ValueError, match="llm on seed 1000 is in both a and b"):
+    a = write_run(tmp_path, "a", episode("haiku", 1000, 2), {"game": V2})
+    b = write_run(tmp_path, "b", episode("haiku", 1000, 3), {"game": V2})
+    with pytest.raises(ValueError, match="haiku on seed 1000 is in both a and b"):
         load([Source(a), Source(b)])
-    with pytest.raises(ValueError, match="has no jev; it has llm"):
+    with pytest.raises(ValueError, match="has no jev; it has haiku"):
         load([Source(a, ("jev",))])
     c = write_run(tmp_path, "c", episode("fly", 1000, 2), {"game": {**V2, "version": "v1", "max_rows": 300,
                                                                      "difficulty_rows": 300}})
@@ -81,10 +81,10 @@ def test_a_players_rows_and_its_interval():
 
 def test_time_comes_from_live_decisions_and_the_flys_simulation():
     from bakeoff.bench import Episode, player_numbers
-    live = [record(player="llm", seed=1000, row=r, latency_ms=ms, usage={"input_tokens": 1000, "output_tokens": 100})
+    live = [record(player="haiku", seed=1000, row=r, latency_ms=ms, usage={"input_tokens": 1000, "output_tokens": 100})
             for r, ms in enumerate([500, 700, 900])]
-    cached = [record(player="llm", seed=1000, row=3, cache_hit=True, **DIED)]
-    n = player_numbers([Episode("llm", 1000, "r", tuple(live + cached), "claude-haiku-4-5-20251001")], 150)
+    cached = [record(player="haiku", seed=1000, row=3, cache_hit=True, **DIED)]
+    n = player_numbers([Episode("haiku", 1000, "r", tuple(live + cached), "claude-haiku-4-5-20251001")], 150)
     assert (n["s_per_decision_median"], n["live_decisions"], n["cache_hits"]) == (0.7, 3, 1)
     assert n["s_per_decision_p90"] == pytest.approx(0.86)
     assert n["decisions_per_row"] == 1.0 and n["s_per_row"] == pytest.approx(0.7)
@@ -129,13 +129,13 @@ def test_pairs_say_who_is_ahead_only_when_the_interval_excludes_zero():
 
 def test_the_benchmark_ranks_players_pairs_them_and_lists_what_it_left_out(tmp_path):
     from bakeoff.bench import JEV_PRICE_NOTE, benchmark
-    stopped = [record(player="llm", seed=1002, row=r) for r in range(5)]
+    stopped = [record(player="haiku", seed=1002, row=r) for r in range(5)]
     run = write_run(tmp_path, "a", episode("solver", 1000, 150, finished=True) + episode("jev", 1000, 40)
-                    + episode("llm", 1000, 90) + stopped, {"game": V2})
+                    + episode("haiku", 1000, 90) + stopped, {"game": V2})
     out = benchmark(load([Source(run)]))
-    assert [p["player"] for p in out["players"]] == ["solver", "llm", "jev"]
-    assert [(p["a"], p["b"]) for p in out["pairs"]] == [("solver", "llm"), ("solver", "jev"), ("llm", "jev")]
-    assert out["incomplete"] == [{"player": "llm", "seed": 1002, "run_id": "a", "rows": 5}]
+    assert [p["player"] for p in out["players"]] == ["solver", "haiku", "jev"]
+    assert [(p["a"], p["b"]) for p in out["pairs"]] == [("solver", "haiku"), ("solver", "jev"), ("haiku", "jev")]
+    assert out["incomplete"] == [{"player": "haiku", "seed": 1002, "run_id": "a", "rows": 5}]
     assert (out["game"], out["max_rows"], out["runs"]) == ("v2", 150, ["a"])
     assert JEV_PRICE_NOTE in out["notes"] and len(out["players"][0]["survival"]) == 151
     json.dumps(out)  # JSON-ready
@@ -182,9 +182,9 @@ def test_load_refuses_what_would_score_wrong(tmp_path):
     full = write_run(tmp_path, "full", episode("b", 1000, 120), {"game": V2})
     with pytest.raises(ValueError, match="short has tracks of 50 rows but full of 150"):
         load([Source(short), Source(full)])
-    m1 = write_run(tmp_path, "m1", episode("llm", 1000, 5), {"game": V2, "models": {"llm": "one"}})
-    m2 = write_run(tmp_path, "m2", episode("llm", 1001, 5), {"game": V2, "models": {"llm": "two"}})
-    with pytest.raises(ValueError, match="llm is one in m1 but two in m2"):
+    m1 = write_run(tmp_path, "m1", episode("haiku", 1000, 5), {"game": V2, "models": {"haiku": "one"}})
+    m2 = write_run(tmp_path, "m2", episode("haiku", 1001, 5), {"game": V2, "models": {"haiku": "two"}})
+    with pytest.raises(ValueError, match="haiku is one in m1 but two in m2"):
         load([Source(m1), Source(m2)])
     twice = write_run(tmp_path, "twice", episode("a", 1000, 3) + episode("a", 1000, 3), {"game": V2})
     with pytest.raises(ValueError, match="a on seed 1000 appears more than once in twice"):
@@ -194,7 +194,7 @@ def test_load_refuses_what_would_score_wrong(tmp_path):
 def test_a_colon_in_a_directory_path_is_not_a_player_list():
     from pathlib import Path
     assert parse_source("runs/a:b/c") == Source(Path("runs/a:b/c"), None)
-    assert parse_source("runs/a:b/c:llm") == Source(Path("runs/a:b/c"), ("llm",))
+    assert parse_source("runs/a:b/c:haiku") == Source(Path("runs/a:b/c"), ("haiku",))
 
 
 def test_benchmark_of_scores_a_run_directory(tmp_path):

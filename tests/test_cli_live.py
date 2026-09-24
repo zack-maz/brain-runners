@@ -18,7 +18,7 @@ def test_by_default_the_page_runs_the_show_with_the_demos_three_ready_and_no_bud
     args = _parser().parse_args(["live"])
     assert (args.players, args.seed, args.start) == (None, None, False)  # the lobby chooses
     assert (args.max_requests, args.port, args.tournament) == (0, 8000, False)
-    assert (DEMO_PLAYERS, DEMO_SEED) == ("fly,jev_composed,llm", 1001)  # what it offers first
+    assert (DEMO_PLAYERS, DEMO_SEED) == ("fly,jev_composed,haiku", 1001)  # what it offers first
 
 
 def test_the_lobby_serves_until_it_is_interrupted_and_reports_the_runs_the_page_played(tmp_path, capsys, monkeypatch):
@@ -30,7 +30,7 @@ def test_the_lobby_serves_until_it_is_interrupted_and_reports_the_runs_the_page_
                  "--cache", str(tmp_path / "cache")]) == 0
     out = capsys.readouterr().out
     assert "watch: http://127.0.0.1:" in out and "the page runs the show" in out
-    assert "fly,jev_composed,llm on track 1001" in out
+    assert "fly,jev_composed,haiku on track 1001" in out
     assert lobby and lobby[0].status == "lobby" and not (tmp_path / "runs").exists()
 
 

@@ -10,8 +10,8 @@ from bakeoff.game.track import generate_track
 from bakeoff.players import PAID, make_player
 from bakeoff.players.briefing import RULES as BRIEFING
 from bakeoff.players.question_sets import CHOICE, READER, TWO_STEP
-from bakeoff.players.set_players import (LLM_SYSTEM, JevReaderPlayer, JevTwoStepPlayer, LlmChoicePlayer,
-                                         LlmComposedPlayer, LlmReaderPlayer, SET_PLAYERS)
+from bakeoff.players.set_players import (CHAT_SYSTEM, JevReaderPlayer, JevTwoStepPlayer, HaikuChoicePlayer,
+                                         HaikuComposedPlayer, HaikuReaderPlayer, SET_PLAYERS)
 from bakeoff.runner import Runner
 from bakeoff.senses import compute_senses, truth_of
 from tests.fakes import FakeAnthropic, FakeTypeSafe, jev_set_reply, llm_reply
@@ -24,7 +24,7 @@ def jev(tmp_path, cls, reply, cap=10):
     return cls(cache=DiskCache(tmp_path), budget=RequestBudget(cap), sdk=sdk), sdk
 
 
-def llm(tmp_path, cls, text, stop_reason="end_turn", cap=10):
+def haiku(tmp_path, cls, text, stop_reason="end_turn", cap=10):
     sdk = FakeAnthropic(llm_reply(text, stop_reason))
     return cls(cache=DiskCache(tmp_path), budget=RequestBudget(cap), sdk=sdk), sdk
 
@@ -35,8 +35,8 @@ def safe(questions, value=0.1):
 
 def test_one_paid_player_per_model_and_set():
     names = [p.name for p in SET_PLAYERS]
-    assert names == ["jev_choice", "jev_two_step", "jev_reader", "llm_composed", "llm_choice", "llm_two_step",
-                     "llm_reader", "glm_composed", "glm_choice", "glm_two_step", "glm_reader"]
+    assert names == ["jev_choice", "jev_two_step", "jev_reader", "haiku_composed", "haiku_choice", "haiku_two_step",
+                     "haiku_reader", "glm_composed", "glm_choice", "glm_two_step", "glm_reader"]
     assert all(name in PAID for name in names)
 
 
@@ -82,10 +82,10 @@ def test_a_jev_set_player_with_perfect_answers_plays_its_rules_ceiling(tmp_path)
 
 def test_the_llm_twin_gets_the_same_questions_in_one_structured_request(tmp_path):
     values = {**safe(TWO_STEP.build(V2)), "gap_stay": 0.9}
-    player, sdk = llm(tmp_path, LlmComposedPlayer, json.dumps({k: v for k, v in values.items() if k.startswith("gap_")}))
+    player, sdk = haiku(tmp_path, HaikuComposedPlayer, json.dumps({k: v for k, v in values.items() if k.startswith("gap_")}))
     decision = player.act(SENSES)
     (call,) = sdk.calls
-    assert call["system"].startswith(LLM_SYSTEM) and call["system"].startswith(BRIEFING)
+    assert call["system"].startswith(CHAT_SYSTEM) and call["system"].startswith(BRIEFING)
     assert "- `gap_left` (yes/no): Would the action `left` land the runner on a gap" in call["system"]
     schema = call["output_config"]["format"]["schema"]
     assert schema["required"] == ["gap_left", "gap_stay", "gap_right", "gap_jump"]
@@ -97,7 +97,7 @@ def test_the_llm_twin_gets_the_same_questions_in_one_structured_request(tmp_path
 
 
 def test_the_llm_choice_twin_names_the_options_once_and_not_the_briefing_twice(tmp_path):
-    player, sdk = llm(tmp_path, LlmChoicePlayer, '{"action": "jump"}')
+    player, sdk = haiku(tmp_path, HaikuChoicePlayer, '{"action": "jump"}')
     assert player.act(SENSES).chosen_action == "jump"
     system = sdk.calls[0]["system"]
     assert system.count(BRIEFING) == 1
@@ -111,19 +111,19 @@ def test_the_llm_choice_twin_names_the_options_once_and_not_the_briefing_twice(t
     ('{"gap_left": 2, "gap_stay": 0, "gap_right": 0, "gap_jump": 0}', "end_turn"),
     ('{"gap_left": 0.1, "gap_stay": 0, "gap_right": 0, "gap_jump": 0}', "max_tokens")])
 def test_an_llm_answer_that_is_not_every_usable_number_is_invalid(tmp_path, text, stop_reason):
-    player, _ = llm(tmp_path, LlmComposedPlayer, text, stop_reason)
+    player, _ = haiku(tmp_path, HaikuComposedPlayer, text, stop_reason)
     decision = player.act(SENSES)
     assert decision.invalid and decision.chosen_action is None and decision.answers["text"] == text
 
 
 def test_the_reader_twin_leaves_room_for_42_answers(tmp_path):
-    player, sdk = llm(tmp_path, LlmReaderPlayer, json.dumps(safe(READER.build(V2), 0.0)))
+    player, sdk = haiku(tmp_path, HaikuReaderPlayer, json.dumps(safe(READER.build(V2), 0.0)))
     assert player.act(SENSES).chosen_action == "stay"
     assert sdk.calls[0]["max_tokens"] == 256 + 12 * 42
 
 
 def test_set_players_spend_nothing_without_a_budget_and_stop_at_the_cap(tmp_path):
-    player = make_player("llm_choice", cache=DiskCache(tmp_path))
+    player = make_player("haiku_choice", cache=DiskCache(tmp_path))
     with pytest.raises(BudgetExhausted):
         player.act(SENSES)
     capped, _ = jev(tmp_path, JevReaderPlayer, jev_set_reply(safe(READER.build(V2))), cap=1)
@@ -141,7 +141,7 @@ def test_both_chat_models_are_sent_the_same_request_and_differ_only_in_the_provi
     from tests.fakes import FakeHttp, glm_reply
 
     cache = DiskCache(tmp_path / "cache")
-    haiku = LlmComposedPlayer(cache=cache, budget=RequestBudget(1), sdk=FakeAnthropic(llm_reply()))
+    haiku = HaikuComposedPlayer(cache=cache, budget=RequestBudget(1), sdk=FakeAnthropic(llm_reply()))
     glm = GlmComposedPlayer(cache=cache, budget=RequestBudget(1), sdk=FakeHttp(glm_reply()))
     assert glm.questions == haiku.questions  # same system prompt, same question lines, same JSON shape
     assert glm.client.provider == "glm" and glm.client.model == "glm-4.5-flash"

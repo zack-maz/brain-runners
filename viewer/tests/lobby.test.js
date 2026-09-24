@@ -8,19 +8,19 @@ const state = (extra) => ({
   status: "lobby", game: { version: "v2" }, max_rows: 150, requests_per_row: 1, max_requests: 0,
   tournament: false, first_practice_seed: 1000, seed: 1001, run: null,
   players: [player("fly"), player("solver"),
-            player("llm", { paid: true, price_usd: 0.0006, requests_left: 200 }),
+            player("haiku", { paid: true, price_usd: 0.0006, requests_left: 200 }),
             player("jev_composed", { paid: true, price_usd: 0.00003, requests_left: 200 }),
             player("glm_composed", { paid: true, price_usd: 0, requests_left: 200 })],
   ...extra,
 });
 
 test("the estimate is the worst case: every row a request, until the budget runs out", () => {
-  const { rows, lines, total_usd } = Lobby.estimate(state(), ["fly", "llm", "jev_composed"]);
+  const { rows, lines, total_usd } = Lobby.estimate(state(), ["fly", "haiku", "jev_composed"]);
   assert.equal(rows, 150);
-  assert.deepEqual(lines.map((l) => [l.player, l.requests]), [["llm", 150], ["jev_composed", 150]]);
+  assert.deepEqual(lines.map((l) => [l.player, l.requests]), [["haiku", 150], ["jev_composed", 150]]);
   assert.equal(total_usd.toFixed(4), (150 * 0.0006 + 150 * 0.00003).toFixed(4));
   // a budget smaller than the track caps the estimate: the run stops when the cap is reached
-  const short = Lobby.estimate(state({ players: [player("llm", { paid: true, price_usd: 0.0006, requests_left: 20 })] }), ["llm"]);
+  const short = Lobby.estimate(state({ players: [player("haiku", { paid: true, price_usd: 0.0006, requests_left: 20 })] }), ["haiku"]);
   assert.deepEqual(short.lines.map((l) => l.requests), [20]);
   assert.equal(short.total_usd.toFixed(4), "0.0120");
 });
@@ -33,10 +33,10 @@ test("a run of free players says it spends nothing, and the free tier says so to
 });
 
 test("the estimate names each paid player, its worst case and whether the track was played before", () => {
-  const played = state({ players: [player("llm", { paid: true, price_usd: 0.0006, requests_left: 150, played_before: true })] });
-  const text = Lobby.estimateText(played, ["llm"]);
+  const played = state({ players: [player("haiku", { paid: true, price_usd: 0.0006, requests_left: 150, played_before: true })] });
+  const text = Lobby.estimateText(played, ["haiku"]);
   assert.match(text, /At worst this run of 150 rows spends 0.09 USD/);
-  assert.match(text, /LLM 150 requests at worst, 0.09 USD, played before \(some answers may be cached\)/);
+  assert.match(text, /HAIKU 150 requests at worst, 0.09 USD, played before \(some answers may be cached\)/);
 });
 
 test("money is written so that a fraction of a cent is still readable", () => {
@@ -53,8 +53,8 @@ test("the page says why a run cannot be started, before anyone presses anything"
   assert.equal(Lobby.whyNot(state(), ["fly"], -1), "the track must be a whole number, 0 or more");
   assert.equal(Lobby.whyNot(state(), ["fly"], 1.5), "the track must be a whole number, 0 or more");
   assert.equal(Lobby.whyNot(state({ status: "running" }), ["fly"], 1001), "a run is already going");
-  const refused = state({ players: [player("llm", { paid: true, why_not: "no requests left" })] });
-  assert.equal(Lobby.whyNot(refused, ["llm"], 7), "no requests left");
+  const refused = state({ players: [player("haiku", { paid: true, why_not: "no requests left" })] });
+  assert.equal(Lobby.whyNot(refused, ["haiku"], 7), "no requests left");
 });
 
 test("the player list marks the paid ones, their price and what is left of the cap", () => {
@@ -67,7 +67,7 @@ test("the player list marks the paid ones, their price and what is left of the c
 });
 
 test("a player that may not run is disabled and says why", () => {
-  const blocked = state({ players: [player("llm", { paid: true, price_usd: 0.0006, requests_left: 0,
+  const blocked = state({ players: [player("haiku", { paid: true, price_usd: 0.0006, requests_left: 0,
                                                     why_not: "llm has no requests left of this session's cap of 5" })] });
   const html = Lobby.playerList(blocked, []);
   assert.match(html, /disabled/);
@@ -87,11 +87,11 @@ test("a name or a reason from the server is text, never markup", () => {
 test("with nothing left of the cap the page says what a paid player can still do, and asks nothing", () => {
   // a cap of 0 is the default: paid players replay what is cached and stop at their first uncached
   // question, so the run cannot spend and there is nothing to confirm
-  const spent = state({ players: [player("llm", { paid: true, price_usd: 0.0065, requests_left: 0 })] });
-  assert.match(Lobby.estimateText(spent, ["llm"]), /No request left of this command's cap/);
-  assert.match(Lobby.estimateText(spent, ["llm"]), /stop at their first uncached question/);
-  assert.equal(Lobby.spends(spent, ["llm"]), false);
-  assert.equal(Lobby.spends(state(), ["llm"]), true);
+  const spent = state({ players: [player("haiku", { paid: true, price_usd: 0.0065, requests_left: 0 })] });
+  assert.match(Lobby.estimateText(spent, ["haiku"]), /No request left of this command's cap/);
+  assert.match(Lobby.estimateText(spent, ["haiku"]), /stop at their first uncached question/);
+  assert.equal(Lobby.spends(spent, ["haiku"]), false);
+  assert.equal(Lobby.spends(state(), ["haiku"]), true);
   assert.equal(Lobby.spends(state(), ["fly", "solver"]), false);
 });
 

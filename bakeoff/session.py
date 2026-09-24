@@ -19,6 +19,7 @@ from bakeoff.clients.core import DiskCache, RequestBudget, SharedBudget
 from bakeoff.game.rules import Rules
 from bakeoff.live import LiveRun
 from bakeoff.players import PAID, REGISTRY, make_player
+from bakeoff.players.names import canonical
 from bakeoff.replay import CONTESTANTS
 
 # tournament seeds are below this and must not be paid for, or shape prompts, before the tournament
@@ -30,8 +31,8 @@ FIRST_PRACTICE_SEED = 1000
 # reader's set is about eleven times the one-shot's. The budget, not this table, enforces the ceiling.
 # Jev's prices are estimates (its provider does not bill per request; COSTS.md explains the token basis).
 # GLM Flash is free while its free tier lasts.
-PRICE_USD = {"llm": 0.0006, "llm_composed": 0.0010, "llm_choice": 0.0009, "llm_two_step": 0.0016,
-             "llm_reader": 0.0065, "jev": 0.00004, "jev_composed": 0.00003, "jev_choice": 0.00004,
+PRICE_USD = {"haiku": 0.0006, "haiku_composed": 0.0010, "haiku_choice": 0.0009, "haiku_two_step": 0.0016,
+             "haiku_reader": 0.0065, "jev": 0.00004, "jev_composed": 0.00003, "jev_choice": 0.00004,
              "jev_two_step": 0.00003, "jev_reader": 0.00012,
              "glm_composed": 0.0, "glm_choice": 0.0, "glm_two_step": 0.0, "glm_reader": 0.0}
 
@@ -161,6 +162,7 @@ class LiveSession:
             raise LobbyError("the track must not be negative")
         if not names:
             raise LobbyError("choose at least one player")
+        names = [canonical(n) for n in names]  # an old llm* name from a saved link still works
         unknown = [n for n in names if n not in REGISTRY]
         if unknown:
             raise LobbyError(f"unknown player {unknown[0]!r}; choose from {sorted(REGISTRY)}")

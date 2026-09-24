@@ -1,5 +1,5 @@
 """Question sets: what a paid player asks each row, and the rule that turns the answers into a move. Each set
-is played twice, by Jev (`jev_<set>`) and by Claude Haiku (`llm_<set>`), with the same questions and the same rule
+is played twice, by Jev (`jev_<set>`) and by Claude Haiku (`haiku_<set>`), with the same questions and the same rule
 (docs/superpowers/specs/2026-09-21-jev-family-design.md; what still differs is in docs/COSTS.md, "Update 2a"). OURS, not TypeSafe's or Anthropic's: every wording and
 every rule here. Pure: no I/O."""
 

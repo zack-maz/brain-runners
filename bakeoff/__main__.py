@@ -12,13 +12,14 @@ from bakeoff.clients.core import DEFAULT_CACHE_DIR, DiskCache, RequestBudget
 from bakeoff.game.rules import DEFAULT, RULES, Rules, resolve, rules_for
 from bakeoff.live_server import EVENTS_PATH, HOST, serve
 from bakeoff.players import PAID, REGISTRY, make_player
+from bakeoff.players.names import canonical
 from bakeoff.report import format_table, load_meta, load_steps, summarize
 from bakeoff.replay import build_replay, empty_replay
 from bakeoff.runner import RunAborted, Runner
 from bakeoff.session import FIRST_PRACTICE_SEED, LiveSession, LobbyError
 from bakeoff.view import render_html
 
-DEMO_PLAYERS = "fly,jev_composed,llm"  # the demo's three: what the lobby offers first
+DEMO_PLAYERS = "fly,jev_composed,haiku"  # the demo's three: what the lobby offers first
 DEMO_SEED = 1001
 
 
@@ -91,7 +92,7 @@ def _parser() -> argparse.ArgumentParser:
 def _players(names: str, cache: DiskCache, max_requests: int, rules: Rules) -> list:
     # one budget per paid player: the providers bill separately, and one must not starve the other
     players = [make_player(name, cache=cache, budget=RequestBudget(max_requests)) if name in PAID
-               else make_player(name) for name in (n.strip() for n in names.split(","))]
+               else make_player(name) for name in (canonical(n.strip()) for n in names.split(","))]
     for p in players:  # a question set that cannot be asked on this vision is a usage error, before anyone plays
         if hasattr(p, "question_set"):
             p.question_set.build(rules)
@@ -129,7 +130,7 @@ def _live(args) -> int:
               file=sys.stderr)
         return 2
     seed = DEMO_SEED if args.seed is None else args.seed
-    names = [n.strip() for n in (args.players or DEMO_PLAYERS).split(",")]
+    names = [canonical(n.strip()) for n in (args.players or DEMO_PLAYERS).split(",")]
     run_args = {"command": "live", "game": args.game, "lookahead": args.lookahead, "window": args.window,
                 "max_rows": args.max_rows, "max_requests": args.max_requests, "cache": args.cache,
                 "tournament": args.tournament, "port": args.port}

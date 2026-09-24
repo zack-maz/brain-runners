@@ -193,8 +193,8 @@ gap in row 1 and lands safely on row 2.</figcaption>
     <h3>Claude Haiku 4.5</h3>
     <p>A regular chatbot-style model. It gets the rules and a description of the rows ahead, and answers with
     one move.</p>
-    <p>The one-shot LLM (<code>llm</code>) is told exactly the same rules, in the same words, as the one-shot Jev.
-    Its question-set twins (<code>llm_composed</code> and so on) ask the same questions as their Jev, under the
+    <p>The one-shot LLM (<code>haiku</code>) is told exactly the same rules, in the same words, as the one-shot Jev.
+    Its question-set twins (<code>haiku_composed</code> and so on) ask the same questions as their Jev, under the
     same rule, but three things still differ between the two models &mdash; see below. A third model, Zhipu's
     <strong>GLM Flash</strong>, plays the same four sets on a free tier (<code>glm_composed</code> and so on).</p>
   </div>
@@ -203,7 +203,7 @@ gap in row 1 and lands safely on row 2.</figcaption>
 <p>What became clear in phase 5 is that <em>how you ask</em> matters as much as <em>who you ask</em>. So the
 project is now a grid: <strong>four question sets</strong> (composed, choice, two-step, reader) &times;
 <strong>three models</strong> (Jev, Claude Haiku, GLM Flash), each set worded once and played by every model
-under the same rule &mdash; <code>jev_composed</code> and <code>llm_composed</code> and <code>glm_composed</code>
+under the same rule &mdash; <code>jev_composed</code> and <code>haiku_composed</code> and <code>glm_composed</code>
 are the same questions asked of three different minds. Section 10 has the detail. Every question and every rule
 is ours, not the models'.</p>
 
@@ -224,15 +224,15 @@ an impression, not a result.</p>
   <thead><tr><th>Player</th><th>Tracks</th><th>Mean rows</th><th>Finished</th><th>How it dies</th></tr></thead>
   <tbody>
     <tr><td>solver <span style="color:var(--muted)">(the ceiling)</span></td><td class="n">20</td><td class="n">150</td><td>always</td><td>&ndash;</td></tr>
-    <tr><td><code>llm_reader</code></td><td class="n">2</td><td class="n">150.0</td><td>2 of 2</td><td>didn't, on its two tracks</td></tr>
+    <tr><td><code>haiku_reader</code></td><td class="n">2</td><td class="n">150.0</td><td>2 of 2</td><td>didn't, on its two tracks</td></tr>
     <tr><td><strong><code>jev_two_step</code></strong></td><td class="n">5</td><td class="n">144.6</td><td>4 of 5</td><td>one jump into a gap</td></tr>
-    <tr><td><code>llm_composed</code></td><td class="n">5</td><td class="n">132.2</td><td>1 of 5</td><td>runs into the gap ahead</td></tr>
+    <tr><td><code>haiku_composed</code></td><td class="n">5</td><td class="n">132.2</td><td>1 of 5</td><td>runs into the gap ahead</td></tr>
     <tr><td><code>jev_composed</code></td><td class="n">5</td><td class="n">124.2</td><td>2 of 5</td><td>jumps into a gap</td></tr>
-    <tr><td><code>llm_two_step</code></td><td class="n">5</td><td class="n">109.6</td><td>1 of 5</td><td>dodges into a gap</td></tr>
+    <tr><td><code>haiku_two_step</code></td><td class="n">5</td><td class="n">109.6</td><td>1 of 5</td><td>dodges into a gap</td></tr>
     <tr><td><code>jev_choice</code></td><td class="n">5</td><td class="n">78.2</td><td>0 of 5</td><td>jumps into a gap</td></tr>
-    <tr><td><code>llm_choice</code></td><td class="n">5</td><td class="n">72.6</td><td>0 of 5</td><td>dodges into a gap</td></tr>
+    <tr><td><code>haiku_choice</code></td><td class="n">5</td><td class="n">72.6</td><td>0 of 5</td><td>dodges into a gap</td></tr>
     <tr><td><strong><code>fly</code></strong></td><td class="n">5</td><td class="n">68.0</td><td>0 of 5</td><td>jumps into a gap, every time</td></tr>
-    <tr><td><code>llm</code> <span style="color:var(--muted)">(one-shot)</span></td><td class="n">5</td><td class="n">56.6</td><td>0 of 5</td><td>dodges into a gap</td></tr>
+    <tr><td><code>haiku</code> <span style="color:var(--muted)">(one-shot)</span></td><td class="n">5</td><td class="n">56.6</td><td>0 of 5</td><td>dodges into a gap</td></tr>
     <tr><td><code>jev_reader</code></td><td class="n">5</td><td class="n">49.6</td><td>0 of 5</td><td>runs into the gap ahead, every time</td></tr>
     <tr><td>always_jump</td><td class="n">20</td><td class="n">39</td><td>0</td><td>&ndash;</td></tr>
     <tr><td>random <span style="color:var(--muted)">(the floor)</span></td><td class="n">20</td><td class="n">24</td><td>0</td><td>&ndash;</td></tr>
@@ -240,7 +240,7 @@ an impression, not a result.</p>
 </table>
 </div>
 <p style="font-size:14px;color:var(--muted)">Full detail, run by run, in <code>docs/COSTS.md</code>.
-<code>llm_reader</code> played two tracks because it is by far the priciest player. GLM Flash played one track
+<code>haiku_reader</code> played two tracks because it is by far the priciest player. GLM Flash played one track
 before its free tier began refusing (<code>glm_composed</code> 109 rows, <code>glm_two_step</code> 74,
 <code>glm_choice</code> 73, <code>glm_reader</code> 38); it is parked until the quota recovers.</p>
 
@@ -248,7 +248,7 @@ before its free tier began refusing (<code>glm_composed</code> 109 rows, <code>g
 interval around each average and compares every pair of players on the tracks both played. Over these five tracks
 it separates <code>jev_two_step</code> from its Haiku twin (+35 rows, interval 2 to 68) and from the fly (+77, 38
 to 116), and it <em>cannot</em> separate most of the rest &mdash; telling <code>jev_composed</code> from
-<code>llm_composed</code> would take about 150 tracks at this gap. It also counts its own luck: 36 pairs at 95%
+<code>haiku_composed</code> would take about 150 tracks at this gap. It also counts its own luck: 36 pairs at 95%
 each means about 2 verdicts would appear by chance alone. That is the honest state of it.</p>
 
 <p>What we learned along the way:</p>
@@ -260,14 +260,14 @@ each means about 2 verdicts would appear by chance alone. That is the honest sta
   <li><strong>How you ask matters as much as who you ask.</strong> Asked one broad question ("which move?"), Jev
   died after 23 rows. Asked four narrow yes/no questions, it read the track almost perfectly and finished. Asked
   to look two moves ahead, it became the best player in the bakeoff.</li>
-  <li><strong>Sharp answers are what make the extra step pay.</strong> <code>llm_two_step</code> gets exactly the
+  <li><strong>Sharp answers are what make the extra step pay.</strong> <code>haiku_two_step</code> gets exactly the
   same questions and the same rule as <code>jev_two_step</code>, and scores worse than its own one-step twin: its
   probabilities are nearly three times less accurate (Brier 0.020 against 0.007).</li>
   <li><strong>A wording can fail on one tile.</strong> <code>jev_reader</code> dies on every track for one reason:
   it reads the tile straight ahead as floor when it is a gap (44% of them), while the composed wording for the
   same tile never missed once. That is our wording failing, not Jev failing to read the track.</li>
   <li><strong>Cost is small but not equal.</strong> Per row: the Jev players about 0.2 s (price not published),
-  the Haiku twins 0.7&ndash;1.1 s and 0.0008&ndash;0.0016 USD, <code>llm_reader</code> 2.9 s and 0.0064 USD &mdash;
+  the Haiku twins 0.7&ndash;1.1 s and 0.0008&ndash;0.0016 USD, <code>haiku_reader</code> 2.9 s and 0.0064 USD &mdash;
   eight times the other twins. The fly is free and takes about 0.7 s a row on the laptop.</li>
 </ul>
 
@@ -370,7 +370,7 @@ scoreboard and a write-up with the honest caveats.</p>
   results there exist and would repeat exactly) or take fresh seeds below 1000.</li>
   <li><strong>A budget go-ahead.</strong> Worst case for 20 tracks of 150 rows (game v2), at the prices measured
   in update 2a: about 0.16 USD for the one-shot LLM, 0.25 to 0.50 USD for each of the cheaper Haiku twins, and
-  about 19 USD for <code>llm_reader</code> alone, which is why it may not be in the tournament at full length. The
+  about 19 USD for <code>haiku_reader</code> alone, which is why it may not be in the tournament at full length. The
   Jev players are a few pennies each (their price is an estimate, not published), GLM Flash is free, and the fly is
   free but takes about two minutes a track and must run on its own.</li>
 </ol>
@@ -401,7 +401,7 @@ one way:</p>
     <text x="342" y="40">game/engine.py</text><text x="342" y="56" fill="#7C848D" font-size="10">step(action), death</text>
     <text x="502" y="40">senses.py</text><text x="502" y="56" fill="#7C848D" font-size="10">JSON view · eye rates (Hz)</text>
     <text x="502" y="130">players/</text>
-    <text x="502" y="148" fill="#7C848D" font-size="10">fly · jev_composed · llm</text>
+    <text x="502" y="148" fill="#7C848D" font-size="10">fly · jev_composed · haiku</text>
     <text x="502" y="164" fill="#7C848D" font-size="10">jev · random · always_jump</text>
     <text x="502" y="180" fill="#7C848D" font-size="10">solver   → Decision</text>
     <text x="502" y="196" fill="#7C848D" font-size="10">+ 4 question sets &#215; 3 models</text>
@@ -462,7 +462,7 @@ uv run python -m bakeoff report runs/&lt;id&gt;
 uv run python -m bakeoff view   runs/&lt;id&gt; [runs/&lt;id&gt; ...]          # one offline HTML page
 uv run python -m bakeoff bench  runs/&lt;id&gt;[:player,...] [...]        # intervals, pairs, cost and time
 uv run python -m bakeoff live   --port 8765                         # the lobby: the browser picks and starts
-uv run python -m bakeoff live   --start --seed 1001 --players fly,jev_composed,llm [--max-requests N]</code></pre>
+uv run python -m bakeoff live   --start --seed 1001 --players fly,jev_composed,haiku [--max-requests N]</code></pre>
 
 <!-- ============================================================ -->
 <hr>
@@ -536,7 +536,7 @@ run on track 1001 was move for move the same as the batch run two days earlier.<
               "jump": "clear the next row, land on the one after", "stay": "run straight"}
 }</code></pre>
 
-<h3>The LLM (<code>llm</code>)</h3>
+<h3>The LLM (<code>haiku</code>)</h3>
 <p>Claude Haiku 4.5, one request per row, system prompt = the rules, user message = the JSON, answer forced to
 <code>{"action": "left" | "right" | "jump" | "stay"}</code> by structured output. Anything else is logged as
 <code>invalid</code>.</p>
@@ -577,7 +577,7 @@ written once and given to every model unchanged (<code>bakeoff/players/question_
   </tbody>
 </table>
 </div>
-<p>Each set is played by Jev (<code>jev_*</code>), by Claude Haiku (<code>llm_*</code>) and by GLM Flash
+<p>Each set is played by Jev (<code>jev_*</code>), by Claude Haiku (<code>haiku_*</code>) and by GLM Flash
 (<code>glm_*</code>), so the model is what differs &mdash; almost. Three things still differ besides the model, and
 the write-up must carry all three: the chat models are also given the briefing of the rules (Jev's yes/no questions
 carry only the question, except in the choice set); Jev's answers in one request are made in parallel and cannot

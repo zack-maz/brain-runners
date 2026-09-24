@@ -207,6 +207,18 @@
     row only. Whoever is ticked to play is shown when the run starts, so nobody has to say it twice. A single
     button would have to mean "play" before a run and "show" during one, which is the misreading this avoids.
 
+39. **Claude Haiku's players are `haiku*`, not `llm*`** (the user, 2026-09-24). With a second chat model in the
+    bakeoff, `llm_composed` beside `glm_composed` read as two unlike things when they are the same question set
+    asked of two models. The players are now `haiku`, `haiku_composed`, `haiku_choice`, `haiku_two_step` and
+    `haiku_reader`, and the page's tags say HAIKU. Nothing recorded changes: the response cache is keyed by
+    provider, model, senses and questions, so every answer already paid for still replays (checked:
+    `haiku_composed` replays practice track 1000 from 131 cache hits, 0 requests, the same 132 rows); the run
+    directories keep their `llm*.jsonl` files; and `bakeoff/players/names.py` maps the old names to the new ones
+    wherever a name is read — the command line, a `DIR:player,...` source, the lobby, and every record and
+    `meta.json` that `load_steps`/`load_meta` return. So an old run and a new one merge as one player, and a saved
+    command still works. The provider ids in `bakeoff/clients/` (`llm`, `jev`, `glm`) are part of the cache path
+    and stay as they are.
+
 Where we are and what comes next: `docs/NEXT.md`.
 
 ## Prior art to reuse

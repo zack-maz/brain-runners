@@ -1,4 +1,4 @@
-"""Players that ask a question set (bakeoff/players/question_sets.py): `jev_<set>` asks Jev, `llm_<set>` asks
+"""Players that ask a question set (bakeoff/players/question_sets.py): `jev_<set>` asks Jev, `haiku_<set>` asks
 Claude Haiku and `glm_<set>` asks GLM Flash the same questions, and the set's rule picks the move from any of their
 answers. The two chat models are sent the same request, built once in ChatSetPlayer, so only the model differs.
 The same cache, cap, error and fallback rules as every paid player (PaidPlayer). The composed set's Jev is
@@ -29,7 +29,7 @@ def unfenced(text: str) -> str:
     return stripped.strip()
 
 
-LLM_SYSTEM = (BRIEFING + " The user message is the runner's current view as JSON. Answer every question below, "
+CHAT_SYSTEM = (BRIEFING + " The user message is the runner's current view as JSON. Answer every question below, "
               "each under its id, in the JSON format given: for a yes/no question, your probability from 0 to 1 that "
               "the answer is yes; for a choice, one of its options.")
 
@@ -95,7 +95,7 @@ class ChatSetPlayer(SetPlayer):
             lines.append(f"- `{qid}` ({'yes/no' if q['type'] == 'noul' else 'choice'}): {text}")
         properties = {qid: {"type": "number"} if q["type"] == "noul" else {"type": "string", "enum": list(q["criteria"])}
                       for qid, q in set_questions.items()}
-        return {"system": LLM_SYSTEM + "\n\nQuestions:\n" + "\n".join(lines),
+        return {"system": CHAT_SYSTEM + "\n\nQuestions:\n" + "\n".join(lines),
                 "schema": {"type": "object", "properties": properties, "required": list(set_questions),
                            "additionalProperties": False},
                 "max_tokens": 256 + 12 * len(set_questions), "questions": set_questions}
@@ -113,7 +113,7 @@ class ChatSetPlayer(SetPlayer):
         return answers, {**answers, **logged}
 
 
-class LlmSetPlayer(ChatSetPlayer):
+class HaikuSetPlayer(ChatSetPlayer):
     client_class = LlmClient
 
 
@@ -133,20 +133,20 @@ class JevReaderPlayer(JevSetPlayer):
     name, question_set = "jev_reader", READER
 
 
-class LlmComposedPlayer(LlmSetPlayer):
-    name, question_set = "llm_composed", COMPOSED
+class HaikuComposedPlayer(HaikuSetPlayer):
+    name, question_set = "haiku_composed", COMPOSED
 
 
-class LlmChoicePlayer(LlmSetPlayer):
-    name, question_set = "llm_choice", CHOICE
+class HaikuChoicePlayer(HaikuSetPlayer):
+    name, question_set = "haiku_choice", CHOICE
 
 
-class LlmTwoStepPlayer(LlmSetPlayer):
-    name, question_set = "llm_two_step", TWO_STEP
+class HaikuTwoStepPlayer(HaikuSetPlayer):
+    name, question_set = "haiku_two_step", TWO_STEP
 
 
-class LlmReaderPlayer(LlmSetPlayer):
-    name, question_set = "llm_reader", READER
+class HaikuReaderPlayer(HaikuSetPlayer):
+    name, question_set = "haiku_reader", READER
 
 
 class GlmComposedPlayer(GlmSetPlayer):
@@ -166,5 +166,5 @@ class GlmReaderPlayer(GlmSetPlayer):
 
 
 SET_PLAYERS = (JevChoicePlayer, JevTwoStepPlayer, JevReaderPlayer,
-               LlmComposedPlayer, LlmChoicePlayer, LlmTwoStepPlayer, LlmReaderPlayer,
+               HaikuComposedPlayer, HaikuChoicePlayer, HaikuTwoStepPlayer, HaikuReaderPlayer,
                GlmComposedPlayer, GlmChoicePlayer, GlmTwoStepPlayer, GlmReaderPlayer)

@@ -7,6 +7,7 @@ import statistics
 from collections import defaultdict
 from pathlib import Path
 
+from bakeoff.players.names import canonical
 from bakeoff.senses import truth_of
 
 COLUMNS = ("player", "runs", "incomplete", "missing", "mean_rows", "median_rows", "finished",
@@ -24,6 +25,9 @@ PRICES_USD_PER_MTOK = {"claude-haiku-4-5-20251001": (1.00, 5.00),
 
 
 def load_steps(run_dir: Path | str) -> list[dict]:
+    """Every step of a run, with each record's player name brought up to date (decision 39): a run
+    recorded before Claude Haiku's players were renamed still merges with a new one as one player.
+    The files on disk are never rewritten."""
     run_dir = Path(run_dir)
     if not run_dir.is_dir():
         raise FileNotFoundError(f"no such run directory: {run_dir}")
@@ -32,7 +36,10 @@ def load_steps(run_dir: Path | str) -> list[dict]:
         lines = [line for line in path.read_text().splitlines() if line.strip()]
         for number, line in enumerate(lines):
             try:
-                steps.append(json.loads(line))
+                step = json.loads(line)
+                if "player" in step:
+                    step["player"] = canonical(step["player"])
+                steps.append(step)
             except json.JSONDecodeError as e:
                 if number != len(lines) - 1:
                     raise ValueError(f"{path}: line {number + 1} is not valid JSON: {e}") from e
@@ -41,12 +48,17 @@ def load_steps(run_dir: Path | str) -> list[dict]:
 
 
 def load_meta(run_dir: Path | str) -> dict | None:
-    """meta.json of a run, or None if it is absent or unreadable."""
+    """meta.json of a run, or None if it is absent or unreadable. Its player list is brought up to
+    date like the records' (decision 39), because the replay orders its runners by it."""
     try:
         meta = json.loads((Path(run_dir) / "meta.json").read_text())
     except (OSError, ValueError):
         return None
-    return meta if isinstance(meta, dict) else None
+    if not isinstance(meta, dict):
+        return None
+    if isinstance(meta.get("players"), list):
+        meta["players"] = [canonical(p) if isinstance(p, str) else p for p in meta["players"]]
+    return meta
 
 
 def _ratio(numerator: int, denominator: int) -> float | None:

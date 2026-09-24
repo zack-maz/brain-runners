@@ -25,7 +25,7 @@ For the paid players, put keys in a git-ignored `.env` at the repo root (templat
 | Key | For |
 | --- | --- |
 | `TYPESAFE_API_KEY` | the Jev players (`jev`, `jev_composed`, `jev_choice`, `jev_two_step`, `jev_reader`) |
-| `ANTHROPIC_API_KEY` | the Claude Haiku players (`llm`, `llm_composed`, `llm_choice`, `llm_two_step`, `llm_reader`) |
+| `ANTHROPIC_API_KEY` | the Claude Haiku players (`haiku`, `haiku_composed`, `haiku_choice`, `haiku_two_step`, `haiku_reader`) |
 | `ZHIPU_API_KEY` | the GLM Flash players (`glm_composed`, `glm_choice`, `glm_two_step`, `glm_reader`) |
 | `GLM_BASE_URL` | only for a mainland Zhipu account |
 
@@ -43,16 +43,21 @@ containing that text, so the keys cannot be echoed by accident.
 | `solver` | perfect search with the same 6-row view — the ceiling | free |
 | `random`, `always_jump` | the floors | free |
 | `fly` | the fruit fly connectome, untrained | free, ~0.7 s a row, ~1 GB of RAM |
-| `jev`, `llm` | the one-shot pair: one broad question, one move | paid |
-| `jev_composed`, `llm_composed`, `glm_composed` | "would each move land on a gap?" (4 questions) | paid / free tier |
-| `jev_choice`, `llm_choice`, `glm_choice` | one Choice over the four moves | paid / free tier |
-| `jev_two_step`, `llm_two_step`, `glm_two_step` | landing *and* whether it leaves a way on (8 questions) | paid / free tier |
-| `jev_reader`, `llm_reader`, `glm_reader` | every visible tile (42 questions), then plan | paid / free tier |
+| `jev`, `haiku` | the one-shot pair: one broad question, one move | paid |
+| `jev_composed`, `haiku_composed`, `glm_composed` | "would each move land on a gap?" (4 questions) | paid / free tier |
+| `jev_choice`, `haiku_choice`, `glm_choice` | one Choice over the four moves | paid / free tier |
+| `jev_two_step`, `haiku_two_step`, `glm_two_step` | landing *and* whether it leaves a way on (8 questions) | paid / free tier |
+| `jev_reader`, `haiku_reader`, `glm_reader` | every visible tile (42 questions), then plan | paid / free tier |
 
 Worst-case price per request, as the page quotes it (measured in `docs/COSTS.md`, rounded up):
-`llm_reader` 0.0065 USD · `llm_two_step` 0.0016 · `llm_composed` 0.0010 · `llm_choice` 0.0009 · `llm` 0.0006 ·
+`haiku_reader` 0.0065 USD · `haiku_two_step` 0.0016 · `haiku_composed` 0.0010 · `haiku_choice` 0.0009 · `haiku` 0.0006 ·
 the Jev players 0.00003–0.00012 (estimates) · the GLM players 0 while the free tier lasts. One request per row, so
 a 150-row track costs at worst 150 × that.
+
+**A note on names.** Claude Haiku's players were called `llm*` until 2026-09-24 (decision 39); they are `haiku*`
+now, so that `haiku_composed` and `glm_composed` read as the pair they are. The old names still work everywhere a
+name is typed, and runs recorded under them are read back under the new ones, so old and new runs merge as one
+player. Nothing on disk was rewritten and no cached answer was lost.
 
 **Tracks.** A seed is a track. `--game v2` (the default) is 150 rows and reaches full difficulty by row 100;
 `--game v1` is the old 300-row game. The same seed is a *different* track in each version, so the two never share

@@ -18,8 +18,8 @@ QUESTIONS = {
 }
 
 
-class LlmPlayer(PaidPlayer):
-    name = "llm"
+class HaikuPlayer(PaidPlayer):
+    name = "haiku"
     client_class = LlmClient
     questions = QUESTIONS
 

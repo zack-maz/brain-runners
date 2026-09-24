@@ -11,7 +11,7 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 - **Game v2** (items 3 and 6, decisions 21–24): built.
 - **Update 2a, the Jev family and its LLM twins** (decisions 25–27): built and reviewed task by task (spec
   `docs/superpowers/specs/2026-09-21-jev-family-design.md`, plan `docs/superpowers/plans/2026-09-21-update2a-jev-family.md`).
-  **Its paid runs are done** (2026-09-21): every player over v2 practice seeds 1000–1004, `llm_reader` on 1000–1001,
+  **Its paid runs are done** (2026-09-21): every player over v2 practice seeds 1000–1004, `haiku_reader` on 1000–1001,
   the fly on the same five tracks. Scoreboard and costs: `docs/COSTS.md`, "Update 2a". Claude Haiku spent 3.85 of the
   5.00 USD of decision 26; nothing on a seed below 1000. **Final whole-branch review done** (2026-09-21, "ready with
   fixes", nothing critical; report `.superpowers/sdd/2026-09-21-update2a-jev-family/final-review-report.md`): money
@@ -33,7 +33,7 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
   whole-update design review ("ready with fixes"; report in the git-ignored
   `.superpowers/sdd/2026-09-22-update3a-page-control/`). Its two critical findings are fixed in `c55d64b`: every
   paid player now carries its own measured price (the confirmed worst case was up to eleven times too low for
-  `llm_reader`), and a run cancelled while it waited for a browser now wakes and closes as `interrupted` instead of
+  `haiku_reader`), and a run cancelled while it waited for a browser now wakes and closes as `interrupted` instead of
   leaving a `meta.json` that says `running` for ever.
 - **Update 3b, the rest of the page** (sections D, E, F; decisions 35, 36 and 37): built 2026-09-23, plan
   `docs/superpowers/plans/2026-09-23-update3b-page-rest.md`. A running log in every mind panel (item 4), the Run and
@@ -76,7 +76,7 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 
 - Update 2a, v2 practice tracks: `uv run python -m bakeoff view runs/20260921-165433` (track 1000, every paid
   player); the other tracks are spread over `runs/20260921-171044` (Jev), `runs/20260921-185546` (LLM twins),
-  `runs/20260921-191326` (`llm_reader`, 1001) and `runs/20260921-192037` (the fly). `view` refuses the same (player,
+  `runs/20260921-191326` (`haiku_reader`, 1001) and `runs/20260921-192037` (the fly). `view` refuses the same (player,
   seed) twice, so pick directories that do not overlap.
 - Free yardsticks on v2: `runs/20260921-155758` (seeds 1000–1019: solver 150, always-jump 39, random 24).
 - Game v1 (phases 1 to 5): `uv run python -m bakeoff view runs/20260919-151934 runs/20260920-102919 runs/20260921-120903`
@@ -145,7 +145,7 @@ All of this is one to five practice tracks: an impression, not a result.
   rule of the game that also lives in JavaScript. The live `episode` event carries the question sets known at that
   moment; a player that changed its questions mid-episode would show nothing under "What it was asked" for the later
   ones (no player does).
-- Left from the final review of update 2a (Minor): `jev_composed` accepts any finite answer while `llm_composed`
+- Left from the final review of update 2a (Minor): `jev_composed` accepts any finite answer while `haiku_composed`
   requires 0 to 1, and `jev_composed` logs no `info.set` (leave its class alone: its cache and records must not
   change); the reader LLM's `max_tokens` (256 + 12 per question, about 50% headroom) is untested on larger visions;
   the `CONTESTANTS` order in `replay.py`, for update 8.

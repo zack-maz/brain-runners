@@ -181,10 +181,10 @@ def test_a_missing_key_is_a_usage_error_before_the_run_directory_exists(tmp_path
         raise ValueError(f"{name} is not set")
 
     monkeypatch.setattr(core, "require_key", no_key)
-    args = ["run", "--players", "solver,llm", "--seeds", "1", "--seed-start", "1000", "--max-requests", "3",
+    args = ["run", "--players", "solver,haiku", "--seeds", "1", "--seed-start", "1000", "--max-requests", "3",
             "--out", str(tmp_path / "runs"), "--cache", str(tmp_path / "cache")]
     assert main(args) == 2
-    assert "llm: ANTHROPIC_API_KEY is not set" in capsys.readouterr().err
+    assert "haiku: ANTHROPIC_API_KEY is not set" in capsys.readouterr().err
     assert not (tmp_path / "runs").exists()
 
 
@@ -223,8 +223,8 @@ def test_the_composed_jev_is_a_paid_player_for_the_seed_rule_and_the_help(tmp_pa
     assert not (tmp_path / "runs").exists()
     with pytest.raises(SystemExit):
         main(["run", "--help"])
-    assert ("EACH paid player (jev, jev_composed, llm, jev_choice, jev_two_step, jev_reader, llm_composed, "
-            "llm_choice, llm_two_step, llm_reader, glm_composed, glm_choice, glm_two_step, glm_reader)"
+    assert ("EACH paid player (jev, jev_composed, haiku, jev_choice, jev_two_step, jev_reader, haiku_composed, "
+            "haiku_choice, haiku_two_step, haiku_reader, glm_composed, glm_choice, glm_two_step, glm_reader)"
             ) in " ".join(capsys.readouterr().out.split())
 
 

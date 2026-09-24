@@ -27,7 +27,7 @@ test("answered falls back to the choice when there is no per-move number", () =>
 
 test("answered shortens a written reply to one line", () => {
   const text = "line one\nline two that goes on and on and on and on and on and on and on and on";
-  const out = answered({ player: "llm" }, frame({ answers: { text } }));
+  const out = answered({ player: "haiku" }, frame({ answers: { text } }));
   assert.ok(out.endsWith("…"));
   assert.ok(!out.includes("\n"));
   assert.ok(out.length <= 64);
@@ -101,7 +101,7 @@ test("an error is shown in --bad, escaped", () => {
 });
 
 test("a written answer is escaped, never markup", () => {
-  const html = line({ player: "llm", questions: [] }, frame({ q: null, answers: { text: '<img src=x onerror="a">' } }));
+  const html = line({ player: "haiku", questions: [] }, frame({ q: null, answers: { text: '<img src=x onerror="a">' } }));
   assert.ok(!html.includes("<img"));
   assert.ok(html.includes("&#60;img"));
 });

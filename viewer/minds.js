@@ -8,12 +8,12 @@
     ["DNa01", "steering"], ["DNb01", "steering"], ["DNp01", "Giant Fiber, escape jump"], ["DNa02", "logged only"],
   ];
   // the short uppercase tag a runner carries in the tunnel and on its panel
-  const TAGS = { fly: "FLY", jev_composed: "JEV", llm: "LLM", jev: "JEV ONE-SHOT", solver: "SOLVER", random: "RANDOM", always_jump: "JUMPER",
-    jev_choice: "JEV CHOICE", jev_two_step: "JEV 2-STEP", jev_reader: "JEV READER", llm_composed: "LLM COMPOSED",
-    llm_choice: "LLM CHOICE", llm_two_step: "LLM 2-STEP", llm_reader: "LLM READER",
+  const TAGS = { fly: "FLY", jev_composed: "JEV", haiku: "HAIKU", jev: "JEV ONE-SHOT", solver: "SOLVER", random: "RANDOM", always_jump: "JUMPER",
+    jev_choice: "JEV CHOICE", jev_two_step: "JEV 2-STEP", jev_reader: "JEV READER", haiku_composed: "HAIKU COMPOSED",
+    haiku_choice: "HAIKU CHOICE", haiku_two_step: "HAIKU 2-STEP", haiku_reader: "HAIKU READER",
     glm_composed: "GLM COMPOSED", glm_choice: "GLM CHOICE", glm_two_step: "GLM 2-STEP", glm_reader: "GLM READER" };
   // players that ask a question set (bakeoff/players/question_sets.py): Jev, Claude Haiku or GLM, and the set's name
-  const SET_PLAYER = /^(jev|llm|glm)_(composed|choice|two_step|reader)$/;
+  const SET_PLAYER = /^(jev|haiku|glm)_(composed|choice|two_step|reader)$/;
   const isSetPlayer = (player) => SET_PLAYER.test(player) && player !== "jev_composed";
   const tagOf = (player) => TAGS[player] || String(player).toUpperCase();
   const DEATHS = {
@@ -203,7 +203,7 @@
     return html + '<p class="muted">Code picks the move from these answers by ' + rule + ". The questions and that rule are ours.</p>";
   }
 
-  function llmMind(frame) {
+  function chatMind(frame) {
     const answers = frame.answers;
     if (!answers) return "";
     return '<pre class="answer">' + esc(answers.text == null ? "" : answers.text) + "</pre>" +
@@ -253,7 +253,7 @@
     const body = episode.player === "fly" ? flyMind(frame, context)
       : episode.player === "jev" ? jevMind(frame)
       : episode.player === "jev_composed" ? jevComposedMind(frame)
-      : episode.player === "llm" ? llmMind(frame)
+      : episode.player === "haiku" ? chatMind(frame)
       : isSetPlayer(episode.player) ? setMind(frame) : "";
     return '<div class="saw">' + sensesGrid(frame, context.window) + verdict(frame) + "</div>" + body + cost(frame) + asked(episode, frame);
   }
@@ -267,7 +267,7 @@
     return "row " + Math.floor(state.row) + ", lane " + (((Math.round(state.lane) % lanes) + lanes) % lanes);
   }
 
-  const api = { esc, cell, bar, tagOf, sensesGrid, verdict, spikeRaster, flyMind, jevMind, jevComposedMind, visorP, llmMind, cost, asked,
+  const api = { esc, cell, bar, tagOf, sensesGrid, verdict, spikeRaster, flyMind, jevMind, jevComposedMind, visorP, chatMind, cost, asked,
                 ours, mind, statusLine, isSetPlayer, readGrid, setMind };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Minds = api;
