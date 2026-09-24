@@ -65,8 +65,9 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
    it answers (a few requests through `bakeoff.clients.glm.HttpTransport`), then
    `uv run python -m bakeoff run --players glm_composed,glm_choice,glm_two_step --seeds 5 --seed-start 1000 --max-requests 700`
    and `--players glm_reader --seeds 2 --seed-start 1000 --max-requests 350`. Track 1000 replays free from the cache.
-2. The updates are done. Refresh `docs/EXPLAINER.html` (it knows game v2, not yet the Jev family, the
-   benchmark or the page that runs the show), then one PR titled **"Opus v1"** from `phase6-updates` (the user's
+2. The updates are done and `docs/EXPLAINER.html` is refreshed (2026-09-24: the question sets and their three
+   models, the benchmark, the page that runs the show, and the five-track scoreboard with what the benchmark can
+   and cannot separate). What is left is one PR titled **"Opus v1"** from `phase6-updates` (the user's
    instruction; not before).
 3. Then phase 6, the tournament and the write-up. It starts by settling which seeds (see "Open"), and it needs a new
    budget go-ahead: the tournament is the first paid use of seeds below 1000 (`--tournament`).

@@ -69,9 +69,9 @@
 <body>
 <main>
 
-<span class="label">brain-bakeoff · explainer · written 2026-09-21, after phase 5; being refreshed after the updates</span>
+<span class="label">brain-bakeoff · explainer · written 2026-09-21, refreshed 2026-09-24 after the updates</span>
 <h1>Three minds, one tunnel</h1>
-<p class="lede">A fruit fly's brain, a small AI that answers yes/no questions, and a chatbot all play the same
+<p class="lede">A fruit fly's brain, a small AI that answers yes/no questions, and two chatbots all play the same
 video game. We watch how each one thinks while it plays.</p>
 
 <p>This page starts in plain language and gets more technical as it goes. Stop reading whenever you have
@@ -82,14 +82,14 @@ enough. Each part is marked with its level.</p>
 <ol>
   <li><a href="#idea">The idea in one minute</a></li>
   <li><a href="#game">The game</a></li>
-  <li><a href="#minds">The three minds</a></li>
+  <li><a href="#minds">The minds</a></li>
   <li><a href="#results">What happened so far</a></li>
-  <li><a href="#watch">How to watch it</a></li>
+  <li><a href="#watch">How to watch it, and run it</a></li>
   <li><a href="#history">How we got here</a></li>
   <li><a href="#next">What's next</a></li>
   <li><a href="#machine">How it's built</a></li>
   <li><a href="#fly">The fly, in detail</a></li>
-  <li><a href="#paid">Jev and the LLM, in detail</a></li>
+  <li><a href="#paid">The question sets, in detail</a></li>
   <li><a href="#data">Runs, records and replays</a></li>
   <li><a href="#rules">Rules we hold ourselves to</a></li>
   <li><a href="#map">File map and glossary</a></li>
@@ -107,9 +107,11 @@ brain, which you can now run as a simulation on a laptop.</p>
 <p>We wanted to see them side by side, doing the same simple task, with their thinking visible. So we built:</p>
 <ul>
   <li><strong>a tiny game</strong> in which a runner goes down a tunnel and must not fall into holes;</li>
-  <li><strong>three players</strong>: a fruit fly brain, Jev, and an LLM (Claude Haiku 4.5);</li>
-  <li><strong>a player page</strong> where you watch all three run the same tunnel together, with a panel
-  under each one showing what it "had in mind" at every step.</li>
+  <li><strong>three kinds of player</strong>: a fruit fly brain, Jev, and chatbots (Claude Haiku 4.5, and GLM
+  Flash on a free tier);</li>
+  <li><strong>a page that runs the show</strong>: you pick the track and the players in the browser, watch them
+  run the same tunnel together with a panel under each one showing what it "had in mind" at every step, open
+  each one's running log line by line, and read the scoreboard and the benchmark on a second tab.</li>
 </ul>
 
 <p>The fun part is that the three are completely different inside. The fly was never trained on anything:
@@ -167,7 +169,7 @@ gap in row 1 and lands safely on row 2.</figcaption>
   slow, which matters because the fly simulation takes about a second per move.</li>
 </ul>
 
-<h2 id="minds">3. The three minds</h2>
+<h2 id="minds">3. The minds</h2>
 
 <div class="minds">
   <div class="mind">
@@ -193,14 +195,17 @@ gap in row 1 and lands safely on row 2.</figcaption>
     one move.</p>
     <p>The one-shot LLM (<code>llm</code>) is told exactly the same rules, in the same words, as the one-shot Jev.
     Its question-set twins (<code>llm_composed</code> and so on) ask the same questions as their Jev, under the
-    same rule, but three things still differ between the two models &mdash; see below.</p>
+    same rule, but three things still differ between the two models &mdash; see below. A third model, Zhipu's
+    <strong>GLM Flash</strong>, plays the same four sets on a free tier (<code>glm_composed</code> and so on).</p>
   </div>
 </div>
 
-<p>Beside the composed Jev shown above, there are seven more question-set players: two more ways to ask Jev
-(<code>jev_choice</code>, <code>jev_two_step</code>, <code>jev_reader</code>) and a Claude Haiku twin for every
-set, including the composed one (<code>llm_composed</code>, <code>llm_choice</code>, <code>llm_two_step</code>,
-<code>llm_reader</code>), covered in section 10.</p>
+<p>What became clear in phase 5 is that <em>how you ask</em> matters as much as <em>who you ask</em>. So the
+project is now a grid: <strong>four question sets</strong> (composed, choice, two-step, reader) &times;
+<strong>three models</strong> (Jev, Claude Haiku, GLM Flash), each set worded once and played by every model
+under the same rule &mdash; <code>jev_composed</code> and <code>llm_composed</code> and <code>glm_composed</code>
+are the same questions asked of three different minds. Section 10 has the detail. Every question and every rule
+is ours, not the models'.</p>
 
 <p>There are also three <strong>yardsticks</strong> that are not contestants: <code>random</code> (picks any
 move), <code>always_jump</code>, and <code>solver</code>, a perfect little search program that plays with the
@@ -210,63 +215,98 @@ like.</p>
 <h2 id="results">4. What happened so far</h2>
 
 <p>We have played <strong>practice tracks only</strong> (seeds 1000 and up) with the paid players. The real
-contest, on tracks nobody has tuned anything on, is the next phase. So everything below is an impression,
-not a result.</p>
+contest, on tracks nobody has tuned anything on, is the next phase. Everything below is <strong>five tracks</strong>:
+an impression, not a result.</p>
 
+<p>Game v2, practice seeds 1000&ndash;1004, rows survived out of 150:</p>
 <div class="scroll">
 <table>
-  <thead><tr><th>Track</th><th>Fly</th><th>Jev (composed)</th><th>LLM</th><th>Jev (one-shot)</th></tr></thead>
+  <thead><tr><th>Player</th><th>Tracks</th><th>Mean rows</th><th>Finished</th><th>How it dies</th></tr></thead>
   <tbody>
-    <tr><td>practice 1000</td><td class="n">58</td><td class="n">247</td><td class="n">199</td><td class="n">23</td></tr>
-    <tr><td>practice 1001 (played live)</td><td class="n">212</td><td class="n">241</td><td class="n">95</td><td class="n">–</td></tr>
+    <tr><td>solver <span style="color:var(--muted)">(the ceiling)</span></td><td class="n">20</td><td class="n">150</td><td>always</td><td>&ndash;</td></tr>
+    <tr><td><code>llm_reader</code></td><td class="n">2</td><td class="n">150.0</td><td>2 of 2</td><td>didn't, on its two tracks</td></tr>
+    <tr><td><strong><code>jev_two_step</code></strong></td><td class="n">5</td><td class="n">144.6</td><td>4 of 5</td><td>one jump into a gap</td></tr>
+    <tr><td><code>llm_composed</code></td><td class="n">5</td><td class="n">132.2</td><td>1 of 5</td><td>runs into the gap ahead</td></tr>
+    <tr><td><code>jev_composed</code></td><td class="n">5</td><td class="n">124.2</td><td>2 of 5</td><td>jumps into a gap</td></tr>
+    <tr><td><code>llm_two_step</code></td><td class="n">5</td><td class="n">109.6</td><td>1 of 5</td><td>dodges into a gap</td></tr>
+    <tr><td><code>jev_choice</code></td><td class="n">5</td><td class="n">78.2</td><td>0 of 5</td><td>jumps into a gap</td></tr>
+    <tr><td><code>llm_choice</code></td><td class="n">5</td><td class="n">72.6</td><td>0 of 5</td><td>dodges into a gap</td></tr>
+    <tr><td><strong><code>fly</code></strong></td><td class="n">5</td><td class="n">68.0</td><td>0 of 5</td><td>jumps into a gap, every time</td></tr>
+    <tr><td><code>llm</code> <span style="color:var(--muted)">(one-shot)</span></td><td class="n">5</td><td class="n">56.6</td><td>0 of 5</td><td>dodges into a gap</td></tr>
+    <tr><td><code>jev_reader</code></td><td class="n">5</td><td class="n">49.6</td><td>0 of 5</td><td>runs into the gap ahead, every time</td></tr>
+    <tr><td>always_jump</td><td class="n">20</td><td class="n">39</td><td>0</td><td>&ndash;</td></tr>
+    <tr><td>random <span style="color:var(--muted)">(the floor)</span></td><td class="n">20</td><td class="n">24</td><td>0</td><td>&ndash;</td></tr>
   </tbody>
 </table>
 </div>
-<p style="font-size:14px;color:var(--muted)">Rows survived out of 300 (game v1).</p>
+<p style="font-size:14px;color:var(--muted)">Full detail, run by run, in <code>docs/COSTS.md</code>.
+<code>llm_reader</code> played two tracks because it is by far the priciest player. GLM Flash played one track
+before its free tier began refusing (<code>glm_composed</code> 109 rows, <code>glm_two_step</code> 74,
+<code>glm_choice</code> 73, <code>glm_reader</code> 38); it is parked until the quota recovers.</p>
 
-<p>And the fly alone, on 20 tracks (game v1, seeds 0–19, played once and never tuned on):</p>
-<div class="scroll">
-<table>
-  <thead><tr><th>Player</th><th>Average rows</th><th>What it means</th></tr></thead>
-  <tbody>
-    <tr><td>random</td><td class="n">35</td><td>the floor</td></tr>
-    <tr><td>always_jump</td><td class="n">48</td><td>the floor for a jump-happy player</td></tr>
-    <tr><td><strong>fly</strong></td><td class="n">127</td><td>an untrained brain, reflexes only</td></tr>
-    <tr><td>solver</td><td class="n">300</td><td>the ceiling</td></tr>
-  </tbody>
-</table>
-</div>
+<p><strong>How sure are we?</strong> The project now has a benchmark (<code>bakeoff bench</code>) that puts a 95%
+interval around each average and compares every pair of players on the tracks both played. Over these five tracks
+it separates <code>jev_two_step</code> from its Haiku twin (+35 rows, interval 2 to 68) and from the fly (+77, 38
+to 116), and it <em>cannot</em> separate most of the rest &mdash; telling <code>jev_composed</code> from
+<code>llm_composed</code> would take about 150 tracks at this gap. It also counts its own luck: 36 pairs at 95%
+each means about 2 verdicts would appear by chance alone. That is the honest state of it.</p>
 
 <p>What we learned along the way:</p>
 <ul>
   <li><strong>The fly really does dodge.</strong> Without any training it plays far above random, because its
-  wiring steers away from looming things. It doesn't plan, so it sometimes dodges into another hole.</li>
-  <li><strong>How you ask Jev matters enormously.</strong> Asked one broad question ("which move?"), Jev died
-  after 23 rows. Asked four narrow yes/no questions, it read the track almost perfectly (1 wrong answer in 928)
-  and survived 247. That's why the demo uses the "composed" version.</li>
-  <li><strong>The LLM's typical death</strong> is stepping sideways into a hole when running straight was safe.</li>
-  <li><strong>Composed Jev "wanders"</strong>: when every move is safe its four answers are nearly equal, so it
-  often steps sideways for no reason. It never killed it, but on track 1001 it probably cost it the finish.</li>
-  <li><strong>Cost is tiny.</strong> An LLM move costs about 0.0006 USD; a Jev move about 0.00003 USD (an
-  estimate). The fly runs on the laptop for free.</li>
+  wiring steers away from looming things. It doesn't plan, so it sometimes dodges into another hole &mdash; on v2
+  all five of its deaths were jumps into a gap. (Its settings were frozen on the old game, v1, and never retuned,
+  which costs it something here.)</li>
+  <li><strong>How you ask matters as much as who you ask.</strong> Asked one broad question ("which move?"), Jev
+  died after 23 rows. Asked four narrow yes/no questions, it read the track almost perfectly and finished. Asked
+  to look two moves ahead, it became the best player in the bakeoff.</li>
+  <li><strong>Sharp answers are what make the extra step pay.</strong> <code>llm_two_step</code> gets exactly the
+  same questions and the same rule as <code>jev_two_step</code>, and scores worse than its own one-step twin: its
+  probabilities are nearly three times less accurate (Brier 0.020 against 0.007).</li>
+  <li><strong>A wording can fail on one tile.</strong> <code>jev_reader</code> dies on every track for one reason:
+  it reads the tile straight ahead as floor when it is a gap (44% of them), while the composed wording for the
+  same tile never missed once. That is our wording failing, not Jev failing to read the track.</li>
+  <li><strong>Cost is small but not equal.</strong> Per row: the Jev players about 0.2 s (price not published),
+  the Haiku twins 0.7&ndash;1.1 s and 0.0008&ndash;0.0016 USD, <code>llm_reader</code> 2.9 s and 0.0064 USD &mdash;
+  eight times the other twins. The fly is free and takes about 0.7 s a row on the laptop.</li>
 </ul>
 
-<h2 id="watch">5. How to watch it</h2>
+<h2 id="watch">5. How to watch it, and run it</h2>
 
 <p>Everything runs from the terminal in the project folder. Watching costs nothing.</p>
 
 <h3>A recorded run</h3>
-<pre><code>uv run python -m bakeoff view runs/20260919-151934 runs/20260920-102919 runs/20260921-120903</code></pre>
-<p>This writes one HTML file (the <strong>demo player</strong>) and you open it in a browser. It shows the tunnel with
-three pixel runners (a fly, an orange critter for the LLM, and "the visor" for Jev), a strip of "mind panels"
-under it, and a play bar. Keys: space plays, arrows step a row, 1/2/3 pick whose mind is in focus.</p>
+<pre><code>uv run python -m bakeoff view runs/20260921-165433</code></pre>
+<p>This writes one HTML file and you open it in a browser. Nothing is fetched from the network: the page, the
+data, the fonts and the benchmark are all inside that one file, so it can be mailed to someone.</p>
 
-<h3>Live</h3>
-<pre><code>uv run python -m bakeoff live --game v1 --seed 1001</code></pre>
-<p>This plays a track in real time on your Mac and streams it into the same page. With no
-<code>--max-requests</code> it spends nothing: Jev's and the LLM's answers come from the saved cache of the earlier
-run (which was played on game v1, hence <code>--game v1</code>; on a track nobody has played, a paid player with no
-budget stops at its first question), and the fly is simulated again for real (about a minute to build its brain, then about a second per row).</p>
+<h3>Live, with the page running the show</h3>
+<pre><code>uv run python -m bakeoff live --port 8765</code></pre>
+<p>This opens a lobby on your own machine and prints its address. In the browser you pick the track and tick who
+plays, and the page tells you what the run would cost at worst before you press Start; the command keeps the
+ceiling, so nothing the page sends can spend more than the cap you started it with (the default cap is 0, which
+replays cached answers and spends nothing). Press Start and the tunnel fills in real time; when it ends, the page
+is ready for another track without restarting the command.</p>
+
+<h3>What is on the page</h3>
+<ul>
+  <li><strong>Run tab.</strong> The tunnel with its pixel runners; under it a <strong>mind panel</strong> per
+  player showing what it was asked and what it answered on the row you are watching, and inside each panel an
+  <strong>"Its log"</strong> list: one line per row, with the question count, the answer, how long it took (or
+  <code>cached</code>), the move, and any error in red. The log follows the row on screen, so it never gives a
+  replay's ending away. Below the tunnel, <strong>Players</strong>: who runs next, and who is in the tunnel.</li>
+  <li><strong>Analysis tab.</strong> The level table (rows survived per track; pick a track to watch it), the
+  scoreboard, the notes about what is ours rather than the fly's or the model's, and the <strong>benchmark</strong>
+  &mdash; intervals, survival curves, rows against cost and time, and every pair of players. After a live run it
+  fills in by itself with the numbers for the run that just finished.</li>
+  <li>Keys on the Run tab: space plays, arrows step a row, 1/2/3 pick whose mind is in focus.</li>
+</ul>
+
+<h3>The benchmark on its own</h3>
+<pre><code>uv run python -m bakeoff bench runs/&lt;id&gt; [runs/&lt;id&gt;:player,player ...]</code></pre>
+<p>Scores runs that were already recorded (so it spends nothing), prints the tables in the terminal and writes
+<code>bench.json</code> and a standalone <code>bench.html</code>. It refuses to mix runs of different lengths, gives
+no interval below five tracks, and says how many of its verdicts chance alone would produce.</p>
 
 <h2 id="history">6. How we got here</h2>
 
@@ -296,20 +336,28 @@ budget stops at its first question), and the fly is simulated again for real (ab
   <li><span class="label">Update 2b · the fly</span>A trained fly was dropped; a richer-input fly
   (<code>fly_rich</code>) stopped at its probe: the wiring carries "where" only as strength, and it played worse.
   <code>fly</code> stays the only fly.</li>
-  <li><span class="label">Item 7 · the benchmark</span>An approved design for one report that says who is better,
-  with confidence, and the cost/performance trade-off. Being prototyped now, not built yet.</li>
-  <li class="next"><span class="label">Next</span>Build the benchmark (item 7), then the GLM Flash twin (item 10),
-  then the page (items 4, 5, 8, 9); then phase 6: the tournament and the write-up.</li>
+  <li><span class="label">Item 7 · the benchmark</span><code>bakeoff bench</code>: intervals, pairs, survival
+  curves, cost and time per row, on recorded runs. Its own review replaced the bootstrap with t intervals, which
+  had been claiming verdicts about one time in seven where there was no difference.</li>
+  <li><span class="label">Item 10 · GLM Flash</span>A third model on all four question sets, free tier. One track
+  recorded, then parked: the tier began refusing about four requests in five.</li>
+  <li><span class="label">Update 3a · the page takes over</span>The command binds the port and sets the money
+  ceiling; the browser picks the track and the players, starts and cancels runs, and sets up the next one.</li>
+  <li><span class="label">Update 3b · the rest of the page</span>A running log in every mind panel, the Run and
+  Analysis tabs, one picker over the tunnel, and the benchmark drawn inside the page. Its design review found the
+  Analysis tab drawing its charts with no stylesheet &mdash; invisible &mdash; and a log that ran ahead of the
+  tunnel; both fixed.</li>
+  <li class="next"><span class="label">Next</span>GLM Flash's remaining tracks when its quota recovers, then one
+  pull request; then phase 6: the tournament and the write-up.</li>
 </ol>
 
 <h2 id="next">7. What's next</h2>
 
-<p><strong>First, the ten updates</strong> in <code>docs/UPDATES.md</code> (decision 20): a better or trained fly,
-more Jev variants, six rows of vision, one live log tab per mind, any seed from the page, a faster difficulty
-ramp, a benchmark for time, cost and performance, the analysis moved to its own tab, selectable players and a
-GLM Flash twin. Done so far: the game changes (v2), the Jev family and its LLM twins (paid runs finished), and
-the fly's richer-input probe (stopped there; no new fly built). Next: the benchmark (item 7, approved design,
-being prototyped), then GLM Flash (item 10, needs a key), then the page (items 4, 5, 8, 9).</p>
+<p><strong>The ten updates</strong> of <code>docs/UPDATES.md</code> (decision 20) are done, bar one: the game got
+harder sooner (v2), Jev gained three more ways of being asked and two rival models, the fly's richer-input idea was
+probed and stopped, the benchmark was built, and the page became the tool that runs everything. What is left is
+<strong>GLM Flash's remaining four tracks</strong>, parked until its free tier stops refusing. Then the whole
+branch becomes one pull request.</p>
 
 <p><strong>Then phase 6: the tournament and a short write-up.</strong> All players play the same set of
 tournament tracks (seeds below 1000, which no paid player has ever seen and nothing was tuned on), then a
@@ -319,11 +367,11 @@ scoreboard and a write-up with the honest caveats.</p>
 <ol>
   <li><strong>Which seeds.</strong> Reuse seeds 0–19 (the fly already played them once, untuned; its
   results there exist and would repeat exactly) or take fresh seeds below 1000.</li>
-  <li><strong>A budget go-ahead.</strong> Worst case for 20 tracks of 150 rows (game v2): about 1.78 USD for the
-  one-shot LLM and about 0.10 USD each for the Jev players (estimates; a player that dies early costs less). The
-  priciest question-set twin, <code>llm_reader</code>, would be about 19 USD for 20 tracks on its own (about
-  0.0063 USD a row, measured in update 2a). The fly is free but takes about 4 minutes per track and must run on
-  its own.</li>
+  <li><strong>A budget go-ahead.</strong> Worst case for 20 tracks of 150 rows (game v2), at the prices measured
+  in update 2a: about 0.16 USD for the one-shot LLM, 0.25 to 0.50 USD for each of the cheaper Haiku twins, and
+  about 19 USD for <code>llm_reader</code> alone, which is why it may not be in the tournament at full length. The
+  Jev players are a few pennies each (their price is an estimate, not published), GLM Flash is free, and the fly is
+  free but takes about two minutes a track and must run on its own.</li>
 </ol>
 
 <!-- ============================================================ -->
@@ -355,7 +403,7 @@ one way:</p>
     <text x="502" y="148" fill="#7C848D" font-size="10">fly · jev_composed · llm</text>
     <text x="502" y="164" fill="#7C848D" font-size="10">jev · random · always_jump</text>
     <text x="502" y="180" fill="#7C848D" font-size="10">solver   → Decision</text>
-    <text x="502" y="196" fill="#7C848D" font-size="10">+ 7 question-set players</text>
+    <text x="502" y="196" fill="#7C848D" font-size="10">+ 4 question sets &#215; 3 models</text>
     <text x="262" y="150">runner.py / live.py</text><text x="262" y="166" fill="#7C848D" font-size="10">play_row: one record per move</text>
     <text x="22" y="150">runs/&lt;id&gt;/</text><text x="22" y="166" fill="#7C848D" font-size="10">meta.json · &lt;player&gt;.jsonl</text>
     <text x="22" y="260">report.py</text><text x="22" y="276" fill="#7C848D" font-size="10">scoreboard (text)</text>
@@ -392,7 +440,16 @@ JavaScript only draws.</figcaption>
   <li><strong>The runner</strong> plays players × seeds and streams one JSON line per move into a run
   directory. <code>live</code> uses the very same <code>play_row</code> function, one row at a time for all players
   in lockstep.</li>
-  <li><strong>Report, replay, view</strong> only read run directories. That's why watching is free.</li>
+  <li><strong>Report, replay, view, bench</strong> only read run directories. That's why watching is free, and
+  why the benchmark can never change what a run recorded.</li>
+  <li><strong>The live session</strong> (<code>bakeoff/session.py</code>) is what the page talks to: one per
+  command, holding one budget per paid player for the whole session, the refusal rules (a paid player may not play
+  a tournament seed without <code>--tournament</code>, cap or no cap) and one run at a time. The page's requests
+  carry a token minted at startup and embedded in the page, which keeps other pages in the browser out; it is not
+  a defence against another program on this machine, since whatever can fetch the page can read the token.</li>
+  <li><strong>The benchmark</strong> (<code>bakeoff/bench.py</code>) scores recorded runs: 95% t intervals over
+  tracks, paired differences for every pair of players, survival curves, and time and cost per row. The page and
+  the standalone <code>bench.html</code> draw it with the same JavaScript renderer.</li>
 </ul>
 
 <h3>The commands</h3>
@@ -401,8 +458,10 @@ uv run pytest -m slow                  # builds the real fly brain: ~1 GB, ~1 mi
 uv run python -m scripts.fetch_fly_data   # once: fly model + annotations into data/
 uv run python -m bakeoff run    --players fly,random,solver --seeds 20 --seed-start 1000   # [--game v1] [--lookahead N]
 uv run python -m bakeoff report runs/&lt;id&gt;
-uv run python -m bakeoff view   runs/&lt;id&gt; [runs/&lt;id&gt; ...]
-uv run python -m bakeoff live   --seed 1001 --players fly,jev_composed,llm [--max-requests N]</code></pre>
+uv run python -m bakeoff view   runs/&lt;id&gt; [runs/&lt;id&gt; ...]          # one offline HTML page
+uv run python -m bakeoff bench  runs/&lt;id&gt;[:player,...] [...]        # intervals, pairs, cost and time
+uv run python -m bakeoff live   --port 8765                         # the lobby: the browser picks and starts
+uv run python -m bakeoff live   --start --seed 1001 --players fly,jev_composed,llm [--max-requests N]</code></pre>
 
 <!-- ============================================================ -->
 <hr>
@@ -460,7 +519,7 @@ predicted 118.7 average rows on seeds 1000–1019, the real brain did 118.0). Fr
 <p>Randomness only comes from the Poisson input, seeded per (track, row), so a fly run repeats exactly: the live
 run on track 1001 was move for move the same as the batch run two days earlier.</p>
 
-<h2 id="paid">10. Jev and the LLM, in detail</h2>
+<h2 id="paid">10. The question sets, in detail</h2>
 
 <p>The one-shot pair, Jev and the LLM, are both told the same rules in the same words
 (<code>bakeoff/players/briefing.py</code>, written before any paid request) and receive the same JSON view:</p>
@@ -503,14 +562,30 @@ states of track 1000 its Choice landed on a gap 29% of the time, about the same 
 questions in one request run in parallel and can't see each other's answers, so the Nouls couldn't help the
 Choice. TypeSafe's own docs call the broad question the anti-pattern.</p>
 
-<h3>Update 2a: the question-set twins</h3>
-<p><code>jev_choice</code>, <code>jev_two_step</code> and <code>jev_reader</code> ask Jev three other ways; each has a
-Claude Haiku twin (<code>llm_choice</code>, <code>llm_two_step</code>, <code>llm_reader</code>) asked the same
-questions under the same rule. The model is not the only difference between a twin and its Jev: the LLM twin is
-also given the briefing of the rules (Jev's yes/no questions carry only the question, except in the choice set),
-Jev's answers in one request are made in parallel and cannot see each other while the LLM writes them in one
-reply, and the LLM's probabilities are numbers it states rather than Jev's own probability. Paid runs are done
-for practice seeds 1000&ndash;1004 (<code>docs/COSTS.md</code>, "Update 2a").</p>
+<h3>The four question sets (update 2a), played by three models</h3>
+<p>A <strong>question set</strong> is a wording plus a rule for turning the answers into a move. All four are ours,
+written once and given to every model unchanged (<code>bakeoff/players/question_sets.py</code>):</p>
+<div class="scroll">
+<table>
+  <thead><tr><th>Set</th><th>What it asks each row</th><th>The rule</th></tr></thead>
+  <tbody>
+    <tr><td><code>composed</code></td><td>4 questions: would each move land on a gap?</td><td>take the least likely</td></tr>
+    <tr><td><code>choice</code></td><td>1 question: which move?</td><td>take the favourite</td></tr>
+    <tr><td><code>two_step</code></td><td>8 questions: land on a gap, and be trapped after it?</td><td>take the lowest combined risk</td></tr>
+    <tr><td><code>reader</code></td><td>42 questions: is each visible tile a gap?</td><td>plan a path through what it read</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Each set is played by Jev (<code>jev_*</code>), by Claude Haiku (<code>llm_*</code>) and by GLM Flash
+(<code>glm_*</code>), so the model is what differs &mdash; almost. Three things still differ besides the model, and
+the write-up must carry all three: the chat models are also given the briefing of the rules (Jev's yes/no questions
+carry only the question, except in the choice set); Jev's answers in one request are made in parallel and cannot
+see each other, while a chat model writes them all in one reply, each able to see the ones before it; and a chat
+model's probability is a number it states, while Jev's is Jev's own probability. Paid runs are done for practice
+seeds 1000&ndash;1004 (<code>docs/COSTS.md</code>).</p>
+<p>One measurement to read carefully: the <strong>Brier score</strong> beside each player says how well calibrated
+its probabilities were. It compares two models <em>within</em> one set, never one set against another &mdash; about
+90% of the reader's tiles are floor, so a player can score well there while dying on every track.</p>
 
 <h3>Money safety</h3>
 <p>Every paid request goes through <code>bakeoff/clients/core.py</code>: first a <strong>disk cache</strong>
@@ -539,10 +614,17 @@ in one HTML file that never loads anything from the network.</p>
 
 <p>The viewer's JavaScript is split into pure, tested modules: <code>timeline.js</code> (time is rows; a jump
 takes two ticks), <code>tunnel.js</code> (tile geometry, fixed camera), <code>sprites.js</code> (pixel figures),
-<code>stage.js</code> (overlapping runners, auto-focus), <code>minds.js</code> (the panels) and <code>feed.js</code>,
-the only way frames reach <code>app.js</code>, either from the embedded replay or from the live stream.
-<code>live</code> serves the same page from <code>127.0.0.1</code> and pushes the same frame shapes over
-Server-Sent Events, standard library only.</p>
+<code>stage.js</code> (overlapping runners, auto-focus), <code>minds.js</code> (the panels), <code>log.js</code>
+(one line per row of a mind's log), <code>tabs.js</code> and <code>picker.js</code> (the two tabs; who is in the
+tunnel), <code>lobby.js</code> (the cost estimate and the refusal text), <code>bench_view.js</code> (the benchmark's
+markup and charts) and <code>feed.js</code>, the only way frames reach <code>app.js</code>, either from the embedded
+replay or from the live stream. Each is tested with <code>node --test</code>, which <code>uv run pytest</code> runs;
+anything that came from a log is escaped before it becomes markup.</p>
+
+<p><code>live</code> serves the same page from <code>127.0.0.1</code> and pushes the same frame shapes over
+Server-Sent Events, standard library only. A page can carry a second data slot, the benchmark of the same runs, and
+a live run's last event carries the benchmark of what it just played &mdash; scored on the server, so the page never
+does arithmetic the Python does not.</p>
 
 <h2 id="rules">12. Rules we hold ourselves to</h2>
 <ul>
@@ -551,8 +633,12 @@ Server-Sent Events, standard library only.</p>
   the tournament; bad results get named in the write-up, not fixed.</li>
   <li><strong>Honesty about the fly.</strong> Untrained, innate wiring only. Anything that is our mapping
   rather than its biology is labelled as ours, on screen and in the write-up.</li>
-  <li><strong>Same words for Jev and the LLM</strong>, and the asymmetry (Jev gets four narrow questions, the LLM
-  one) is named.</li>
+  <li><strong>Same words for every model.</strong> A question set is written once and given to Jev, Haiku and GLM
+  unchanged; what still differs between them (the briefing, parallel answers, whose probability it is) is named
+  wherever the numbers are shown.</li>
+  <li><strong>Say how sure we are, where the number is read.</strong> No interval below five tracks, no verdict
+  without one, and a count of how many verdicts chance alone would give among the pairs compared. A benchmark of
+  one track says so above its own table.</li>
   <li><strong>Budget.</strong> No paid request without a cap and a cache; no cap raised without your go-ahead.</li>
   <li><strong>One fly at a time</strong> on the 8 GB Mac (about 1 GB each).</li>
   <li><strong>How work gets done:</strong> brainstorm → spec → plan → one implementer and one reviewer per task →
@@ -572,10 +658,13 @@ Server-Sent Events, standard library only.</p>
     <tr><td><code>bakeoff/clients/</code></td><td>Jev and Anthropic clients, cache, cap, keys</td></tr>
     <tr><td><code>bakeoff/runner.py</code>, <code>live.py</code>, <code>live_server.py</code></td><td>playing and recording, batch and live</td></tr>
     <tr><td><code>bakeoff/report.py</code>, <code>replay.py</code>, <code>view.py</code></td><td>reading runs, building the page</td></tr>
+    <tr><td><code>bakeoff/bench.py</code></td><td>the benchmark: intervals, pairs, survival, cost and time per row</td></tr>
+    <tr><td><code>bakeoff/session.py</code></td><td>the live session: the ceiling, the refusal rules, one run at a time</td></tr>
     <tr><td><code>viewer/</code></td><td>the demo player (plain JS, no build step) and its tests</td></tr>
     <tr><td><code>calibration/</code></td><td>the fly's frozen tuning and first scoreboard</td></tr>
     <tr><td><code>docs/DECISIONS.md</code></td><td>every decision, in order</td></tr>
     <tr><td><code>docs/NEXT.md</code></td><td>where things stand and what comes next</td></tr>
+    <tr><td><code>docs/UPDATES.md</code></td><td>the ten updates between phase 5 and the tournament</td></tr>
     <tr><td><code>docs/COSTS.md</code></td><td>measured costs and what each paid run showed</td></tr>
     <tr><td><code>docs/superpowers/</code></td><td>the five binding design specs and one plan per phase or update</td></tr>
     <tr><td><code>runs/</code>, <code>.cache/</code>, <code>data/</code></td><td>recorded runs, cached answers, fly model data (all git-ignored)</td></tr>
@@ -599,13 +688,16 @@ Server-Sent Events, standard library only.</p>
     <tr><td>Choice</td><td>A Jev question answered with probabilities over a set of options.</td></tr>
     <tr><td>Practice vs tournament seeds</td><td>1000 and up may be looked at and tuned on; below 1000 are for the real contest.</td></tr>
     <tr><td>Run directory</td><td>One recorded session: <code>meta.json</code> plus one log file per player.</td></tr>
+    <tr><td>Question set</td><td>A wording plus a rule for turning the answers into a move; ours, and played by every model unchanged.</td></tr>
+    <tr><td>Brier score</td><td>How well calibrated a probability was: 0 is perfect, and it only compares like with like.</td></tr>
   </tbody>
 </table>
 </div>
 
-<p style="margin-top:48px;color:var(--muted);font-size:14px">Written 2026-09-21, after phase 5 was merged; it
-does not yet know the Jev family or the other updates, and is being refreshed once all of them are done. If
-this page and <code>docs/DECISIONS.md</code> disagree, the decisions file wins.</p>
+<p style="margin-top:48px;color:var(--muted);font-size:14px">Written 2026-09-21 after phase 5, refreshed
+2026-09-24 once the updates were built: the question sets and their three models, the benchmark, and the page that
+runs the show. Everything measured here is five practice tracks; the tournament has not been played. If this page
+and <code>docs/DECISIONS.md</code> disagree, the decisions file wins.</p>
 
 </main>
 <script>
