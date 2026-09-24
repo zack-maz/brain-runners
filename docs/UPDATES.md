@@ -39,8 +39,11 @@ Branch: `phase6-updates`.
 - Items 4, 5, 8, 9, the page: approved design (decision 35,
   `docs/superpowers/specs/2026-09-22-page-control-design.md`), built as updates 3a and 3b. **Update 3a is built**
   (plan `docs/superpowers/plans/2026-09-22-update3a-page-control.md`): the control channel, the money ceiling for a
-  whole session and the lobby, so the page picks the track and the players and starts and cancels the run. Update 3b
-  (the logs in the mind panels, the Run and Analysis tabs, the player picker in a replay) is next.
+  whole session and the lobby, so the page picks the track and the players and starts and cancels the run.
+  **Update 3b is built** (plan `docs/superpowers/plans/2026-09-23-update3b-page-rest.md`): a running log in every
+  mind panel (item 4), the Run and Analysis tabs (item 8) and one player picker over the tunnel (item 9), with the
+  level table left to pick the track alone (decision 37) and the benchmark drawn in the Analysis tab by the same
+  code as its own page (decision 36). Items 4, 8 and 9 are done; item 5 was done by 3a.
 - Item 7, the benchmark (decision 31, `docs/superpowers/specs/2026-09-22-benchmark-design.md`): built; `python -m
   bakeoff bench` scores recorded runs with intervals, pairs, time and cost per row, and writes its own page.
 
