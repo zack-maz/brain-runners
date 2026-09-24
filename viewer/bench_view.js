@@ -15,6 +15,7 @@
   const SHELL = `
 <section aria-label="Players">
   <h2 class="label">Players</h2>
+  <p class="warn first" data-bench="thin" hidden></p>
   <p class="note first">Rows survived per track, with a 95% interval for the mean over tracks like these. Players
     with fewer than five tracks get no interval and are not ranked. Click a player to follow it through the charts;
     the blue marks the player in focus, nothing else.</p>
@@ -71,6 +72,17 @@
       const range = p.ci_low == null ? "" : `<line class="range" x1="${x(p.ci_low)}" x2="${x(p.ci_high)}" y1="7" y2="7"/>`;
       return `<svg class="ci" width="160" height="14" aria-hidden="true"><line class="track" x1="2" x2="158" y1="7" y2="7"/>` +
         `${range}<circle class="mean" cx="${x(p.mean_rows)}" cy="7" r="3"/></svg>`;
+    }
+
+    // What a handful of tracks is: said above the table, where the numbers are read, not only in the
+    // notes at the bottom. A benchmark of one track is what happened, not a result.
+    function leadLine() {
+      const thin = at("thin");
+      if (data.players.some((p) => p.ranked)) { thin.hidden = true; return; }
+      const tracks = Math.max(...data.players.map((p) => p.seeds));
+      thin.hidden = false;
+      thin.textContent = tracks === 1 ? "One track: what happened on it, not a result. A player needs five tracks for an interval and a ranking."
+        : tracks + " tracks: what happened on them, not a result. A player needs five tracks for an interval and a ranking.";
     }
 
     function playersTable() {
@@ -191,6 +203,7 @@
     }
 
     function render() {
+      leadLine();
       playersTable();
       survivalChart();
       scatter("cost", "usd_per_row", "USD per row", (t) => String(t), (p) => (p.cost === "free" ? "free" : "no price"));

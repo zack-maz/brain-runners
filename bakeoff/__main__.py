@@ -150,7 +150,8 @@ def _live(args) -> int:
         return 2
     try:
         try:
-            server.page = render_html(empty_replay(rules), live=EVENTS_PATH, token=session.token)
+            server.page = render_html(empty_replay(rules), live=EVENTS_PATH, token=session.token,
+                                      bench={"why": "The benchmark of this run comes when it ends."})
         except ValueError as e:
             print(e, file=sys.stderr)
             return 2
@@ -288,6 +289,8 @@ def main(argv: list[str] | None = None) -> int:
         from bakeoff.bench import benchmark_of  # numpy: only when a page wants the benchmark
 
         numbers, why = benchmark_of(args.run_dirs)
+        if numbers is None:
+            print(f"no benchmark: {why}", file=sys.stderr)
         output = Path(args.output)
         try:
             output.write_text(render_html(replay, bench=numbers if numbers else {"why": why}), encoding="utf-8")

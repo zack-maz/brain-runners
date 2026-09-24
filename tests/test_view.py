@@ -57,6 +57,12 @@ def test_the_page_keeps_every_caveat_about_the_fly_and_about_jevs_questions():
         assert caveat in page, caveat
 
 
+def test_the_page_carries_the_chart_rules_the_analysis_tab_draws_with():
+    """Without bench.css the Analysis tab's charts are black on black: nothing in the tests sees colour."""
+    page = render_html({"episodes": []})
+    assert ".chart .line" in page and '[data-bench="players"] th' in page
+
+
 def test_every_script_the_page_names_exists_and_app_comes_last():
     names = re.findall(r'<script src="([^"]+)"></script>', (VIEWER_DIR / "index.html").read_text())
     assert names == ["timeline.js", "tunnel.js", "sprites.js", "stage.js", "minds.js", "log.js", "picker.js", "tabs.js",

@@ -8,6 +8,7 @@
   const embedded = JSON.parse(document.getElementById("replay-data").textContent);
   if (!embedded) return;
   const benchSlot = document.getElementById("bench-data");
+  const WAITING = { why: "The benchmark of this run comes when it ends." };
   let benchData = benchSlot ? JSON.parse(benchSlot.textContent) : null; // a live run gets its own when it ends
   const liveUrl = document.body.dataset.live || null;
   const token = document.body.dataset.token || null; // every control request carries it; a replay has none
@@ -196,6 +197,7 @@
   function renderStrip() {
     const strip = $("strip");
     const openLog = view.openLog; // only one log is open at a time; it survives a re-render of the strip
+    const wasAt = openLog && view.panels[openLog] ? view.panels[openLog].lines.scrollTop : 0; // and so does the reader's place
     strip.innerHTML = "";
     view.panels = {};
     view.runners = playing().map((episode) => {
@@ -215,23 +217,36 @@
       return { episode, track: store.tracks[String(episode.seed)], lookahead: game.lookahead || 6, window: window_,
                context: { windowMs: run.fly ? run.fly.window_ms : null, window: window_, maxHz: game.looming ? game.looming.max_hz : null } };
     });
-    if (openLog && view.panels[openLog]) view.panels[openLog].log.open = true;
+    if (openLog && view.panels[openLog]) {
+      view.panels[openLog].log.open = true;
+      view.panels[openLog].restoreTo = wasAt; // put back after the first append, which refills the list
+    }
     if (!view.runners.length) {
       strip.innerHTML = '<p class="note" style="padding:16px">' + (view.seed == null ? "Nothing has been played yet."
         : "None of the players shown ran track " + esc(view.seed) + ". Pick a player above to show it.") + "</p>";
     }
   }
 
-  // the log of one decision at a time, appended as the frames arrive so the list keeps its scroll
-  function appendLog(player) {
+  // The log of one decision at a time, up to the row on screen: a log is watched with the run, so it
+  // never runs ahead of the tunnel or gives a replay's ending away. Lines are appended as the frames
+  // arrive so the list keeps its scroll; scrubbing back takes the later ones off again.
+  function appendLog(player, upTo) {
     const ui = view.panels[player];
     const episode = episodeOf(player, view.seed);
-    if (!ui || !episode || episode.frames.length <= ui.logged) return;
+    if (!ui || !episode) return;
+    const want = Math.min(upTo + 1, episode.frames.length);
+    if (want < ui.logged) { // scrubbed back: drop what has not happened yet
+      while (ui.lines.children.length > want) ui.lines.removeChild(ui.lines.lastChild);
+      ui.logged = want;
+      return;
+    }
+    if (want === ui.logged) return;
     // "at the bottom" before the append decides whether the newest line is scrolled to afterwards
     const atEnd = ui.lines.scrollTop + ui.lines.clientHeight >= ui.lines.scrollHeight - 4;
-    ui.lines.insertAdjacentHTML("beforeend", Log.lines(episode, episode.frames.slice(ui.logged)));
-    ui.logged = episode.frames.length;
+    ui.lines.insertAdjacentHTML("beforeend", Log.lines(episode, episode.frames.slice(ui.logged, want)));
+    ui.logged = want;
     if (atEnd) ui.lines.scrollTop = ui.lines.scrollHeight;
+    if (ui.restoreTo) { ui.lines.scrollTop = ui.restoreTo; ui.restoreTo = 0; }
   }
 
   // one panel's log open at a time: opening one closes the rest
@@ -331,7 +346,7 @@
       const status = !store.ended && !episode.complete && s.index === episode.frames.length - 1 && t >= s.frame.landing[0]
         ? "thinking…" : Minds.statusLine(episode, s, s.runner.track.lanes);
       if (ui.status.innerHTML !== status) ui.status.innerHTML = status;
-      appendLog(s.id);
+      appendLog(s.id, s.index);
       if (s.index !== ui.index) {
         const open = !!(ui.decision.querySelector("details") || {}).open;
         ui.decision.innerHTML = Minds.mind(episode, s.frame, s.runner.context);
@@ -461,6 +476,7 @@
   document.addEventListener("keydown", (event) => {
     const typing = event.target instanceof Element && event.target.closest("button, select, input, summary");
     if (typing || event.metaKey || event.ctrlKey || event.altKey) return;
+    if (view.tab !== "run") return; // the transport is hidden off the Run tab, and so are its keys
     if (event.key === " ") { event.preventDefault(); togglePlay(); }
     if (event.key === "ArrowLeft") stepRows(-1);
     if (event.key === "ArrowRight") stepRows(1);
@@ -517,6 +533,7 @@
                            scoreboard: null, ended: false, error: null });
     Object.assign(view, { seed: null, shown: new Set(), focus: null, auto: true, heldSince: 0, t: 0,
                           playing: false, following: true, runners: [], panels: {}, openLog: null });
+    benchData = WAITING; // the run before this one is not this run's benchmark
     Feed.fromEmbedded(replay, handlers);
     renderAll();
   }

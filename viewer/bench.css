@@ -1,21 +1,24 @@
-/* The benchmark page. Tokens and base rules come from viewer.css; blue (--accent) marks the player in focus. */
-body { padding-bottom: 64px; }
+/* The benchmark, wherever it is drawn: the standalone page and the replay's Analysis tab both load these rules,
+   because both mount bench_view.js. Tokens and base rules come from viewer.css; blue (--accent) marks the player
+   in focus. The table rules are keyed to the renderer's data-bench names, not to ids, so one set styles both. */
+#bench-page { padding-bottom: 64px; }
 .note.first { margin: 0 0 20px; }
 .chart { display: block; width: 100%; max-width: 900px; height: auto; overflow: visible; }
 .pair-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: var(--gutter); }
 .pair-charts h2.label { margin-bottom: 20px; }
 
-#players th, #players td, #pairs th, #pairs td { padding: 6px 14px 6px 0; text-align: right; white-space: nowrap;
+[data-bench="players"] th, [data-bench="players"] td, [data-bench="pairs"] th, [data-bench="pairs"] td { padding: 6px 14px 6px 0; text-align: right; white-space: nowrap;
   border-bottom: 1px solid var(--hairline); }
-#players th, #pairs th { font: 400 var(--size-label)/1.4 var(--font-mono); letter-spacing: var(--tracking-label);
+[data-bench="players"] th, [data-bench="pairs"] th { font: 400 var(--size-label)/1.4 var(--font-mono); letter-spacing: var(--tracking-label);
   text-transform: uppercase; color: var(--muted); }
-#players th:first-child, #players td:first-child, #pairs td:nth-child(-n+2), #pairs th:nth-child(-n+2),
-#pairs td.verdict, #pairs th.verdict { text-align: left; }
-#players tbody tr { cursor: pointer; }
-#players tbody tr:hover td { color: var(--bright); }
-#players tr[aria-current="true"] td:first-child { color: var(--accent); }
-#players tr[aria-current="true"] td { color: var(--bright); }
-#pairs tr.focus td { color: var(--bright); }
+[data-bench="players"] th:first-child, [data-bench="players"] td:first-child,
+[data-bench="pairs"] td:nth-child(-n+2), [data-bench="pairs"] th:nth-child(-n+2),
+[data-bench="pairs"] td.verdict, [data-bench="pairs"] th.verdict { text-align: left; }
+[data-bench="players"] tbody tr { cursor: pointer; }
+[data-bench="players"] tbody tr:hover td { color: var(--bright); }
+[data-bench="players"] tr[aria-current="true"] td:first-child { color: var(--accent); }
+[data-bench="players"] tr[aria-current="true"] td { color: var(--bright); }
+[data-bench="pairs"] tr.focus td { color: var(--bright); }
 .muted-cell { color: var(--muted); }
 .ci { vertical-align: middle; }
 .ci .track { stroke: var(--hairline); stroke-width: 1; }
@@ -40,12 +43,12 @@ tr[aria-current="true"] .ci .mean { fill: var(--accent); }
 
 .numbers { margin-top: 12px; }
 .numbers summary { cursor: pointer; }
-#survival-table th, #survival-table td { padding: 4px 14px 4px 0; text-align: right; white-space: nowrap;
+[data-bench="survival-table"] th, [data-bench="survival-table"] td { padding: 4px 14px 4px 0; text-align: right; white-space: nowrap;
   border-bottom: 1px solid var(--hairline); }
-#survival-table th { font: 400 var(--size-label)/1.4 var(--font-mono); letter-spacing: var(--tracking-label);
+[data-bench="survival-table"] th { font: 400 var(--size-label)/1.4 var(--font-mono); letter-spacing: var(--tracking-label);
   text-transform: uppercase; color: var(--muted); }
-#survival-table td:first-child { text-align: left; }
-#survival-table tr[aria-current="true"] td:first-child { color: var(--accent); }
+[data-bench="survival-table"] td:first-child { text-align: left; }
+[data-bench="survival-table"] tr[aria-current="true"] td:first-child { color: var(--accent); }
 .chart text.dot-name { fill: var(--muted); font-size: 10px; }
-.notes { max-width: var(--measure); margin: 0; padding: 0 0 0 18px; font-size: var(--size-small); color: var(--muted); }
-.notes li + li { margin-top: 8px; }
+[data-bench="notes"] { max-width: var(--measure); margin: 0; padding: 0 0 0 18px; font-size: var(--size-small); color: var(--muted); }
+[data-bench="notes"] li + li { margin-top: 8px; }

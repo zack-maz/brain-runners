@@ -15,8 +15,9 @@ the tabs (D, E, F). A replay file opened from disk has no server and shows none 
 
 ## A. The control channel (`bakeoff/live_server.py`, `bakeoff/live.py`)
 
-Loopback only, as today, and every request carries a token minted at startup and embedded in the page, so another
-program on this machine cannot drive the run.
+Loopback only, as today, and every request carries a token minted at startup and embedded in the page, so no other
+page in the browser can drive the run. (Corrected 2026-09-23, update 3b's review: it is not a defence against a
+program on this machine — whatever may fetch `/` may read the token out of the page. `CLAUDE.md` says the same.)
 
 | route | what it does |
 | --- | --- |

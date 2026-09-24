@@ -33,11 +33,36 @@ test("answered shortens a written reply to one line", () => {
   assert.ok(out.length <= 64);
 });
 
-test("answered gives the fly its rates, signals and spike count", () => {
+test("answered gives the fly its rates, signals and spike count, and says the input is ours", () => {
   const fly = { player: "fly" };
   const info = { left_hz: 120.4, right_hz: 80, turn_signal_hz: -14.6, jump_signal_hz: 41.2, total_spikes: 5312 };
   assert.equal(answered(fly, frame({ info, answers: null })),
-    "eyes 120 Hz / 80 Hz, turn -15 Hz, jump 41 Hz, 5312 spikes");
+    "input (ours) 120 Hz / 80 Hz, turn -15 Hz, jump 41 Hz, 5312 spikes");
+});
+
+test("a rounded chance never reads as certainty", () => {
+  const jev = { player: "jev_composed" };
+  assert.equal(answered(jev, frame({ chosen_action: "stay", answers: { gap_stay: { noul: 0.004 } } })),
+    "<1% it lands on a gap");
+  assert.equal(answered(jev, frame({ chosen_action: "stay", answers: { gap_stay: { noul: 0.998 } } })),
+    ">99% it lands on a gap");
+  assert.equal(answered(jev, frame({ chosen_action: "stay", answers: { gap_stay: { noul: 0 } } })),
+    "0% it lands on a gap");
+});
+
+test("a set that asks about being trapped says both halves, because the rule used both", () => {
+  const two = { player: "jev_two_step" };
+  assert.equal(answered(two, frame({ chosen_action: "left", answers: { gap_left: { noul: 0.3 }, trapped_left: { noul: 0.02 } } })),
+    "lands on a gap 30% · trapped after it 2%");
+});
+
+test("a move the player never made is not printed twice", () => {
+  assert.equal(move(frame({ chosen_action: null, executed_action: "stay" })),
+    '<span class="warn">no move, ran stay</span>');
+});
+
+test("the fly's line carries the time its simulation took", () => {
+  assert.equal(timing(frame({ latency_ms: null, info: { wall_ms: 1043.6 } })), "simulated in 1044 ms");
 });
 
 test("answered marks a missing fly signal rather than printing NaN", () => {

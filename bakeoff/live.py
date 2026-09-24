@@ -155,7 +155,11 @@ class LiveRun:
         a reload. One track is rarely enough for an interval, and the numbers say so themselves."""
         from bakeoff.bench import benchmark_of  # numpy: only when a run ends
 
-        numbers, why = benchmark_of([self.run_dir])
+        try:
+            numbers, why = benchmark_of([self.run_dir])
+        except Exception as e:  # the run's end is what the page waits for: never lose it to the extra
+            numbers, why = None, f"the benchmark could not be scored: {e!r}"
+
         return {"status": self.status, "runs": replay["runs"], "scoreboard": replay["scoreboard"],
                 "bench": numbers if numbers else {"why": why}}
 

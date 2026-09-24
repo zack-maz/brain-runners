@@ -8,7 +8,8 @@
   const esc = Mind.esc;
 
   const hz = (value) => (typeof value === "number" ? Math.round(value) + " Hz" : "–");
-  const percent = (p) => Math.round(p * 100) + "%";
+  // rounded, but never rounded to certainty: 0.004 is not 0% and 0.996 is not 100%
+  const percent = (p) => (p > 0 && p < 0.005 ? "<1%" : p < 1 && p > 0.995 ? ">99%" : Math.round(p * 100) + "%");
   const CUT = 64; // how much of a written answer one line carries; the whole of it is in the panel above
 
   // one line of text, cut at CUT characters with an ellipsis, newlines flattened to spaces
@@ -32,13 +33,20 @@
   function answered(episode, frame) {
     const info = frame.info || {};
     if (episode.player === "fly") {
-      return "eyes " + hz(info.left_hz) + " / " + hz(info.right_hz) + ", turn " + hz(info.turn_signal_hz) +
+      // "ours" is the honesty rule: the looming input is our weighting of the gaps and the turn and
+      // jump signals are read against our thresholds. The panel above says so; a log is read alone.
+      return "input (ours) " + hz(info.left_hz) + " / " + hz(info.right_hz) + ", turn " + hz(info.turn_signal_hz) +
         ", jump " + hz(info.jump_signal_hz) + ", " + (info.total_spikes == null ? "–" : info.total_spikes) + " spikes";
     }
     const answers = frame.answers;
     if (!answers) return "";
     if (typeof answers.text === "string" && answers.text !== "") return short(answers.text);
     const gap = (answers["gap_" + frame.chosen_action] || {}).noul;
+    const trapped = (answers["trapped_" + frame.chosen_action] || {}).noul;
+    // both halves when the set asks for both, because the rule chose on both
+    if (typeof gap === "number" && typeof trapped === "number") {
+      return "lands on a gap " + percent(gap) + " · trapped after it " + percent(trapped);
+    }
     if (typeof gap === "number") return percent(gap) + " it lands on a gap";
     const choice = (answers.action || {}).choice;
     if (choice != null) return "chose " + choice;
@@ -47,17 +55,19 @@
 
   // the move, and why the game ran a different one when it did
   function move(frame) {
-    const chosen = frame.chosen_action == null ? "no move" : frame.chosen_action;
-    if (frame.chosen_action === frame.executed_action) return esc(chosen);
+    if (frame.chosen_action === frame.executed_action) return esc(frame.chosen_action);
     const why = frame.error != null ? "error" : frame.invalid ? "not a valid move" : frame.gated ? "held back" : "no move";
-    return esc(chosen) + ' <span class="warn">' + why + ", ran " + esc(frame.executed_action) + "</span>";
+    const said = '<span class="warn">' + why + ", ran " + esc(frame.executed_action) + "</span>";
+    return frame.chosen_action == null ? said : esc(frame.chosen_action) + " " + said;
   }
 
   // how long it took, or that the answer never left this machine
   function timing(frame) {
     if (frame.cache_hit) return "cached";
-    if (frame.latency_ms == null) return "";
-    return Math.round(frame.latency_ms) + " ms";
+    if (frame.latency_ms != null) return Math.round(frame.latency_ms) + " ms";
+    const wall = (frame.info || {}).wall_ms; // the fly sends no request: what it took is its simulation
+    if (wall != null) return "simulated in " + Math.round(wall) + " ms";
+    return "";
   }
 
   // one row's line. `frame.row` is the row it decided on.
