@@ -35,6 +35,8 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
   paid player now carries its own measured price (the confirmed worst case was up to eleven times too low for
   `llm_reader`), and a run cancelled while it waited for a browser now wakes and closes as `interrupted` instead of
   leaving a `meta.json` that says `running` for ever.
+- **Update 3b, the rest of the page** (sections D, E, F; decisions 35 and 36): **prototyped and verified**
+  2026-09-23 on branch `proto/page-3b`, not yet planned or implemented. Full detail under "Where to resume".
 - **Item 7, the benchmark** (decision 31, spec `docs/superpowers/specs/2026-09-22-benchmark-design.md`): built
   2026-09-22. `python -m bakeoff bench RUN_DIR[:PLAYER,...] ...` scores recorded runs (spends nothing), prints the
   tables and writes `bench.json` and an offline `bench.html`. Prototyped, then its five tested commits taken as they
@@ -45,14 +47,35 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 
 ## Where to resume (in this order)
 
-1. **Update 3b**, the rest of the page (design sections D, E, F): the running log in every mind panel, the Run and
-   Analysis tabs (the benchmark drawn from a `bench.json` written into the page), and the player picker that shows
-   and hides runners in a replay as well as choosing who runs live. It gets its own plan; the house workflow is to
-   prototype it in a scratch clone first ([[prototyped-plans-workflow]] in the memory notes; prototypes kept as local
-   `proto/*` branches, `proto/page-3a` is 3a's). Worth carrying over from 3a's review while writing it: the lobby
-   never polls `/state`, so the page's freshness depends on the `end` event arriving; and `bakeoff live` still says
-   "another program on this machine cannot drive the run" in the design text, which is not what the token does (any
-   local program that can fetch `/` can read it) — the code and `CLAUDE.md` now say so, the spec does not.
+1. **Update 3b**, the rest of the page (design sections D, E, F). **Its prototype is built and verified**
+   (2026-09-23, branch `proto/page-3b`, four commits on top of `771eb3d`); what is left is to generate the plan from
+   it and run the implementers. Decisions 35 and 36 settle its shape:
+   - **D, a log in every mind panel**: new pure `viewer/log.js` (+ `viewer/tests/log.test.js`), one line per row with
+     the row, what it was asked, what it answered, the latency or `cached`, and any error in `--bad`; the fly's lines
+     carry its eye rates, its turn and jump signals and its spike count. Lines are appended as the frames arrive so
+     the list keeps its scroll, and one panel's log is open at a time. Every value goes through `Minds.esc`.
+   - **E, two tabs**: new pure `viewer/tabs.js`. Run holds the tunnel, the strip with its logs, the lobby and the
+     transport (which now hides off the Run tab); Analysis holds the levels, the scoreboard, the "what is ours"
+     notes and the benchmark.
+   - **F, one player picker**: new pure `viewer/picker.js`, on the Run tab. It shows and hides the runners of a
+     replay; a player that did not run the track in view can never be turned on. **The level table no longer toggles
+     players** (it keeps its track buttons, and picking a track returns to the Run tab) — spec F says the picker does
+     what the level table does today, so the two never disagree. Flagged to the user 2026-09-23; not yet answered.
+   - **Decision 36**: `viewer/bench_app.js` became `viewer/bench_view.js`, a renderer mounted into a container by
+     both `bench.html` and the Analysis tab, so there is one drawing code; and `bakeoff/bench.py` gained
+     `benchmark_of(run_dirs) -> (numbers | None, why | None)`, used by `view` (a second data slot, `bench-data`, in
+     `bakeoff/view.py`) and by a live run's `end` event (`LiveRun._end_event`), so the Analysis tab fills in without
+     a reload.
+   - **Verified**: 429 Python tests and 27 new JavaScript tests green; in a browser, a replay of the five-player v2
+     track drew 9 benchmark rows in the tab, and a live `solver,random` run on track 1001 filled its logs as it
+     played and then its Analysis tab with its own numbers.
+   - **Next**: generate the plan with `.superpowers/tools/genplan.py` from `proto/page-3b`, dispatch the implementers
+     brief by brief, byte-compare each against the prototype commit (skip the per-task reviews when `compare.sh`
+     reports no DIFFERS), then one whole-update design review ([[prototyped-plans-workflow]]).
+   - Worth carrying into that review from 3a's: the lobby never polls `/state`, so the page's freshness depends on
+     the `end` event arriving; and `bakeoff live` still says "another program on this machine cannot drive the run"
+     in the design text, which is not what the token does (any local program that can fetch `/` can read it) — the
+     code and `CLAUDE.md` now say so, the spec does not.
 2. **Parked**: GLM Flash's tracks 1001–1004 (decision 34), while Zhipu's free tier throttles. To pick it up, check
    it answers (a few requests through `bakeoff.clients.glm.HttpTransport`), then
    `uv run python -m bakeoff run --players glm_composed,glm_choice,glm_two_step --seeds 5 --seed-start 1000 --max-requests 700`
@@ -85,7 +108,7 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 ## Tooling
 
 Plans are generated from a prototype (`.superpowers/tools/genplan.py`; prototypes kept as local branches
-`proto/game-v2`, `proto/jev-family`, `proto/page-3a`). The SDD ledgers are `.superpowers/sdd/<date>-<name>/`
+`proto/game-v2`, `proto/jev-family`, `proto/page-3a`, `proto/page-3b`). The SDD ledgers are `.superpowers/sdd/<date>-<name>/`
 (git-ignored): update 2a's, and update 3a's, which holds its briefs, its per-task diffs and its review report.
 `.superpowers/tools/mkbriefs.py` writes the briefs and the commit-message files (its trailer names the model of
 the session that dispatches, so check it before a new run of tasks).
