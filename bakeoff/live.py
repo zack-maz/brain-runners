@@ -146,8 +146,18 @@ class LiveRun:
         self.meta.update(status=self.status, finished_at=_now())
         self._write_meta()
         replay = build_replay([self.run_dir])  # the same last event as a run that played: read from disk
-        self.broadcast.emit("end", {"status": self.status, "runs": replay["runs"], "scoreboard": replay["scoreboard"]})
+        self.broadcast.emit("end", self._end_event(replay))
         self.broadcast.close()
+
+    def _end_event(self, replay: dict) -> dict:
+        """The last event of a run: what the page needs to settle. It carries the benchmark of the run
+        that just played, scored here rather than in the browser, so the Analysis tab fills in without
+        a reload. One track is rarely enough for an interval, and the numbers say so themselves."""
+        from bakeoff.bench import benchmark_of  # numpy: only when a run ends
+
+        numbers, why = benchmark_of([self.run_dir])
+        return {"status": self.status, "runs": replay["runs"], "scoreboard": replay["scoreboard"],
+                "bench": numbers if numbers else {"why": why}}
 
     def _write_meta(self) -> None:
         (self.run_dir / "meta.json").write_text(json.dumps(self.meta, indent=2))
@@ -207,6 +217,6 @@ class LiveRun:
             self.meta.update(status=self.status, finished_at=_now(), requests=_requests(self.players))
             self._write_meta()
             replay = build_replay([self.run_dir])
-            self.broadcast.emit("end", {"status": self.status, "runs": replay["runs"], "scoreboard": replay["scoreboard"]})
+            self.broadcast.emit("end", self._end_event(replay))
             self.broadcast.close()
         return self.run_dir

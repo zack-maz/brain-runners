@@ -69,7 +69,10 @@ def test_the_stream_is_the_replay_in_the_replays_own_shapes(tmp_path):
         assert set(header["episode"]) == set(episode) - {"frames"}
     assert events[0][0] == "episode" and events[1][0] == "frame"  # a runner is announced, then it moves
     name, end = events[-1]
-    assert name == "end" and end == {"status": "completed", "runs": replay["runs"], "scoreboard": replay["scoreboard"]}
+    assert name == "end"
+    # the benchmark of the run just played rides along (decision 36); the rest is the replay's own shapes
+    assert end.pop("bench")["runs"] == replay["runs"][0]["run_id"].split()  # one run, scored where it was recorded
+    assert end == {"status": "completed", "runs": replay["runs"], "scoreboard": replay["scoreboard"]}
     json.dumps(events)
 
 

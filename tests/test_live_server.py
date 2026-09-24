@@ -203,3 +203,17 @@ def test_a_request_that_is_not_json_is_a_refusal_not_a_crash(server):
     response = connection.getresponse()
     assert response.status == 400 and "not JSON" in json.loads(response.read())["error"]
     connection.close()
+
+
+def test_the_end_of_a_live_run_carries_the_benchmark_of_what_was_just_played(server):
+    """The page has no numbers of its own: the server scores the run it just recorded and sends them
+    with the end event, so the Analysis tab fills in without a reload (decision 36)."""
+    httpd, session = server
+    started = payload(httpd, "POST", "/run", {"seed": 1001, "players": ["solver", "random"]})[1]
+    session.wait(30)
+    body = get(httpd, f"{EVENTS_PATH}?run={started['run_id']}")[1]
+    blocks = [b.split("\n") for b in body.strip().split("\n\n")]
+    end = json.loads(next(lines[1][6:] for lines in blocks if lines[0] == "event: end"))
+    assert {p["player"] for p in end["bench"]["players"]} == {"solver", "random"}
+    assert end["bench"]["players"][0]["seeds"] == 1  # one track: enough to score, never enough to rank
+    assert all(p["ranked"] is False for p in end["bench"]["players"])
