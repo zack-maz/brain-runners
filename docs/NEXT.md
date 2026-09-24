@@ -90,6 +90,11 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 
 ## Where to resume (in this order)
 
+0. **`fly2`, the second pure fly** (decisions 41–42, spec `docs/superpowers/specs/2026-09-24-fly2-design.md`,
+   branch `fly2`). Spike 04, the probe, passed on 2026-09-24 (`spikes/04-fly2-probe/REPORT.md` on branch
+   `spike/fly2-probe`): every candidate turns away from a gap under a strong centre, and M3 is admitted. Next is the
+   plan: prototype first, and the calibration rule goes in its first task. Then come the surfaces, the calibration
+   with its controls, the player and the page, and one real run of `fly` and `fly2` on v2 seeds 1000–1019.
 1. **Parked**: GLM Flash's tracks 1001–1004 (decision 34), while Zhipu's free tier throttles. To pick it up, check
    it answers (a few requests through `bakeoff.clients.glm.HttpTransport`), then
    `uv run python -m bakeoff run --players glm_composed,glm_choice,glm_two_step --seeds 5 --seed-start 1000 --max-requests 700`

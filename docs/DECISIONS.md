@@ -239,6 +239,16 @@
       for the jump, and dodge before jump.
     - **Controls reported with the result:** no brain, shuffled wiring, and `fly`.
     - **A probe first (spike 04):** if no candidate turns away from the gap's side, the update stops there.
+42. **The probe passes; the turn readout is chosen per candidate** (the user, 2026-09-24; spike 04, branch
+    `spike/fly2-probe`, `spikes/04-fly2-probe/REPORT.md`). With the centre driven at 500 Hz, every candidate still
+    turns away from the side of an extra gap, so fly2 goes on to the surfaces. M3's sideways channel (LPLC4 + LC22)
+    turns the fly away from its own side and drives no Giant Fiber, so M3 is admitted. The spec's DNa02 test gives
+    a different answer for each candidate, and the user chose to apply it per candidate:
+    - **M2:** DNa02 is within the trial noise in every uneven condition, so its turn is DNa01 + DNg13.
+    - **M3:** DNa02 adds to the turn (above the noise at 300 and 500 Hz), so it keeps DNa02 + DNa01 + DNg13.
+    - **M1:** DNa02 is above the noise for a left gap at 300 and 500 Hz and within it for every right gap. The test
+      says "cancels" only when DNa02 is within the noise in the uneven conditions, and here it is not, so M1 keeps
+      DNa02 + DNa01 + DNg13. This is the controller's reading of the test and the user may still reverse it.
 
 Where we are and what comes next: `docs/NEXT.md`.
 
