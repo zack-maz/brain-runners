@@ -44,10 +44,13 @@ rule, ours) played by `jev_<set>` and by Claude Haiku twins `haiku_<set>` (`set_
 `llm_<set>` until decision 39, and `bakeoff/players/names.py` still reads the old name everywhere); the report's `brier_all`;
 its paid runs are done (five v2 practice tracks, `docs/COSTS.md`). Update 2b, the fly, stopped at its probe (spike 03, decision 30). Item 7, the benchmark, is built:
 `python -m bakeoff bench` (`bakeoff/bench.py`, page `viewer/bench.html`), decision 31. Item 10, the GLM Flash twins, is
-built and parked after one track (decisions 33–34). Left: the page, items 4, 5, 8 and 9 (decision 35, design
-`docs/superpowers/specs/2026-09-22-page-control-design.md`), as updates 3a and 3b. Resume from `docs/NEXT.md`; one PR "Opus v1" when
-all updates are done. Then phase 6, the tournament and the write-up, which needs a new budget go-ahead. Each phase
-gets its own plan.
+built and parked after one track (decisions 33–34). The page (items 4, 5, 8 and 9; decision 35, design
+`docs/superpowers/specs/2026-09-22-page-control-design.md`) is built as updates 3a (the control channel, the session
+ceiling, the lobby) and 3b (the logs, the Run and Analysis tabs, the picker, the benchmark in the page), each
+reviewed and fixed; decisions 36–39 settle their open questions and the rename of Claude Haiku's players.
+**Everything before phase 6 is built**; what is left is GLM Flash's parked tracks and one PR "Opus v1" from
+`phase6-updates`, on the user's word. Then phase 6, the tournament and the write-up, which needs a new budget
+go-ahead. Each phase gets its own plan. Resume from `docs/NEXT.md`.
 
 ## How we work here
 

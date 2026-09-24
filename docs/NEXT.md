@@ -50,6 +50,27 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
   `end` event could be lost to the benchmark it carries, and the fly's log lines did not say the input is ours.
   Its last open question is settled (decision 38): the lobby's ticks and the picker are two labelled rows of one
   "Players" section, because they answer different questions — who runs next, and who is in the tunnel.
+- **2026-09-24, after the updates** (in order, all on `phase6-updates`):
+  - `docs/EXPLAINER.html` refreshed for everything built since phase 5, and `docs/WALKTHROUGH.md` written: the
+    manual, command by command and panel by panel, every command in it run before it was written down. The README's
+    stale claims are corrected with it.
+  - **Decision 39, the rename**: Claude Haiku's players are `haiku*`, not `llm*`, so that `haiku_composed` and
+    `glm_composed` read as the pair they are. Nothing recorded changed: the cache is keyed by provider, model,
+    senses and questions, so every paid answer still replays (checked: `haiku_composed` replays track 1000 from 131
+    cache hits, 0 requests, the same 132 rows), the run directories keep their `llm*.jsonl`, and
+    `bakeoff/players/names.py` maps the old name to the new one wherever a name is read, so old and new runs merge
+    as one player and a saved command still works (`tests/test_names.py`).
+  - **The fly could not play a live run at all since update 3a** (found by the user, fixed 2026-09-24): brian2
+    installs a SIGINT handler as it is imported, CPython allows that only on the main thread, and the run now plays
+    in a worker thread, so building the brain there raised and the page said only "RUN ENDED: Interrupted".
+    `bakeoff/fly/brain.py:import_brian2()` imports it without that handler off the main thread. And a crash is now
+    `crashed`, with its error in `meta.json` and on the page — `interrupted` means Ctrl-C or Cancel, in `live` and
+    in `run` alike. Lesson in [[live-run-thread-gotchas]]: smoke-test a live run **with the fly** after any change
+    to the run path.
+  - **The lobby is the bakeoff's own grid**: "who runs next" is a row per question set crossed with a column per
+    model, each saying what it is, with the fly and the yardsticks below it. `viewer/lobby.js` builds it (pure,
+    tested): every offered player appears exactly once, an unexpected one joins the yardsticks, an empty crossing
+    is an em dash.
 
 - **Item 7, the benchmark** (decision 31, spec `docs/superpowers/specs/2026-09-22-benchmark-design.md`): built
   2026-09-22. `python -m bakeoff bench RUN_DIR[:PLAYER,...] ...` scores recorded runs (spends nothing), prints the
@@ -65,10 +86,10 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
    it answers (a few requests through `bakeoff.clients.glm.HttpTransport`), then
    `uv run python -m bakeoff run --players glm_composed,glm_choice,glm_two_step --seeds 5 --seed-start 1000 --max-requests 700`
    and `--players glm_reader --seeds 2 --seed-start 1000 --max-requests 350`. Track 1000 replays free from the cache.
-2. The updates are done and `docs/EXPLAINER.html` is refreshed (2026-09-24: the question sets and their three
-   models, the benchmark, the page that runs the show, and the five-track scoreboard with what the benchmark can
-   and cannot separate). What is left is one PR titled **"Opus v1"** from `phase6-updates` (the user's
-   instruction; not before).
+2. **The branch is ready for its PR.** Everything before phase 6 is built, reviewed and documented, and the docs
+   are current (`EXPLAINER.html`, `WALKTHROUGH.md`, `README.md`, `CLAUDE.md`, decisions to 39). One PR titled
+   **"Opus v1"** from `phase6-updates`, on the user's word and not before. Worth doing first, cheaply: one live
+   run with the fly and one merged replay, to see the page whole after the rename and the lobby grid.
 3. Then phase 6, the tournament and the write-up. It starts by settling which seeds (see "Open"), and it needs a new
    budget go-ahead: the tournament is the first paid use of seeds below 1000 (`--tournament`).
 
