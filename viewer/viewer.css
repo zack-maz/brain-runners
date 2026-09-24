@@ -181,3 +181,20 @@ table { border-collapse: collapse; font-size: var(--size-small); font-variant-nu
 .pick .about { color: var(--muted); font-size: var(--size-small); }
 .pick .note { grid-column: 2; margin-top: 0; font-size: var(--size-label-sm); }
 .pick.blocked { opacity: 0.55; cursor: not-allowed; }
+
+/* the two tabs: plain buttons over one page, no routing */
+.tabs { display: flex; gap: 4px; padding: 0 16px; border-bottom: 1px solid var(--hairline); }
+.tabs button { min-height: 44px; padding: 0 16px; background: none; border: 0; border-bottom: 2px solid transparent;
+  color: var(--muted); cursor: pointer; }
+.tabs button[aria-selected="true"] { color: var(--bright); border-bottom-color: var(--accent); }
+.tabs button:hover { color: var(--text); }
+/* the tab strip is the rule above the first section of either panel */
+[role="tabpanel"] > section:first-child { margin-top: 0; border-top: 0; }
+
+/* who is in the tunnel */
+#picks-replay { display: flex; flex-wrap: wrap; gap: 8px; }
+.pick-player { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px;
+  background: var(--panel); border: 1px solid var(--hairline); color: var(--muted); cursor: pointer; }
+.pick-player[aria-pressed="true"] { color: var(--bright); border-color: var(--text); }
+.pick-player[disabled] { opacity: 0.45; cursor: default; }
+.pick-player .note { font-size: var(--size-small); }

@@ -7,6 +7,8 @@
 
   const embedded = JSON.parse(document.getElementById("replay-data").textContent);
   if (!embedded) return;
+  const benchSlot = document.getElementById("bench-data");
+  let benchData = benchSlot ? JSON.parse(benchSlot.textContent) : null; // a live run gets its own when it ends
   const liveUrl = document.body.dataset.live || null;
   const token = document.body.dataset.token || null; // every control request carries it; a replay has none
 
@@ -43,7 +45,7 @@
   const store = { game: null, runs: [], players: [], seeds: [], tracks: {}, episodes: [], scoreboard: null, ended: !liveUrl, error: null };
   const view = {
     seed: null, shown: new Set(), focus: null, auto: true, heldSince: 0,
-    t: 0, playing: false, speed: 3, following: !!liveUrl, size: 0, runners: [], panels: {}, openLog: null,
+    t: 0, playing: false, speed: 3, following: !!liveUrl, size: 0, runners: [], panels: {}, openLog: null, tab: "run",
   };
 
   const runOf = (episode) => store.runs.find((run) => run.run_id === episode.run_id) || {};
@@ -81,6 +83,7 @@
       store.ended = true;
       if (end.runs) store.runs = end.runs;
       if (end.scoreboard) store.scoreboard = end.scoreboard;
+      if (end.bench) benchData = end.bench; // the numbers for the run that just ended, scored by the server
       notice(end.status === "completed" ? null : "The run ended: " + end.status, false);
       renderAll();
       if (liveUrl) refreshState(); // the run is over: the lobby comes back, with the run still on screen
@@ -121,8 +124,7 @@
       '<th><button type="button" data-seed="' + esc(seed) + '"' + (seed === view.seed ? ' aria-current="true"' : "") + ">" + esc(seed) +
       "</button></th>").join("") + "</tr></thead><tbody>";
     for (const player of store.players) {
-      html += '<tr><th><button type="button" data-player="' + esc(player) + '" aria-pressed="' + view.shown.has(player) + '">' +
-        esc(Minds.tagOf(player)) + "</button></th>";
+      html += "<tr><th>" + esc(Minds.tagOf(player)) + "</th>";
       for (const seed of store.seeds) {
         const episode = episodeOf(player, seed);
         const track = store.tracks[String(seed)];
@@ -137,16 +139,56 @@
     $("matrix").innerHTML = html + "</tbody>";
   }
 
+  // the level table picks the track; picking one goes back to the race, where the track is watched
   $("matrix").addEventListener("click", (event) => {
-    const button = event.target.closest("button");
+    const button = event.target.closest("button[data-seed]");
     if (!button) return;
-    if (button.dataset.seed != null) {
-      view.seed = Number(button.dataset.seed);
-      view.t = 0;
-      view.focus = null;
-      setPlaying(false);
-    } else if (view.shown.has(button.dataset.player)) view.shown.delete(button.dataset.player);
-    else view.shown.add(button.dataset.player);
+    view.seed = Number(button.dataset.seed);
+    view.t = 0;
+    view.focus = null;
+    setPlaying(false);
+    showTab("run");
+    renderAll();
+  });
+
+  // ---- the tabs -----------------------------------------------------------------------------
+  function showTab(wanted) {
+    view.tab = Tabs.select(view.tab, wanted);
+    for (const tab of Tabs.stateOf(view.tab)) {
+      const button = $("tab-" + tab.name);
+      button.setAttribute("aria-selected", String(tab.selected));
+      button.tabIndex = tab.selected ? 0 : -1;
+      $("panel-" + tab.name).hidden = tab.hidden;
+    }
+    $("transport").hidden = view.tab !== "run" || !ready; // the transport drives the race, and only it
+    if (view.tab === "run") { resize(); draw(); } // the canvas cannot be sized while it is hidden
+    else renderBench();
+  }
+
+  document.querySelector(".tabs").addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-tab]");
+    if (button) showTab(button.dataset.tab);
+  });
+  document.querySelector(".tabs").addEventListener("keydown", (event) => {
+    const next = Tabs.step(view.tab, event.key);
+    if (!next) return;
+    event.preventDefault();
+    showTab(next);
+    $("tab-" + next).focus();
+  });
+
+  // ---- who is in the tunnel -------------------------------------------------------------------
+  function renderPicker() {
+    const here = store.players.filter((p) => episodeOf(p, view.seed));
+    $("picks-replay").innerHTML = Picker.list(store.players, here, view.shown, ABOUT);
+    $("picker-hint").textContent = Picker.hint(store.players, here, view.shown, view.seed);
+  }
+
+  $("picks-replay").addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-player]");
+    if (!button) return;
+    const here = store.players.filter((p) => episodeOf(p, view.seed));
+    view.shown = Picker.toggle(view.shown, here, button.dataset.player);
     renderAll();
   });
 
@@ -564,10 +606,25 @@
 
   function renderAll() {
     renderMatrix();
+    renderPicker();
     renderStrip();
     renderBelow();
+    renderBench();
     resize();
     draw();
+  }
+
+  // The benchmark, drawn once for a set of numbers: it is only built when the Analysis tab is looked
+  // at, and again when a live run ends and the server sends the numbers for what was just played.
+  let benchDrawn = null;
+  function renderBench() {
+    if (view.tab !== "analysis" || benchDrawn === benchData) return;
+    benchDrawn = benchData;
+    const why = benchData && benchData.why ? benchData.why : BenchView.why(benchData);
+    $("bench-why").hidden = !why;
+    $("bench-why").textContent = why || "";
+    $("bench").innerHTML = "";
+    if (!why) BenchView.mount($("bench"), benchData);
   }
 
   // ---- start --------------------------------------------------------------------------------
@@ -576,10 +633,10 @@
   chooseDefaults();
   $("empty").hidden = true;
   $("app").hidden = false;
-  $("transport").hidden = false;
   $("mode").textContent = liveUrl ? "Live" : "Replay";
   $("live").hidden = !liveUrl;
   ready = true;
+  showTab(view.tab);
   renderAll();
   window.addEventListener("resize", () => { resize(); draw(); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw); // the canvas tags use the embedded mono

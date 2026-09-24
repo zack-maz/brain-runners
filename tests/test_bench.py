@@ -195,3 +195,24 @@ def test_a_colon_in_a_directory_path_is_not_a_player_list():
     from pathlib import Path
     assert parse_source("runs/a:b/c") == Source(Path("runs/a:b/c"), None)
     assert parse_source("runs/a:b/c:llm") == Source(Path("runs/a:b/c"), ("llm",))
+
+
+def test_benchmark_of_scores_a_run_directory(tmp_path):
+    from bakeoff.bench import benchmark_of
+
+    run = write_run(tmp_path, "r", episode("solver", 1000, 40) + episode("random", 1000, 9), {"game": V2})
+    out, why = benchmark_of([run])
+    assert why is None
+    assert {p["player"] for p in out["players"]} == {"solver", "random"}
+
+
+def test_benchmark_of_says_why_instead_of_failing_when_there_is_nothing_to_score(tmp_path):
+    """The page asks for numbers it may not be able to have; `bakeoff bench` still refuses loudly."""
+    from bakeoff.bench import benchmark_of
+
+    out, why = benchmark_of([tmp_path / "missing"])
+    assert out is None and why
+
+    run = write_run(tmp_path, "open", [record(player="solver", seed=1000, row=0)], {"game": V2})
+    out, why = benchmark_of([run])
+    assert out is None and "needs runs that ended" in why

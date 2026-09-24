@@ -272,6 +272,19 @@ def benchmark(loaded: Loaded) -> dict:
 
 # ---- the terminal ----------------------------------------------------------------------------------------------
 
+def benchmark_of(run_dirs: list[str | Path]) -> tuple[dict | None, str | None]:
+    """The benchmark of these run directories, or (None, why not). The page asks for numbers it may
+    not be able to have — a live run of one track, runs of two lengths — and says so instead of
+    failing; `bakeoff bench` still refuses loudly."""
+    try:
+        loaded = load([parse_source(str(d)) for d in run_dirs])
+    except (FileNotFoundError, ValueError) as e:
+        return None, str(e)
+    if not loaded.episodes:
+        return None, "no completed run to score: the benchmark needs runs that ended."
+    return benchmark(loaded), None
+
+
 def _num(value, digits: int = 1) -> str:
     return "-" if value is None else f"{value:.{digits}f}"
 

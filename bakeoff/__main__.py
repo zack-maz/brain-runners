@@ -285,9 +285,12 @@ def main(argv: list[str] | None = None) -> int:
         if not replay["episodes"]:
             print("no step records in " + ", ".join(args.run_dirs), file=sys.stderr)
             return 2
+        from bakeoff.bench import benchmark_of  # numpy: only when a page wants the benchmark
+
+        numbers, why = benchmark_of(args.run_dirs)
         output = Path(args.output)
         try:
-            output.write_text(render_html(replay), encoding="utf-8")
+            output.write_text(render_html(replay, bench=numbers if numbers else {"why": why}), encoding="utf-8")
         except OSError as e:
             print(f"cannot write {output}: {e}", file=sys.stderr)
             return 2

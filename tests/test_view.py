@@ -59,7 +59,8 @@ def test_the_page_keeps_every_caveat_about_the_fly_and_about_jevs_questions():
 
 def test_every_script_the_page_names_exists_and_app_comes_last():
     names = re.findall(r'<script src="([^"]+)"></script>', (VIEWER_DIR / "index.html").read_text())
-    assert names == ["timeline.js", "tunnel.js", "sprites.js", "stage.js", "minds.js", "log.js", "feed.js", "lobby.js", "app.js"]
+    assert names == ["timeline.js", "tunnel.js", "sprites.js", "stage.js", "minds.js", "log.js", "picker.js", "tabs.js",
+                     "feed.js", "lobby.js", "bench.js", "bench_view.js", "app.js"]
     assert all((VIEWER_DIR / name).is_file() for name in names)
 
 
@@ -144,4 +145,51 @@ def test_the_benchmark_page_makes_no_network_request_and_names_only_existing_scr
     assert not re.search(r"(src|href)=[\"']?https?:", page) and "@import" not in page
     source = (VIEWER_DIR / "bench.html").read_text()
     scripts = re.findall(r'<script src="([^"]+)"></script>', source)
-    assert scripts == ["bench.js", "bench_app.js"] and all((VIEWER_DIR / s).exists() for s in scripts)
+    assert scripts == ["bench.js", "bench_view.js", "bench_app.js"] and all((VIEWER_DIR / s).exists() for s in scripts)
+
+
+BENCH = re.compile(r'<script type="application/json" id="bench-data">(.*?)</script>', re.S)
+
+
+def test_the_benchmark_rides_in_its_own_slot_and_leaves_the_replay_alone():
+    page = render_html({"episodes": []}, bench={"players": [{"player": "solver"}]})
+    assert json.loads(BENCH.search(page).group(1)) == {"players": [{"player": "solver"}]}
+    assert json.loads(DATA.search(page).group(1)) == {"episodes": []}
+
+
+def test_a_page_given_no_benchmark_keeps_an_empty_slot():
+    page = render_html({"episodes": []})
+    assert json.loads(BENCH.search(page).group(1)) is None
+
+
+def test_a_benchmark_cannot_close_its_script_element_either():
+    page = render_html({"episodes": []}, bench={"notes": ["</script><script>alert(1)</script>"]})
+    assert "</script><script>alert(1)" not in page
+    assert json.loads(BENCH.search(page).group(1))["notes"] == ["</script><script>alert(1)</script>"]
+
+
+def test_the_benchmark_page_has_no_slot_for_a_benchmark_and_refuses_one():
+    """bench.html carries its numbers in the replay slot; giving it a second set would lose them."""
+    with pytest.raises(ValueError, match="benchmark data slot"):
+        render_html({}, page_name="bench.html", bench={"players": []})
+
+
+def test_view_writes_the_benchmark_of_the_runs_it_merges(tmp_path, capsys):
+    from tests.test_replay import DIED, record, write_run
+
+    records = ([record(player="solver", seed=1000, row=r) for r in range(9)] + [record(player="solver", seed=1000, row=9, **DIED)])
+    run = write_run(tmp_path, "r", records, {"game": None})
+    out = tmp_path / "page.html"
+    assert main(["view", str(run), "--out", str(out)]) == 0
+    numbers = json.loads(BENCH.search(out.read_text()).group(1))
+    assert [p["player"] for p in numbers["players"]] == ["solver"]
+
+
+def test_view_still_builds_a_page_when_there_is_nothing_to_score(tmp_path):
+    """A run that never ended has no benchmark; the page says why rather than failing to build."""
+    from tests.test_replay import record, write_run
+
+    run = write_run(tmp_path, "open", [record(player="solver", seed=1000, row=0)], {"game": None})
+    out = tmp_path / "page.html"
+    assert main(["view", str(run), "--out", str(out)]) == 0
+    assert "why" in json.loads(BENCH.search(out.read_text()).group(1))
