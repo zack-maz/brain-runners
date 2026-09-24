@@ -138,8 +138,10 @@ All of this is one to five practice tracks: an impression, not a result.
   phase 3: `preflight()` runs inside `Runner.run`. Declined: turning a brain exception into a `stay`
   fallback; phase 2 decided a simulator failure must end the run, because a silent `stay` would
   change the fly's score.
-- Left from the final review of phase 5 (Minor): a crash in `live` (and in `run`) closes the run as `interrupted`,
-  the same status as Ctrl-C; a status of its own would be the more honest record. A hard kill leaves `status:
+- Done 2026-09-24: a crash in `live` (and in `run`) now closes the run as `crashed`, with the error in `meta.json`
+  and on the page; `interrupted` means Ctrl-C or Cancel. It was found the hard way: the fly could not play a live
+  run at all after update 3a, because brian2 installs a SIGINT handler as it is imported and the run now plays in
+  a worker thread, and the page reported only "interrupted". A hard kill leaves `status:
   running` behind (run 3 of update 2a, `runs/20260921-184858`, is one). `viewer/tunnel.js` knows that rows past the
   finish line never kill (drawing only, commented and tested); a `finish_row` in the track JSON would remove the one
   rule of the game that also lives in JavaScript. The live `episode` event carries the question sets known at that

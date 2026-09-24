@@ -294,7 +294,8 @@ their own tests, skipped when node is not installed.
 | --- | --- |
 | A paid player stops after a few rows | the cap is 0 and the rest of the track is not cached — this is the safe default |
 | `status: budget_exhausted` | the cap ran out; the answers so far are cached, so continuing later is cheaper |
-| `status: interrupted` | Ctrl-C, Cancel, or a crash. A hard kill can leave `running` behind |
+| `status: interrupted` | Ctrl-C or Cancel. A hard kill can leave `running` behind |
+| `status: crashed` | a bug in this tool: `meta.json` carries the error and the page says it |
 | `view` refuses two directories | they are different game versions, or the same (player, seed) appears twice |
 | `bench` refuses | runs of different track lengths, or fewer than five tracks for an interval |
 | "No completed run to score" on the Analysis tab | nothing in view has ended yet |

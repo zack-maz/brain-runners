@@ -117,14 +117,30 @@ def test_ctrl_c_is_an_interrupted_run_not_a_crash(tmp_path):
     assert len(load_steps(live.run_dir)) == 2
 
 
-def test_our_own_bug_still_closes_the_run_and_is_raised(tmp_path):
+def test_our_own_bug_closes_the_run_as_crashed_and_says_why(tmp_path):
+    """A crash is not someone pressing Ctrl-C. It was recorded as `interrupted` until 2026-09-24,
+    which is how a real crash in a live run (brian2 imported off the main thread) reached the page
+    as "RUN ENDED: Interrupted" with no reason."""
     class Buggy(Scripted):
         def act(self, senses): raise RuntimeError("our bug")
 
     live = LiveRun([Buggy("b", "stay")], 1001, out_root=tmp_path, max_rows=20, run_id="live")
     with pytest.raises(RuntimeError, match="our bug"):
         live.run()
-    assert json.loads((live.run_dir / "meta.json").read_text())["status"] == "interrupted" and live.broadcast.closed
+    meta = json.loads((live.run_dir / "meta.json").read_text())
+    assert meta["status"] == "crashed" and meta["error"] == "RuntimeError: our bug"
+    assert live.broadcast.closed
+    said = [e for e in live.broadcast._events if e[0] == "error"]
+    assert said and "our bug" in said[-1][1]["message"]  # the page is told, not left guessing
+
+
+def test_ctrl_c_is_still_an_interruption(tmp_path):
+    class Stopped(Scripted):
+        def act(self, senses): raise KeyboardInterrupt
+
+    live = LiveRun([Stopped("b", "stay")], 1001, out_root=tmp_path, max_rows=20, run_id="live")
+    live.run()
+    assert json.loads((live.run_dir / "meta.json").read_text())["status"] == "interrupted"
 
 
 def test_prepare_gives_the_page_an_empty_replay_that_names_the_run(tmp_path):

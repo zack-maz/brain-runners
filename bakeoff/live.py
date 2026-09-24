@@ -209,16 +209,20 @@ class LiveRun:
             self.broadcast.emit("error", {"message": self.error})
         except Cancelled:  # the page pressed cancel, or the operator did
             self.status = "interrupted"
-        except BaseException as e:  # Ctrl-C, or our bug: the directory is still a valid, incomplete run
+        except KeyboardInterrupt:  # the operator: the directory is still a valid, incomplete run
             self.status = "interrupted"
-            if not isinstance(e, KeyboardInterrupt):
-                raise
+        except BaseException as e:  # our bug: say so, rather than looking like someone pressed Ctrl-C
+            self.status, self.error = "crashed", f"{type(e).__name__}: {e}"
+            self.broadcast.emit("error", {"message": "the run crashed: " + self.error})
+            raise
         finally:
             for log in logs.values():
                 log.close()
             for player in self.players:
                 _close(player)
             self.meta.update(status=self.status, finished_at=_now(), requests=_requests(self.players))
+            if self.error:
+                self.meta["error"] = self.error
             self._write_meta()
             replay = build_replay([self.run_dir])
             self.broadcast.emit("end", self._end_event(replay))

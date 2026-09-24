@@ -9,6 +9,8 @@ neurons, so the rates can change between decisions without a rebuild.
 from __future__ import annotations
 
 import importlib.util
+import signal
+import threading
 import time
 
 import numpy as np
@@ -16,6 +18,30 @@ import numpy as np
 from bakeoff.fly import data
 from bakeoff.fly.neurons import SIDES, Selection, load_selection
 from bakeoff.fly.reading import WINDOW_MS, Reading
+
+
+def import_brian2():
+    """`import brian2`, from any thread.
+
+    brian2 installs its own SIGINT handler while it is being imported, so that Ctrl-C can stop a
+    simulation, and CPython allows a signal handler to be installed only from the main thread. A live
+    run plays in a worker thread (the page starts it), so importing brian2 there raised
+    `ValueError: signal only works in main thread of the main interpreter` and took the whole run
+    down — the page showed "interrupted" with no reason. Off the main thread we let the import happen
+    without that handler: it only exists to interrupt a simulation from the keyboard, and a live run
+    is cancelled between decisions instead. Nothing about the simulation changes.
+    """
+    if threading.current_thread() is threading.main_thread():
+        import brian2 as b2
+
+        return b2
+    installed = signal.signal
+    signal.signal = lambda *args, **kwargs: None  # only for the length of the import
+    try:
+        import brian2 as b2
+    finally:
+        signal.signal = installed
+    return b2
 
 
 def _upstream_model():
@@ -28,8 +54,7 @@ def _upstream_model():
 class Brain:
     def __init__(self, selection: Selection | None = None, window_ms: float = WINDOW_MS, target: str = "cython"):
         data.require()
-        import brian2 as b2
-
+        b2 = import_brian2()  # from a worker thread too: a live run plays in one
         self._b2 = b2
         b2.prefs.codegen.target = target
         upstream = _upstream_model()

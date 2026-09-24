@@ -193,8 +193,11 @@ class Runner:
         except RunAborted as abort:
             meta["status"] = abort.status
             raise
-        except BaseException:
+        except KeyboardInterrupt:
             meta["status"] = "interrupted"
+            raise
+        except BaseException as e:  # our bug: a crash is not someone pressing Ctrl-C
+            meta["status"], meta["error"] = "crashed", f"{type(e).__name__}: {e}"
             raise
         else:
             meta["status"] = "completed"

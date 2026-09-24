@@ -143,13 +143,23 @@ def test_budget_exhausted_is_recorded_in_meta(tmp_path):
     assert json.loads((tmp_path / "t4" / "meta.json").read_text())["status"] == "budget_exhausted"
 
 
-def test_any_other_exception_marks_the_run_interrupted(tmp_path):
+def test_any_other_exception_marks_the_run_crashed_and_records_why(tmp_path):
     class Boom(Scripted):
         def reset(self, game, seed): raise RuntimeError("kaboom")
 
     with pytest.raises(RuntimeError, match="kaboom"):
         Runner(tmp_path).run([Boom(None, name="boom")], range(1), run_id="t5")
-    assert json.loads((tmp_path / "t5" / "meta.json").read_text())["status"] == "interrupted"
+    meta = json.loads((tmp_path / "t5" / "meta.json").read_text())
+    assert meta["status"] == "crashed" and meta["error"] == "RuntimeError: kaboom"
+
+
+def test_ctrl_c_marks_the_run_interrupted(tmp_path):
+    class Stopped(Scripted):
+        def reset(self, game, seed): raise KeyboardInterrupt
+
+    with pytest.raises(KeyboardInterrupt):
+        Runner(tmp_path).run([Stopped(None, name="stopped")], range(1), run_id="t6")
+    assert json.loads((tmp_path / "t6" / "meta.json").read_text())["status"] == "interrupted"
 
 
 def test_close_is_called_and_a_failing_close_does_not_mask_the_real_error(tmp_path):
