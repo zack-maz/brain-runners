@@ -49,7 +49,7 @@ built and parked after one track (decisions 33–34). The page (items 4, 5, 8 an
 ceiling, the lobby) and 3b (the logs, the Run and Analysis tabs, the picker, the benchmark in the page), each
 reviewed and fixed; decisions 36–39 settle their open questions and the rename of Claude Haiku's players.
 **Everything before phase 6 is built**; what is left is GLM Flash's parked tracks and one PR "Opus v1" from
-`phase6-updates`, on the user's word. `fly2`, a second pure fly with a sideways read-out channel of its own, is
+`phase6-updates`, on the user's word. `fly2`, a second pure fly with a richer input of ours (M3, a sideways channel), is
 built, calibrated and played on branch `fly2` (decisions 41–43, spec
 `docs/superpowers/specs/2026-09-24-fly2-design.md`, plan `docs/superpowers/plans/2026-09-24-fly2.md`): its numbers
 are frozen (`calibration/FLY2_REPORT.md`), its real run and its live smoke are done, and it is not yet merged (it

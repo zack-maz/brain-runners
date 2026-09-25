@@ -95,8 +95,8 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
    from the prototype `proto/fly2`, 9 tasks, branch `fly2`). Spike 04, the probe, passed on 2026-09-24
    (`spikes/04-fly2-probe/REPORT.md` on branch `spike/fly2-probe`): every candidate turns away from a gap under a
    strong centre, and M3 is admitted. M3, "a sideways channel", is frozen as decision 43
-   (`calibration/FLY2_REPORT.md`): gain 250 Hz, falloff 2, turn threshold 40 Hz, jump threshold 175 Hz; held-out,
-   fly2 scored 82.34 rows against its stand-in brain's 65.98. The real run is done: `fly,fly2` on v2 seeds
+   (`calibration/FLY2_REPORT.md`): gain 250 Hz, falloff 2, turn threshold 40 Hz, jump threshold 175 Hz; on held-out seeds
+   1200–1399 (stand-in brain) fly2 scored 82.34 rows, the same rule with no brain 74.05, shuffled wiring 27.84, fly 65.98. The real run is done: `fly,fly2` on v2 seeds
    1000–1019 (`runs/20260925-101614`), fly mean 66.55 rows, fly2 mean 78.20; `bakeoff bench` says "can't tell yet"
    (+11.7 rows, 95% interval -4.5 to 27.8, about 69 tracks for a verdict). The live smoke is done too: `bakeoff
    live` on v2 track 1001 with fly and fly2 ticked completed, one shared brain (peak 720 MB), every decision
