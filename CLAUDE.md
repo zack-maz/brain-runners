@@ -5,7 +5,7 @@ simulation play the same seeded runs of a "Run"-style tunnel game; output is a w
 tournament. Read these before doing anything:
 
 0. `docs/EXPLAINER.html` — the plain-language tour of the whole project, high level first, then technical
-   (dated 2026-09-21: predates the Jev family; refreshed when all updates are done).
+   (written 2026-09-21, refreshed 2026-09-24 after the updates and 2026-09-25 for fly2).
 1. `docs/NEXT.md` — where things stand and what to do next, in order (rewritten as the state changes).
    `docs/DECISIONS.md` — what the user has decided, numbered, only ever added to.
 2. `docs/superpowers/specs/2026-09-19-tunnel-run-design.md` — the approved design (binding), extended by
