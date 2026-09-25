@@ -5,6 +5,8 @@ from __future__ import annotations
 import zlib
 from typing import Callable
 
+from bakeoff.fly import shared
+from bakeoff.fly.channels import FLY_CELLS
 from bakeoff.game.engine import Game
 from bakeoff.players.base import Decision
 from bakeoff.senses import LOOMING_FALLOFF, LOOMING_GAIN_HZ, looming_rates
@@ -45,9 +47,9 @@ def noise_seed(seed: int, row: int) -> int:
 
 
 def _real_brain():
-    from bakeoff.fly.brain import Brain  # imports brian2: only when a fly actually plays
+    from bakeoff.fly import shared  # the brain itself imports brian2 only when a fly actually plays
 
-    return Brain()
+    return shared.acquire("fly", FLY_CELLS)
 
 
 class FlyPlayer:
@@ -58,6 +60,8 @@ class FlyPlayer:
                  gain_hz: float = LOOMING_GAIN_HZ, falloff: float = LOOMING_FALLOFF):
         self._brain_factory = brain_factory
         self._brain = None  # about 1 GB: built on the first reset(), not when the CLI lists players
+        if brain_factory is _real_brain:
+            shared.want("fly", FLY_CELLS)  # one brain per process, shared with any other fly of the run
         self._seed = 0
         self.turn_threshold_hz, self.jump_threshold_hz = turn_threshold_hz, jump_threshold_hz
         self.gain_hz, self.falloff = gain_hz, falloff

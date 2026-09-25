@@ -32,9 +32,11 @@ def pytest_collection_modifyitems(config, items):
 
 @pytest.fixture(scope="session")
 def brain():
-    """The real fly brain, built once per test session (about 1 GB, half a minute). Slow tests only."""
+    """The real fly brain, built once per test session (about 1 GB, half a minute). Slow tests only.
+    Every fly2 candidate's input is registered beside fly's, so fly's slow tests run on the shared brain."""
     from bakeoff.fly.brain import Brain
+    from bakeoff.fly.channels import FLY_CELLS, MAPPINGS
 
-    brain = Brain()
+    brain = Brain(inputs={"fly": FLY_CELLS, **{name: mapping.cells for name, mapping in MAPPINGS.items()}})
     yield brain
     brain.close()
