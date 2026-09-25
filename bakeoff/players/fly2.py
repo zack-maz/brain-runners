@@ -27,6 +27,13 @@ FALLOFF = 3.0
 TURN_THRESHOLD_HZ = 0.0
 JUMP_THRESHOLD_HZ = 200.0
 CALIBRATED = False
+# mean rows on the held-out seeds, from the same report: fly2 and its controls (None until calibrated)
+CONTROLS = None
+
+
+def about() -> str:
+    """One line for the lobby: what fly2 is, from the frozen mapping (never typed into the page)."""
+    return f"{MAPPINGS[MAPPING].summary}, walking-steering neurons, dodge before jump"
 
 
 def turn_signal_hz(rates_hz: dict[str, float], turn_types: tuple[str, ...]) -> float:

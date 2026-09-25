@@ -85,6 +85,11 @@ def answered_models(out_root: Path | str) -> dict[str, str]:
     return models
 
 
+def about_of(name: str) -> str | None:
+    """What a fly is, for its tick in the lobby; the grid's rows and columns say it for everyone else."""
+    return {"fly": "looming \u2192 escape reflex (phase 2)", "fly2": fly2.about()}.get(name)
+
+
 def _order(names) -> list[str]:
     """The contestants first, in the page's own order, then the free yardsticks."""
     rest = sorted(set(names) - set(CONTESTANTS))
@@ -159,7 +164,7 @@ class LiveSession:
         for name in _order(REGISTRY):
             paid = name in PAID
             players.append({
-                "name": name, "paid": paid,
+                "name": name, "paid": paid, "about": about_of(name),
                 "price_usd": PRICE_USD.get(name) if paid else 0.0,
                 "model": model_of(name) if paid else None,
                 # what it answered as last: the asked-for name may be a moving one (`jev-latest`)

@@ -128,7 +128,8 @@ def fly2_meta() -> dict:
             "sees": {channel: list(offsets) for channel, offsets in mapping.sees.items()},
             "gain_hz": fly2.GAIN_HZ, "falloff": fly2.FALLOFF, "step_hz": mapping.step_hz, "max_hz": CHANNEL_MAX_HZ,
             "turn_types": list(mapping.turn_types), "turn_threshold_hz": fly2.TURN_THRESHOLD_HZ,
-            "jump_threshold_hz": fly2.JUMP_THRESHOLD_HZ, "window_ms": WINDOW_MS, "provisional": not fly2.CALIBRATED}
+            "jump_threshold_hz": fly2.JUMP_THRESHOLD_HZ, "window_ms": WINDOW_MS, "provisional": not fly2.CALIBRATED,
+            "controls": fly2.CONTROLS}
 
 
 def new_meta(run_id: str, players: list[Player], seeds: Sequence[int], rules: Rules, args: dict | None) -> dict:

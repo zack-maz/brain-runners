@@ -106,7 +106,8 @@ def test_run_writes_one_jsonl_per_player_and_meta(tmp_path):
                            "annotations_commit": "17fc57722002e1a7d38cdd0c89ac382bf92718da"}
     assert meta["fly2"]["mapping"] in ("M1", "M2", "M3") and meta["fly2"]["max_hz"] == 500.0
     assert meta["fly2"]["provisional"] == (not fly2.CALIBRATED) and meta["fly2"]["window_ms"] == 100.0
-    assert set(meta["fly2"]) >= {"gain_hz", "falloff", "turn_types", "turn_threshold_hz", "jump_threshold_hz", "cells"}
+    assert set(meta["fly2"]) >= {"gain_hz", "falloff", "turn_types", "turn_threshold_hz", "jump_threshold_hz", "cells",
+                                 "controls"}
     assert meta["args"] == {"players": "solver,random"}
     assert meta["status"] == "completed" and meta["schema_version"] == 1
     assert "git_sha" in meta and {"anthropic", "brian2", "numpy"} <= set(meta["versions"])

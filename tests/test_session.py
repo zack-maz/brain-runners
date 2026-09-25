@@ -227,3 +227,13 @@ def test_an_uncalibrated_fly2_is_shown_with_its_reason_and_cannot_be_started(tmp
         live.start(1001, ["fly2"])
     monkeypatch.setattr(fly2, "CALIBRATED", True)
     assert live.why_not("fly2", 1001) is None
+
+
+def test_each_fly_says_what_it_is_and_nobody_else_needs_to(tmp_path):
+    from bakeoff.fly.channels import MAPPINGS
+    from bakeoff.players import fly2
+
+    by_name = {p["name"]: p for p in session(tmp_path).state()["players"]}
+    assert by_name["fly"]["about"] == "looming → escape reflex (phase 2)"
+    assert by_name["fly2"]["about"] == MAPPINGS[fly2.MAPPING].summary + ", walking-steering neurons, dodge before jump"
+    assert by_name["haiku"]["about"] is None and by_name["solver"]["about"] is None

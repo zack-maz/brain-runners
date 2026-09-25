@@ -8,7 +8,7 @@
     ["DNa01", "steering"], ["DNb01", "steering"], ["DNp01", "Giant Fiber, escape jump"], ["DNa02", "logged only"],
   ];
   // the short uppercase tag a runner carries in the tunnel and on its panel
-  const TAGS = { fly: "FLY", jev_composed: "JEV", haiku: "HAIKU", jev: "JEV ONE-SHOT", glm: "GLM ONE-SHOT", solver: "SOLVER", random: "RANDOM", always_jump: "JUMPER",
+  const TAGS = { fly: "FLY", fly2: "FLY2", jev_composed: "JEV", haiku: "HAIKU", jev: "JEV ONE-SHOT", glm: "GLM ONE-SHOT", solver: "SOLVER", random: "RANDOM", always_jump: "JUMPER",
     jev_choice: "JEV CHOICE", jev_two_step: "JEV 2-STEP", jev_reader: "JEV READER", haiku_composed: "HAIKU COMPOSED",
     haiku_choice: "HAIKU CHOICE", haiku_two_step: "HAIKU 2-STEP", haiku_reader: "HAIKU READER",
     glm_composed: "GLM COMPOSED", glm_choice: "GLM CHOICE", glm_two_step: "GLM 2-STEP", glm_reader: "GLM READER" };
@@ -78,13 +78,14 @@
   }
 
   // windowMs null: the window is unknown, so the x axis is scaled by the frame's own latest spike instead
-  function spikeRaster(info, windowMs) {
+  // groups: [name, what it is] of the read-out neurons to draw, fly's by default
+  function spikeRaster(info, windowMs, groups = FLY_GROUPS) {
     const rowHeight = 9, width = 200;
     const times = (group, side) => (info.spike_times_ms || {})[group + "_" + side] || [];
-    const latest = Math.max(1, ...FLY_GROUPS.flatMap(([group]) => ["left", "right"].flatMap((side) => times(group, side))));
+    const latest = Math.max(1, ...groups.flatMap(([group]) => ["left", "right"].flatMap((side) => times(group, side))));
     const span = windowMs == null ? latest : windowMs;
     let rows = "";
-    FLY_GROUPS.forEach(([group], g) => {
+    groups.forEach(([group], g) => {
       ["left", "right"].forEach((side, s) => {
         const y = (g * 2 + s) * rowHeight + g * 4;
         rows += '<text x="0" y="' + (y + 7) + '">' + group + " " + side[0].toUpperCase() + "</text>";
@@ -92,7 +93,7 @@
           '" x2="' + (52 + (t / span) * width).toFixed(1) + '" y1="' + y + '" y2="' + (y + rowHeight - 2) + '"/>').join("");
       });
     });
-    const height = FLY_GROUPS.length * (2 * rowHeight + 4);
+    const height = groups.length * (2 * rowHeight + 4);
     const label = "spikes of the read-out neurons" + (windowMs == null ? "" : " over the " + esc(windowMs) + " ms window");
     return '<svg class="raster" viewBox="0 0 256 ' + height + '" role="img" aria-label="' + label + '">' + rows + "</svg>";
   }
@@ -105,14 +106,6 @@
     const windowMs = context.windowMs, maxHz = context.maxHz;
     const eyeScale = maxHz || Math.max(info.left_hz, info.right_hz, 1);
     const turn = info.turn_signal_hz, threshold = info.turn_threshold_hz;
-    const limit = Math.ceil(Math.max(100, Math.abs(turn), Math.abs(threshold)) / 50) * 50; // the turn bar's span
-    const turnShare = 0.5 + Math.max(-limit, Math.min(limit, turn)) / (2 * limit);
-    const thresholdShare = threshold / (2 * limit);
-    let turnTicks = '<i class="tick" style="left:50%"></i>';
-    if (threshold > 0) {
-      turnTicks += '<i class="tick" style="left:' + ((0.5 + thresholdShare) * 100).toFixed(1) + '%"></i>' +
-        '<i class="tick" style="left:' + ((0.5 - thresholdShare) * 100).toFixed(1) + '%"></i>';
-    }
     const jumpScale = Math.max(maxHz || 0, info.jump_signal_hz, info.jump_threshold_hz, 1);
     return '<div class="eyes"><span>left eye ' + hz(info.left_hz) + bar(info.left_hz / eyeScale) + "</span>" +
       "<span>right eye " + hz(info.right_hz) + bar(info.right_hz / eyeScale) + "</span></div>" +
@@ -121,12 +114,61 @@
       '<p class="muted">' + esc(info.total_spikes) + " spikes in the whole brain" +
       (windowMs == null ? "" : " in " + esc(windowMs) + " ms") + "</p>" +
       '<div class="signal">turn signal ' + hz(turn) + ' <span class="muted">(right minus left steering; turns beyond ±' +
-      Math.round(threshold) + " Hz, our threshold)</span>" +
-      '<span class="bar centred"><i class="fill" style="left:' + (Math.min(turnShare, 0.5) * 100).toFixed(1) + "%;width:" +
-      (Math.abs(turnShare - 0.5) * 100).toFixed(1) + '%"></i>' + turnTicks + "</span></div>" +
+      Math.round(threshold) + " Hz, our threshold)</span>" + turnBar(turn, threshold) + "</div>" +
       '<div class="signal">jump signal ' + hz(info.jump_signal_hz) + ' <span class="muted">(Giant Fiber; jumps above ' +
       hz(info.jump_threshold_hz) + ", our threshold)</span>" +
       bar(info.jump_signal_hz / jumpScale, info.jump_threshold_hz / jumpScale) + "</div>";
+  }
+
+  // a bar centred on zero, filled towards the turn, with ticks at zero and at ±threshold
+  function turnBar(turn, threshold) {
+    const limit = Math.ceil(Math.max(100, Math.abs(turn), Math.abs(threshold)) / 50) * 50; // the turn bar's span
+    const turnShare = 0.5 + Math.max(-limit, Math.min(limit, turn)) / (2 * limit);
+    const thresholdShare = threshold / (2 * limit);
+    let turnTicks = '<i class="tick" style="left:50%"></i>';
+    if (threshold > 0) {
+      turnTicks += '<i class="tick" style="left:' + ((0.5 + thresholdShare) * 100).toFixed(1) + '%"></i>' +
+        '<i class="tick" style="left:' + ((0.5 - thresholdShare) * 100).toFixed(1) + '%"></i>';
+    }
+    return '<span class="bar centred"><i class="fill" style="left:' + (Math.min(turnShare, 0.5) * 100).toFixed(1) + "%;width:" +
+      (Math.abs(turnShare - 0.5) * 100).toFixed(1) + '%"></i>' + turnTicks + "</span>";
+  }
+
+  const STEERING = ["DNa02", "DNa01", "DNg13"];
+  const BRANCHES = {
+    dodge: "dodged: the turn was beyond its threshold",
+    jump: "jumped: no dodge, and the Giant Fiber was above its threshold",
+    stay: "stayed: neither signal crossed its threshold",
+  };
+
+  // fly2's panel. context.fly2 is the run's fly2 block (its mapping and constants, from meta.json), or null
+  // for a run that did not record it; the input bars then scale against the frame's own largest channel.
+  function fly2Mind(frame, context) {
+    const info = frame.info;
+    if (!info) return "";
+    const meta = context.fly2 || {};
+    const channels = info.channels_hz || {};
+    const scale = meta.max_hz || Math.max(1, ...Object.values(channels));
+    const cells = meta.cells || {};
+    const types = info.turn_types || [];
+    const groups = types.map((t) => [t, "steering"]).concat([["DNp01", "Giant Fiber, escape jump"]],
+      STEERING.filter((t) => !types.includes(t)).concat(["DNb05", "DNa04"]).map((t) => [t, "logged only"]));
+    const drives = Object.keys(cells).map((ch) => esc(ch) + ": " + cells[ch].map(esc).join(", ")).join("; ");
+    const turn = info.turn_signal_hz, threshold = info.turn_threshold_hz;
+    const jumpScale = Math.max(meta.max_hz || 0, info.jump_signal_hz, info.jump_threshold_hz, 1);
+    return '<div class="eyes">' + Object.keys(channels).map((ch) => "<span>" + esc(ch) + " " + hz(channels[ch]) +
+      bar(channels[ch] / scale) + "</span>").join("") + "</div>" +
+      '<p class="muted">Input' + (drives ? " to " + drives : "") + ". Which gaps drive which cells, and how hard, is ours.</p>" +
+      spikeRaster(info, context.windowMs, groups) +
+      '<p class="muted">' + esc(info.total_spikes) + " spikes in the whole brain" +
+      (context.windowMs == null ? "" : " in " + esc(context.windowMs) + " ms") + "</p>" +
+      '<div class="signal">turn signal ' + hz(turn) + ' <span class="muted">(right minus left of ' +
+      types.map(esc).join(" + ") + ", our read-out; dodges beyond ±" + Math.round(threshold) + " Hz, our threshold)</span>" +
+      turnBar(turn, threshold) + "</div>" +
+      '<div class="signal">jump signal ' + hz(info.jump_signal_hz) + ' <span class="muted">(Giant Fiber; jumps above ' +
+      hz(info.jump_threshold_hz) + ", our threshold, when it does not dodge)</span>" +
+      bar(info.jump_signal_hz / jumpScale, info.jump_threshold_hz / jumpScale) + "</div>" +
+      '<p class="muted">Our rule, dodge before jump: ' + (BRANCHES[info.branch] || esc(info.branch)) + ".</p>";
   }
 
   function jevMind(frame) {
@@ -248,9 +290,36 @@
           " The cap, the step and the window length are fixed design choices of ours and were not tuned.</li>");
   }
 
-  // the whole panel for one decision; context = {windowMs, maxHz, window}, from the run's meta
+  // fly2's part of "what is ours", from one run of replay.runs that played it (or undefined): its mapping,
+  // read-out, rule, numbers and controls, all read from the run's meta. Empty when no run recorded fly2.
+  function oursFly2(run) {
+    const f = run && run.fly2;
+    if (!f || f.mapping == null) return "";
+    const seen = Object.keys(f.cells || {}).map((ch) => esc(ch) + " (lanes " + (f.sees[ch] || []).map(esc).join(", ") +
+      ") drives " + f.cells[ch].map(esc).join(", ")).join("; ");
+    let html = "<li>Input mapping " + esc(f.mapping) + ", " + esc(f.summary) + ": each gap a channel sees adds " +
+      cell(f.gain_hz) + " / row<sup>" + cell(f.falloff) + "</sup> Hz, capped at " + cell(f.max_hz) + " Hz and rounded to " +
+      cell(f.step_hz) + " Hz steps. " + seen + ". Lane 0 is the runner's own.</li>" +
+      "<li>Read-out: the turn is right minus left of " + (f.turn_types || []).map(esc).join(" + ") +
+      ", chosen for this mapping by a probe of the brain (spike 04); the jump is the Giant Fiber mean.</li>" +
+      "<li>Rule, dodge before jump: a turn beyond " + cell(f.turn_threshold_hz) + " Hz goes left or right; otherwise a " +
+      "Giant Fiber above " + cell(f.jump_threshold_hz) + " Hz jumps; otherwise it runs straight.</li>";
+    if (f.provisional) return html + '<li class="warn">fly2\'s values were provisional when this run was made: not yet calibrated.</li>';
+    html += "<li>The mapping (one of three), the gain, the falloff and the two thresholds were chosen once, by a rule fixed " +
+      "before any measurement, on practice tracks 1000 to 1199 of game v2, then frozen (calibration/FLY2_REPORT.md).</li>";
+    const c = f.controls;
+    if (c) {
+      html += "<li>Controls, mean rows on held-out tracks " + esc(c.seeds) + ": fly2 " + cell(c.fly2) + ", the same rule with no brain " +
+        cell(c.no_brain) + ", on shuffled wiring " + (c.shuffled == null ? "not measured" : cell(c.shuffled)) + ", fly " +
+        cell(c.fly) + ". Where the no-brain control does as well, the gain is our mapping's and rule's, not the wiring's.</li>";
+    }
+    return html;
+  }
+
+  // the whole panel for one decision; context = {windowMs, maxHz, window, fly2}, from the run's meta
   function mind(episode, frame, context) {
     const body = episode.player === "fly" ? flyMind(frame, context)
+      : episode.player === "fly2" ? fly2Mind(frame, context)
       : episode.player === "jev" ? jevMind(frame)
       : episode.player === "jev_composed" ? jevComposedMind(frame)
       : episode.player === "haiku" || episode.player === "glm" ? chatMind(frame)
@@ -267,7 +336,7 @@
     return "row " + Math.floor(state.row) + ", lane " + (((Math.round(state.lane) % lanes) + lanes) % lanes);
   }
 
-  const api = { esc, cell, bar, tagOf, sensesGrid, verdict, spikeRaster, flyMind, jevMind, jevComposedMind, visorP, chatMind, cost, asked,
+  const api = { esc, cell, bar, tagOf, sensesGrid, verdict, spikeRaster, flyMind, fly2Mind, oursFly2, jevMind, jevComposedMind, visorP, chatMind, cost, asked,
                 ours, mind, statusLine, isSetPlayer, readGrid, setMind };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Minds = api;

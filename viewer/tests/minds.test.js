@@ -263,3 +263,62 @@ test("the reader panel draws what it read, darker for surer gaps, and escapes a 
   assert.match(odd, /stopped: &#60;i&#62;/);
   assert.equal(Minds.readGrid({ gap_left: { noul: 0.1 } }), "");
 });
+
+const fly2Info = (extra) => ({
+  channels_hz: { centre: 300, left: 0, right: 100 }, turn_types: ["DNa02", "DNa01", "DNg13"],
+  turn_signal_hz: -42, jump_signal_hz: 230, turn_threshold_hz: 20, jump_threshold_hz: 200, branch: "dodge",
+  total_spikes: 4100, spike_times_ms: { DNa02_left: [12.5], DNp01_right: [40] }, ...extra,
+});
+const fly2Meta = (extra) => ({
+  mapping: "M1", summary: "a straight-ahead channel", max_hz: 500, step_hz: 100, gain_hz: 250, falloff: 3,
+  cells: { centre: ["LPLC2 left", "LPLC2 right"], left: ["LC4 left"], right: ["LC4 right"] },
+  sees: { centre: [0], left: [-3, -2, -1], right: [1, 2, 3] }, turn_types: ["DNa02", "DNa01", "DNg13"],
+  turn_threshold_hz: 20, jump_threshold_hz: 200, window_ms: 100, provisional: false,
+  controls: { seeds: "1200-1399", fly2: 98.5, no_brain: 71.25, shuffled: 40, fly: 66 }, ...extra,
+});
+
+test("fly2's panel shows every channel, its own read-out, both thresholds and which branch of our rule fired", () => {
+  const html = Minds.fly2Mind(frame({ info: fly2Info() }), context({ fly2: fly2Meta() }));
+  assert.match(html, /centre 300 Hz/);
+  assert.match(html, /right 100 Hz/);
+  assert.match(html, /centre: LPLC2 left, LPLC2 right; left: LC4 left/);
+  assert.match(html, /Which gaps drive which cells, and how hard, is ours/);
+  assert.match(html, /right minus left of DNa02 \+ DNa01 \+ DNg13, our read-out; dodges beyond ±20 Hz, our threshold/);
+  assert.match(html, /jumps above 200 Hz, our threshold, when it does not dodge/);
+  assert.match(html, /Our rule, dodge before jump: dodged: the turn was beyond its threshold/);
+  assert.match(html, /DNa02 L/);  // the raster draws the read-out neurons that decide
+  assert.match(html, /DNb05 L/);  // and the logged ones
+  assert.equal(Minds.fly2Mind(frame({ info: null }), context()), "");
+});
+
+test("fly2's panel works without the run's fly2 block, and a read-out without DNa02 draws it as logged only", () => {
+  const html = Minds.fly2Mind(frame({ info: fly2Info({ turn_types: ["DNa01", "DNg13"], branch: "stay" }) }), context());
+  assert.match(html, /right minus left of DNa01 \+ DNg13,/);
+  assert.match(html, /stayed: neither signal crossed its threshold/);
+  assert.match(html, /DNa02 L/);
+  assert.doesNotMatch(html, /Input to/);
+});
+
+test("the mind dispatches fly2 to its own panel and escapes what it logs", () => {
+  const html = Minds.mind({ player: "fly2" }, frame({ info: fly2Info({ channels_hz: { "<b>": 1 }, branch: "<i>" }) }), context());
+  assert.match(html, /&#60;b&#62; 1 Hz/);
+  assert.equal(html.includes("<b>"), false);
+  assert.equal(Minds.tagOf("fly2"), "FLY2");
+});
+
+test("Minds.oursFly2 lists the mapping, the read-out, the rule, the numbers and the controls", () => {
+  const html = Minds.oursFly2({ fly2: fly2Meta() });
+  assert.match(html, /Input mapping M1, a straight-ahead channel/);
+  assert.match(html, /250 \/ row<sup>3<\/sup> Hz, capped at 500 Hz and rounded to 100 Hz steps/);
+  assert.match(html, /centre \(lanes 0\) drives LPLC2 left, LPLC2 right/);
+  assert.match(html, /right minus left of DNa02 \+ DNa01 \+ DNg13/);
+  assert.match(html, /a turn beyond 20 Hz goes left or right; otherwise a Giant Fiber above 200 Hz jumps/);
+  assert.match(html, /practice tracks 1000 to 1199 of game v2, then frozen/);
+  assert.match(html, /fly2 98.50, the same rule with no brain 71.25, on shuffled wiring 40, fly 66/);
+  assert.match(Minds.oursFly2({ fly2: fly2Meta({ provisional: true }) }), /provisional when this run was made/);
+  assert.doesNotMatch(Minds.oursFly2({ fly2: fly2Meta({ provisional: true }) }), /Controls/);
+  assert.match(Minds.oursFly2({ fly2: fly2Meta({ controls: { ...fly2Meta().controls, shuffled: null } }) }),
+    /on shuffled wiring not measured/);
+  assert.equal(Minds.oursFly2(undefined), "");
+  assert.equal(Minds.oursFly2({ fly2: null }), "");
+});

@@ -85,8 +85,8 @@
   ];
   // the players that are not in the grid, and why they are here at all
   const APART = [
-    { key: "asked", title: "Asked nothing", says: "The fly is not asked anything: gaps ahead become looming into its eyes and its own neurons steer.",
-      players: ["fly"] },
+    { key: "asked", title: "Asked nothing", says: "The flies are not asked anything: gaps ahead become input to their eyes and their own neurons steer. How gaps become input is ours.",
+      players: ["fly", "fly2"] },
     { key: "yardsticks", title: "Yardsticks, not contestants", says: "What good and bad look like on the same track: a perfect search, a coin, and one that always jumps.",
       players: ["solver", "random", "always_jump"] },
   ];
@@ -145,6 +145,7 @@
       '<input type="checkbox" name="player" value="' + esc(player.name) + '"' + (on ? " checked" : "") +
       (player.why_not ? " disabled" : "") + ">" +
       '<span class="pick-name">' + esc(player.name) + "</span>" +
+      (player.about ? '<span class="note">' + esc(player.about) + "</span>" : "") +
       '<span class="note">' + esc(notesFor(player)) + "</span>" +
       (player.why_not ? '<span class="note warn">' + esc(player.why_not) + "</span>" : "") +
       "</label></td>";

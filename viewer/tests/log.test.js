@@ -114,3 +114,10 @@ test("lines keeps the frames' order, oldest first", () => {
 test("short leaves a short line alone", () => {
   assert.equal(short("  a  b "), "a b");
 });
+
+test("answered gives fly2 its channels, signals and branch, and says the input and the rule are ours", () => {
+  const info = { channels_hz: { centre: 300, left: 0, right: 100 }, turn_signal_hz: -41.6, jump_signal_hz: 230.2,
+                 branch: "dodge", total_spikes: 4100 };
+  assert.equal(answered({ player: "fly2" }, frame({ info, answers: null })),
+    "input (ours) centre 300 Hz / left 0 Hz / right 100 Hz, turn -42 Hz, jump 230 Hz, dodged (our rule), 4100 spikes");
+});

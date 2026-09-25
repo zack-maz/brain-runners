@@ -17,9 +17,10 @@
   const esc = Minds.esc;
   const cell = Minds.cell;
   const DEMO = ["fly", "jev_composed", "haiku"]; // the default view; an older replay has only the one-shot jev
-  const SPRITE = { fly: "fly", jev_composed: "visor", haiku: "chat" }; // everyone else is a plain grey block
+  const SPRITE = { fly: "fly", fly2: "fly", jev_composed: "visor", haiku: "chat" }; // everyone else is a plain grey block
   const ABOUT = {
     fly: "Fruit fly connectome, untrained",
+    fly2: "The same fly, a richer input and read-out (ours)",
     jev_composed: "Jev, four yes/no questions a row",
     jev: "Jev, one broad question a row",
     haiku: "Claude Haiku 4.5",
@@ -215,7 +216,8 @@
       view.panels[episode.player] = { panel, status: panel.querySelector(".status"), decision: panel.querySelector(".decision"),
                                       log: panel.querySelector(".log"), lines: panel.querySelector(".log-lines"), index: -1, logged: 0 };
       return { episode, track: store.tracks[String(episode.seed)], lookahead: game.lookahead || 6, window: window_,
-               context: { windowMs: run.fly ? run.fly.window_ms : null, window: window_, maxHz: game.looming ? game.looming.max_hz : null } };
+               context: { windowMs: run.fly ? run.fly.window_ms : null, window: window_, maxHz: game.looming ? game.looming.max_hz : null,
+                         fly2: run.fly2 || null } };
     });
     if (openLog && view.panels[openLog]) {
       view.panels[openLog].log.open = true;
@@ -609,6 +611,9 @@
     $("board").hidden = !board.rows.length; // a live run has no scoreboard until it ends
     const flyRun = store.runs.find((run) => run.fly && (run.players || []).includes("fly")) || store.runs.find((run) => run.fly);
     $("ours").innerHTML = Minds.ours(flyRun);
+    const fly2Run = store.runs.find((run) => run.fly2 && (run.players || []).includes("fly2"));
+    $("ours-fly2").innerHTML = Minds.oursFly2(fly2Run);
+    $("honesty-fly2").hidden = !fly2Run;
     $("runs").innerHTML = store.runs.map((run) => {
       const sha = run.git_sha ? run.git_sha.slice(0, 7) + (run.git_dirty ? ", uncommitted changes" : "") : "unknown commit";
       const status = run.status === "completed" ? "completed" : '<span class="warn">' + esc(run.status || "status unknown") + "</span>";
