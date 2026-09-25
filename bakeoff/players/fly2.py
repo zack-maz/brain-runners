@@ -20,18 +20,18 @@ from bakeoff.game.engine import Game
 from bakeoff.players.base import Decision
 from bakeoff.players.fly import jump_signal_hz
 
-# Frozen by the calibration (calibration/FLY2_REPORT.md); provisional until CALIBRATED is True. Never retune.
-MAPPING = "M1"
+# Frozen by the calibration on practice seeds 1000-1199 (calibration/FLY2_REPORT.md, decision 43). Never retune:
+# tournament seeds must never influence these numbers.
+MAPPING = "M3"
 GAIN_HZ = 250.0
-FALLOFF = 3.0
-TURN_THRESHOLD_HZ = 0.0
-JUMP_THRESHOLD_HZ = 200.0
-CALIBRATED = False
-# Once calibrated, a dict copied by hand from calibration/FLY2_REPORT.md's Controls table (mean rows on the
-# held-out seeds): {"seeds": "1200-1399" (held-out), "practice_seeds": "1000-1199", "candidates": 3 (how many
-# candidate mappings were measured), "fly2": <float>, "no_brain": <float>, "shuffled": <float or None if not
-# measured>, "fly": <float>}. None until calibrated.
-CONTROLS = None
+FALLOFF = 2.0
+TURN_THRESHOLD_HZ = 40.0
+JUMP_THRESHOLD_HZ = 175.0
+CALIBRATED = True
+# Copied from calibration/FLY2_REPORT.md's Controls table (mean rows on the held-out seeds, stand-in brain);
+# tests/test_fly2_player.py checks every value against the report. "candidates" is how many mappings were measured.
+CONTROLS = {"seeds": "1200-1399", "practice_seeds": "1000-1199", "candidates": 3,
+            "fly2": 82.34, "no_brain": 74.05, "shuffled": 27.84, "fly": 65.98}
 
 
 def about() -> str:

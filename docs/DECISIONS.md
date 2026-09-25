@@ -249,6 +249,29 @@
     - **M1:** DNa02 is above the noise for a left gap at 300 and 500 Hz and within it for every right gap. The test
       says "cancels" only when DNa02 is within the noise in the uneven conditions, and here it is not, so M1 keeps
       DNa02 + DNa01 + DNg13. This is the controller's reading of the test and the user may still reverse it.
+43. **fly2 is M3, the sideways channel, frozen** (the user, 2026-09-25; `calibration/FLY2_REPORT.md`). The rule
+    of decision 41, fixed before any surface was measured, picked M3 over M1 and M2 on v2 practice seeds 1000–1199.
+    - **What M3 is:** gaps in the runner's own lane drive LPLC2 + LC4 of both eyes; gaps in side lanes drive
+      LPLC4 + LC22 of that side's eye.
+    - **Its read-out:** turn = right minus left of DNa02 + DNa01 + DNg13; jump = the Giant Fiber.
+    - **Its numbers:** gain 250 Hz, falloff 2, turn threshold 40 Hz, jump threshold 175 Hz. They are frozen in
+      `bakeoff/players/fly2.py`.
+
+    On the stand-in brain, held-out seeds 1200–1399 (mean rows):
+    - fly2: 82.3;
+    - the same mapping and rule with no brain: 74.1;
+    - M3 on shuffled wiring: 27.8;
+    - `fly`: 66.0.
+
+    The user accepted the result with what it says:
+    - **Our part is large.** Our mapping and rule already reach 74 rows without a brain; the wiring adds about 8
+      rows more.
+    - **The shuffled control is weak evidence.** On shuffled wiring, the read-out neurons never fire, so it shows
+      only that the real wiring routes these eye cells to them.
+    - **Deaths are still mostly jumps into gaps:** 158 of 195 on held-out seeds.
+    - **The turn threshold sits at the top of the grid** (40 Hz), so a higher one was never tried.
+    - **The held-out seeds were not wholly unseen:** they had been used by the research that chose the three
+      candidates.
 
 Where we are and what comes next: `docs/NEXT.md`.
 

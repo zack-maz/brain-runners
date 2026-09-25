@@ -177,3 +177,17 @@ def test_a_small_real_surface_of_each_candidate_has_one_neuron_per_group(brain):
         assert len(one["cells"]) == 2 ** len(mapping.channels)
         silent = one["cells"][0]
         assert set(silent["rates_hz"].values()) == {0.0} and set(silent["spike_counts"][0].values()) == {0}
+
+
+@pytest.mark.slow
+def test_the_committed_fly2_surface_is_what_the_brain_does_today(brain):
+    from bakeoff.fly.surface import _channels_seed
+    from bakeoff.players import fly2
+
+    committed = load_surface(SURFACE_FILE.parent / f"fly2_surface_{fly2.MAPPING}.json")
+    for cell in committed["cells"][-6:]:  # the loudest inputs
+        combo = tuple(cell["rates_hz"][ch] for ch in committed["channels"])
+        counts = [brain.window_of(fly2.MAPPING, cell["rates_hz"],
+                                  noise_seed=_channels_seed(fly2.MAPPING, combo, t)).spike_counts
+                  for t in range(committed["trials"])]
+        assert [{k: c[k] for k in old} for c, old in zip(counts, cell["spike_counts"])] == cell["spike_counts"]

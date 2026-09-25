@@ -105,3 +105,26 @@ def test_an_uncalibrated_fly2_is_refused_before_the_run_directory_exists(tmp_pat
         Runner(out_root=tmp_path).run([make_player("fly2")], seeds=[1000], run_id="r")
     assert not (tmp_path / "r").exists()
     shared._wanted.clear()
+
+
+def test_the_committed_constants_are_the_calibration_winner():
+    from pathlib import Path
+
+    text = (Path(__file__).resolve().parents[1] / "calibration" / "FLY2_REPORT.md").read_text()
+    heading = text.split("## Winner: ")[1]
+    assert heading.startswith(fly2.MAPPING + ",")
+    row = heading.split("\n\n")[2].splitlines()[2]
+    winner = tuple(float(cell) for cell in row.strip("| ").split(" | ")[:4])
+    assert winner == (fly2.GAIN_HZ, fly2.FALLOFF, fly2.TURN_THRESHOLD_HZ, fly2.JUMP_THRESHOLD_HZ)
+    assert fly2.CALIBRATED and fly2.CONTROLS["seeds"] == "1200-1399" and fly2.CONTROLS["practice_seeds"] == "1000-1199"
+    assert fly2.CONTROLS["candidates"] == 3 - ("Not measured, so not in the running" in text)  # none missing expected
+    # every control number on the page is the report's, not a copy that can drift (final review, I3)
+    table = text.split("## Controls\n\n")[1].split("\n\n")[1].splitlines()[2:]
+    keys = {"fly2 (winner)": "fly2", "no brain": "no_brain", "shuffled wiring": "shuffled", "fly (frozen": "fly"}
+    seen = set()
+    for line in table:
+        player, _practice, held_out = [cell.strip() for cell in line.strip("|").split("|")]
+        key = next(k for prefix, k in keys.items() if player.startswith(prefix))
+        assert f"{fly2.CONTROLS[key]:.2f}" == held_out, key
+        seen.add(key)
+    assert seen == {"fly2", "no_brain", "shuffled", "fly"}
