@@ -85,15 +85,22 @@
         each eye (LPLC2 and LC4); the steering neurons DNa01 and DNb01 are read as left and right, the Giant Fiber
         (DNp01) as jump. The wiring is the fly's. These numbers are ours:</p>
       <ul id="ours"></ul>
+      <div id="honesty-fly2" hidden>
+        <p>fly2 is the same model with the same wiring, given a richer input and read by walking-steering neurons
+          as well as the Giant Fiber. The wiring, the model and the neurons are the fly's; which cells each channel
+          drives, which neurons make the turn, the rule and the numbers are ours:</p>
+        <ul id="ours-fly2"></ul>
+      </div>
       <p>Known weaknesses:</p>
       <ul>
         <li>The fly does not plan. It flees gaps by reflex and may dodge into another gap.</li>
-        <li>Its input is crude: a whole eye is stimulated at one rate. Stimulating part of the visual field was not tested.</li>
+        <li>fly's input is crude: a whole eye is stimulated at one rate. Stimulating part of the visual field was not tested.</li>
         <li>On equal input to both eyes its deciding read-out leans right (0 to +20 Hz, never negative; the model's
           left eye has 162 looming cells, its right eye 152). With our turn threshold (listed above) that lean decides
           moves: a gap straight ahead that does not trigger a jump usually becomes a step to the right. The lean is the
           fly's, the threshold that exposes it is ours.</li>
-        <li>The wiring also has a mild left bias in DNa02, which is logged but never decides.</li>
+        <li>The wiring also has a mild left bias in DNa02, which fly logs but never decides on (fly2's M1 and M3
+          read-outs do use it).</li>
         <li>The model has no spontaneous activity and no memory between decisions; trial-to-trial spread comes only
           from input noise.</li>
         <li>That DNa01, DNa02 and DNb01 turn the fly towards their own side comes from published steering studies,

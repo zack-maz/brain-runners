@@ -188,3 +188,18 @@ test("a column no player fills is left out altogether", () => {
   assert.equal(html.includes("GLM-4.5 Flash"), false);
   assert.match(html, /Claude Haiku 4\.5/);
 });
+
+test("both flies sit in the row of those asked nothing, each saying what it is", () => {
+  const players = [player("fly", { about: "looming → escape reflex (phase 2)" }),
+                   player("fly2", { about: "a straight-ahead channel, walking-steering neurons, dodge before jump",
+                                    why_not: "fly2 is not calibrated yet (calibration/FLY2_REPORT.md)" }),
+                   player("solver")];
+  const html = Lobby.playerList(state({ players }), []);
+  const asked = html.slice(html.indexOf("Asked nothing"), html.indexOf("Yardsticks"));
+  assert.match(asked, /value="fly"/);
+  assert.match(asked, /value="fly2" disabled/);
+  assert.match(asked, /looming → escape reflex \(phase 2\)/);
+  assert.match(asked, /a straight-ahead channel, walking-steering neurons, dodge before jump/);
+  assert.match(asked, /fly2 is not calibrated yet/);
+  assert.match(asked, /How gaps become input is ours/);
+});

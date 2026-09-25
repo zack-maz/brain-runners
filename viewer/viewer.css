@@ -87,7 +87,7 @@ section > h2.label { margin-bottom: 20px; }
 .bar { position: relative; display: block; height: 4px; margin-top: 6px; background: var(--hairline); }
 .bar .fill { position: absolute; top: 0; bottom: 0; left: 0; background: var(--text); }
 .bar .tick { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--muted); }
-.eyes { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px; }
+.eyes { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 16px; margin-top: 12px; } /* fly: two eyes, fly2: three channels, one row */
 .signal { margin-top: 10px; }
 .raster { display: block; width: 100%; max-width: 360px; margin-top: 10px; }
 .raster text { font: 7px var(--font-mono); fill: var(--muted); }

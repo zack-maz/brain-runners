@@ -38,6 +38,13 @@
       return "input (ours) " + hz(info.left_hz) + " / " + hz(info.right_hz) + ", turn " + hz(info.turn_signal_hz) +
         ", jump " + hz(info.jump_signal_hz) + ", " + (info.total_spikes == null ? "–" : info.total_spikes) + " spikes";
     }
+    if (episode.player === "fly2") {
+      const channels = info.channels_hz || {};
+      return "input (ours) " + Object.keys(channels).map((ch) => ch + " " + hz(channels[ch])).join(" / ") +
+        ", turn " + hz(info.turn_signal_hz) + ", jump " + hz(info.jump_signal_hz) + ", " +
+        ({ dodge: "dodged", jump: "jumped", stay: "stayed" }[info.branch] || "–") + " (our rule), " +
+        (info.total_spikes == null ? "–" : info.total_spikes) + " spikes";
+    }
     const answers = frame.answers;
     if (!answers) return "";
     if (typeof answers.text === "string" && answers.text !== "") return short(answers.text);

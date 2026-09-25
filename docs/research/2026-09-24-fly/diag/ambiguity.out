@@ -1,0 +1,32 @@
+
+A today: 79 keys; best-single-action gap rate over all floor states = 7.06% per decision (a 150-row game ~ 100% chance to die in rows 30-149)
+   key (250.0, 250.0): share of states 30.5%, gap rate stay/left/right/jump = 69%/48%/48%/23%
+   key (25.0, 0.0): share of states 3.2%, gap rate stay/left/right/jump = 0%/0%/0%/0%
+   key (0.0, 0.0): share of states 6.2%, gap rate stay/left/right/jump = 0%/0%/0%/0%
+   key (0.0, 25.0): share of states 3.2%, gap rate stay/left/right/jump = 0%/0%/0%/0%
+   key (50.0, 25.0): share of states 1.3%, gap rate stay/left/right/jump = 0%/0%/0%/10%
+   key (50.0, 0.0): share of states 1.1%, gap rate stay/left/right/jump = 0%/0%/0%/0%
+
+A5: 30 keys; best-single-action gap rate over all floor states = 5.30% per decision (a 150-row game ~ 100% chance to die in rows 30-149)
+   key (250.0, 250.0): share of states 22.7%, gap rate stay/left/right/jump = 93%/55%/55%/23%
+   key (25.0, 0.0): share of states 5.5%, gap rate stay/left/right/jump = 0%/0%/0%/0%
+   key (0.0, 0.0): share of states 27.6%, gap rate stay/left/right/jump = 0%/0%/0%/0%
+   key (0.0, 25.0): share of states 5.6%, gap rate stay/left/right/jump = 0%/0%/0%/0%
+   key (50.0, 25.0): share of states 1.3%, gap rate stay/left/right/jump = 0%/0%/0%/22%
+   key (25.0, 50.0): share of states 1.2%, gap rate stay/left/right/jump = 0%/0%/0%/21%
+
+B : 173 keys; best-single-action gap rate over all floor states = 4.96% per decision (a 150-row game ~ 100% chance to die in rows 30-149)
+   key (250.0, 250.0, 250.0, 250.0): share of states 21.0%, gap rate stay/left/right/jump = 100%/51%/51%/24%
+   key (25.0, 0.0, 0.0, 0.0): share of states 3.2%, gap rate stay/left/right/jump = 0%/0%/0%/0%
+   key (0.0, 0.0, 0.0, 0.0): share of states 6.2%, gap rate stay/left/right/jump = 0%/0%/0%/0%
+   key (0.0, 25.0, 0.0, 0.0): share of states 3.2%, gap rate stay/left/right/jump = 0%/0%/0%/0%
+   key (50.0, 25.0, 0.0, 0.0): share of states 1.1%, gap rate stay/left/right/jump = 0%/0%/0%/0%
+   key (50.0, 0.0, 0.0, 0.0): share of states 1.1%, gap rate stay/left/right/jump = 0%/0%/0%/0%
+
+E : 16 keys; best-single-action gap rate over all floor states = 1.23% per decision (a 150-row game ~ 77% chance to die in rows 30-149)
+   key (True, True, True, True): share of states 1.2%, gap rate stay/left/right/jump = 100%/100%/100%/100%
+   key (False, False, False, False): share of states 47.9%, gap rate stay/left/right/jump = 0%/0%/0%/0%
+   key (False, False, False, True): share of states 12.1%, gap rate stay/left/right/jump = 0%/0%/0%/100%
+   key (True, False, False, True): share of states 1.9%, gap rate stay/left/right/jump = 0%/100%/0%/100%
+   key (False, False, True, False): share of states 6.8%, gap rate stay/left/right/jump = 0%/0%/100%/0%
+   key (False, True, False, False): share of states 3.3%, gap rate stay/left/right/jump = 100%/0%/0%/0%

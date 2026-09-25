@@ -3,6 +3,7 @@
 Free players only, so nothing here touches a provider."""
 
 import json
+import threading
 
 import pytest
 
@@ -179,6 +180,20 @@ def test_only_one_run_at_a_time(tmp_path):
     lobby.check(1002, ["solver"])
 
 
+def test_a_new_run_is_refused_while_the_finished_runs_thread_is_still_closing_its_players(tmp_path, monkeypatch):
+    """Minor 4: `LiveRun.run()` sets its status to `completed` before its `finally` closes the players and
+    writes meta.json. In that gap `run.status` already says finished, but the thread has not ended, so a
+    second run must still be refused: starting one while the first's brain (or provider clients) are still
+    being released could build a brain the new players do not expect."""
+    lobby = session(tmp_path)
+    play(lobby, seed=1001, players=["solver"])  # a normal run, all the way to a real "completed" status
+    assert lobby.run.status == "completed"
+    monkeypatch.setattr(threading.Thread, "is_alive", lambda self: True)  # the thread has not really ended
+    assert lobby.status == "running"
+    with pytest.raises(LobbyError, match="a run is already going"):
+        lobby.check(1002, ["solver"])
+
+
 def test_cancelling_closes_the_run_as_a_normal_interrupted_directory(tmp_path, monkeypatch):
     lobby = session(tmp_path)
     with pytest.raises(LobbyError, match="no run is going"):
@@ -213,3 +228,32 @@ def test_a_run_spends_from_the_session_budget_but_records_only_its_own_requests(
         second.spend()
     with pytest.raises(BudgetExhausted):
         second.spend()  # the ceiling the command set holds across the session
+
+
+def test_an_uncalibrated_fly2_is_shown_with_its_reason_and_cannot_be_started(tmp_path, monkeypatch):
+    from bakeoff.players import fly2
+
+    monkeypatch.setattr(fly2, "CALIBRATED", False)
+    live = session(tmp_path)
+    by_name = {p["name"]: p for p in live.state(seed=1001)["players"]}
+    assert by_name["fly2"]["why_not"] == "fly2 is not calibrated yet (calibration/FLY2_REPORT.md)"
+    assert by_name["fly2"]["paid"] is False and by_name["fly"]["why_not"] is None
+    with pytest.raises(LobbyError, match="fly2 is not calibrated yet"):
+        live.start(1001, ["fly2"])
+    monkeypatch.setattr(fly2, "CALIBRATED", True)
+    assert live.why_not("fly2", 1001) is None
+
+
+def test_each_fly_says_what_it_is_and_nobody_else_needs_to(tmp_path, monkeypatch):
+    from bakeoff.fly.channels import MAPPINGS
+    from bakeoff.players import fly2
+
+    monkeypatch.setattr(fly2, "CALIBRATED", False)
+    by_name = {p["name"]: p for p in session(tmp_path).state()["players"]}
+    assert by_name["fly"]["about"] == "looming → escape reflex (phase 2)"
+    assert by_name["fly2"]["about"] == "not calibrated yet: its input, read-out and numbers are fixed by calibration/FLY2_REPORT.md"
+    assert by_name["haiku"]["about"] is None and by_name["solver"]["about"] is None
+
+    monkeypatch.setattr(fly2, "CALIBRATED", True)
+    by_name = {p["name"]: p for p in session(tmp_path).state()["players"]}
+    assert by_name["fly2"]["about"] == MAPPINGS[fly2.MAPPING].summary + ", walking-steering neurons, dodge before jump"

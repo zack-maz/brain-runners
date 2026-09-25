@@ -36,8 +36,28 @@ def test_the_giant_fiber_is_graded_with_the_threat(brain):
 
 def test_a_reading_names_every_read_out_group_and_times_lie_in_the_window(brain):
     reading = brain.window(150.0, 0.0, noise_seed=1)
-    names = {f"{t}_{s}" for t in ("DNa01", "DNb01", "DNp01", "DNa02") for s in ("left", "right")}
+    names = {f"{t}_{s}" for t in ("DNa01", "DNb01", "DNp01", "DNa02", "DNg13", "DNb05", "DNa04") for s in ("left", "right")}
     assert set(reading.rates_hz) == set(reading.spike_counts) == set(reading.spike_times_ms) == names
     assert reading.rates_hz["DNp01_left"] == reading.spike_counts["DNp01_left"] * 10.0  # one neuron, 100 ms
     assert all(0.0 <= t <= 100.0 for times in reading.spike_times_ms.values() for t in times)
     assert len(reading.spike_times_ms["DNp01_left"]) == reading.spike_counts["DNp01_left"]
+
+
+def test_each_input_drives_only_its_own_cells_and_a_window_names_its_channels(brain):
+    assert set(brain.inputs) == {"fly", "M1", "M2", "M3"}
+    silent = brain.window_of("M3", {"centre": 0.0, "left": 0.0, "right": 0.0}, noise_seed=1)
+    assert silent.total_spikes == 0
+    sideways = brain.window_of("M3", {"centre": 0.0, "left": 500.0, "right": 0.0}, noise_seed=1)
+    assert sideways.spike_counts["DNp01_left"] == sideways.spike_counts["DNp01_right"] == 0  # spike 04: no Giant Fiber
+    with pytest.raises(ValueError, match="has channels"):
+        brain.window_of("M3", {"left": 1.0, "right": 1.0}, noise_seed=1)
+    with pytest.raises(KeyError, match="no input 'M9'"):
+        brain.window_of("M9", {}, noise_seed=1)
+
+
+def test_a_window_of_one_input_leaves_nothing_behind_for_the_next(brain):
+    alone = brain.window(150.0, 0.0, noise_seed=7)
+    brain.window_of("M3", {"centre": 500.0, "left": 500.0, "right": 0.0}, noise_seed=7)
+    after = brain.window(150.0, 0.0, noise_seed=7)
+    assert (alone.spike_counts, alone.spike_times_ms, alone.total_spikes) == (
+        after.spike_counts, after.spike_times_ms, after.total_spikes)

@@ -69,10 +69,10 @@
 <body>
 <main>
 
-<span class="label">brain-bakeoff · explainer · written 2026-09-21, refreshed 2026-09-24 after the updates</span>
+<span class="label">brain-bakeoff · explainer · written 2026-09-21, refreshed 2026-09-25 after fly2</span>
 <h1>Three minds, one tunnel</h1>
-<p class="lede">A fruit fly's brain, a small AI that answers yes/no questions, and two chatbots all play the same
-video game. We watch how each one thinks while it plays.</p>
+<p class="lede">Two fruit fly brains, a small AI that answers yes/no questions, and two chatbots all play the
+same video game. We watch how each one thinks while it plays.</p>
 
 <p>This page starts in plain language and gets more technical as it goes. Stop reading whenever you have
 enough. Each part is marked with its level.</p>
@@ -107,16 +107,15 @@ brain, which you can now run as a simulation on a laptop.</p>
 <p>We wanted to see them side by side, doing the same simple task, with their thinking visible. So we built:</p>
 <ul>
   <li><strong>a tiny game</strong> in which a runner goes down a tunnel and must not fall into holes;</li>
-  <li><strong>three kinds of player</strong>: a fruit fly brain, Jev, and chatbots (Claude Haiku 4.5, and GLM
-  Flash on a free tier);</li>
+  <li><strong>three kinds of player</strong>: two fruit fly brains (<code>fly</code> and <code>fly2</code>, connected to the game two different ways), Jev, and chatbots (Claude Haiku 4.5, and GLM Flash on a free tier);</li>
   <li><strong>a page that runs the show</strong>: you pick the track and the players in the browser, watch them
   run the same tunnel together with a panel under each one showing what it "had in mind" at every step, open
   each one's running log line by line, and read the scoreboard and the benchmark on a second tab.</li>
 </ul>
 
-<p>The fun part is that the three are completely different inside. The fly was never trained on anything:
-it plays with the escape reflexes wiring gave it. Jev answers precise questions with probabilities. The LLM reads
-a description of what's ahead and replies with a move.</p>
+<p>The fun part is that the three kinds are completely different inside. Neither fly was ever trained on
+anything: each plays with the escape reflexes its wiring gave it, and the two share that wiring: they are connected to the game in different ways. Jev answers
+precise questions with probabilities. The LLM reads a description of what's ahead and replies with a move.</p>
 
 <h2 id="game">2. The game</h2>
 
@@ -179,6 +178,14 @@ gap in row 1 and lands safely on row 2.</figcaption>
     mapped by scientists (the FlyWire project) and published as a runnable model.</p>
     <p><strong>Untrained.</strong> We only plug in: holes ahead become "something is looming" signals into
     its eyes, and we read the neurons that make a real fly turn or jump away.</p>
+  </div>
+  <div class="mind">
+    <span class="label">FLY2</span>
+    <h3>A second fruit fly brain</h3>
+    <p>The same brain, connected to the game a different way: gaps beside the runner's own lane, not just ahead of
+    it, also drive eye cells (a "sideways channel"), and its turn is read from a different set of steering neurons.</p>
+    <p><strong>Untrained</strong>, like <code>fly</code>. This connection was one of three candidates measured on the
+    real brain and picked by a rule fixed before any of them were measured.</p>
   </div>
   <div class="mind">
     <span class="label">JEV</span>
@@ -271,6 +278,25 @@ each means about 2 verdicts would appear by chance alone. That is the honest sta
   eight times the other twins. The fly is free and takes about 0.7 s a row on the laptop.</li>
 </ul>
 
+<h3>Two flies</h3>
+<p><code>fly</code> and <code>fly2</code> then played v2 practice seeds 1000&ndash;1019 on the real brain. Twenty
+tracks, like the five above, is an impression, not a result:</p>
+<div class="scroll">
+<table>
+  <thead><tr><th>Player</th><th>Tracks</th><th>Mean rows</th><th>Finished</th><th>How it dies</th></tr></thead>
+  <tbody>
+    <tr><td><strong><code>fly2</code></strong></td><td class="n">20</td><td class="n">78.2</td><td>1 of 20</td><td>16 jump into a gap, 3 dodge into one</td></tr>
+    <tr><td><code>fly</code></td><td class="n">20</td><td class="n">66.6</td><td>0 of 20</td><td>jumps into a gap, every time</td></tr>
+  </tbody>
+</table>
+</div>
+<p>The benchmark puts <code>fly2</code> ahead by 11.7 rows on average (95% interval &minus;4.5 to 27.8, 12 wins,
+3 ties, 5 losses) but calls it "can't tell yet": at this gap, telling the two flies apart with confidence would
+take about 69 tracks.</p>
+<p style="font-size:14px;color:var(--muted)">Full detail in <code>docs/COSTS.md</code> and
+<code>calibration/FLY2_REPORT.md</code>. fly2's stand-in brain had predicted 72.0 rows for these seeds; the real
+brain did a little better, 78.2.</p>
+
 <h2 id="watch">5. How to watch it, and run it</h2>
 
 <p>Everything runs from the terminal in the project folder. Watching costs nothing. This section is the tour;
@@ -336,7 +362,7 @@ no interval below five tracks, and says how many of its verdicts chance alone wo
   paid runs are done.</li>
   <li><span class="label">Update 2b · the fly</span>A trained fly was dropped; a richer-input fly
   (<code>fly_rich</code>) stopped at its probe: the wiring carries "where" only as strength, and it played worse.
-  <code>fly</code> stays the only fly.</li>
+  <code>fly</code> stayed the only fly &mdash; until <code>fly2</code>, below.</li>
   <li><span class="label">Item 7 · the benchmark</span><code>bakeoff bench</code>: intervals, pairs, survival
   curves, cost and time per row, on recorded runs. Its own review replaced the bootstrap with t intervals, which
   had been claiming verdicts about one time in seven where there was no difference.</li>
@@ -348,6 +374,18 @@ no interval below five tracks, and says how many of its verdicts chance alone wo
   Analysis tabs, one picker over the tunnel, and the benchmark drawn inside the page. Its design review found the
   Analysis tab drawing its charts with no stylesheet &mdash; invisible &mdash; and a log that ran ahead of the
   tunnel; both fixed.</li>
+  <li><span class="label">Spike 04 · fly2's probe</span>A second fly needs a richer input, chosen among three
+  candidate mappings by a rule fixed before any of them was measured. The probe first: with a gap straight ahead driving the eyes hard, does a gap on one side still turn the fly
+  away from it? For all three it did, so all three went on to be measured. M3, a sideways channel that
+  drives other eye cells for gaps beside the runner's own lane, was admitted because it turns the fly away from
+  its own side, and it drives no Giant Fiber at all.</li>
+  <li><span class="label">Calibration · fly2 frozen (decision 43)</span>M3 won the rule on practice seeds
+  1000&ndash;1199. Its read-out: turn = right minus left of DNa02 + DNa01 + DNg13, jump = the Giant Fiber, dodge
+  before jump. On held-out seeds, fly2 averaged 82.3 rows against <code>fly</code>'s 66.0. Frozen in
+  <code>calibration/FLY2_REPORT.md</code>.</li>
+  <li><span class="label">First real run</span><code>fly</code> and <code>fly2</code> played v2 seeds
+  1000&ndash;1019 on the real brain: fly2 averaged 78.2 rows, <code>fly</code> 66.6. The benchmark says it can't
+  tell them apart yet.</li>
   <li class="next"><span class="label">Next</span>GLM Flash's remaining tracks when its quota recovers, then one
   pull request; then phase 6: the tournament and the write-up.</li>
 </ol>
@@ -457,12 +495,12 @@ JavaScript only draws.</figcaption>
 <pre><code>uv run pytest                          # fast tests (Python + the viewer's JS via node --test)
 uv run pytest -m slow                  # builds the real fly brain: ~1 GB, ~1 minute
 uv run python -m scripts.fetch_fly_data   # once: fly model + annotations into data/
-uv run python -m bakeoff run    --players fly,random,solver --seeds 20 --seed-start 1000   # [--game v1] [--lookahead N]
+uv run python -m bakeoff run    --players fly,fly2,random,solver --seeds 20 --seed-start 1000   # [--game v1] [--lookahead N]
 uv run python -m bakeoff report runs/&lt;id&gt;
 uv run python -m bakeoff view   runs/&lt;id&gt; [runs/&lt;id&gt; ...]          # one offline HTML page
 uv run python -m bakeoff bench  runs/&lt;id&gt;[:player,...] [...]        # intervals, pairs, cost and time
 uv run python -m bakeoff live   --port 8765                         # the lobby: the browser picks and starts
-uv run python -m bakeoff live   --start --seed 1001 --players fly,jev_composed,haiku [--max-requests N]</code></pre>
+uv run python -m bakeoff live   --start --seed 1001 --players fly,fly2,jev_composed,haiku [--max-requests N]</code></pre>
 
 <!-- ============================================================ -->
 <hr>
@@ -474,6 +512,9 @@ Nature 2024 (<a href="https://github.com/philshiu/Drosophila_brain_model">code</
 v783 connectivity: 138,639 leaky integrate-and-fire neurons and 15.1 million synapses, default parameters.
 It has no learning, no spontaneous activity and no visual front end: you choose which neurons to drive and
 read which neurons fire.</p>
+
+<p>Two players read this same brain, connected to the game two different ways: <code>fly</code>, next, and <code>fly2</code>,
+a second way in and out, further down.</p>
 
 <h3>One decision</h3>
 <ol>
@@ -519,6 +560,46 @@ predicted 118.7 average rows on seeds 1000–1019, the real brain did 118.0). Fr
 
 <p>Randomness only comes from the Poisson input, seeded per (track, row), so a fly run repeats exactly: the live
 run on track 1001 was move for move the same as the batch run two days earlier.</p>
+
+<h3>fly2: a second way in and out</h3>
+<p>Same brain, same simulator. What differs is what drives the eyes and which neurons we read.</p>
+<ol>
+  <li><strong>Input, "a sideways channel" (M3).</strong> A gap in the runner's own lane drives the looming
+  cells of both eyes (LPLC2 and LC4), same as <code>fly</code>. A gap in a lane to the side (up to three lanes
+  either way) also drives a second, more lateral pair of looming cells (LPLC4 and LC22) on that side's eye
+  &mdash; input <code>fly</code> never gets. Each gap adds 250 / row&sup2; Hz to its channel, capped at 500 Hz
+  and rounded to 100 Hz steps.</li>
+  <li><strong>Read-out.</strong> Turn signal = (DNa02 + DNa01 + DNg13) right &minus; (DNa02 + DNa01 + DNg13)
+  left &mdash; <code>fly</code> reads DNa01 and DNb01 instead. Jump signal = the Giant Fiber (DNp01), same
+  as <code>fly</code>.</li>
+  <li><strong>Rule: dodge before jump.</strong> Turn if the turn signal is above 40 Hz either way; otherwise
+  jump if the Giant Fiber is above 175 Hz; otherwise stay.</li>
+</ol>
+
+<div class="ours">
+<span class="label">Ours, not the fly's</span>
+<p>The sideways mapping, the read-out and the rule, plus four numbers: the gain (250 Hz) and falloff (row
+squared) of the input, and the two thresholds (40 Hz, 175 Hz). Picked once by a rule fixed before any
+measurement, from three candidate mappings measured on the real brain, on practice seeds 1000&ndash;1199, then
+played once on held-out seeds 1200&ndash;1399 (82.3 rows). Frozen: <code>calibration/FLY2_REPORT.md</code>. They
+must never be retuned.</p>
+</div>
+
+<p>Two controls come with the result. With no brain at all, our mapping and rule alone already reach 74 rows on
+the held-out seeds; the real wiring adds about 8 more. On shuffled wiring, the read-out neurons never fire at
+all, so that control shows only that the real wiring routes these eye cells to them, not how good the routing
+is. Most deaths are still the same kind as <code>fly</code>'s: jumping into a gap (158 of 195 on held-out
+seeds).</p>
+
+<div class="note">
+<span class="label">Caveats</span>
+<ul>
+  <li>The winning turn threshold (40 Hz) sits at the top of the grid it was chosen from, so a higher one was
+  never tried.</li>
+  <li>The held-out seeds were not wholly unseen: they had already been used by the research that chose the three
+  candidate mappings.</li>
+</ul>
+</div>
 
 <h2 id="paid">10. The question sets, in detail</h2>
 
@@ -629,11 +710,12 @@ does arithmetic the Python does not.</p>
 
 <h2 id="rules">12. Rules we hold ourselves to</h2>
 <ul>
-  <li><strong>Seed discipline.</strong> Seeds 1000+ are practice (1000–1399 were used to calibrate the fly).
+  <li><strong>Seed discipline.</strong> Seeds 1000+ are practice (1000–1399 were used to calibrate both flies).
   Tournament seeds are below 1000, and nothing is ever tuned on them. Prompts and rules are frozen before
   the tournament; bad results get named in the write-up, not fixed.</li>
-  <li><strong>Honesty about the fly.</strong> Untrained, innate wiring only. Anything that is our mapping
-  rather than its biology is labelled as ours, on screen and in the write-up.</li>
+  <li><strong>Honesty about the flies.</strong> Untrained, innate wiring only, for <code>fly</code> and
+  <code>fly2</code> alike. Anything that is our mapping rather than the fly's biology is labelled as ours, on
+  screen and in the write-up.</li>
   <li><strong>Same words for every model.</strong> A question set is written once and given to Jev, Haiku and GLM
   unchanged; what still differs between them (the briefing, parallel answers, whose probability it is) is named
   wherever the numbers are shown.</li>
@@ -696,8 +778,9 @@ does arithmetic the Python does not.</p>
 </div>
 
 <p style="margin-top:48px;color:var(--muted);font-size:14px">Written 2026-09-21 after phase 5, refreshed
-2026-09-24 once the updates were built: the question sets and their three models, the benchmark, and the page that
-runs the show. Everything measured here is five practice tracks; the tournament has not been played. If this page
+2026-09-24 once the updates were built (the question sets and their three models, the benchmark, and the page
+that runs the show) and again 2026-09-25 once <code>fly2</code> was built, calibrated and played. Everything
+measured here is practice tracks, one to twenty of them; the tournament has not been played. If this page
 and <code>docs/DECISIONS.md</code> disagree, the decisions file wins.</p>
 
 </main>

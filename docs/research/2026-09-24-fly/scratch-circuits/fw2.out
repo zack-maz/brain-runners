@@ -1,0 +1,134 @@
+### direct: left-eye type -> DN (>= 10 synapses; post compartment)
+
+| input (L)   | DN      | DN side   |   syn | onto dendrite   |
+|:------------|:--------|:----------|------:|:----------------|
+| LPLC4       | DNb05   | ipsi      |  2077 | 100%            |
+| LC4         | DNp04   | ipsi      |  1425 | 100%            |
+| LPLC4       | DNp03   | ipsi      |  1146 | 100%            |
+| LC11        | DNp35   | ipsi      |  1022 | 100%            |
+| LPLC1       | DNp03   | ipsi      |   978 | 100%            |
+| LPLC1       | DNp35   | ipsi      |   866 | 100%            |
+| LPLC2       | DNp04   | ipsi      |   782 | 100%            |
+| LC4         | DNp11   | ipsi      |   736 | 100%            |
+| LC4         | DNp02   | ipsi      |   622 | 100%            |
+| LC21        | DNp35   | ipsi      |   572 | 100%            |
+| LPLC1       | DNp11   | ipsi      |   560 | 100%            |
+| LPLC2       | DNp01   | ipsi      |   544 | 100%            |
+| LPLC1       | DNp06   | ipsi      |   521 | 100%            |
+| LLPC1       | DNae002 | ipsi      |   487 | 100%            |
+| LC9         | DNp09   | ipsi      |   470 | 100%            |
+| LC4         | DNp03   | ipsi      |   456 | 100%            |
+| LC4         | DNp01   | ipsi      |   454 | 100%            |
+| LPLC2       | DNp06   | ipsi      |   447 | 100%            |
+| LC9         | DNp11   | ipsi      |   424 | 100%            |
+| LC4         | DNp05   | ipsi      |   346 | 100%            |
+| LPLC2       | DNp35   | ipsi      |   322 | 100%            |
+| LPLC4       | DNg82   | ipsi      |   314 | 100%            |
+| LC4         | DNp35   | ipsi      |   262 | 100%            |
+| LPLC4       | DNp05   | ipsi      |   227 | 100%            |
+| LC22        | DNp03   | ipsi      |   173 | 100%            |
+| LPLC1       | DNa07   | ipsi      |   157 | 100%            |
+| LC22        | DNp05   | ipsi      |   136 | 100%            |
+| LPLC4       | DNp11   | ipsi      |   113 | 100%            |
+| LC17        | DNp35   | ipsi      |    98 | 100%            |
+| LPLC4       | DNa04   | ipsi      |    96 | 100%            |
+| LLPC1       | DNp03   | ipsi      |    78 | 100%            |
+| LC4         | DNp06   | ipsi      |    76 | 100%            |
+| LC15        | DNp35   | ipsi      |    70 | 100%            |
+| LLPC1       | DNa04   | ipsi      |    64 | 100%            |
+| LLPC1       | DNa02   | ipsi      |    62 | 100%            |
+| LC9         | DNp35   | ipsi      |    61 | 100%            |
+| LC6         | DNp06   | ipsi      |    54 | 100%            |
+| LLPC1       | DNb01   | ipsi      |    43 | 100%            |
+| LC10a       | DNp11   | ipsi      |    41 | 100%            |
+| HSS         | DNa02   | ipsi      |    40 | 100%            |
+| LC22        | DNg82   | ipsi      |    37 | 100%            |
+| LPLC2       | DNp09   | ipsi      |    36 | 100%            |
+| LC10a       | DNa08   | ipsi      |    32 | 100%            |
+| LPLC2       | DNp05   | ipsi      |    26 | 100%            |
+| LLPC1       | DNp06   | ipsi      |    25 | 100%            |
+| LC18        | DNp35   | ipsi      |    23 | 100%            |
+| LPLC2       | DNp11   | ipsi      |    23 | 100%            |
+| LLPC3       | DNae002 | ipsi      |    20 | 100%            |
+| HSS         | DNg41   | ipsi      |    16 | 100%            |
+| LLPC1       | DNg82   | ipsi      |    15 | 100%            |
+| LC9         | DNa02   | ipsi      |    14 | 100%            |
+| LPLC2       | DNp03   | ipsi      |    11 | 100%            |
+| LPLC4       | DNa05   | ipsi      |    11 | 100%            |
+| LPLC1       | DNp04   | ipsi      |    11 | 100%            |
+| LC18        | DNp11   | ipsi      |    10 | 100%            |
+
+### 2-hop onto DN dendrites: sum over mids of syn(in->mid)/in(mid) * syn(mid->DN dendrite), >= 1
+
+| input (L)   | DN      | DN side   |   2-hop weight | via (top 2)              |
+|:------------|:--------|:----------|---------------:|:-------------------------|
+| LC10a       | DNae002 | ipsi      |          234.8 | CB0359, CB0007           |
+| LPLC4       | DNa15   | ipsi      |          187.3 | PLP009, CB0527           |
+| LPLC4       | DNb05   | ipsi      |          184.5 | LPLC4, SAD094            |
+| LPLC4       | DNae002 | ipsi      |          162.4 | PLP009, PLP029           |
+| LC11        | DNp35   | ipsi      |          151.1 | LC11, AVLP282            |
+| LC22        | DNa15   | ipsi      |          146   | PLP009, CB0527           |
+| LPLC4       | DNa04   | ipsi      |          145.1 | PLP009, PLP092           |
+| LC9         | DNp09   | ipsi      |          131.5 | LC9, PVLP004,PVLP005     |
+| LC10a       | DNa02   | ipsi      |          128.6 | AOTU025, CB0359          |
+| LC22        | DNae002 | ipsi      |          115.1 | PLP009, PLP029           |
+| LC12        | DNp35   | ipsi      |          112.9 | PVLP013, PVLP100         |
+| LPLC4       | DNp03   | ipsi      |          103.4 | LPLC4, PLP060            |
+| LC10a       | aSP22   | ipsi      |          103.3 | CB0739, CB0007           |
+| LC10a       | DNa03   | ipsi      |           99.3 | AOTUv3B_P01, AOTU025     |
+| LLPC1       | DNae002 | ipsi      |           99.3 | PS013, LLPC1             |
+| LPLC4       | DNa02   | ipsi      |           93.3 | PLP009, CB0431           |
+| LPLC4       | DNg82   | ipsi      |           91.9 | PLP172, PLP029           |
+| LC9         | DNp11   | ipsi      |           88.2 | LC9, LC4                 |
+| LC12        | DNp04   | contra    |           86.8 | PVLP025, PVLP120         |
+| LPLC2       | DNp04   | ipsi      |           86.6 | LPLC2, LC4               |
+| LPLC4       | DNae002 | contra    |           84.7 | CB2271, CB2352           |
+| LPLC2       | DNp35   | ipsi      |           84.4 | LPLC2, DNp04             |
+| LC21        | DNp35   | ipsi      |           77.7 | LC21, CB0154             |
+| LPLC2       | DNp01   | ipsi      |           76   | LPLC2, PVLP122b          |
+| LC22        | DNa04   | ipsi      |           75.4 | PLP009, PS020            |
+| LLPC1       | DNa02   | ipsi      |           71.1 | PS013, PS230,PLP242      |
+| LPLC2       | DNp06   | ipsi      |           71.1 | LPLC2, PVLP076           |
+| LPLC4       | DNb01   | contra    |           68.3 | CB2271, CB3066           |
+| LC10a       | DNb01   | ipsi      |           67.1 | CB0007, CB0739           |
+| LPLC1       | DNp03   | ipsi      |           65.8 | LPLC1, CB2700            |
+| LC4         | DNp35   | ipsi      |           65.4 | DNp04, PVLP024           |
+| LC10a       | DNa02   | contra    |           64.1 | CB3127, CB2070           |
+| LPLC1       | DNp35   | ipsi      |           59.5 | LPLC1, CB1932            |
+| LC10a       | DNa04   | ipsi      |           59.4 | CB0359, LAL027           |
+| LC10a       | DNb01   | contra    |           58   | CB2070, CB1080           |
+| LC4         | DNp01   | ipsi      |           57.9 | PVLP024, PVLP122b        |
+| LC10a       | DNae002 | contra    |           57.1 | CB2070, CB3127           |
+| LC22        | DNp03   | ipsi      |           56.7 | LPLC4, PS003,PS006       |
+| LPLC1       | DNa05   | contra    |           55.5 | CB2102, PS208b           |
+| LC9         | DNp05   | ipsi      |           55.1 | CL067, LC4               |
+| LPLC4       | DNb01   | ipsi      |           54.7 | PS106, PS022             |
+| LC22        | DNa02   | ipsi      |           51.5 | PLP009, CB0527           |
+| LLPC1       | DNa04   | ipsi      |           50.7 | PS230,PLP242, PS013      |
+| LLPC1       | DNp06   | ipsi      |           49.4 | PLP249, LLPC1            |
+| LC17        | DNp35   | ipsi      |           49.3 | PVLP120, CB1920          |
+| LPLC1       | DNp06   | ipsi      |           48.7 | LPLC1, LT61b             |
+| LC22        | DNae002 | contra    |           47.1 | CB2271, CB2352           |
+| LC9         | DNp09   | contra    |           45.7 | PVLP020, AVLP462b        |
+| LPLC4       | DNa15   | contra    |           45   | PLP228, CB0527           |
+| LC18        | DNp04   | contra    |           44.9 | CB0158, CB0738           |
+| LC18        | DNp35   | ipsi      |           44.2 | CB0280, AVLP086          |
+| LC15        | DNp06   | ipsi      |           43.6 | CB2049, LT61b            |
+| LC4         | DNp11   | contra    |           43.2 | PVLP022, PVLP024         |
+| LC11        | DNp09   | ipsi      |           43.1 | PVLP150, PVLP004,PVLP005 |
+| LC22        | DNb01   | contra    |           42.7 | CB2271, CB2352           |
+| LPLC2       | DNp06   | contra    |           41.8 | PVLP151, AVLP429         |
+| LC15        | DNp35   | ipsi      |           41.6 | LTe20, PVLP074           |
+| LPLC1       | DNp11   | ipsi      |           41.5 | LPLC1, LC4               |
+| LC22        | DNg82   | ipsi      |           39.4 | PS020, PLP172            |
+| LC11        | DNp09   | contra    |           38.9 | PVLP020, CL053           |
+| LC4         | DNp05   | ipsi      |           38.9 | PVLP024, LC4             |
+| LPLC2       | DNb05   | ipsi      |           38.5 | LPLC4, LLPC2             |
+| LC22        | DNb05   | ipsi      |           38.2 | LPLC4, LTe42a            |
+| LC4         | DNp11   | ipsi      |           37.8 | PVLP024, LC4             |
+| LC22        | DNp05   | ipsi      |           37.7 | PLP093, PLP214           |
+| LLPC1       | DNp03   | ipsi      |           37.2 | PLP249, LPLC4            |
+| LPLC4       | DNa05   | ipsi      |           36.1 | PLP241, PS020            |
+| LPLC1       | DNa04   | contra    |           35.2 | CB2102, CB2712           |
+| LC10a       | DNa15   | ipsi      |           35.2 | LAL027, AOTU015b         |
+| LC4         | DNp05   | contra    |           34.8 | PVLP022, PVLP024         |

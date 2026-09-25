@@ -5,8 +5,9 @@ This file is rewritten whenever the state changes. What the user has decided sta
 
 ## Where we are
 
-Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Before phase 6 come the updates of
-`docs/UPDATES.md` (decision 20), on branch `phase6-updates`:
+Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Before phase 6 came the updates of
+`docs/UPDATES.md` (decision 20), built on branch `phase6-updates` and merged to `main` as PR #6 "Opus v1" on
+2026-09-25:
 
 - **Game v2** (items 3 and 6, decisions 21–24): built.
 - **Update 2a, the Jev family and its LLM twins** (decisions 25–27): built and reviewed task by task (spec
@@ -90,14 +91,26 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 
 ## Where to resume (in this order)
 
+0. **`fly2`, the second pure fly, is built, calibrated, played and merged** (decisions 41–43, spec
+   `docs/superpowers/specs/2026-09-24-fly2-design.md`, plan `docs/superpowers/plans/2026-09-24-fly2.md`, generated
+   from the prototype `proto/fly2`, 9 tasks, branch `fly2`). Spike 04, the probe, passed on 2026-09-24
+   (`spikes/04-fly2-probe/REPORT.md` on branch `spike/fly2-probe`): every candidate turns away from a gap under a
+   strong centre, and M3 is admitted. M3, "a sideways channel", is frozen as decision 43
+   (`calibration/FLY2_REPORT.md`): gain 250 Hz, falloff 2, turn threshold 40 Hz, jump threshold 175 Hz; on held-out seeds
+   1200–1399 (stand-in brain) fly2 scored 82.34 rows, the same rule with no brain 74.05, shuffled wiring 27.84, fly 65.98. The real run is done: `fly,fly2` on v2 seeds
+   1000–1019 (`runs/20260925-101614`), fly mean 66.55 rows, fly2 mean 78.20; `bakeoff bench` says "can't tell yet"
+   (+11.7 rows, 95% interval -4.5 to 27.8, about 69 tracks for a verdict). The live smoke is done too: `bakeoff
+   live` on v2 track 1001 with fly and fly2 ticked completed, one shared brain (peak 720 MB), every decision
+   matching the same track played with fly2 on a brain of its own. Whole-branch design review done ("ready with
+   fixes", 0 Critical, 3 Important, 10 Minor, all fixed and re-reviewed). Merged to `main` as PR #7 on 2026-09-25.
+   What is left: the trained fly (track 2 of decision 41) and a fast
+   engine each get their own spec later; and whether to settle fly2 vs fly with about 69 more tracks before
+   phase 6.
 1. **Parked**: GLM Flash's tracks 1001–1004 (decision 34), while Zhipu's free tier throttles. To pick it up, check
    it answers (a few requests through `bakeoff.clients.glm.HttpTransport`), then
    `uv run python -m bakeoff run --players glm_composed,glm_choice,glm_two_step --seeds 5 --seed-start 1000 --max-requests 700`
    and `--players glm_reader --seeds 2 --seed-start 1000 --max-requests 350`. Track 1000 replays free from the cache.
-2. **The branch is ready for its PR.** Everything before phase 6 is built, reviewed and documented, and the docs
-   are current (`EXPLAINER.html`, `WALKTHROUGH.md`, `README.md`, `CLAUDE.md`, decisions to 39). One PR titled
-   **"Opus v1"** from `phase6-updates`, on the user's word and not before. Worth doing first, cheaply: one live
-   run with the fly and one merged replay, to see the page whole after the rename and the lobby grid.
+2. **Done 2026-09-25: PR #6 "Opus v1"** (`phase6-updates`, everything before phase 6) is merged to `main`.
 3. Then phase 6, the tournament and the write-up. It starts by settling which seeds (see "Open"), and it needs a new
    budget go-ahead: the tournament is the first paid use of seeds below 1000 (`--tournament`).
 

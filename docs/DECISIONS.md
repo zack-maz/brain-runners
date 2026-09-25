@@ -226,6 +226,52 @@
     the only difference. Its one departure is reading the reply — GLM wraps its JSON in a markdown fence, which is
     stripped for the parse only, so the log still keeps the answer as it came. Free tier, so its price is 0, and it
     spends nothing until someone plays it with `--max-requests`.
+41. **`fly2`, a second pure fly** (the user, 2026-09-24; research in `docs/research/2026-09-24-fly/`, design in
+    `docs/superpowers/specs/2026-09-24-fly2-design.md`, branch `fly2`). The research found that the input is the
+    bottleneck: the best table on `fly`'s two eye totals scores 66.7 rows on v2 held-out seeds, and the fly already
+    scores 66.0. The user chose the following:
+    - **Pure first:** the fly is improved within decision 2. A trained fly comes later as a separate, labelled player.
+    - **Both flies selectable:** `fly` stays unchanged and `fly2` plays beside it.
+    - **A rule picks the input:** it chooses among three candidate mappings (a straight-ahead channel, narrow eyes, a
+      sideways LPLC4/LC22 channel), each measured on the real brain, with the rule fixed before any measurement,
+      practice seeds 1000–1199 only, and the winner played once on 1200–1399.
+    - **The readout and rule, ours and labelled:** turn from DNa02 + DNa01 + DNg13 (DNb01 dropped), the Giant Fiber
+      for the jump, and dodge before jump.
+    - **Controls reported with the result:** no brain, shuffled wiring, and `fly`.
+    - **A probe first (spike 04):** if no candidate turns away from the gap's side, the update stops there.
+42. **The probe passes; the turn readout is chosen per candidate** (the user, 2026-09-24; spike 04, branch
+    `spike/fly2-probe`, `spikes/04-fly2-probe/REPORT.md`). With the centre driven at 500 Hz, every candidate still
+    turns away from the side of an extra gap, so fly2 goes on to the surfaces. M3's sideways channel (LPLC4 + LC22)
+    turns the fly away from its own side and drives no Giant Fiber, so M3 is admitted. The spec's DNa02 test gives
+    a different answer for each candidate, and the user chose to apply it per candidate:
+    - **M2:** DNa02 is within the trial noise in every uneven condition, so its turn is DNa01 + DNg13.
+    - **M3:** DNa02 adds to the turn (above the noise at 300 and 500 Hz), so it keeps DNa02 + DNa01 + DNg13.
+    - **M1:** DNa02 is above the noise for a left gap at 300 and 500 Hz and within it for every right gap. The test
+      says "cancels" only when DNa02 is within the noise in the uneven conditions, and here it is not, so M1 keeps
+      DNa02 + DNa01 + DNg13. This is the controller's reading of the test and the user may still reverse it.
+43. **fly2 is M3, the sideways channel, frozen** (the user, 2026-09-25; `calibration/FLY2_REPORT.md`). The rule
+    of decision 41, fixed before any surface was measured, picked M3 over M1 and M2 on v2 practice seeds 1000–1199.
+    - **What M3 is:** gaps in the runner's own lane drive LPLC2 + LC4 of both eyes; gaps in side lanes drive
+      LPLC4 + LC22 of that side's eye.
+    - **Its read-out:** turn = right minus left of DNa02 + DNa01 + DNg13; jump = the Giant Fiber.
+    - **Its numbers:** gain 250 Hz, falloff 2, turn threshold 40 Hz, jump threshold 175 Hz. They are frozen in
+      `bakeoff/players/fly2.py`.
+
+    On the stand-in brain, held-out seeds 1200–1399 (mean rows):
+    - fly2: 82.3;
+    - the same mapping and rule with no brain: 74.1;
+    - M3 on shuffled wiring: 27.8;
+    - `fly`: 66.0.
+
+    The user accepted the result with what it says:
+    - **Our part is large.** Our mapping and rule already reach 74 rows without a brain; the wiring adds about 8
+      rows more.
+    - **The shuffled control is weak evidence.** On shuffled wiring, the read-out neurons never fire, so it shows
+      only that the real wiring routes these eye cells to them.
+    - **Deaths are still mostly jumps into gaps:** 158 of 195 on held-out seeds.
+    - **The turn threshold sits at the top of the grid** (40 Hz), so a higher one was never tried.
+    - **The held-out seeds were not wholly unseen:** they had been used by the research that chose the three
+      candidates.
 
 Where we are and what comes next: `docs/NEXT.md`.
 

@@ -5,6 +5,7 @@ from typing import Callable
 from bakeoff.players.always_jump import AlwaysJumpPlayer
 from bakeoff.players.base import Player
 from bakeoff.players.fly import FlyPlayer
+from bakeoff.players.fly2 import Fly2Player
 from bakeoff.players.glm import GlmPlayer
 from bakeoff.players.jev import JevPlayer
 from bakeoff.players.jev_composed import JevComposedPlayer
@@ -16,6 +17,7 @@ from bakeoff.players.solver import SolverPlayer
 
 REGISTRY: dict[str, Callable[..., Player]] = {
     "random": RandomPlayer, "always_jump": AlwaysJumpPlayer, "solver": SolverPlayer, "fly": FlyPlayer,
+    "fly2": Fly2Player,
     "jev": JevPlayer, "jev_composed": JevComposedPlayer, "haiku": HaikuPlayer, "glm": GlmPlayer,
     **{player.name: player for player in SET_PLAYERS}}
 # these take cache= and budget=; without a budget they can only replay the cache

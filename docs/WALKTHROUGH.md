@@ -43,6 +43,7 @@ containing that text, so the keys cannot be echoed by accident.
 | `solver` | perfect search with the same 6-row view — the ceiling | free |
 | `random`, `always_jump` | the floors | free |
 | `fly` | the fruit fly connectome, untrained | free, ~0.7 s a row, ~1 GB of RAM |
+| `fly2` | a second pure fly, same connectome, a richer input of ours, a sideways channel (M3) (decision 43) | free, ~0.5 s a row, shares `fly`'s brain when run together |
 | `jev`, `haiku`, `glm` | the one-shot trio: one broad question, one move | paid / free tier |
 | `jev_composed`, `haiku_composed`, `glm_composed` | "would each move land on a gap?" (4 questions) | paid / free tier |
 | `jev_choice`, `haiku_choice`, `glm_choice` | one Choice over the four moves | paid / free tier |
@@ -239,6 +240,14 @@ before. To spend something deliberately, pass a cap that is the most you are wil
 - `uv run pytest -m slow` builds the real brain in the tests; the fast suite uses a stand-in.
 - The calibration itself can be reproduced — `uv run python -m bakeoff.fly.calibrate calibration/response_surface.json /tmp/REPORT.md` —
   but its result is frozen: run it to check, not to change anything.
+- `fly2` adds a richer input of ours, a sideways channel (M3) (the mapping, the read-out and the rule are ours; the wiring,
+  the model and the neurons are still the fly's). Its numbers (gain 250 Hz, falloff 2, turn threshold 40 Hz, jump
+  threshold 175 Hz) were frozen the same way, on the same practice seeds (`calibration/FLY2_REPORT.md`, decision
+  43), and must never be retuned either. Its own two commands, also reproducible but frozen: `uv run python -m
+  bakeoff.fly.surface --mapping M3 calibration/fly2_surface_M3.json` measures a candidate mapping's response
+  surface (~25 minutes; `--shuffle-seed 1` measures the shuffled-wiring control instead), and `uv run python -m
+  bakeoff.fly.calibrate2 --surface M1=... --surface M2=... --surface M3=... calibration/FLY2_REPORT.md` turns
+  measured surfaces into the calibration and its controls (~3 minutes, no brain built).
 
 ---
 

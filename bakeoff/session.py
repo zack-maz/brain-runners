@@ -18,7 +18,7 @@ from pathlib import Path
 from bakeoff.clients.core import DiskCache, RequestBudget, SharedBudget
 from bakeoff.game.rules import Rules
 from bakeoff.live import LiveRun
-from bakeoff.players import PAID, REGISTRY, make_player
+from bakeoff.players import PAID, REGISTRY, fly2, make_player
 from bakeoff.players.names import RENAMED, canonical
 from bakeoff.replay import CONTESTANTS
 
@@ -85,6 +85,16 @@ def answered_models(out_root: Path | str) -> dict[str, str]:
     return models
 
 
+def about_of(name: str) -> str | None:
+    """What a fly is, for its tick in the lobby; the grid's rows and columns say it for everyone else.
+    fly2 shows a neutral line while it is not calibrated, instead of a provisional mapping's summary as if
+    it had already won."""
+    if name == "fly2":
+        return (fly2.about() if fly2.CALIBRATED
+                else "not calibrated yet: its input, read-out and numbers are fixed by calibration/FLY2_REPORT.md")
+    return {"fly": "looming \u2192 escape reflex (phase 2)"}.get(name)
+
+
 def _order(names) -> list[str]:
     """The contestants first, in the page's own order, then the free yardsticks."""
     rest = sorted(set(names) - set(CONTESTANTS))
@@ -148,7 +158,10 @@ class LiveSession:
     def status(self) -> str:
         if self.run is None:
             return "lobby"
-        return "running" if self.run.status == "running" else "finished"
+        # `run.status` can say "completed" before the run's thread has finished closing its players
+        # (live.py's `finally`); treat that gap as still running too, so a new run cannot start into it.
+        thread_alive = self._thread is not None and self._thread.is_alive()
+        return "running" if self.run.status == "running" or thread_alive else "finished"
 
     def state(self, seed: int | None = None) -> dict:
         """Everything the lobby needs: the players with their price and their budget, the seed rule,
@@ -159,7 +172,7 @@ class LiveSession:
         for name in _order(REGISTRY):
             paid = name in PAID
             players.append({
-                "name": name, "paid": paid,
+                "name": name, "paid": paid, "about": about_of(name),
                 "price_usd": PRICE_USD.get(name) if paid else 0.0,
                 "model": model_of(name) if paid else None,
                 # what it answered as last: the asked-for name may be a moving one (`jev-latest`)
@@ -190,6 +203,8 @@ class LiveSession:
     def why_not(self, name: str, seed: int) -> str | None:
         """Why this player may not play this track, or None. The one place that rule lives: `check`
         refuses with it and `state` shows it."""
+        if name == "fly2" and not fly2.CALIBRATED:
+            return "fly2 is not calibrated yet (calibration/FLY2_REPORT.md)"
         if name not in PAID:
             return None
         if self.paid_blocked:

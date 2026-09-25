@@ -13,11 +13,12 @@ from typing import Callable, Sequence
 
 from bakeoff.errors import BudgetExhausted, PreflightError, RunAborted  # noqa: F401  (re-exported)
 from bakeoff.fly import data as fly_data
+from bakeoff.fly.channels import MAPPINGS, MAX_HZ as CHANNEL_MAX_HZ
 from bakeoff.fly.reading import WINDOW_MS
 from bakeoff.game.engine import ACTIONS, Game
 from bakeoff.game.rules import Rules, resolve
 from bakeoff.game.track import generate_track
-from bakeoff.players import fly
+from bakeoff.players import fly, fly2
 from bakeoff.players.base import Player
 from bakeoff.players.solver import solve_depths
 from bakeoff.senses import (LOOMING_FALLOFF, LOOMING_GAIN_HZ, LOOMING_STEP_HZ, MAX_HZ, compute_senses,
@@ -119,6 +120,18 @@ def play_row(player: Player, game: Game, seed: int, run_id: str, first: bool) ->
     }
 
 
+def fly2_meta() -> dict:
+    """fly2's frozen numbers and what is ours about it, as fly's block records fly's (bakeoff/players/fly2.py)."""
+    mapping = MAPPINGS[fly2.MAPPING]
+    return {"mapping": mapping.name, "summary": mapping.summary, "channels": list(mapping.channels),
+            "cells": {channel: [f"{t} {side}" for t, side in groups] for channel, groups in mapping.cells.items()},
+            "sees": {channel: list(offsets) for channel, offsets in mapping.sees.items()},
+            "gain_hz": fly2.GAIN_HZ, "falloff": fly2.FALLOFF, "step_hz": mapping.step_hz, "max_hz": CHANNEL_MAX_HZ,
+            "turn_types": list(mapping.turn_types), "turn_threshold_hz": fly2.TURN_THRESHOLD_HZ,
+            "jump_threshold_hz": fly2.JUMP_THRESHOLD_HZ, "window_ms": WINDOW_MS, "provisional": not fly2.CALIBRATED,
+            "controls": fly2.CONTROLS}
+
+
 def new_meta(run_id: str, players: list[Player], seeds: Sequence[int], rules: Rules, args: dict | None) -> dict:
     """meta.json as a run starts: status `running`, no finish time yet."""
     return {
@@ -131,6 +144,7 @@ def new_meta(run_id: str, players: list[Player], seeds: Sequence[int], rules: Ru
         "fly": {"turn_threshold_hz": fly.TURN_THRESHOLD_HZ, "jump_threshold_hz": fly.JUMP_THRESHOLD_HZ,
                 "window_ms": WINDOW_MS, "provisional": not fly.CALIBRATED,
                 "model_commit": fly_data.MODEL_REPO_COMMIT, "annotations_commit": fly_data.ANNOTATIONS_COMMIT},
+        "fly2": fly2_meta(),
         "models": {p.name: p.model for p in players if getattr(p, "model", None)},
         "requests": _requests(players),
         "args": args or {}, "python": platform.python_version(),

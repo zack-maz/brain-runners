@@ -5,7 +5,7 @@ simulation play the same seeded runs of a "Run"-style tunnel game; output is a w
 tournament. Read these before doing anything:
 
 0. `docs/EXPLAINER.html` — the plain-language tour of the whole project, high level first, then technical
-   (dated 2026-09-21: predates the Jev family; refreshed when all updates are done).
+   (written 2026-09-21, refreshed 2026-09-24 after the updates and 2026-09-25 for fly2).
 1. `docs/NEXT.md` — where things stand and what to do next, in order (rewritten as the state changes).
    `docs/DECISIONS.md` — what the user has decided, numbered, only ever added to.
 2. `docs/superpowers/specs/2026-09-19-tunnel-run-design.md` — the approved design (binding), extended by
@@ -48,9 +48,12 @@ built and parked after one track (decisions 33–34). The page (items 4, 5, 8 an
 `docs/superpowers/specs/2026-09-22-page-control-design.md`) is built as updates 3a (the control channel, the session
 ceiling, the lobby) and 3b (the logs, the Run and Analysis tabs, the picker, the benchmark in the page), each
 reviewed and fixed; decisions 36–39 settle their open questions and the rename of Claude Haiku's players.
-**Everything before phase 6 is built**; what is left is GLM Flash's parked tracks and one PR "Opus v1" from
-`phase6-updates`, on the user's word. Then phase 6, the tournament and the write-up, which needs a new budget
-go-ahead. Each phase gets its own plan. Resume from `docs/NEXT.md`.
+**Everything before phase 6 is built and on `main`** (PR #6 "Opus v1", merged 2026-09-25); what is left of it is
+GLM Flash's parked tracks. `fly2`, a second pure fly with a richer input of ours (M3, a sideways channel), is
+built, calibrated, played and on `main` (PR #7, merged 2026-09-25; decisions 41–43, spec
+`docs/superpowers/specs/2026-09-24-fly2-design.md`, plan `docs/superpowers/plans/2026-09-24-fly2.md`): its numbers
+are frozen (`calibration/FLY2_REPORT.md`), its real run and its live smoke are done. Then phase 6, the tournament and the write-up, which needs a new budget go-ahead. Each
+phase gets its own plan. Resume from `docs/NEXT.md`.
 
 ## How we work here
 
@@ -92,9 +95,9 @@ go-ahead. Each phase gets its own plan. Resume from `docs/NEXT.md`.
   what it just played — never at the cost of the event itself, which is what the page waits for.
 - `bakeoff live` (`bakeoff/live.py`, `bakeoff/live_server.py`, `bakeoff/session.py`) plays one track in lockstep by
   row, records a normal run directory and streams it to the page over Server-Sent Events on `127.0.0.1` only
-  (standard library, no dependency). It builds one fly brain in its own process: never start it next to another fly
-  run. Its records come from `runner.play_row` and its frames from `replay.frame_of`, the same functions `run` and
-  `view` use; keep it that way.
+  (standard library, no dependency). It builds one fly brain in its own process, shared by every fly of a run
+  (`bakeoff/fly/shared.py`): never start it next to another fly run. Its records come from `runner.play_row` and
+  its frames from `replay.frame_of`, the same functions `run` and `view` use; keep it that way.
 - The page runs the show (update 3a, design `docs/superpowers/specs/2026-09-22-page-control-design.md`): the command
   binds the port and sets the ceiling, the lobby in the browser picks the track and the players and starts and
   cancels the run (`GET /state`, `POST /run`, `POST /cancel`, `GET /events?run=`). Every request but the page itself
