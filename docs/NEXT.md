@@ -5,8 +5,9 @@ This file is rewritten whenever the state changes. What the user has decided sta
 
 ## Where we are
 
-Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Before phase 6 come the updates of
-`docs/UPDATES.md` (decision 20), on branch `phase6-updates`:
+Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Before phase 6 came the updates of
+`docs/UPDATES.md` (decision 20), built on branch `phase6-updates` and merged to `main` as PR #6 "Opus v1" on
+2026-09-25:
 
 - **Game v2** (items 3 and 6, decisions 21–24): built.
 - **Update 2a, the Jev family and its LLM twins** (decisions 25–27): built and reviewed task by task (spec
@@ -101,18 +102,15 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
    (+11.7 rows, 95% interval -4.5 to 27.8, about 69 tracks for a verdict). The live smoke is done too: `bakeoff
    live` on v2 track 1001 with fly and fly2 ticked completed, one shared brain (peak 720 MB), every decision
    matching the same track played with fly2 on a brain of its own. Whole-branch design review done ("ready with
-   fixes", 0 Critical, 3 Important, 10 Minor, all fixed and re-reviewed). What is left: the branch is not merged
-   (it comes after PR #6 "Opus v1", open, on the user's word); the trained fly (track 2 of decision 41) and a fast
+   fixes", 0 Critical, 3 Important, 10 Minor, all fixed and re-reviewed). What is left: its PR to `main` is open
+   (PR #6 is merged, so it shows fly2's commits alone), to merge on the user's word; the trained fly (track 2 of decision 41) and a fast
    engine each get their own spec later; and whether to settle fly2 vs fly with about 69 more tracks before
    phase 6.
 1. **Parked**: GLM Flash's tracks 1001–1004 (decision 34), while Zhipu's free tier throttles. To pick it up, check
    it answers (a few requests through `bakeoff.clients.glm.HttpTransport`), then
    `uv run python -m bakeoff run --players glm_composed,glm_choice,glm_two_step --seeds 5 --seed-start 1000 --max-requests 700`
    and `--players glm_reader --seeds 2 --seed-start 1000 --max-requests 350`. Track 1000 replays free from the cache.
-2. **The branch is ready for its PR.** Everything before phase 6 is built, reviewed and documented, and the docs
-   are current (`EXPLAINER.html`, `WALKTHROUGH.md`, `README.md`, `CLAUDE.md`, decisions to 39). One PR titled
-   **"Opus v1"** from `phase6-updates`, on the user's word and not before. Worth doing first, cheaply: one live
-   run with the fly and one merged replay, to see the page whole after the rename and the lobby grid.
+2. **Done 2026-09-25: PR #6 "Opus v1"** (`phase6-updates`, everything before phase 6) is merged to `main`.
 3. Then phase 6, the tournament and the write-up. It starts by settling which seeds (see "Open"), and it needs a new
    budget go-ahead: the tournament is the first paid use of seeds below 1000 (`--tournament`).
 

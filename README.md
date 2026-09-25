@@ -21,7 +21,7 @@ Details in `docs/NEXT.md`. The untrained fly plays: on seeds 0–19 of game v1 i
 
 A second pure fly, `fly2`, adds a richer input of ours, a sideways channel (M3) (the wiring, the model and the neurons are
 still the fly's; the mapping, the read-out and the rule are ours). It is built, calibrated and played on branch
-`fly2` (decisions 41–43), not yet merged: on v2 seeds 1000–1019 fly2 scores 78.20 rows on average against fly's
+`fly2` (decisions 41–43), its PR open: on v2 seeds 1000–1019 fly2 scores 78.20 rows on average against fly's
 66.55, but `bakeoff bench` cannot yet tell them apart with confidence.
 
 The game comes in versions (`bakeoff/game/rules.py`): `v1`, the 300-row game phases 1 to 5 were played on, and

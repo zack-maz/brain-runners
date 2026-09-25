@@ -48,12 +48,11 @@ built and parked after one track (decisions 33–34). The page (items 4, 5, 8 an
 `docs/superpowers/specs/2026-09-22-page-control-design.md`) is built as updates 3a (the control channel, the session
 ceiling, the lobby) and 3b (the logs, the Run and Analysis tabs, the picker, the benchmark in the page), each
 reviewed and fixed; decisions 36–39 settle their open questions and the rename of Claude Haiku's players.
-**Everything before phase 6 is built**; what is left is GLM Flash's parked tracks and one PR "Opus v1" from
-`phase6-updates`, on the user's word. `fly2`, a second pure fly with a richer input of ours (M3, a sideways channel), is
+**Everything before phase 6 is built and on `main`** (PR #6 "Opus v1", merged 2026-09-25); what is left of it is
+GLM Flash's parked tracks. `fly2`, a second pure fly with a richer input of ours (M3, a sideways channel), is
 built, calibrated and played on branch `fly2` (decisions 41–43, spec
 `docs/superpowers/specs/2026-09-24-fly2-design.md`, plan `docs/superpowers/plans/2026-09-24-fly2.md`): its numbers
-are frozen (`calibration/FLY2_REPORT.md`), its real run and its live smoke are done, and it is not yet merged (it
-comes after PR "Opus v1"). Then phase 6, the tournament and the write-up, which needs a new budget go-ahead. Each
+are frozen (`calibration/FLY2_REPORT.md`), its real run and its live smoke are done, and its PR to `main` is open. Then phase 6, the tournament and the write-up, which needs a new budget go-ahead. Each
 phase gets its own plan. Resume from `docs/NEXT.md`.
 
 ## How we work here
