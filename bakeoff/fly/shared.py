@@ -8,6 +8,7 @@ brain is closed when the last holder closes, and the registry is emptied with it
 
 from __future__ import annotations
 
+import gc
 import threading
 from typing import Callable, Mapping
 
@@ -28,12 +29,13 @@ def want(name: str, cells: Mapping) -> None:
         _wanted.setdefault(name, cells)
 
 
-def acquire(name: str, cells: Mapping, build: Callable[[dict], object] = _real_brain) -> "Holder":
+def acquire(name: str, cells: Mapping, build: Callable[[dict], object] | None = None) -> "Holder":
+    """`build(inputs)` makes the brain; the real one when None (looked up at call time, so a test can swap it)."""
     global _brain, _holders
     with _lock:
         _wanted.setdefault(name, cells)
         if _brain is None:
-            _brain = build(dict(_wanted))
+            _brain = (build or _real_brain)(dict(_wanted))
         elif name not in _brain.inputs:
             raise RuntimeError(f"the fly brain of this process was built without {name}'s input "
                                f"(it has {sorted(_brain.inputs)}); make every fly before the first one plays")
@@ -49,6 +51,7 @@ def _release() -> None:
             _brain.close()
             _brain = None
             _wanted.clear()
+            gc.collect()  # brian2's objects hold cycles: free this brain before a next one is built beside it
 
 
 class Holder:
