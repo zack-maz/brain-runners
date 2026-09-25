@@ -18,7 +18,7 @@ from pathlib import Path
 from bakeoff.clients.core import DiskCache, RequestBudget, SharedBudget
 from bakeoff.game.rules import Rules
 from bakeoff.live import LiveRun
-from bakeoff.players import PAID, REGISTRY, make_player
+from bakeoff.players import PAID, REGISTRY, fly2, make_player
 from bakeoff.players.names import RENAMED, canonical
 from bakeoff.replay import CONTESTANTS
 
@@ -190,6 +190,8 @@ class LiveSession:
     def why_not(self, name: str, seed: int) -> str | None:
         """Why this player may not play this track, or None. The one place that rule lives: `check`
         refuses with it and `state` shows it."""
+        if name == "fly2" and not fly2.CALIBRATED:
+            return "fly2 is not calibrated yet (calibration/FLY2_REPORT.md)"
         if name not in PAID:
             return None
         if self.paid_blocked:

@@ -213,3 +213,17 @@ def test_a_run_spends_from_the_session_budget_but_records_only_its_own_requests(
         second.spend()
     with pytest.raises(BudgetExhausted):
         second.spend()  # the ceiling the command set holds across the session
+
+
+def test_an_uncalibrated_fly2_is_shown_with_its_reason_and_cannot_be_started(tmp_path, monkeypatch):
+    from bakeoff.players import fly2
+
+    monkeypatch.setattr(fly2, "CALIBRATED", False)
+    live = session(tmp_path)
+    by_name = {p["name"]: p for p in live.state(seed=1001)["players"]}
+    assert by_name["fly2"]["why_not"] == "fly2 is not calibrated yet (calibration/FLY2_REPORT.md)"
+    assert by_name["fly2"]["paid"] is False and by_name["fly"]["why_not"] is None
+    with pytest.raises(LobbyError, match="fly2 is not calibrated yet"):
+        live.start(1001, ["fly2"])
+    monkeypatch.setattr(fly2, "CALIBRATED", True)
+    assert live.why_not("fly2", 1001) is None
