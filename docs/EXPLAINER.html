@@ -107,15 +107,14 @@ brain, which you can now run as a simulation on a laptop.</p>
 <p>We wanted to see them side by side, doing the same simple task, with their thinking visible. So we built:</p>
 <ul>
   <li><strong>a tiny game</strong> in which a runner goes down a tunnel and must not fall into holes;</li>
-  <li><strong>three kinds of player</strong>: two fruit fly brains (<code>fly</code> and <code>fly2</code>, wired
-  to the game two different ways), Jev, and chatbots (Claude Haiku 4.5, and GLM Flash on a free tier);</li>
+  <li><strong>three kinds of player</strong>: two fruit fly brains (<code>fly</code> and <code>fly2</code>, connected to the game two different ways), Jev, and chatbots (Claude Haiku 4.5, and GLM Flash on a free tier);</li>
   <li><strong>a page that runs the show</strong>: you pick the track and the players in the browser, watch them
   run the same tunnel together with a panel under each one showing what it "had in mind" at every step, open
   each one's running log line by line, and read the scoreboard and the benchmark on a second tab.</li>
 </ul>
 
 <p>The fun part is that the three kinds are completely different inside. Neither fly was ever trained on
-anything: each plays with the escape reflexes wiring gave it, wired up to the game a different way. Jev answers
+anything: each plays with the escape reflexes its wiring gave it, and the two share that wiring: they are connected to the game in different ways. Jev answers
 precise questions with probabilities. The LLM reads a description of what's ahead and replies with a move.</p>
 
 <h2 id="game">2. The game</h2>
@@ -183,9 +182,9 @@ gap in row 1 and lands safely on row 2.</figcaption>
   <div class="mind">
     <span class="label">FLY2</span>
     <h3>A second fruit fly brain</h3>
-    <p>The same brain, wired to the game a different way: gaps beside the runner's own lane, not just ahead of
-    it, also drive eye cells (a "sideways channel"), and a third steering neuron joins the read-out.</p>
-    <p><strong>Untrained</strong>, like <code>fly</code>. Its wiring was one of three candidates measured on the
+    <p>The same brain, connected to the game a different way: gaps beside the runner's own lane, not just ahead of
+    it, also drive eye cells (a "sideways channel"), and its turn is read from a different set of steering neurons.</p>
+    <p><strong>Untrained</strong>, like <code>fly</code>. This connection was one of three candidates measured on the
     real brain and picked by a rule fixed before any of them were measured.</p>
   </div>
   <div class="mind">
@@ -375,10 +374,11 @@ no interval below five tracks, and says how many of its verdicts chance alone wo
   Analysis tabs, one picker over the tunnel, and the benchmark drawn inside the page. Its design review found the
   Analysis tab drawing its charts with no stylesheet &mdash; invisible &mdash; and a log that ran ahead of the
   tunnel; both fixed.</li>
-  <li><span class="label">Spike 04 · fly2's probe</span>A second fly needs a richer wiring, chosen among three
-  candidate mappings by a rule fixed before any of them was measured. The probe first: with a gap driven hard on
-  one side, does any candidate still turn away from it? All three did, and M3, a sideways channel that also
-  drives eye cells for gaps beside the runner's own lane, drove no Giant Fiber, so it went on to the surfaces.</li>
+  <li><span class="label">Spike 04 · fly2's probe</span>A second fly needs a richer input, chosen among three
+  candidate mappings by a rule fixed before any of them was measured. The probe first: with a gap straight ahead driving the eyes hard, does a gap on one side still turn the fly
+  away from it? For all three it did, so all three went on to be measured. M3, a sideways channel that
+  drives other eye cells for gaps beside the runner's own lane, was admitted because it turns the fly away from
+  its own side, and it drives no Giant Fiber at all.</li>
   <li><span class="label">Calibration · fly2 frozen (decision 43)</span>M3 won the rule on practice seeds
   1000&ndash;1199. Its read-out: turn = right minus left of DNa02 + DNa01 + DNg13, jump = the Giant Fiber, dodge
   before jump. On held-out seeds, fly2 averaged 82.3 rows against <code>fly</code>'s 66.0. Frozen in
@@ -513,8 +513,8 @@ v783 connectivity: 138,639 leaky integrate-and-fire neurons and 15.1 million syn
 It has no learning, no spontaneous activity and no visual front end: you choose which neurons to drive and
 read which neurons fire.</p>
 
-<p>Two players read this same brain, wired up two different ways: <code>fly</code>, next, and <code>fly2</code>,
-a second wiring, further down.</p>
+<p>Two players read this same brain, connected to the game two different ways: <code>fly</code>, next, and <code>fly2</code>,
+a second way in and out, further down.</p>
 
 <h3>One decision</h3>
 <ol>
@@ -561,7 +561,7 @@ predicted 118.7 average rows on seeds 1000–1019, the real brain did 118.0). Fr
 <p>Randomness only comes from the Poisson input, seeded per (track, row), so a fly run repeats exactly: the live
 run on track 1001 was move for move the same as the batch run two days earlier.</p>
 
-<h3>fly2: a second wiring</h3>
+<h3>fly2: a second way in and out</h3>
 <p>Same brain, same simulator. What differs is what drives the eyes and which neurons we read.</p>
 <ol>
   <li><strong>Input, "a sideways channel" (M3).</strong> A gap in the runner's own lane drives the looming
@@ -570,7 +570,7 @@ run on track 1001 was move for move the same as the batch run two days earlier.<
   &mdash; input <code>fly</code> never gets. Each gap adds 250 / row&sup2; Hz to its channel, capped at 500 Hz
   and rounded to 100 Hz steps.</li>
   <li><strong>Read-out.</strong> Turn signal = (DNa02 + DNa01 + DNg13) right &minus; (DNa02 + DNa01 + DNg13)
-  left &mdash; one more steering neuron than <code>fly</code> reads. Jump signal = the Giant Fiber (DNp01), same
+  left &mdash; <code>fly</code> reads DNa01 and DNb01 instead. Jump signal = the Giant Fiber (DNp01), same
   as <code>fly</code>.</li>
   <li><strong>Rule: dodge before jump.</strong> Turn if the turn signal is above 40 Hz either way; otherwise
   jump if the Giant Fiber is above 175 Hz; otherwise stay.</li>
