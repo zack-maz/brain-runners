@@ -50,9 +50,9 @@ ceiling, the lobby) and 3b (the logs, the Run and Analysis tabs, the picker, the
 reviewed and fixed; decisions 36–39 settle their open questions and the rename of Claude Haiku's players.
 **Everything before phase 6 is built and on `main`** (PR #6 "Opus v1", merged 2026-09-25); what is left of it is
 GLM Flash's parked tracks. `fly2`, a second pure fly with a richer input of ours (M3, a sideways channel), is
-built, calibrated and played on branch `fly2` (decisions 41–43, spec
+built, calibrated, played and on `main` (PR #7, merged 2026-09-25; decisions 41–43, spec
 `docs/superpowers/specs/2026-09-24-fly2-design.md`, plan `docs/superpowers/plans/2026-09-24-fly2.md`): its numbers
-are frozen (`calibration/FLY2_REPORT.md`), its real run and its live smoke are done, and its PR to `main` is open. Then phase 6, the tournament and the write-up, which needs a new budget go-ahead. Each
+are frozen (`calibration/FLY2_REPORT.md`), its real run and its live smoke are done. Then phase 6, the tournament and the write-up, which needs a new budget go-ahead. Each
 phase gets its own plan. Resume from `docs/NEXT.md`.
 
 ## How we work here

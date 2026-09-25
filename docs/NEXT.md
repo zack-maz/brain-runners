@@ -91,7 +91,7 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 
 ## Where to resume (in this order)
 
-0. **`fly2`, the second pure fly, is built, calibrated and played** (decisions 41–43, spec
+0. **`fly2`, the second pure fly, is built, calibrated, played and merged** (decisions 41–43, spec
    `docs/superpowers/specs/2026-09-24-fly2-design.md`, plan `docs/superpowers/plans/2026-09-24-fly2.md`, generated
    from the prototype `proto/fly2`, 9 tasks, branch `fly2`). Spike 04, the probe, passed on 2026-09-24
    (`spikes/04-fly2-probe/REPORT.md` on branch `spike/fly2-probe`): every candidate turns away from a gap under a
@@ -102,8 +102,8 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
    (+11.7 rows, 95% interval -4.5 to 27.8, about 69 tracks for a verdict). The live smoke is done too: `bakeoff
    live` on v2 track 1001 with fly and fly2 ticked completed, one shared brain (peak 720 MB), every decision
    matching the same track played with fly2 on a brain of its own. Whole-branch design review done ("ready with
-   fixes", 0 Critical, 3 Important, 10 Minor, all fixed and re-reviewed). What is left: its PR to `main` is open
-   (PR #6 is merged, so it shows fly2's commits alone), to merge on the user's word; the trained fly (track 2 of decision 41) and a fast
+   fixes", 0 Critical, 3 Important, 10 Minor, all fixed and re-reviewed). Merged to `main` as PR #7 on 2026-09-25.
+   What is left: the trained fly (track 2 of decision 41) and a fast
    engine each get their own spec later; and whether to settle fly2 vs fly with about 69 more tracks before
    phase 6.
 1. **Parked**: GLM Flash's tracks 1001–1004 (decision 34), while Zhipu's free tier throttles. To pick it up, check
