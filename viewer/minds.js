@@ -88,7 +88,7 @@
     groups.forEach(([group], g) => {
       ["left", "right"].forEach((side, s) => {
         const y = (g * 2 + s) * rowHeight + g * 4;
-        rows += '<text x="0" y="' + (y + 7) + '">' + group + " " + side[0].toUpperCase() + "</text>";
+        rows += '<text x="0" y="' + (y + 7) + '">' + esc(group) + " " + side[0].toUpperCase() + "</text>";
         rows += times(group, side).map((t) => '<line class="spike ' + side + '" x1="' + (52 + (t / span) * width).toFixed(1) +
           '" x2="' + (52 + (t / span) * width).toFixed(1) + '" y1="' + y + '" y2="' + (y + rowHeight - 2) + '"/>').join("");
       });
@@ -305,12 +305,15 @@
       "<li>Rule, dodge before jump: a turn beyond " + cell(f.turn_threshold_hz) + " Hz goes left or right; otherwise a " +
       "Giant Fiber above " + cell(f.jump_threshold_hz) + " Hz jumps; otherwise it runs straight.</li>";
     if (f.provisional) return html + '<li class="warn">fly2\'s values were provisional when this run was made: not yet calibrated.</li>';
-    html += "<li>The mapping (one of three), the gain, the falloff and the two thresholds were chosen once, by a rule fixed " +
-      "before any measurement, on practice tracks 1000 to 1199 of game v2, then frozen (calibration/FLY2_REPORT.md).</li>";
     const c = f.controls;
+    const count = c && c.candidates != null ? " (one of " + cell(c.candidates) + ")" : "";
+    const seeds = c && c.practice_seeds != null ? "on practice tracks " + esc(c.practice_seeds) + " of game v2, " : "";
+    html += "<li>The mapping" + count + ", the gain, the falloff and the two thresholds were chosen once, by a rule fixed " +
+      "before any measurement, " + seeds + "then frozen (calibration/FLY2_REPORT.md).</li>";
     if (c) {
-      html += "<li>Controls, mean rows on held-out tracks " + esc(c.seeds) + ": fly2 " + cell(c.fly2) + ", the same rule with no brain " +
-        cell(c.no_brain) + ", on shuffled wiring " + (c.shuffled == null ? "not measured" : cell(c.shuffled)) + ", fly " +
+      html += "<li>Controls, mean rows on held-out tracks " + esc(c.seeds) + ", all played on the stand-in brain (the measured " +
+        "response surfaces): fly2 " + cell(c.fly2) + ", the same rule with no brain " + cell(c.no_brain) +
+        ", on shuffled wiring " + (c.shuffled == null ? "not measured" : cell(c.shuffled)) + ", fly on its own stand-in " +
         cell(c.fly) + ". Where the no-brain control does as well, the gain is our mapping's and rule's, not the wiring's.</li>";
     }
     return html;

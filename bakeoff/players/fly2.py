@@ -27,7 +27,10 @@ FALLOFF = 3.0
 TURN_THRESHOLD_HZ = 0.0
 JUMP_THRESHOLD_HZ = 200.0
 CALIBRATED = False
-# mean rows on the held-out seeds, from the same report: fly2 and its controls (None until calibrated)
+# Once calibrated, a dict copied by hand from calibration/FLY2_REPORT.md's Controls table (mean rows on the
+# held-out seeds): {"seeds": "1200-1399" (held-out), "practice_seeds": "1000-1199", "candidates": 3 (how many
+# candidate mappings were measured), "fly2": <float>, "no_brain": <float>, "shuffled": <float or None if not
+# measured>, "fly": <float>}. None until calibrated.
 CONTROLS = None
 
 

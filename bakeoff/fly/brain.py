@@ -87,6 +87,11 @@ class Brain:
         self._rfc = params["t_rfc"]
         self._groups = {}
         objects = []
+        # The order inputs are registered in here does not change a window's outcome. With more than one
+        # input, `rfc` and `active` are set fresh for every window in window_of() below, so which group is
+        # active depends on the name asked for, not on registration order; an inactive group runs no code
+        # and draws no random numbers; and b2.seed() runs after restore(), resetting the device's random
+        # buffers regardless of how many (inactive) objects sit in the network alongside the active one.
         for name, channels in self.inputs.items():
             cells = np.array([i for members in channels.values() for i in members], dtype=int)
             label = "looming" if name == "fly" else f"looming_{name}"  # fly's objects keep their names

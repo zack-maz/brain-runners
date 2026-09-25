@@ -55,6 +55,12 @@ def best(results: list[dict]) -> dict:
 def calibrate(surfaces: dict[str, dict], shuffled: dict | None = None, practice_seeds=PRACTICE_SEEDS,
               held_out_seeds=HELD_OUT_SEEDS, check_seeds=CHECK_SEEDS, grid=GRID, no_brain_grid=NO_BRAIN_GRID,
               fly_surface: dict | None = None) -> dict:
+    if min(practice_seeds) < 1000 or min(held_out_seeds) < 1000 or min(check_seeds) < 1000:
+        raise ValueError("tournament seeds (below 1000) may not be used to calibrate fly2")
+    for name, surface in surfaces.items():
+        if surface.get("shuffle_seed") is not None:
+            raise ValueError(f"the surface for {name} was measured on shuffled wiring; "
+                              "it is a control, not a candidate")
     missing = [name for name in CANDIDATE_ORDER if name not in surfaces]
     practice = [generate_track(seed, V2) for seed in practice_seeds]
     held_out = [generate_track(seed, V2) for seed in held_out_seeds]
@@ -110,6 +116,9 @@ def report(result: dict, practice_seeds=PRACTICE_SEEDS, held_out_seeds=HELD_OUT_
         f"Game v2, stand-in brains from the measured surfaces, practice seeds {_seeds(practice_seeds)}. "
         f"{sum(len(r) for r in result['scored'].values())} configurations over "
         f"{len(result['scored'])} candidates. Highest mean rows wins; ties to M1, M2, M3, then grid order.",
+        f"The held-out seeds {_seeds(held_out_seeds)} were used earlier by the research that chose the three "
+        "candidates (their best-table scores on these seeds), so they are not wholly unseen; the rule itself "
+        "never looked at them before scoring the winner.",
     ]
     if result["missing"]:
         parts.append(f"Not measured, so not in the running: {', '.join(result['missing'])}.")
@@ -145,7 +154,12 @@ def report(result: dict, practice_seeds=PRACTICE_SEEDS, held_out_seeds=HELD_OUT_
         + _table(controls, ("player", "practice", "held_out"))
         + ("" if "shuffled" in result else "\n\nThe shuffled-wiring control is not measured yet.")
         + "\n\nNo brain, best configuration: "
-        + ", ".join(f"{k} {result['no_brain']['practice'][k]}" for k in CONFIG_COLUMNS) + ".")
+        + ", ".join(f"{k} {result['no_brain']['practice'][k]}" for k in CONFIG_COLUMNS) + "."
+        + "\n\nThe shuffle keeps each neuron's in- and out-degree by sign and every connection's presynaptic sign "
+          "and synapse count; it loses which neuron talks to which and each neuron's summed input weight (a "
+          "permutation can also create a self-connection or repeat a pair). Like fly2 itself, the shuffled control "
+          "searches the whole grid, gain and falloff included, rather than only its own thresholds as the spec "
+          "allows for a control — more generous to the control, the conservative direction.")
     parts.append("## Floors on the practice seeds\n\n" + _table(result["floors"], ("player",) + SCORE_COLUMNS))
     top = sorted(((name, r) for name, rows in result["scored"].items() for r in rows),
                  key=lambda item: -item[1]["mean_rows"])[:10]

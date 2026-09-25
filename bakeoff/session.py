@@ -86,8 +86,13 @@ def answered_models(out_root: Path | str) -> dict[str, str]:
 
 
 def about_of(name: str) -> str | None:
-    """What a fly is, for its tick in the lobby; the grid's rows and columns say it for everyone else."""
-    return {"fly": "looming \u2192 escape reflex (phase 2)", "fly2": fly2.about()}.get(name)
+    """What a fly is, for its tick in the lobby; the grid's rows and columns say it for everyone else.
+    fly2 shows a neutral line while it is not calibrated, instead of a provisional mapping's summary as if
+    it had already won."""
+    if name == "fly2":
+        return (fly2.about() if fly2.CALIBRATED
+                else "not calibrated yet: its input, read-out and numbers are fixed by calibration/FLY2_REPORT.md")
+    return {"fly": "looming \u2192 escape reflex (phase 2)"}.get(name)
 
 
 def _order(names) -> list[str]:
@@ -153,7 +158,10 @@ class LiveSession:
     def status(self) -> str:
         if self.run is None:
             return "lobby"
-        return "running" if self.run.status == "running" else "finished"
+        # `run.status` can say "completed" before the run's thread has finished closing its players
+        # (live.py's `finally`); treat that gap as still running too, so a new run cannot start into it.
+        thread_alive = self._thread is not None and self._thread.is_alive()
+        return "running" if self.run.status == "running" or thread_alive else "finished"
 
     def state(self, seed: int | None = None) -> dict:
         """Everything the lobby needs: the players with their price and their budget, the seed rule,

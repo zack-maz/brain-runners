@@ -12,8 +12,10 @@ pytestmark = pytest.mark.slow
 RUN = Path(__file__).resolve().parents[1] / "runs" / "20260921-192037" / "fly.jsonl"  # fly, v2 seeds 1000-1004
 
 
-@pytest.mark.skipif(not RUN.exists(), reason="the recorded fly run is not on this machine")
 def test_fly_replays_its_recorded_v2_run_exactly_on_the_shared_brain(brain):
+    if not RUN.exists():
+        pytest.fail("the parity gate needs runs/20260921-192037/fly.jsonl, "
+                    "fly's recorded v2 run (git-ignored, on the machine that recorded it)")
     records = [json.loads(line) for line in RUN.read_text().splitlines()]
     assert {r["seed"] for r in records} == {1000, 1001, 1002, 1003, 1004}
     drift = []

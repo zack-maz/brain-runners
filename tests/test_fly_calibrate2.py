@@ -78,6 +78,30 @@ def test_the_report_says_whose_tuning_it_is_and_shows_the_controls():
     assert f"## Winner: {result['winner']['candidate']}" in text and "## Controls" in text
     assert "| no brain |" in text and "The shuffled-wiring control is not measured yet." in text
     assert "--players fly,fly2 --seeds 2 --seed-start 1000" in text and "| deaths |" in text
+    # Minor 8: the held-out seeds were not wholly unseen; the research that chose the candidates used them
+    assert "were used earlier by the research that chose the three candidates" in text
+    assert "the rule itself never looked at them" in text
+    # Minor 7: what the shuffle keeps and loses, and that its control searches the whole grid
+    assert "keeps each neuron's in- and out-degree by sign" in text
+    assert "loses which neuron talks to which" in text
+    assert "searches the whole grid, gain and falloff included" in text
+
+
+def test_calibrate_refuses_any_seed_below_1000():
+    with pytest.raises(ValueError, match="tournament seeds"):
+        calibrate(surfaces(), **{**SMALL, "practice_seeds": range(900, 904)})
+    with pytest.raises(ValueError, match="tournament seeds"):
+        calibrate(surfaces(), **{**SMALL, "held_out_seeds": range(500, 502)})
+    with pytest.raises(ValueError, match="tournament seeds"):
+        calibrate(surfaces(), **{**SMALL, "check_seeds": range(0, 2)})
+
+
+def test_a_candidate_surface_measured_on_shuffled_wiring_is_refused():
+    shuffled_m1 = measure_mapping(CartoonBrain(shuffle_seed=1), MAPPINGS["M1"], trials=1)
+    bad = {**surfaces(names=("M2", "M3")), "M1": shuffled_m1}
+    with pytest.raises(ValueError, match="the surface for M1 was measured on shuffled wiring; "
+                                          "it is a control, not a candidate"):
+        calibrate(bad, **SMALL)
 
 
 def test_fly2_on_refuses_a_surface_of_another_candidate():

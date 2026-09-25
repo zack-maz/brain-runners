@@ -274,7 +274,8 @@ const fly2Meta = (extra) => ({
   cells: { centre: ["LPLC2 left", "LPLC2 right"], left: ["LC4 left"], right: ["LC4 right"] },
   sees: { centre: [0], left: [-3, -2, -1], right: [1, 2, 3] }, turn_types: ["DNa02", "DNa01", "DNg13"],
   turn_threshold_hz: 20, jump_threshold_hz: 200, window_ms: 100, provisional: false,
-  controls: { seeds: "1200-1399", fly2: 98.5, no_brain: 71.25, shuffled: 40, fly: 66 }, ...extra,
+  controls: { seeds: "1200-1399", practice_seeds: "1000-1199", candidates: 3, fly2: 98.5, no_brain: 71.25, shuffled: 40, fly: 66 },
+  ...extra,
 });
 
 test("fly2's panel shows every channel, its own read-out, both thresholds and which branch of our rule fired", () => {
@@ -304,6 +305,10 @@ test("the mind dispatches fly2 to its own panel and escapes what it logs", () =>
   assert.match(html, /&#60;b&#62; 1 Hz/);
   assert.equal(html.includes("<b>"), false);
   assert.equal(Minds.tagOf("fly2"), "FLY2");
+  // the raster's neuron names come from the log (turn_types) and must be escaped too
+  const raster = Minds.mind({ player: "fly2" }, frame({ info: fly2Info({ turn_types: ["<b>"] }) }), context());
+  assert.equal(raster.includes("<b>"), false);
+  assert.match(raster, /&#60;b&#62; L/);
 });
 
 test("Minds.oursFly2 lists the mapping, the read-out, the rule, the numbers and the controls", () => {
@@ -313,12 +318,21 @@ test("Minds.oursFly2 lists the mapping, the read-out, the rule, the numbers and 
   assert.match(html, /centre \(lanes 0\) drives LPLC2 left, LPLC2 right/);
   assert.match(html, /right minus left of DNa02 \+ DNa01 \+ DNg13/);
   assert.match(html, /a turn beyond 20 Hz goes left or right; otherwise a Giant Fiber above 200 Hz jumps/);
-  assert.match(html, /practice tracks 1000 to 1199 of game v2, then frozen/);
-  assert.match(html, /fly2 98.50, the same rule with no brain 71.25, on shuffled wiring 40, fly 66/);
+  // the count and the seed range come from f.controls, not a literal
+  assert.match(html, /The mapping \(one of 3\), the gain, the falloff and the two thresholds were chosen once/);
+  assert.match(html, /on practice tracks 1000-1199 of game v2, then frozen/);
+  assert.match(html, /fly2 98.50, the same rule with no brain 71.25, on shuffled wiring 40, fly on its own stand-in 66/);
+  assert.match(html, /all played on the stand-in brain \(the measured response surfaces\)/);
   assert.match(Minds.oursFly2({ fly2: fly2Meta({ provisional: true }) }), /provisional when this run was made/);
   assert.doesNotMatch(Minds.oursFly2({ fly2: fly2Meta({ provisional: true }) }), /Controls/);
   assert.match(Minds.oursFly2({ fly2: fly2Meta({ controls: { ...fly2Meta().controls, shuffled: null } }) }),
     /on shuffled wiring not measured/);
+  // no controls recorded at all: no count, no seed range, and no Controls line
+  const noControls = Minds.oursFly2({ fly2: fly2Meta({ controls: undefined }) });
+  assert.match(noControls, /The mapping, the gain, the falloff and the two thresholds were chosen once, by a rule fixed before any measurement, then frozen/);
+  assert.doesNotMatch(noControls, /one of/);
+  assert.doesNotMatch(noControls, /practice tracks/);
+  assert.doesNotMatch(noControls, /Controls/);
   assert.equal(Minds.oursFly2(undefined), "");
   assert.equal(Minds.oursFly2({ fly2: null }), "");
 });
