@@ -15,7 +15,9 @@ from __future__ import annotations
 import itertools
 import statistics
 import sys
+from collections import Counter
 from pathlib import Path
+from typing import Callable
 
 from bakeoff.fly.surface import SurrogateBrain, load_surface
 from bakeoff.game.engine import Game
@@ -47,26 +49,36 @@ def play(player, track: Track) -> tuple[Game, list[str]]:
     return game, actions
 
 
-def score(player, tracks: list[Track]) -> dict:
+def score(player, tracks: list[Track], deaths: bool = False) -> dict:
+    """`deaths`: also count the deaths by cause (fly2's report shows them)."""
     games, actions = [], []
     for track in tracks:
         game, played = play(player, track)
         games.append(game)
         actions += played
     rows = [g.rows_survived for g in games]
-    return {"mean_rows": sum(rows) / len(rows), "median_rows": statistics.median(rows),
-            "finished": sum(g.finished for g in games), "jump_share": actions.count("jump") / len(actions)}
+    result = {"mean_rows": sum(rows) / len(rows), "median_rows": statistics.median(rows),
+              "finished": sum(g.finished for g in games), "jump_share": actions.count("jump") / len(actions)}
+    if deaths:
+        result["deaths"] = dict(Counter(g.death_cause for g in games if g.death_cause is not None))
+    return result
+
+
+def search_configs(make: Callable[[dict], object], tracks: list[Track], configs: list[dict], sort: bool = True,
+                   deaths: bool = False) -> list[dict]:
+    """Every configuration's score: the player `make(config)` makes, over the tracks. Best first when `sort`
+    (stable: ties keep the order given), else in the order given."""
+    results = [{**config, **score(make(config), tracks, deaths=deaths)} for config in configs]
+    return sorted(results, key=lambda r: -r["mean_rows"]) if sort else results
 
 
 def search(surface: dict, tracks: list[Track], gains_hz=GAINS_HZ, falloffs=FALLOFFS,
            turn_thresholds_hz=TURN_THRESHOLDS_HZ, jump_thresholds_hz=JUMP_THRESHOLDS_HZ) -> list[dict]:
     """Every candidate's score, best first (stable sort: ties keep grid order)."""
     brain = SurrogateBrain(surface)
-    results = []
-    for gain, falloff, turn, jump in itertools.product(gains_hz, falloffs, turn_thresholds_hz, jump_thresholds_hz):
-        config = {"gain_hz": gain, "falloff": falloff, "turn_threshold_hz": turn, "jump_threshold_hz": jump}
-        results.append({**config, **score(FlyPlayer(brain_factory=lambda: brain, **config), tracks)})
-    return sorted(results, key=lambda r: -r["mean_rows"])
+    configs = [{"gain_hz": gain, "falloff": falloff, "turn_threshold_hz": turn, "jump_threshold_hz": jump}
+               for gain, falloff, turn, jump in itertools.product(gains_hz, falloffs, turn_thresholds_hz, jump_thresholds_hz)]
+    return search_configs(lambda config: FlyPlayer(brain_factory=lambda: brain, **config), tracks, configs)
 
 
 def _table(rows: list[dict], columns: tuple[str, ...]) -> str:
