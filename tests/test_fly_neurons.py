@@ -2,9 +2,10 @@ import pandas as pd
 import pytest
 
 from bakeoff.fly import data
-from bakeoff.fly.neurons import load_selection, select_neurons
+from bakeoff.fly.channels import FLY_CELLS, MAPPINGS
+from bakeoff.fly.neurons import load_selection, load_tables, select_channels, select_neurons
 
-TYPES = ("LPLC2", "LC4", "DNa01", "DNb01", "DNp01", "DNa02")
+TYPES = ("LPLC2", "LC4", "DNa01", "DNb01", "DNp01", "DNa02", "DNg13", "DNb05", "DNa04")
 
 
 def annotations(extra=()):
@@ -18,6 +19,7 @@ def test_a_neurons_model_index_is_its_position_in_the_model_id_list():
     selection = select_neurons(annotations(), model_ids)
     assert selection.inputs == {"left": (1, 3), "right": (2, 4)}  # LPLC2 then LC4 of that eye
     assert selection.readouts["DNa01_left"] == (5,) and selection.readouts["DNp01_right"] == (10,)
+    assert selection.readouts["DNg13_left"] == (13,) and selection.readouts["DNa04_right"] == (18,)
     assert set(selection.readouts) == {f"{t}_{s}" for t in TYPES[2:] for s in ("left", "right")}
 
 
@@ -41,6 +43,29 @@ def test_a_group_with_no_neuron_in_the_model_is_an_error():
     model_ids = [int(r) for r in annotations()["root_id"] if r != 120]  # 120 is the left DNa01
     with pytest.raises(ValueError, match="no left DNa01 neuron is in the model"):
         select_neurons(annotations(), model_ids)
+
+
+def test_fly_as_channels_selects_exactly_its_eyes():
+    model_ids = [999] + [int(r) for r in annotations()["root_id"]]
+    assert select_channels(annotations(), model_ids, FLY_CELLS) == select_neurons(annotations(), model_ids).inputs
+
+
+def test_channels_list_their_groups_in_the_order_given_and_a_missing_group_is_an_error():
+    extra = [(900, "LPLC4", "left"), (901, "LC22", "left"), (902, "LC22", "left")]
+    model_ids = [int(r) for r in annotations(extra)["root_id"]]
+    cells = {"centre": (("LC4", "right"), ("LPLC2", "left")), "left": (("LPLC4", "left"), ("LC22", "left"))}
+    assert select_channels(annotations(extra), model_ids, cells) == {"centre": (3, 0), "left": (18, 19, 20)}
+    with pytest.raises(ValueError, match="no right LPLC4 neuron is in the model"):
+        select_channels(annotations(extra), model_ids, {"right": (("LPLC4", "right"),)})
+
+
+@pytest.mark.slow
+def test_every_candidate_channel_has_its_cells_in_the_real_model():
+    tables = load_tables(data.ANNOTATIONS, data.COMPLETENESS)
+    m3 = select_channels(*tables, MAPPINGS["M3"].cells)
+    assert (len(m3["centre"]), len(m3["left"]), len(m3["right"])) == (108 + 102 + 54 + 50, 56 + 43, 54 + 46)
+    m1 = select_channels(*tables, MAPPINGS["M1"].cells)
+    assert (len(m1["centre"]), len(m1["left"]), len(m1["right"])) == (210, 54, 50)
 
 
 @pytest.mark.slow
