@@ -90,13 +90,21 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 
 ## Where to resume (in this order)
 
-0. **`fly2`, the second pure fly** (decisions 41–42, spec `docs/superpowers/specs/2026-09-24-fly2-design.md`,
-   branch `fly2`). Spike 04, the probe, passed on 2026-09-24 (`spikes/04-fly2-probe/REPORT.md` on branch
-   `spike/fly2-probe`): every candidate turns away from a gap under a strong centre, and M3 is admitted. The plan is written
-   (`docs/superpowers/plans/2026-09-24-fly2.md`, generated from the prototype `proto/fly2`, 9 tasks; the calibration
-   rule is task 1). It waits for the user's review. After the code come the controller's steps C1–C9: the parity
-   gate, the three surfaces, the rule, the shuffled control, freezing the numbers (decision 43), one real run of
-   `fly` and `fly2` on v2 seeds 1000–1019, the live smoke, the docs and the design review.
+0. **`fly2`, the second pure fly, is built, calibrated and played** (decisions 41–43, spec
+   `docs/superpowers/specs/2026-09-24-fly2-design.md`, plan `docs/superpowers/plans/2026-09-24-fly2.md`, generated
+   from the prototype `proto/fly2`, 9 tasks, branch `fly2`). Spike 04, the probe, passed on 2026-09-24
+   (`spikes/04-fly2-probe/REPORT.md` on branch `spike/fly2-probe`): every candidate turns away from a gap under a
+   strong centre, and M3 is admitted. M3, "a sideways channel", is frozen as decision 43
+   (`calibration/FLY2_REPORT.md`): gain 250 Hz, falloff 2, turn threshold 40 Hz, jump threshold 175 Hz; held-out,
+   fly2 scored 82.34 rows against its stand-in brain's 65.98. The real run is done: `fly,fly2` on v2 seeds
+   1000–1019 (`runs/20260925-101614`), fly mean 66.55 rows, fly2 mean 78.20; `bakeoff bench` says "can't tell yet"
+   (+11.7 rows, 95% interval -4.5 to 27.8, about 69 tracks for a verdict). The live smoke is done too: `bakeoff
+   live` on v2 track 1001 with fly and fly2 ticked completed, one shared brain (peak 720 MB), every decision
+   matching the same track played with fly2 on a brain of its own. Whole-branch design review done ("ready with
+   fixes", 0 Critical, 3 Important, 10 Minor, all fixed and re-reviewed). What is left: the branch is not merged
+   (it comes after PR #6 "Opus v1", open, on the user's word); the trained fly (track 2 of decision 41) and a fast
+   engine each get their own spec later; and whether to settle fly2 vs fly with about 69 more tracks before
+   phase 6.
 1. **Parked**: GLM Flash's tracks 1001–1004 (decision 34), while Zhipu's free tier throttles. To pick it up, check
    it answers (a few requests through `bakeoff.clients.glm.HttpTransport`), then
    `uv run python -m bakeoff run --players glm_composed,glm_choice,glm_two_step --seeds 5 --seed-start 1000 --max-requests 700`

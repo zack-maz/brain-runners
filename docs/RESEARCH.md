@@ -44,3 +44,11 @@ wave of days-old hobby repos ("fly plays Doom", a Chrome-dino clone with a train
 GPU and Apple-MLX ports of the Shiu model claiming large speedups), indexed at
 https://github.com/cobanov/awesome-fly and covered sceptically by Hackaday. Treat as
 inspiration and leads to test, not as precedent.
+
+## 2026-09-24: research for fly2
+
+Three research agents answered briefs before the design of `fly2`
+(`docs/superpowers/specs/2026-09-24-fly2-design.md`): why `fly` dies, which inborn circuits fit the game, and what
+other projects did with this model. Their reports and the briefs they were given are in
+`docs/research/2026-09-24-fly/`. Spike 04, the probe that followed, is on branch `spike/fly2-probe`,
+`spikes/04-fly2-probe/REPORT.md`.

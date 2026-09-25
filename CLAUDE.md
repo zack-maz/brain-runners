@@ -49,8 +49,12 @@ built and parked after one track (decisions 33–34). The page (items 4, 5, 8 an
 ceiling, the lobby) and 3b (the logs, the Run and Analysis tabs, the picker, the benchmark in the page), each
 reviewed and fixed; decisions 36–39 settle their open questions and the rename of Claude Haiku's players.
 **Everything before phase 6 is built**; what is left is GLM Flash's parked tracks and one PR "Opus v1" from
-`phase6-updates`, on the user's word. Then phase 6, the tournament and the write-up, which needs a new budget
-go-ahead. Each phase gets its own plan. Resume from `docs/NEXT.md`.
+`phase6-updates`, on the user's word. `fly2`, a second pure fly with a sideways read-out channel of its own, is
+built, calibrated and played on branch `fly2` (decisions 41–43, spec
+`docs/superpowers/specs/2026-09-24-fly2-design.md`, plan `docs/superpowers/plans/2026-09-24-fly2.md`): its numbers
+are frozen (`calibration/FLY2_REPORT.md`), its real run and its live smoke are done, and it is not yet merged (it
+comes after PR "Opus v1"). Then phase 6, the tournament and the write-up, which needs a new budget go-ahead. Each
+phase gets its own plan. Resume from `docs/NEXT.md`.
 
 ## How we work here
 
@@ -92,9 +96,9 @@ go-ahead. Each phase gets its own plan. Resume from `docs/NEXT.md`.
   what it just played — never at the cost of the event itself, which is what the page waits for.
 - `bakeoff live` (`bakeoff/live.py`, `bakeoff/live_server.py`, `bakeoff/session.py`) plays one track in lockstep by
   row, records a normal run directory and streams it to the page over Server-Sent Events on `127.0.0.1` only
-  (standard library, no dependency). It builds one fly brain in its own process: never start it next to another fly
-  run. Its records come from `runner.play_row` and its frames from `replay.frame_of`, the same functions `run` and
-  `view` use; keep it that way.
+  (standard library, no dependency). It builds one fly brain in its own process, shared by every fly of a run
+  (`bakeoff/fly/shared.py`): never start it next to another fly run. Its records come from `runner.play_row` and
+  its frames from `replay.frame_of`, the same functions `run` and `view` use; keep it that way.
 - The page runs the show (update 3a, design `docs/superpowers/specs/2026-09-22-page-control-design.md`): the command
   binds the port and sets the ceiling, the lobby in the browser picks the track and the players and starts and
   cancels the run (`GET /state`, `POST /run`, `POST /cancel`, `GET /events?run=`). Every request but the page itself

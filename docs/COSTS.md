@@ -238,3 +238,22 @@ track 1000 stands as its record.
 
 A failed decision is a logged error and a `stay`, which can kill a player on a bad row: GLM's rows above are a
 floor, not its ability. The benchmark shows it but does not rank it, since a rank needs five tracks.
+
+## fly2: the second pure fly (game v2, 2026-09-25, free)
+
+fly2 is a local simulation like the fly: the response surfaces, the calibration and the real run below all cost
+nothing (`calibration/FLY2_REPORT.md`, decision 43).
+
+**Real run** (`uv run python -m bakeoff run --players fly,fly2 --seeds 20 --seed-start 1000`, `runs/20260925-101614`,
+game v2, `completed`, 22 minutes wall):
+
+| player | mean rows | median | finished | deaths jumped / dodged into a gap | median wall time per decision |
+| --- | --- | --- | --- | --- | --- |
+| fly | 66.55 | 70 | 0 of 20 | 20 / 0 | 489 ms |
+| fly2 | 78.20 | 78 | 1 of 20 | 16 / 3 | 495 ms |
+
+The stand-in brain (the measured response surfaces, no simulation) predicted 72.00 rows for fly2 on these same
+seeds, against the 78.20 the real brain scored.
+
+`bakeoff bench` on the same run: fly2 minus fly is +11.7 rows (95% interval -4.5 to 27.8, 12 wins / 3 ties / 5
+losses) — "can't tell yet"; about 69 tracks would be needed for a verdict.
