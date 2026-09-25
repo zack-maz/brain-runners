@@ -66,6 +66,15 @@ section > h2.label { margin-bottom: 20px; }
 .mind header .about { color: var(--muted); font-size: var(--size-small); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mind .status { min-height: 1.6em; color: var(--text); }
 .mind p { margin-top: 8px; }
+.mind .log { margin-top: 12px; border-top: 1px solid var(--hairline); }
+.log-lines { list-style: none; margin: 0 0 4px; padding: 0; max-height: 220px; overflow-y: auto;
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: var(--size-small); }
+.log-lines li { display: grid; grid-template-columns: 4.5em minmax(0, 7em) minmax(0, 1fr); gap: 10px;
+  padding: 3px 0; border-bottom: 1px solid var(--hairline); }
+.log-lines li:last-child { border-bottom: 0; }
+.log-lines .at { color: var(--muted); }
+.log-lines .said { color: var(--muted); overflow-wrap: anywhere; }
+.log-lines .bad { grid-column: 1 / -1; }
 .mind .saw { display: flex; gap: 16px; align-items: flex-start; margin-top: 10px; }
 .mind .verdict { margin-top: 0; }
 .mind .verdict strong { font-weight: 500; font-size: 20px; letter-spacing: -0.015em; color: var(--bright); }
@@ -153,3 +162,59 @@ table { border-collapse: collapse; font-size: var(--size-small); font-variant-nu
   #speeds button[data-speed="1"], #speeds button[data-speed="20"] { display: none; }
   #auto { margin-left: auto; }
 }
+
+/* ---- the lobby: the page starts the runs ------------------------------------------------------ */
+#lobby form { max-width: 900px; }
+.lobby-top { display: flex; align-items: center; gap: 12px; margin-bottom: var(--gutter); }
+.lobby-top input { width: 9ch; padding: 6px 8px; background: var(--panel); color: var(--bright);
+  border: 1px solid var(--line-strong); font: inherit; }
+#lobby button { padding: 8px 14px; background: var(--panel); color: var(--bright);
+  border: 1px solid var(--line-strong); cursor: pointer; }
+#lobby button[disabled] { color: var(--muted); cursor: not-allowed; }
+#lobby button[data-armed="true"] { border-color: var(--warn); color: var(--warn); }
+#cancel { border-color: var(--bad); color: var(--bad); }
+/* who runs next: question sets down, models across, and the players that are apart below */
+#picks { overflow-x: auto; }
+table.players { border-collapse: collapse; width: 100%; }
+table.players th, table.players td { vertical-align: top; padding: 10px; border: 1px solid var(--hairline); }
+table.players thead th { background: var(--panel); text-align: left; width: 22%; }
+table.players th.what { background: var(--panel); text-align: left; width: 22%; min-width: 180px; }
+table.players th .label { display: block; color: var(--bright); margin-bottom: 4px; }
+table.players th .note { display: block; margin: 0; font-size: var(--size-label-sm); max-width: 34ch; }
+/* the model a column really asks for: a short label, so mono, and above the prose */
+table.players th .note.mono { font-family: var(--font-mono); color: var(--text); margin-bottom: 6px;
+  letter-spacing: var(--tracking-label); overflow-wrap: anywhere; }
+table.players td { min-width: 170px; }
+table.players td.none { color: var(--muted); text-align: center; vertical-align: middle; }
+.apart { margin-top: 20px; }
+.apart .note { margin: 0 0 8px; max-width: var(--measure); }
+.picks-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.picks-row .pick { border: 1px solid var(--hairline); min-width: 170px; }
+.pick { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: baseline;
+  padding: 10px 12px; background: var(--panel); border: 1px solid transparent; cursor: pointer; }
+.pick:has(input:checked) { border-color: var(--text); color: var(--bright); }
+.pick input { grid-row: span 3; align-self: center; accent-color: var(--accent); }
+.pick-name { font: 400 var(--size-small)/1.4 var(--font-mono); color: var(--text); }
+.pick:has(input:checked) .pick-name { color: var(--bright); }
+.pick .note { grid-column: 2; margin-top: 0; font-size: var(--size-label-sm); }
+.pick.blocked { opacity: 0.55; cursor: not-allowed; }
+
+/* the two tabs: plain buttons over one page, no routing */
+.tabs { display: flex; gap: 4px; padding: 0 16px; border-bottom: 1px solid var(--hairline); }
+.tabs button { min-height: 44px; padding: 0 16px; background: none; border: 0; border-bottom: 2px solid transparent;
+  color: var(--muted); cursor: pointer; }
+.tabs button[aria-selected="true"] { color: var(--bright); border-bottom-color: var(--bright); }
+.tabs button:hover { color: var(--text); }
+/* the tab strip is the rule above the first section of either panel */
+[role="tabpanel"] > section:first-child { margin-top: 0; border-top: 0; }
+
+/* the players: two rows of one control — who runs next (live, before a run) and who is in the tunnel */
+.row-label { color: var(--muted); margin: 20px 0 8px; }
+#lobby .lobby-top + .row-label { margin-top: 16px; }
+#picker { margin-top: 24px; }
+#picks-replay { display: flex; flex-wrap: wrap; gap: 8px; }
+.pick-player { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px;
+  background: var(--panel); border: 1px solid var(--hairline); color: var(--muted); cursor: pointer; }
+.pick-player[aria-pressed="true"] { color: var(--bright); border-color: var(--text); }
+.pick-player[disabled] { opacity: 0.45; cursor: default; }
+.pick-player .note { font-size: var(--size-small); }

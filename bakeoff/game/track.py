@@ -5,23 +5,24 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass
 
-LANES = 12
-MAX_ROWS = 300
-DIFFICULTY_ROWS = 300  # gap density ramps over this many rows whatever max_rows is, so tracks are prefix-stable
-LOOKAHEAD = 6
-RUNWAY_ROWS = 4  # rows 0..RUNWAY_ROWS are all floor so nobody dies before seeing a gap
-START_GAP_RATE = 0.04  # chance that a lane starts a gap run, at row 0
-END_GAP_RATE = 0.16  # the same chance at row max_rows
-MAX_GAP_WIDTH = 3
+from bakeoff.game.rules import DEFAULT, RULES, Rules, resolve
+
 _PATH_MOVES = ("stay", "stay", "stay", "stay", "left", "left", "right", "right", "jump")
 
 
 @dataclass(frozen=True)
 class Track:
     seed: int
-    lanes: int
-    max_rows: int
+    rules: Rules
     gaps: tuple[tuple[int, ...], ...]  # gaps[row] = sorted lanes that are gaps in that row
+
+    @property
+    def lanes(self) -> int:
+        return self.rules.lanes
+
+    @property
+    def max_rows(self) -> int:
+        return self.rules.max_rows
 
     def is_gap(self, row: int, lane: int) -> bool:
         return row < len(self.gaps) and (lane % self.lanes) in self.gaps[row]
@@ -31,7 +32,7 @@ class Track:
                 "gaps": [list(row) for row in self.gaps]}
 
 
-def start_lane(lanes: int = LANES) -> int:
+def start_lane(lanes: int = RULES[DEFAULT].lanes) -> int:
     return lanes // 2
 
 
@@ -50,25 +51,28 @@ def _safe_path(rng: random.Random, lanes: int, length: int) -> set[tuple[int, in
     return tiles
 
 
-def generate_track(seed: int, lanes: int = LANES, max_rows: int = MAX_ROWS) -> Track:
+def generate_track(seed: int, rules: Rules | None = None, max_rows: int | None = None) -> Track:
+    """The track of `seed` in a game version (default: the current one). `max_rows` shortens or
+    lengthens it; the rows it shares with the full track are the same."""
+    rules = resolve(rules, max_rows)
     # Two independent streams (string seeds hash the same in every process): a longer track
     # extends the path without shifting the gap scatter, so any max_rows plays a prefix.
     path_rng, gap_rng = random.Random(f"{seed}:path"), random.Random(f"{seed}:gaps")
-    length = max_rows + LOOKAHEAD + 2  # so look-ahead and a last jump never leave the track
-    protected = _safe_path(path_rng, lanes, length)
+    length = rules.max_rows + rules.lookahead + 2  # so look-ahead and a last jump never leave the track
+    protected = _safe_path(path_rng, rules.lanes, length)
     gaps: list[tuple[int, ...]] = []
     for row in range(length):
         row_gaps: set[int] = set()
-        if row > RUNWAY_ROWS:
-            progress = min(1.0, row / DIFFICULTY_ROWS)
-            rate = START_GAP_RATE + (END_GAP_RATE - START_GAP_RATE) * progress
-            widest = 1 + min(MAX_GAP_WIDTH - 1, int(progress * MAX_GAP_WIDTH))
-            for lane in range(lanes):
+        if row > rules.runway_rows:
+            progress = min(1.0, row / rules.difficulty_rows)
+            rate = rules.start_gap_rate + (rules.end_gap_rate - rules.start_gap_rate) * progress
+            widest = 1 + min(rules.max_gap_width - 1, int(progress * rules.max_gap_width))
+            for lane in range(rules.lanes):
                 if gap_rng.random() < rate:
                     width = gap_rng.randint(1, widest)
-                    row_gaps.update((lane + i) % lanes for i in range(width))
+                    row_gaps.update((lane + i) % rules.lanes for i in range(width))
         gaps.append(tuple(sorted(l for l in row_gaps if (row, l) not in protected)))
-    return Track(seed=seed, lanes=lanes, max_rows=max_rows, gaps=tuple(gaps))
+    return Track(seed=seed, rules=rules, gaps=tuple(gaps))
 
 
 def survivable(track: Track) -> bool:

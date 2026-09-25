@@ -64,9 +64,28 @@ class RequestBudget:
         self.max_requests = max_requests
         self.used = 0
 
+    @property
+    def remaining(self) -> int:
+        return max(0, self.max_requests - self.used)
+
     def spend(self) -> None:
         if self.used >= self.max_requests:
             raise BudgetExhausted(f"request cap of {self.max_requests} reached")
+        self.used += 1
+
+
+class SharedBudget(RequestBudget):
+    """One run's view of a budget that outlives it (a `bakeoff live` session may play several runs).
+    It spends from the shared budget, so the ceiling the command set can never be raised, but counts
+    its own requests: the run's `meta.json` then records what that run spent, not the session's total.
+    Its own cap is what was left when the run began."""
+
+    def __init__(self, shared: RequestBudget):
+        super().__init__(shared.remaining)
+        self.shared = shared
+
+    def spend(self) -> None:
+        self.shared.spend()  # raises BudgetExhausted when the session's cap is reached
         self.used += 1
 
 
@@ -111,8 +130,13 @@ class PaidClient:
         if self._owns_sdk and self.budget.max_requests > 0:
             require_key(self.key_name)
 
+    # what the client itself puts in the request besides the questions (a provider's own knobs). It is part of the
+    # cache key: changing how a request is made must not replay answers made the old way.
+    request_options: dict = {}
+
     def ask(self, senses: dict, questions: dict) -> Reply:
-        return cached_request(self.cache, self.budget, self.provider, self.model, senses, questions,
+        asked = {**questions, **({"request_options": self.request_options} if self.request_options else {})}
+        return cached_request(self.cache, self.budget, self.provider, self.model, senses, asked,
                               lambda: self._live(senses, questions))
 
     def _live(self, senses: dict, questions: dict) -> dict:

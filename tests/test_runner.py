@@ -6,6 +6,7 @@ import pytest
 from bakeoff.players import make_player
 from bakeoff.players.base import Decision
 from bakeoff.errors import PreflightError
+from bakeoff.game.rules import V2
 from bakeoff.runner import BudgetExhausted, RunAborted, Runner
 
 KEYS = {"run_id", "player", "seed", "row", "lane", "senses", "looming", "questions", "answers",
@@ -97,7 +98,7 @@ def test_run_writes_one_jsonl_per_player_and_meta(tmp_path):
     assert (run_dir / "random.jsonl").exists()
     meta = json.loads((run_dir / "meta.json").read_text())
     assert meta["players"] == ["solver", "random"] and meta["seeds"] == [0, 1]
-    assert meta["game"] == {"lanes": 12, "max_rows": 40, "lookahead": 6, "window": 3,
+    assert meta["game"] == {**V2.variant(max_rows=40).to_json(),
                             "looming": {"gain_hz": 250.0, "falloff": 3.0, "step_hz": 25.0, "max_hz": 250.0,
                                         "provisional": False}}
     assert meta["fly"] == {"turn_threshold_hz": 0.0, "jump_threshold_hz": 200.0, "window_ms": 100.0,
@@ -142,13 +143,23 @@ def test_budget_exhausted_is_recorded_in_meta(tmp_path):
     assert json.loads((tmp_path / "t4" / "meta.json").read_text())["status"] == "budget_exhausted"
 
 
-def test_any_other_exception_marks_the_run_interrupted(tmp_path):
+def test_any_other_exception_marks_the_run_crashed_and_records_why(tmp_path):
     class Boom(Scripted):
         def reset(self, game, seed): raise RuntimeError("kaboom")
 
     with pytest.raises(RuntimeError, match="kaboom"):
         Runner(tmp_path).run([Boom(None, name="boom")], range(1), run_id="t5")
-    assert json.loads((tmp_path / "t5" / "meta.json").read_text())["status"] == "interrupted"
+    meta = json.loads((tmp_path / "t5" / "meta.json").read_text())
+    assert meta["status"] == "crashed" and meta["error"] == "RuntimeError: kaboom"
+
+
+def test_ctrl_c_marks_the_run_interrupted(tmp_path):
+    class Stopped(Scripted):
+        def reset(self, game, seed): raise KeyboardInterrupt
+
+    with pytest.raises(KeyboardInterrupt):
+        Runner(tmp_path).run([Stopped(None, name="stopped")], range(1), run_id="t6")
+    assert json.loads((tmp_path / "t6" / "meta.json").read_text())["status"] == "interrupted"
 
 
 def test_close_is_called_and_a_failing_close_does_not_mask_the_real_error(tmp_path):
@@ -266,7 +277,7 @@ def test_new_meta_is_what_run_writes_first(tmp_path):
     from bakeoff.runner import new_meta
 
     players = [make_player("solver")]
-    meta = new_meta("r", players, [5], 40, {"x": 1})
+    meta = new_meta("r", players, [5], V2.variant(max_rows=40), {"x": 1})
     run_dir = Runner(tmp_path).run(players, [5], max_rows=40, run_id="r", args={"x": 1})
     written = json.loads((run_dir / "meta.json").read_text())
     assert meta["status"] == "running" and meta["finished_at"] is None

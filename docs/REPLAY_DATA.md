@@ -10,8 +10,9 @@ records it is built from are described in `docs/STEP_RECORD.md`.
 | key | type | meaning |
 | --- | --- | --- |
 | `replay_version` | int | 1. Bumped on any breaking change to this object |
+| `game` | object or null | the game every run in the replay played (`Rules.to_json()`: `version`, `lanes`, `max_rows`, `lookahead`, `window`, the ramp), null when no run has a `meta.json`. Runs of different games are an error (`ValueError`, exit 2): a seed is a different track in another game. Runs that differ only in `max_rows` are the same game. A `game` block without `version` is v1 |
 | `runs` | object[] | one per run directory, in the order given: `run_id` plus these keys of its `meta.json`, null when absent: `status`, `git_sha`, `git_dirty`, `started_at`, `finished_at`, `players`, `seeds`, `game`, `fly`, `models`, `requests`. A directory without `meta.json` is named after the directory |
-| `players` | string[] | players with at least one episode: `fly`, `jev_composed`, `llm` (the demo's three), then `jev`, then the others in the order the runs planned them |
+| `players` | string[] | players with at least one episode, ordered by `CONTESTANTS` in `bakeoff/replay.py`: `fly`, `jev_composed`, `llm` (the demo's three), then `jev`, `jev_choice`, `llm_choice`, `llm_composed`, `jev_two_step`, `llm_two_step`, `jev_reader`, `llm_reader`; any player not in that list follows, in the order the runs planned them |
 | `seeds` | int[] | every seed with at least one episode, ascending |
 | `tracks` | object | `{"<seed>": track}`, the step record's `track`. When runs played the same seed with different `max_rows`, the longest is kept (the shorter one is its prefix) |
 | `episodes` | object[] | one per (player, seed), sorted by seed, then by `players` order |
@@ -45,7 +46,7 @@ Frames are sorted by `row`. A jump advances two rows, so rows are not consecutiv
 
 ## How the viewer uses it
 
-The page never reads this object directly: `viewer/feed.js` hands it over as calls (`onMeta`, then
+The page never reads this object directly: `viewer/feed.js` hands it over as calls (`onMeta` with `game`, then
 `onEpisode` and `onFrame` per episode), the same calls a live run makes, so the two cannot drift apart.
 
 ## The live stream

@@ -1,4 +1,8 @@
-# First measured costs (phase 3)
+# Measured runs and costs
+
+> Names: the Claude Haiku players were called `llm*` when these runs were recorded and are `haiku*` now
+> (decision 39). The tables below are left as they were written; `llm_composed` here is `haiku_composed`
+> in the tool today, and the tool reads the old run directories under the new names.
 
 2026-09-20. One track each, practice seed 1000, each player run alone, SDK retries off, code at `89dcb7a`.
 Run ids: `20260920-102909` (jev), `20260920-102919` (llm). Runs and the response cache are git-ignored; the
@@ -22,7 +26,7 @@ prices are not known: the report therefore still shows Jev's `cost_usd` as `-`.
 A replay of both players afterwards (`20260920-103208`, no `--max-requests`) made 0 requests, was answered by
 24 + 200 cache hits and reproduced both runs row for row: re-runs and replays are free.
 
-## Projection for the tournament
+## Projection for the tournament (phase 3, game v1: at most 300 rows a track)
 
 20 seeds, one request per row survived, at most 300 rows per track.
 
@@ -32,6 +36,10 @@ A replay of both players afterwards (`20260920-103208`, no `--max-requests`) mad
 | llm | 3.56 | 2.38 (20 x 200 requests) |
 
 One track is a weak basis for the second column: a player that survives longer costs more.
+
+This projection is phase 3's, on game v1 (300 rows a track). On v2 (150 rows a track, this file's `llm` rate of
+0.00059 USD a request) the one-shot LLM's worst case for 20 tracks is about 1.78 USD (20 x 150 requests); the
+priciest twin, `llm_reader` (about 0.0063 USD a row, "Update 2a" above), would be about 19 USD for 20 x 150 rows.
 
 ## What else the track showed (one track: an impression, not a result)
 
@@ -50,9 +58,9 @@ One track is a weak basis for the second column: a player that survives longer c
 
 ## The composed Jev's first recorded track (phase 5a, 2026-09-21)
 
-`uv run python -m bakeoff run --players jev_composed --seeds 1 --seed-start 1000 --max-requests 300`, run
-`runs/20260921-120903`, practice seed 1000, status `completed`. Inside the budget of decision 19 (232 of the 1,000
-Jev requests pre-authorized for phase 5).
+`uv run python -m bakeoff run --players jev_composed --seeds 1 --seed-start 1000 --max-requests 300` (game v1: now
+needs `--game v1`), run `runs/20260921-120903`, practice seed 1000, status `completed`. Inside the budget of
+decision 19 (232 of the 1,000 Jev requests pre-authorized for phase 5).
 
 | player | model | rows survived | live requests | failed requests | mean latency ms | median / max ms | input tokens | output tokens | cost USD | USD per request |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -79,9 +87,9 @@ What the track showed (one track: an impression, not a result):
 
 ## The first real go-live (phase 5c, 2026-09-21)
 
-`uv run python -m bakeoff live --seed 1001 --players fly,jev_composed,llm --max-requests 300`, run
-`runs/20260921-132459`, fresh practice seed 1001, status `completed`, watched in a browser. Inside decision 19's
-budget: 228 Jev requests (460 of the 1,000 in total) and 92 of the 300 Claude Haiku requests.
+`uv run python -m bakeoff live --seed 1001 --players fly,jev_composed,llm --max-requests 300` (game v1: now needs
+`--game v1`), run `runs/20260921-132459`, fresh practice seed 1001, status `completed`, watched in a browser. Inside
+decision 19's budget: 228 Jev requests (460 of the 1,000 in total) and 92 of the 300 Claude Haiku requests.
 
 | player | model | rows survived | live requests | failed requests | mean latency ms | input tokens | output tokens | cost USD |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -103,3 +111,130 @@ budget: 228 Jev requests (460 of the 1,000 in total) and 92 of the 300 Claude Ha
   so here the wandering (or the three wrong answers) cost it the finish: it reached a dead end that running
   straight avoids.
 
+
+## Update 2a: the Jev family and its LLM twins (game v2, 2026-09-21, paid runs done)
+
+Inside decision 26: Claude Haiku at most 5.00 USD for update 2, v2 practice seeds 1000 and up only. **Spent: 3.85
+USD of Haiku** (run 1: 1.38; run 2: 0.044; run 3: 0.126; run 4: 1.37; run 5: 0.93), 1.15 USD of the budget left. Jev's cost is not known per request (see above);
+the user does not count it.
+
+**Run 1** (`runs/20260921-165433`, seed 1000, every paid player, cap 150 each, `completed`):
+
+| player | rows (of 150) | live requests | mean latency ms | input tokens | output tokens | cost USD | Brier (all Nouls) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| jev_composed | 150, finished | 128 | 201 | 78,063 | 9,344 | - | 0.011 |
+| jev_two_step | 150, finished | 136 | 208 | 124,070 | 19,856 | - | 0.007 |
+| jev_choice | 94 | 81 | 204 | 68,752 | 3,645 | - | - |
+| jev_reader | 38 | 39 | 223 | 79,692 | 32,682 | - | 0.005 |
+| llm (one-shot) | 93 | 85 | 740 | 47,209 | 765 | 0.051 | - |
+| llm_composed | 132 | 131 | 939 | 107,816 | 4,586 | 0.130 | 0.019 |
+| llm_choice | 93 | 92 | 750 | 71,435 | 828 | 0.076 | - |
+| llm_two_step | 95 | 95 | 1,700 | 119,115 | 6,321 | 0.150 | 0.013 |
+| llm_reader | 150, finished | 150 | 2,991 | 596,551 | 74,986 | 0.970 | 0.003 |
+
+**Run 2** (`runs/20260921-171044`, seeds 1001–1004, cap 600 each, `aborted` on Anthropic connection errors while
+the API was down): all four Jev players completed all four tracks; `llm` was cut on 1001; the other LLM twins did
+not start. Jev over the five tracks 1000–1004 (runs 1 and 2 together):
+
+| player | mean rows (of 150) | finished | Brier |
+| --- | --- | --- | --- |
+| jev_two_step | 144.6 | 4 of 5 | 0.007 |
+| jev_composed | 124.2 | 2 of 5 | 0.008–0.011 |
+| jev_choice | 78.2 | 0 of 5 | - |
+| jev_reader | 49.6 | 0 of 5 | 0.005–0.009 |
+
+**Run 3** (`runs/20260921-184858`, seeds 1001–1004, the four cheaper LLM twins, cap 600 each): stopped by the
+controller at the user's request before a context reset (its `meta.json` still says `running`: a hard stop, the
+known gap of the phase 5 review). `llm` finished its four tracks (mean 47.5 rows), `llm_choice` had played part of
+1001; `llm_composed` and `llm_two_step` had not started. Everything answered is cached: rerunning the same command
+replays it for free and continues.
+
+**Run 4** (`runs/20260921-185546`, seeds 1001–1004, the four cheaper LLM twins, cap 600 each, `completed`, no
+error or fallback): run 3's answers replayed from the cache (`llm` entirely). Live: `llm_choice` 190 requests (0.16
+USD), `llm_composed` 516 (0.51), `llm_two_step` 443 (0.70); mean latency 700–990 ms.
+
+**Run 5** (`runs/20260921-191326`, seed 1001, `llm_reader`, cap 150, `completed`): 150 rows, finished; 144 requests,
+2,863 ms mean latency, 573,101 input and 71,729 output tokens, 0.93 USD.
+
+**Run 6** (`runs/20260921-192037`, seeds 1000–1004, the fly, free, `completed`): mean 68.0 rows, median 64, none
+finished, all five deaths jumps into a gap. This is the v1-calibrated fly on v2 (decision 23) and matches the stand-in
+brain's 68-row average of decision 21.
+
+**All players over v2 practice seeds 1000–1004** (`llm_reader` on 1000–1001 only, decision 26; each (player, seed)
+taken from exactly one of runs 1, 2, 4, 5, 6; deaths are "ran into / jumped into / dodged into" a gap):
+
+| player | tracks | mean rows | median | finished | deaths ran / jumped / dodged | Brier (all Nouls) |
+| --- | --- | --- | --- | --- | --- | --- |
+| llm_reader | 2 | 150.0 | 150 | 2 of 2 | - | 0.003 |
+| jev_two_step | 5 | 144.6 | 150 | 4 of 5 | 0 / 1 / 0 | 0.007 |
+| llm_composed | 5 | 132.2 | 132 | 1 of 5 | 4 / 0 / 0 | 0.017 |
+| jev_composed | 5 | 124.2 | 146 | 2 of 5 | 0 / 3 / 0 | 0.009 |
+| llm_two_step | 5 | 109.6 | 107 | 1 of 5 | 1 / 0 / 3 | 0.020 |
+| jev_choice | 5 | 78.2 | 94 | 0 of 5 | 0 / 5 / 0 | - |
+| llm_choice | 5 | 72.6 | 73 | 0 of 5 | 0 / 2 / 3 | - |
+| fly | 5 | 68.0 | 64 | 0 of 5 | 0 / 5 / 0 | - |
+| llm (one-shot) | 5 | 56.6 | 52 | 0 of 5 | 2 / 0 / 3 | - |
+| jev_reader | 5 | 49.6 | 45 | 0 of 5 | 5 / 0 / 0 | 0.008 |
+
+(Yardsticks on the same game, `runs/20260921-155758`: solver 150, always-jump 39, random 24.)
+
+The same scoreboard with 95% intervals, time and cost per row and every pair (2026-09-22, the benchmark of item 7):
+`uv run python -m bakeoff bench runs/20260921-165433 "runs/20260921-171044:jev_composed,jev_choice,jev_two_step,jev_reader" runs/20260921-185546 runs/20260921-191326 runs/20260921-192037`. With 95% paired t intervals over five tracks (decision 32) it separates, among others, `jev_two_step` from its
+Haiku twin `llm_two_step` (+35.0 rows, interval 2.0 to 68.0, 4 wins, 1 tie, 0 losses) and from the fly (+76.6, 37.7
+to 115.5). It cannot yet tell `llm_composed` from `llm_two_step` (+22.6, -7.1 to 52.3; about 9 tracks for an 80%
+chance of a verdict), `jev_two_step` from `llm_composed` (+12.4, about 31) nor `jev_composed` from `llm_composed`
+(+8.0 for Haiku, about 152). These are 36 pairs at 95% each, so about 2 verdicts would come by chance alone: read
+each as a lead. `llm_reader`, on 2 tracks, gets no interval, no verdict and no rank. Per row: `llm_reader` 2.88 s and 0.0064 USD, the other
+Haiku twins 0.7 to 1.1 s and 0.0008 to 0.0016 USD, the Jev players 0.17 to 0.23 s (price unknown), the fly 0.66 s.
+
+What these five tracks suggest (an impression, not a result): looking two moves ahead is where the rows are, but
+only when the answers are sharp: `jev_two_step` finishes 4 of 5, while its Haiku twin, asked the same questions under
+the same rule, averages 110 rows with a Brier nearly three times Jev's, and falls below its own one-step twin. On
+the pointed question sets Jev's answers score the better Brier of the two models (0.007–0.009 against 0.017–0.020);
+on the reader set it is the other way round (`llm_reader` 0.003 finishes both its tracks, `jev_reader` dies in every
+track). The one-shot Choice is weak for both models. `llm_reader` is the priciest player by far (about 0.0063 USD
+and 3 s a row).
+
+What the comparison between the models must carry (final review of update 2a):
+
+- The model is not the only difference. The LLM twin is also given the briefing of the rules in its system prompt;
+  Jev's yes/no questions carry only the question (the choice set gives the briefing to both). Jev's answers in one
+  request are made in parallel and cannot see each other (decision 11); the LLM writes all of its answers in one
+  reply, each able to see the ones before it. And an LLM probability is a number it states, while Jev's is Jev's
+  probability. The Brier numbers above compare these two kinds of number.
+- `brier_all` compares the two models within one set, not sets with each other: about 90% of the reader's tiles are
+  floor, so `jev_reader` scores 0.008 while dying on every track.
+- `jev_reader`'s five deaths are one event: the tile straight ahead (`tile_r1_c`) read as floor (p 0.09–0.19) while it
+  is a gap, and the planner stays. Jev missed 35 of 80 gaps at offset 0 (44%) and 81 of 763 elsewhere (11%), and read
+  no floor as a gap (0 of 9,783); `llm_reader` missed 1 of 274 and 13 of 2,119. The composed wording for the same tile
+  (`gap_stay`) was never missed in 73 cases, so it is the reader's wording or the 42-question request that fails, not
+  Jev's reading of the track.
+
+## Item 10: the GLM Flash twins (game v2, 2026-09-22, parked)
+
+Free tier (`glm-4.5-flash`, 0 USD), so the cost of these runs is nothing; what limits them is the tier's throttle.
+Two fixes came out of the first requests: GLM-4.5 thinks by default and its thoughts spent the whole token budget
+(empty, cut-off replies), and asked only for "an object" it wrapped its answer (`{"answer": {...}}`), which made
+every `glm_choice` decision invalid. It now answers with thinking off and with the same JSON schema Claude Haiku
+gets, inside a markdown fence that both chat models' reader strips.
+
+**Track 1000** (`runs/20260922-110347`, cap 150 each, `completed`; no invalid answer):
+
+| player | rows (of 150) | live requests | failed decisions | mean latency ms | input tokens | output tokens |
+| --- | --- | --- | --- | --- | --- | --- |
+| glm_composed | 109 | 103 | 4.6% | 5,496 | 58,754 | 3,595 |
+| glm_two_step | 74 | 73 | 2.7% | 4,196 | 64,381 | 6,030 |
+| glm_choice | 73 | 71 | 0% | 1,157 | 41,435 | 810 |
+| glm_reader | 38 | 34 | 13% | 14,151 | 74,889 | 12,832 |
+
+On the same track: `jev_composed` 150, `llm_composed` 132, `jev_two_step` 150, `llm_two_step` 95, `jev_choice` 94,
+`llm_choice` 93, `jev_reader` 38, `llm_reader` 150.
+
+**Tracks 1001–1004 are not run** (`runs/20260922-113159`, `aborted`): the free tier began answering "the service
+may be temporarily overloaded" (HTTP 429) to nearly every request, and the run's circuit breaker stopped it after
+six in a row. A plain probe then got 1 request through in 5. GLM now backs off 5, 20 and 60 seconds and each retry
+spends from the cap, so a throttled run waits instead of burning it. Parked by the user on 2026-09-22 (decision 34);
+track 1000 stands as its record.
+
+A failed decision is a logged error and a `stay`, which can kill a player on a bad row: GLM's rows above are a
+floor, not its ability. The benchmark shows it but does not rank it, since a rank needs five tracks.

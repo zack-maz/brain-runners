@@ -22,7 +22,7 @@ Stand-in brain: measured response surface, 121 inputs x 8 trials, 100 ms window,
 | --- | --- | --- | --- |
 | 118.70 | 120.50 | 0 | 0.07 |
 
-Compare with the real brain: `uv run python -m bakeoff run --players fly --seeds 20 --seed-start 1000`.
+Compare with the real brain: `uv run python -m bakeoff run --players fly --seeds 20 --seed-start 1000 --game v1`.
 
 ## Floors and reference on the practice seeds
 

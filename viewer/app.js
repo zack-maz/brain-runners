@@ -7,18 +7,33 @@
 
   const embedded = JSON.parse(document.getElementById("replay-data").textContent);
   if (!embedded) return;
+  const benchSlot = document.getElementById("bench-data");
+  const WAITING = { why: "The benchmark of this run comes when it ends." };
+  let benchData = benchSlot ? JSON.parse(benchSlot.textContent) : null; // a live run gets its own when it ends
   const liveUrl = document.body.dataset.live || null;
+  const token = document.body.dataset.token || null; // every control request carries it; a replay has none
 
   const $ = (id) => document.getElementById(id);
   const esc = Minds.esc;
   const cell = Minds.cell;
-  const DEMO = ["fly", "jev_composed", "llm"]; // the default view; an older replay has only the one-shot jev
-  const SPRITE = { fly: "fly", jev_composed: "visor", llm: "llm" }; // everyone else is a plain grey block
+  const DEMO = ["fly", "jev_composed", "haiku"]; // the default view; an older replay has only the one-shot jev
+  const SPRITE = { fly: "fly", jev_composed: "visor", haiku: "chat" }; // everyone else is a plain grey block
   const ABOUT = {
     fly: "Fruit fly connectome, untrained",
     jev_composed: "Jev, four yes/no questions a row",
     jev: "Jev, one broad question a row",
-    llm: "Large language model",
+    haiku: "Claude Haiku 4.5",
+    jev_choice: "Jev, one question a row, landings named",
+    jev_two_step: "Jev, eight yes/no questions a row, looks two moves on",
+    jev_reader: "Jev reads every visible tile, code plans",
+    haiku_composed: "Claude Haiku, asked the composed Jev's four questions",
+    haiku_choice: "Claude Haiku, asked jev_choice's question",
+    haiku_two_step: "Claude Haiku, asked jev_two_step's eight questions",
+    haiku_reader: "Claude Haiku reads every visible tile, code plans",
+    glm_composed: "GLM Flash, asked the composed Jev's four questions",
+    glm_choice: "GLM Flash, asked jev_choice's question",
+    glm_two_step: "GLM Flash, asked jev_two_step's eight questions",
+    glm_reader: "GLM Flash reads every visible tile, code plans",
     random: "Random moves, the floor",
     always_jump: "Always jumps, the second floor",
     solver: "Scripted solver, the reference (not a contestant)",
@@ -28,10 +43,10 @@
   const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // ---- the store: everything the feed has delivered -------------------------------------------
-  const store = { runs: [], players: [], seeds: [], tracks: {}, episodes: [], scoreboard: null, ended: !liveUrl, error: null };
+  const store = { game: null, runs: [], players: [], seeds: [], tracks: {}, episodes: [], scoreboard: null, ended: !liveUrl, error: null };
   const view = {
     seed: null, shown: new Set(), focus: null, auto: true, heldSince: 0,
-    t: 0, playing: false, speed: 3, following: !!liveUrl, size: 0, runners: [], panels: {},
+    t: 0, playing: false, speed: 3, following: !!liveUrl, size: 0, runners: [], panels: {}, openLog: null, tab: "run",
   };
 
   const runOf = (episode) => store.runs.find((run) => run.run_id === episode.run_id) || {};
@@ -47,7 +62,7 @@
 
   const handlers = {
     onMeta(meta) {
-      Object.assign(store, { runs: meta.runs, players: meta.players.slice(), seeds: meta.seeds.slice(), scoreboard: meta.scoreboard });
+      Object.assign(store, { game: meta.game, runs: meta.runs, players: meta.players.slice(), seeds: meta.seeds.slice(), scoreboard: meta.scoreboard });
     },
     onEpisode(episode, track) {
       store.episodes.push({ ...episode, frames: [] });
@@ -69,8 +84,10 @@
       store.ended = true;
       if (end.runs) store.runs = end.runs;
       if (end.scoreboard) store.scoreboard = end.scoreboard;
+      if (end.bench) benchData = end.bench; // the numbers for the run that just ended, scored by the server
       notice(end.status === "completed" ? null : "The run ended: " + end.status, false);
       renderAll();
+      if (liveUrl) refreshState(); // the run is over: the lobby comes back, with the run still on screen
     },
     onError(message) {
       if (store.ended) return;
@@ -108,8 +125,7 @@
       '<th><button type="button" data-seed="' + esc(seed) + '"' + (seed === view.seed ? ' aria-current="true"' : "") + ">" + esc(seed) +
       "</button></th>").join("") + "</tr></thead><tbody>";
     for (const player of store.players) {
-      html += '<tr><th><button type="button" data-player="' + esc(player) + '" aria-pressed="' + view.shown.has(player) + '">' +
-        esc(Minds.tagOf(player)) + "</button></th>";
+      html += "<tr><th>" + esc(Minds.tagOf(player)) + "</th>";
       for (const seed of store.seeds) {
         const episode = episodeOf(player, seed);
         const track = store.tracks[String(seed)];
@@ -124,22 +140,64 @@
     $("matrix").innerHTML = html + "</tbody>";
   }
 
+  // the level table picks the track; picking one goes back to the race, where the track is watched
   $("matrix").addEventListener("click", (event) => {
-    const button = event.target.closest("button");
+    const button = event.target.closest("button[data-seed]");
     if (!button) return;
-    if (button.dataset.seed != null) {
-      view.seed = Number(button.dataset.seed);
-      view.t = 0;
-      view.focus = null;
-      setPlaying(false);
-    } else if (view.shown.has(button.dataset.player)) view.shown.delete(button.dataset.player);
-    else view.shown.add(button.dataset.player);
+    view.seed = Number(button.dataset.seed);
+    view.t = 0;
+    view.focus = null;
+    setPlaying(false);
+    showTab("run");
+    renderAll();
+  });
+
+  // ---- the tabs -----------------------------------------------------------------------------
+  function showTab(wanted) {
+    view.tab = Tabs.select(view.tab, wanted);
+    for (const tab of Tabs.stateOf(view.tab)) {
+      const button = $("tab-" + tab.name);
+      button.setAttribute("aria-selected", String(tab.selected));
+      button.tabIndex = tab.selected ? 0 : -1;
+      $("panel-" + tab.name).hidden = tab.hidden;
+    }
+    $("transport").hidden = view.tab !== "run" || !ready; // the transport drives the race, and only it
+    if (view.tab === "run") { resize(); draw(); } // the canvas cannot be sized while it is hidden
+    else renderBench();
+  }
+
+  document.querySelector(".tabs").addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-tab]");
+    if (button) showTab(button.dataset.tab);
+  });
+  document.querySelector(".tabs").addEventListener("keydown", (event) => {
+    const next = Tabs.step(view.tab, event.key);
+    if (!next) return;
+    event.preventDefault();
+    showTab(next);
+    $("tab-" + next).focus();
+  });
+
+  // ---- who is in the tunnel -------------------------------------------------------------------
+  function renderPicker() {
+    const here = store.players.filter((p) => episodeOf(p, view.seed));
+    $("picks-replay").innerHTML = Picker.list(store.players, here, view.shown, ABOUT);
+    $("picker-hint").textContent = Picker.hint(store.players, here, view.shown, view.seed);
+  }
+
+  $("picks-replay").addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-player]");
+    if (!button) return;
+    const here = store.players.filter((p) => episodeOf(p, view.seed));
+    view.shown = Picker.toggle(view.shown, here, button.dataset.player);
     renderAll();
   });
 
   // ---- the mind strip -----------------------------------------------------------------------
   function renderStrip() {
     const strip = $("strip");
+    const openLog = view.openLog; // only one log is open at a time; it survives a re-render of the strip
+    const wasAt = openLog && view.panels[openLog] ? view.panels[openLog].lines.scrollTop : 0; // and so does the reader's place
     strip.innerHTML = "";
     view.panels = {};
     view.runners = playing().map((episode) => {
@@ -152,17 +210,56 @@
       panel.dataset.player = episode.player;
       panel.innerHTML = '<header><span class="label tag">' + esc(Minds.tagOf(episode.player)) + '</span><span class="about">' +
         esc(ABOUT[episode.player] || "") + (model ? " · " + esc(model) : "") + '</span></header><div class="body"><p class="status"></p>' +
-        '<div class="decision"></div></div>';
+        '<div class="decision"></div><details class="log"><summary class="label">Its log</summary><ol class="log-lines"></ol></details></div>';
       strip.appendChild(panel);
-      view.panels[episode.player] = { panel, status: panel.querySelector(".status"), decision: panel.querySelector(".decision"), index: -1 };
+      view.panels[episode.player] = { panel, status: panel.querySelector(".status"), decision: panel.querySelector(".decision"),
+                                      log: panel.querySelector(".log"), lines: panel.querySelector(".log-lines"), index: -1, logged: 0 };
       return { episode, track: store.tracks[String(episode.seed)], lookahead: game.lookahead || 6, window: window_,
                context: { windowMs: run.fly ? run.fly.window_ms : null, window: window_, maxHz: game.looming ? game.looming.max_hz : null } };
     });
+    if (openLog && view.panels[openLog]) {
+      view.panels[openLog].log.open = true;
+      view.panels[openLog].restoreTo = wasAt; // put back after the first append, which refills the list
+    }
     if (!view.runners.length) {
       strip.innerHTML = '<p class="note" style="padding:16px">' + (view.seed == null ? "Nothing has been played yet."
-        : "None of the players shown ran track " + esc(view.seed) + ". Pick a player in the level table to show it.") + "</p>";
+        : "None of the players shown ran track " + esc(view.seed) + ". Pick a player above to show it.") + "</p>";
     }
   }
+
+  // The log of one decision at a time, up to the row on screen: a log is watched with the run, so it
+  // never runs ahead of the tunnel or gives a replay's ending away. Lines are appended as the frames
+  // arrive so the list keeps its scroll; scrubbing back takes the later ones off again.
+  function appendLog(player, upTo) {
+    const ui = view.panels[player];
+    const episode = episodeOf(player, view.seed);
+    if (!ui || !episode) return;
+    const want = Math.min(upTo + 1, episode.frames.length);
+    if (want < ui.logged) { // scrubbed back: drop what has not happened yet
+      while (ui.lines.children.length > want) ui.lines.removeChild(ui.lines.lastChild);
+      ui.logged = want;
+      return;
+    }
+    if (want === ui.logged) return;
+    // "at the bottom" before the append decides whether the newest line is scrolled to afterwards
+    const atEnd = ui.lines.scrollTop + ui.lines.clientHeight >= ui.lines.scrollHeight - 4;
+    ui.lines.insertAdjacentHTML("beforeend", Log.lines(episode, episode.frames.slice(ui.logged, want)));
+    ui.logged = want;
+    if (atEnd) ui.lines.scrollTop = ui.lines.scrollHeight;
+    if (ui.restoreTo) { ui.lines.scrollTop = ui.restoreTo; ui.restoreTo = 0; }
+  }
+
+  // one panel's log open at a time: opening one closes the rest
+  $("strip").addEventListener("toggle", (event) => {
+    const log = event.target.closest("details.log");
+    if (!log) return;
+    if (!log.open) {
+      if (view.openLog === log.closest(".mind").dataset.player) view.openLog = null;
+      return;
+    }
+    view.openLog = log.closest(".mind").dataset.player;
+    for (const other of $("strip").querySelectorAll("details.log")) if (other !== log) other.open = false;
+  }, true);
 
   $("strip").addEventListener("click", (event) => {
     if (event.target.closest("summary, details")) return;
@@ -238,7 +335,7 @@
       Tunnel.draw(ctx, size, track, t, maxRows, outline);
       drawRunners(all, track, t, size);
       $("row-label").textContent = "Row " + String(Math.min(Math.floor(t), maxRows)).padStart(4, "0") + " / " + String(maxRows).padStart(4, "0");
-      $("track-label").textContent = "Track " + view.seed;
+      $("track-label").textContent = "Track " + view.seed + (store.game ? " · " + store.game.version : "");
     }
 
     for (const s of all) {
@@ -249,6 +346,7 @@
       const status = !store.ended && !episode.complete && s.index === episode.frames.length - 1 && t >= s.frame.landing[0]
         ? "thinking…" : Minds.statusLine(episode, s, s.runner.track.lanes);
       if (ui.status.innerHTML !== status) ui.status.innerHTML = status;
+      appendLog(s.id, s.index);
       if (s.index !== ui.index) {
         const open = !!(ui.decision.querySelector("details") || {}).open;
         ui.decision.innerHTML = Minds.mind(episode, s.frame, s.runner.context);
@@ -378,12 +476,127 @@
   document.addEventListener("keydown", (event) => {
     const typing = event.target instanceof Element && event.target.closest("button, select, input, summary");
     if (typing || event.metaKey || event.ctrlKey || event.altKey) return;
+    if (view.tab !== "run") return; // the transport is hidden off the Run tab, and so are its keys
     if (event.key === " ") { event.preventDefault(); togglePlay(); }
     if (event.key === "ArrowLeft") stepRows(-1);
     if (event.key === "ArrowRight") stepRows(1);
     if (event.key === "a" || event.key === "A") { setAuto(!view.auto); draw(); }
     const nth = view.runners[Number(event.key) - 1];
     if (nth) focusOn(nth.episode.player, true);
+  });
+
+  // ---- the lobby: the page starts the runs ----------------------------------------------------
+  const lobby = { state: null, chosen: [], armed: false, refusal: null, watching: null, source: null, timer: null };
+
+  async function control(path, options) {
+    const settings = options || {};
+    try {
+      const response = await fetch(path, { ...settings, headers: { "X-Bakeoff-Token": token, ...(settings.headers || {}) } });
+      const body = await response.json().catch(() => ({ error: "the server answered something that is not JSON" }));
+      return { ok: response.ok, body };
+    } catch (e) { // the command was stopped, or the machine went to sleep
+      return { ok: false, body: { error: "no answer from the run: is `bakeoff live` still going?" } };
+    }
+  }
+
+  // an empty box is no track at all, not track 0: Number("") is 0 and would silently start a run
+  const chosenSeed = () => ($("seed").value.trim() === "" ? NaN : Math.round(Number($("seed").value)));
+
+  async function refreshState() {
+    const { ok, body } = await control("/state?seed=" + encodeURIComponent(chosenSeed()));
+    if (ok) applyState(body);
+    else { lobby.refusal = body.error; renderLobby(); }
+  }
+
+  function applyState(state) {
+    if (lobby.state == null) { // the first answer: the lobby opens with what the command line offered
+      lobby.chosen = (state.ready || {}).players || [];
+      if ((state.ready || {}).seed != null) $("seed").value = state.ready.seed;
+    }
+    lobby.state = state;
+    const run = state.run;
+    if (run && run.replay && lobby.watching !== run.run_id) watch(run);
+    renderLobby();
+  }
+
+  function watch(run) { // one stream per run, so a stream never runs on into the next one
+    lobby.watching = run.run_id;
+    if (lobby.source) lobby.source.close();
+    resetTo(run.replay);
+    notice("Waiting for the first decision…", false);
+    lobby.source = Feed.fromStream(liveUrl + "?run=" + encodeURIComponent(run.run_id) +
+                                   "&token=" + encodeURIComponent(token), handlers);
+  }
+
+  function resetTo(replay) { // a new run: the page starts again from that run's empty replay
+    Object.assign(store, { game: null, runs: [], players: [], seeds: [], tracks: {}, episodes: [],
+                           scoreboard: null, ended: false, error: null });
+    Object.assign(view, { seed: null, shown: new Set(), focus: null, auto: true, heldSince: 0, t: 0,
+                          playing: false, following: true, runners: [], panels: {}, openLog: null });
+    benchData = WAITING; // the run before this one is not this run's benchmark
+    Feed.fromEmbedded(replay, handlers);
+    renderAll();
+  }
+
+  function renderLobby() {
+    const state = lobby.state;
+    if (!state) return;
+    const running = state.status === "running";
+    $("picks").innerHTML = Lobby.playerList(state, lobby.chosen);
+    $("estimate").textContent = Lobby.estimateText(state, lobby.chosen);
+    $("ceiling").textContent = Lobby.ceilingText(state);
+    const why = lobby.refusal || Lobby.whyNot(state, lobby.chosen, chosenSeed());
+    $("lobby-why").hidden = !why;
+    $("lobby-why").textContent = why || "";
+    const cost = Lobby.estimate(state, lobby.chosen);
+    $("start").disabled = !!why;
+    $("start").textContent = !lobby.armed ? "Start"
+      : "Confirm: start and spend at most " + Lobby.usd(cost.total_usd);
+    $("start").dataset.armed = String(lobby.armed);
+    $("cancel").hidden = !running;
+    $("seed").disabled = running;
+  }
+
+  function pressedStart() {
+    const state = lobby.state;
+    if (!state || Lobby.whyNot(state, lobby.chosen, chosenSeed())) return;
+    // a run that can really spend is confirmed once, with its worst case on the button
+    if (Lobby.spends(state, lobby.chosen) && !lobby.armed) {
+      lobby.armed = true;
+      return renderLobby();
+    }
+    startRun();
+  }
+
+  async function startRun() {
+    lobby.armed = false;
+    lobby.refusal = null;
+    const { ok, body } = await control("/run", { method: "POST", headers: { "Content-Type": "application/json" },
+                                                 body: JSON.stringify({ seed: chosenSeed(), players: lobby.chosen }) });
+    if (!ok) lobby.refusal = body.error || "the run was refused";
+    if (ok && body.state) applyState(body.state);
+    else renderLobby();
+  }
+
+  $("lobby-form").addEventListener("submit", (event) => { event.preventDefault(); pressedStart(); });
+  $("picks").addEventListener("change", () => {
+    lobby.chosen = [...$("picks").querySelectorAll("input[name=player]:checked")].map((input) => input.value);
+    lobby.armed = false;
+    lobby.refusal = null;
+    renderLobby();
+  });
+  $("seed").addEventListener("input", () => { // another track: another set of prices and refusals
+    lobby.armed = false;
+    lobby.refusal = null;
+    renderLobby();
+    clearTimeout(lobby.timer);
+    lobby.timer = setTimeout(refreshState, 300);
+  });
+  $("cancel").addEventListener("click", async () => {
+    const { ok, body } = await control("/cancel", { method: "POST" });
+    if (!ok) lobby.refusal = body.error || "the run could not be stopped";
+    if (ok && body.state) applyState(body.state);
+    else renderLobby();
   });
 
   // ---- the sections underneath --------------------------------------------------------------
@@ -410,10 +623,25 @@
 
   function renderAll() {
     renderMatrix();
+    renderPicker();
     renderStrip();
     renderBelow();
+    renderBench();
     resize();
     draw();
+  }
+
+  // The benchmark, drawn once for a set of numbers: it is only built when the Analysis tab is looked
+  // at, and again when a live run ends and the server sends the numbers for what was just played.
+  let benchDrawn = null;
+  function renderBench() {
+    if (view.tab !== "analysis" || benchDrawn === benchData) return;
+    benchDrawn = benchData;
+    const why = benchData && benchData.why ? benchData.why : BenchView.why(benchData);
+    $("bench-why").hidden = !why;
+    $("bench-why").textContent = why || "";
+    $("bench").innerHTML = "";
+    if (!why) BenchView.mount($("bench"), benchData);
   }
 
   // ---- start --------------------------------------------------------------------------------
@@ -422,18 +650,18 @@
   chooseDefaults();
   $("empty").hidden = true;
   $("app").hidden = false;
-  $("transport").hidden = false;
   $("mode").textContent = liveUrl ? "Live" : "Replay";
   $("live").hidden = !liveUrl;
   ready = true;
+  showTab(view.tab);
   renderAll();
   window.addEventListener("resize", () => { resize(); draw(); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw); // the canvas tags use the embedded mono
   if (liveUrl) {
-    notice("Waiting for the first decision…", false);
     const clear = handlers.onFrame;
     // a frame means the stream is alive: the waiting or the lost-connection notice goes, a real error stays
     handlers.onFrame = (...args) => { if (store.error == null) notice(null); clear(...args); };
-    Feed.fromStream(liveUrl, handlers);
+    $("lobby").hidden = false; // the page runs the show; a replay file has no server and no controls
+    refreshState();
   }
 })();

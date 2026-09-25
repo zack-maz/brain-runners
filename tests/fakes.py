@@ -60,3 +60,64 @@ def llm_reply(text='{"action": "stay"}', stop_reason="end_turn"):
     return {"id": "msg_1", "type": "message", "role": "assistant", "model": "claude-haiku-4-5-20251001",
             "content": [{"type": "text", "text": text}], "stop_reason": stop_reason, "stop_sequence": None,
             "usage": {"input_tokens": 520, "output_tokens": 9}}
+
+
+def jev_set_reply(values: dict):
+    """A Jev reply to a question set: {id: P(yes)} for Nouls, {id: move} for a Choice."""
+    answers = {qid: {"type": "choice", "choice": v, "confidence": 0.7} if isinstance(v, str)
+               else {"type": "noul", "noul": v} for qid, v in values.items()}
+    return {"model": "jev-latest", "usage": {"input_tokens": 300, "output_tokens": 4 * len(values)}, "answers": answers}
+
+
+class FakeHttp:
+    """Looks like bakeoff.clients.glm.HttpTransport. `reply` is a chat-completion-shaped dict, or an exception."""
+
+    def __init__(self, reply):
+        self.reply, self.calls, self.closed = reply, [], False
+
+    def post(self, body):
+        self.calls.append(body)
+        if isinstance(self.reply, Exception):
+            raise self.reply
+        return self.reply
+
+    def close(self):
+        self.closed = True
+
+
+def glm_reply(text='{"action": "stay"}', finish_reason="stop", model="glm-4.5-flash"):
+    return {"id": "1", "model": model, "choices": [{"index": 0, "finish_reason": finish_reason,
+                                                    "message": {"role": "assistant", "content": text}}],
+            "usage": {"prompt_tokens": 480, "completion_tokens": 7, "total_tokens": 487}}
+
+
+class SlowPlayer:
+    """A free player that takes its time, so a test can cancel a run while it is going. Registered
+    under a name of its own by `slow_player()`; it never asks anyone anything."""
+
+    name = "slow"
+
+    def __init__(self, seconds: float = 0.05):
+        self.seconds = seconds
+
+    def reset(self, game, seed) -> None:
+        pass
+
+    def act(self, senses: dict):
+        import time
+
+        from bakeoff.players.base import Decision
+
+        time.sleep(self.seconds)
+        return Decision(chosen_action="stay")
+
+    def observe(self, executed_action: str) -> None:
+        pass
+
+
+def slow_player(monkeypatch, seconds: float = 0.05) -> str:
+    """Puts `SlowPlayer` in the registry for one test and gives back its name."""
+    from bakeoff.players import REGISTRY
+
+    monkeypatch.setitem(REGISTRY, SlowPlayer.name, lambda: SlowPlayer(seconds))
+    return SlowPlayer.name

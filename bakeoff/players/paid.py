@@ -8,6 +8,16 @@ from bakeoff.game.engine import Game
 from bakeoff.players.base import Decision
 
 
+def unfenced(text: str) -> str:
+    """The answer without a markdown code fence around it. GLM wraps its JSON in ```json ... ```; Claude Haiku
+    does not, so this changes nothing for it and both chat models are read by the same rule."""
+    stripped = text.strip()
+    if stripped.startswith("```"):
+        stripped = stripped.split("\n", 1)[-1] if "\n" in stripped else stripped
+        stripped = stripped.rsplit("```", 1)[0]
+    return stripped.strip()
+
+
 class PaidPlayer:
     name: str
     client_class: type[PaidClient]

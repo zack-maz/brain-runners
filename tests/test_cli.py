@@ -15,12 +15,39 @@ def test_run_then_report(tmp_path, capsys):
     (run_dir,) = tmp_path.iterdir()
     meta = json.loads((run_dir / "meta.json").read_text())
     assert meta["status"] == "completed" and meta["seeds"] == [0, 1]
-    assert meta["args"] == {"players": "solver,random", "seeds": 2, "seed_start": 0, "max_rows": 30,
+    assert meta["args"] == {"players": "solver,random", "seeds": 2, "seed_start": 0, "game": "v2",
+                            "lookahead": None, "window": None, "max_rows": 30,
                             "max_requests": 0, "cache": ".cache/responses", "tournament": False}
     assert meta["models"] == {} and meta["requests"] == {}
 
     assert main(["report", str(run_dir)]) == 0
     assert "| solver |" in capsys.readouterr().out
+
+
+def test_the_game_version_and_vision_are_chosen_and_recorded(tmp_path):
+    assert main(["run", "--players", "solver", "--seeds", "1", "--max-rows", "20", "--out", str(tmp_path / "a")]) == 0
+    assert main(["run", "--players", "solver", "--seeds", "1", "--game", "v1", "--lookahead", "3",
+                 "--out", str(tmp_path / "b")]) == 0
+    (a,), (b,) = (tmp_path / "a").iterdir(), (tmp_path / "b").iterdir()
+    game_a, game_b = (json.loads((d / "meta.json").read_text())["game"] for d in (a, b))
+    assert (game_a["version"], game_a["max_rows"]) == ("v2", 20)
+    assert (game_b["version"], game_b["max_rows"], game_b["lookahead"]) == ("v1+look3", 300, 3)
+    first = json.loads((b / "solver.jsonl").read_text().splitlines()[0])
+    assert len(first["senses"]["ahead"]) == 3
+
+
+def test_an_impossible_vision_is_a_usage_error(tmp_path, capsys):
+    assert main(["run", "--players", "solver", "--lookahead", "1", "--out", str(tmp_path)]) == 2
+    assert "lookahead must be at least 2" in capsys.readouterr().err
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_a_question_set_that_needs_more_vision_is_a_usage_error_before_anything_is_played(tmp_path, capsys):
+    args = ["run", "--players", "jev_composed,jev_two_step", "--lookahead", "3", "--max-requests", "5",
+            "--seed-start", "1000", "--out", str(tmp_path / "runs"), "--cache", str(tmp_path / "cache")]
+    assert main(args) == 2
+    assert "the two-step questions need 4 rows" in capsys.readouterr().err
+    assert not (tmp_path / "runs").exists() or list((tmp_path / "runs").iterdir()) == []
 
 
 def test_seed_start_offsets_the_seeds(tmp_path):
@@ -154,10 +181,10 @@ def test_a_missing_key_is_a_usage_error_before_the_run_directory_exists(tmp_path
         raise ValueError(f"{name} is not set")
 
     monkeypatch.setattr(core, "require_key", no_key)
-    args = ["run", "--players", "solver,llm", "--seeds", "1", "--seed-start", "1000", "--max-requests", "3",
+    args = ["run", "--players", "solver,haiku", "--seeds", "1", "--seed-start", "1000", "--max-requests", "3",
             "--out", str(tmp_path / "runs"), "--cache", str(tmp_path / "cache")]
     assert main(args) == 2
-    assert "llm: ANTHROPIC_API_KEY is not set" in capsys.readouterr().err
+    assert "haiku: ANTHROPIC_API_KEY is not set" in capsys.readouterr().err
     assert not (tmp_path / "runs").exists()
 
 
@@ -196,7 +223,9 @@ def test_the_composed_jev_is_a_paid_player_for_the_seed_rule_and_the_help(tmp_pa
     assert not (tmp_path / "runs").exists()
     with pytest.raises(SystemExit):
         main(["run", "--help"])
-    assert "EACH paid player (jev, jev_composed, llm)" in " ".join(capsys.readouterr().out.split())
+    assert ("EACH paid player (jev, jev_composed, haiku, glm, jev_choice, jev_two_step, jev_reader, haiku_composed, "
+            "haiku_choice, haiku_two_step, haiku_reader, glm_composed, glm_choice, glm_two_step, glm_reader)"
+            ) in " ".join(capsys.readouterr().out.split())
 
 
 def test_max_requests_0_on_low_seeds_is_not_refused_by_the_guard(tmp_path, capsys, monkeypatch):
@@ -208,3 +237,50 @@ def test_max_requests_0_on_low_seeds_is_not_refused_by_the_guard(tmp_path, capsy
 def test_a_free_player_with_a_cap_on_low_seeds_is_not_refused_by_the_guard(tmp_path):
     assert main(["run", "--players", "solver", "--max-requests", "5", "--seeds", "1", "--max-rows", "20",
                 "--out", str(tmp_path)]) == 0
+
+
+def test_a_paid_player_with_a_different_window_is_a_usage_error(tmp_path, capsys, monkeypatch):
+    sdks = fake_paid(monkeypatch)
+    assert main(paid_args(tmp_path, "--window", "2")) == 2
+    assert ("paid players are told they see 3 lanes either side; --window 2 is for free players only"
+            in capsys.readouterr().err)
+    assert sdks[0].calls == []
+    assert not (tmp_path / "runs").exists()
+
+
+def test_a_paid_player_with_the_same_window_explicit_is_not_refused_by_this_check(tmp_path, capsys, monkeypatch):
+    fake_paid(monkeypatch)
+    assert main(paid_args(tmp_path, "--window", "3")) == 1  # request cap of 0: budget_exhausted, not the window rule
+    assert "run budget_exhausted: request cap of 0 reached" in capsys.readouterr().err
+
+
+def test_report_names_the_game(tmp_path, capsys):
+    assert main(["run", "--players", "solver", "--seeds", "1", "--max-rows", "20", "--out", str(tmp_path)]) == 0
+    (run_dir,) = tmp_path.iterdir()
+    capsys.readouterr()
+    assert main(["report", str(run_dir)]) == 0
+    assert "game: v2" in capsys.readouterr().out
+
+
+def test_report_names_v1_for_a_game_block_recorded_before_versions(tmp_path, capsys):
+    assert main(["run", "--players", "solver", "--seeds", "1", "--max-rows", "20", "--out", str(tmp_path)]) == 0
+    (run_dir,) = tmp_path.iterdir()
+    meta_path = run_dir / "meta.json"
+    meta = json.loads(meta_path.read_text())
+    del meta["game"]["version"]
+    meta_path.write_text(json.dumps(meta))
+    capsys.readouterr()
+    assert main(["report", str(run_dir)]) == 0
+    assert "game: v1" in capsys.readouterr().out
+
+
+def test_report_prints_no_game_line_without_a_game_block(tmp_path, capsys):
+    assert main(["run", "--players", "solver", "--seeds", "1", "--max-rows", "20", "--out", str(tmp_path)]) == 0
+    (run_dir,) = tmp_path.iterdir()
+    meta_path = run_dir / "meta.json"
+    meta = json.loads(meta_path.read_text())
+    del meta["game"]
+    meta_path.write_text(json.dumps(meta))
+    capsys.readouterr()
+    assert main(["report", str(run_dir)]) == 0
+    assert "game:" not in capsys.readouterr().out

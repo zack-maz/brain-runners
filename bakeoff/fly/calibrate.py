@@ -19,6 +19,7 @@ from pathlib import Path
 
 from bakeoff.fly.surface import SurrogateBrain, load_surface
 from bakeoff.game.engine import Game
+from bakeoff.game.rules import V1
 from bakeoff.game.track import Track, generate_track
 from bakeoff.players import make_player
 from bakeoff.players.fly import FlyPlayer
@@ -97,7 +98,7 @@ def report(surface: dict, results: list[dict], held_out: dict, check: dict, floo
         f"## Winner on check seeds {CHECK_SEEDS.start}-{CHECK_SEEDS.stop - 1}, stand-in brain\n\n"
         + _table([check], SCORE_COLUMNS)
         + f"\n\nCompare with the real brain: `uv run python -m bakeoff run --players fly --seeds {len(CHECK_SEEDS)} "
-        f"--seed-start {CHECK_SEEDS.start}`.",
+        f"--seed-start {CHECK_SEEDS.start} --game v1`.",
         "## Floors and reference on the practice seeds\n\n" + _table(floors, ("player",) + SCORE_COLUMNS),
         "## Top 10 candidates\n\n" + _table(results[:10], CONFIG_COLUMNS + SCORE_COLUMNS),
     ]) + "\n"
@@ -109,13 +110,14 @@ def main(argv: list[str] | None = None) -> int:
         print("usage: python -m bakeoff.fly.calibrate <response_surface.json> <REPORT.md>", file=sys.stderr)
         return 2
     surface = load_surface(argv[0])
-    practice = [generate_track(seed) for seed in PRACTICE_SEEDS]
+    # v1: the frozen numbers were fixed on v1 tracks and must stay reproducible as they were
+    practice = [generate_track(seed, V1) for seed in PRACTICE_SEEDS]
     results = search(surface, practice)
     winner = {k: results[0][k] for k in CONFIG_COLUMNS}
     brain = SurrogateBrain(surface)
 
     def winner_on(seeds: range) -> dict:
-        return score(FlyPlayer(brain_factory=lambda: brain, **winner), [generate_track(seed) for seed in seeds])
+        return score(FlyPlayer(brain_factory=lambda: brain, **winner), [generate_track(seed, V1) for seed in seeds])
 
     floors = [{"player": name, **score(make_player(name), practice)} for name in FLOORS]
     text = report(surface, results, winner_on(HELD_OUT_SEEDS), winner_on(CHECK_SEEDS), floors)

@@ -38,12 +38,12 @@ use the next record's `row`/`lane`, or derive the landing tile as below.
 | `lane` | int | lane at decision time, `0 .. lanes-1` (starts at `lanes // 2`, i.e. 6) |
 | `senses` | object | exactly what the player was shown, see below |
 | `looming` | `{left_hz, right_hz}` | floats, the fly's eye rates for these senses: each visible gap adds `gain_hz / row ** falloff` to its eye (own lane: both eyes), the sum is capped at `max_hz` and rounded to the nearest `step_hz` (so 11 levels, 0 to 250). Ours, not the fly's biology |
-| `questions` | object or null | what a paid player was asked, else null. Jev: `{action, gap_ahead, left_safe}`, each `{type: "choice" \| "noul", instructions, criteria?}`. Composed Jev: `{gap_left, gap_stay, gap_right, gap_jump}`, four Nouls. LLM: `{system, schema, max_tokens}`; its user message is the `senses` as JSON |
-| `answers` | object or null | Jev: `{action: {type, choice, confidence, probabilities: {left, right, jump, stay}}, gap_ahead: {type, noul}, left_safe: {type, noul}}`, `noul` being the probability of yes. Composed Jev: `{gap_left: {type, noul}, gap_stay, gap_right, gap_jump}`, each the probability that the action lands on a gap. LLM: `{text, stop_reason}`, `text` being the raw JSON it returned. Null after an `error` |
+| `questions` | object or null | what a paid player was asked, else null. Jev: `{action, gap_ahead, left_safe}`, each `{type: "choice" \| "noul", instructions, criteria?}`. Composed Jev: `{gap_left, gap_stay, gap_right, gap_jump}`, four Nouls. LLM: `{system, schema, max_tokens}`; its user message is the `senses` as JSON. Question-set players (`jev_choice`, `jev_two_step`, `jev_reader`): the set's questions, in Jev's form. Their LLM twins (`llm_<set>`): `{system, schema, max_tokens, questions}`, `questions` being the same set |
+| `answers` | object or null | Jev: `{action: {type, choice, confidence, probabilities: {left, right, jump, stay}}, gap_ahead: {type, noul}, left_safe: {type, noul}}`, `noul` being the probability of yes. Composed Jev: `{gap_left: {type, noul}, gap_stay, gap_right, gap_jump}`, each the probability that the action lands on a gap. LLM: `{text, stop_reason}`, `text` being the raw JSON it returned. Question-set players: one entry per question id in Jev's form (`{noul}` or `{choice}`); an LLM twin's entries are read from its JSON, plus `text` and `stop_reason`. Null after an `error` |
 | `chosen_action` | string or null | what the player asked for. May be an invalid string, or null if it gave none |
 | `executed_action` | string | what the game ran: `left`, `right`, `jump` or `stay`. Equals `chosen_action` unless a fallback applied |
 | `solver_action` | string | the reference solver's move on the same senses: the first action, in the order `stay, left, right, jump`, with the maximum depth |
-| `solver_depths` | object | for each of `stay`, `left`, `right`, `jump`, the furthest visible row (1..6) its best continuation reaches; 0 if the first move is not known-safe. Ties are normal |
+| `solver_depths` | object | for each of `stay`, `left`, `right`, `jump`, the furthest visible row (1..6, the game's `lookahead`, 6 by default; decision 22) its best continuation reaches; 0 if the first move is not known-safe. Ties are normal |
 | `gated` | bool | the player was blocked by a threshold and produced no move (fallback applies) |
 | `invalid` | bool | the chosen action was not one of the four (fallback applies) |
 | `error` | string or null | player error text (API failure etc.); the fallback applies |
@@ -64,9 +64,12 @@ runner executes `stay`. It is never the solver's move.
 ### `senses`
 
 `{lane, lanes, rows_survived, ahead, actions}`. `lane` and `rows_survived` are at decision time
-(so `senses.lane == lane`). `lanes` is 12. `ahead` has 6 entries, `{row: 1..6, gaps_relative: [...]}`:
-the gap lanes `row` rows ahead as offsets from the runner's lane, only within 3 lanes either side
-(`-3..3`), lane wrap already applied. `actions` maps each action to a description.
+(so `senses.lane == lane`). `lanes` is 12, the tunnel's width (a separate `Rules` field, not changed by
+vision experiments). `ahead` has 6 entries, `{row: 1..6, gaps_relative: [...]}`: the gap lanes `row` rows
+ahead as offsets from the runner's lane, only within 3 lanes either side (`-3..3`), lane wrap already
+applied. The 6 rows and the 3 lanes either side are the game's default `lookahead` and `window`
+(`bakeoff/game/rules.py`); a run with a different vision (`--lookahead`, `--window`, decision 22) shows
+more or fewer entries here. `actions` maps each action to a description.
 
 ### `info` of the fly
 
@@ -103,6 +106,16 @@ finite number, and never `gated`. The report scores its Nouls (`brier_gap_left` 
 the record's `senses` show (`bakeoff.senses.lands_on_gap`), since that is what the questions ask;
 `ground_truth` keeps its two keys.
 
+The question-set players (`bakeoff/players/question_sets.py`, `set_players.py`) ask one set each: `composed` (the
+composed Jev's four Nouls; Jev's own player is `jev_composed`), `choice` (one Choice whose options name each move's
+landing tile), `two_step` (the four landing Nouls plus `trapped_<action>`: would every move after this one land on a
+gap?) and `reader` (`tile_r<row>_<side>`, one Noul per visible tile, e.g. `tile_r2_l3`). `jev_<set>` asks Jev,
+`llm_<set>` asks Claude Haiku the same questions in one structured request. The set's rule picks the move from the
+answers and is named in `info.rule` (with `info.set` and `info.order`); every wording and every rule is ours. A
+decision is `invalid` unless every answer is usable (a Noul a finite number from 0 to 1, the Choice one of the four
+moves; for an LLM twin also JSON with `stop_reason` `end_turn`). The report's `brier_all` scores every Noul whose
+truth the senses show (`bakeoff.senses.truth_of`).
+
 ## The landing tile
 
 Given `row`, `lane` and `executed_action` (`lanes` from `track.lanes`):
@@ -122,13 +135,14 @@ line and cannot kill. `finished` is true when the runner's row after the move is
 
 Present only in the first record of each seed (null elsewhere): `{seed, lanes, max_rows, gaps}`.
 `gaps[r]` is the sorted list of lane indices that are gaps in row `r`; the list has
-`max_rows + 8` entries (rows `0 .. max_rows + 7`); rows 0 to 4 are always empty; a row beyond
-the list is floor. Lanes wrap. Lookups: gap at (`r`, `l`) iff `r < gaps.length` and
+`max_rows + lookahead + 2` entries (rows `0 .. max_rows + lookahead + 1`); rows 0 to `runway_rows` are always
+empty; a row beyond the list is floor. Lanes wrap. Lookups: gap at (`r`, `l`) iff `r < gaps.length` and
 `gaps[r]` contains `((l % lanes) + lanes) % lanes`.
 
-A track's identity is its seed: the difficulty ramp is fixed at 300 rows, so a run with a smaller
-`max_rows` plays the first rows of the same track (its `gaps` is a prefix of the 300-row
-`gaps`). All players on a seed see the same track.
+A track's identity is its seed and its game version (`meta.json` `game`): the same seed is a different track
+in another version. Within a version the difficulty ramp is fixed (`difficulty_rows`), so a run with a
+smaller `max_rows` plays the first rows of the same track (its `gaps` is a prefix of the full track's).
+All players on a seed see the same track.
 
 ## `meta.json`
 
@@ -142,7 +156,7 @@ A track's identity is its seed: the difficulty ramp is fixed at 300 rows, so a r
 | `status` | string | `running`, then `completed`, `aborted`, `budget_exhausted` or `interrupted` |
 | `players` | string[] | the players planned for this run, in order |
 | `seeds` | int[] | the seeds planned for this run |
-| `game` | object | `lanes`, `max_rows`, `lookahead`, `window` (visible lanes each side), `looming: {gain_hz, falloff, step_hz, max_hz, provisional}` |
+| `game` | object | the game's rules (`bakeoff/game/rules.py`): `version` (`v1`, `v2`, or a vision variant such as `v2+look3`), `lanes`, `max_rows`, `lookahead`, `window` (visible lanes each side), `runway_rows`, `start_gap_rate`, `end_gap_rate`, `difficulty_rows`, `max_gap_width`; and `looming: {gain_hz, falloff, step_hz, max_hz, provisional}`. Runs from before game versions have only `lanes`, `max_rows`, `lookahead`, `window` and `looming`, and were played on v1 |
 | `fly` | object | `turn_threshold_hz`, `jump_threshold_hz`, `window_ms`, `provisional` (true until calibrated), `model_commit`, `annotations_commit` |
 | `models` | object | `{player: model id}` for paid players in the run, e.g. `{"jev": "jev-latest", "llm": "claude-haiku-4-5-20251001"}` |
 | `requests` | object | `{player: {max, used}}` for paid players: the `--max-requests` cap and the live requests spent against it, failed ones included. Written at the start with `used: 0` and rewritten when the run ends, so a crashed run may show a stale count |

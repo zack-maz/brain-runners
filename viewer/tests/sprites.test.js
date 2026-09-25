@@ -4,7 +4,7 @@ const { GRIDS, INKS, visorCells, pixels, sizeOf } = require("../sprites.js");
 
 test("the approved grids, character for character", () => {
   assert.deepEqual(GRIDS.fly, ["..ee.ee..", "...bbb...", ".w.bbb.w.", "ww.bbb.ww", "wwwbbbwww", "ww.bbb.ww", ".w.bbb.w.", "...b.b...", "..b...b.."]);
-  assert.deepEqual(GRIDS.llm, [".ooooooo.", ".ooooooo.", ".okoookoo", "ooooooooo", ".ooooooo.", ".ooooooo.", ".o.o.o.o.", ".o.o.o.o."]);
+  assert.deepEqual(GRIDS.chat, [".ooooooo.", ".ooooooo.", ".okoookoo", "ooooooooo", ".ooooooo.", ".ooooooo.", ".o.o.o.o.", ".o.o.o.o."]);
   assert.deepEqual(GRIDS.visor, [".jjjjj.", "jjjjjjj", "jVVVvvj", "jjjjjjj", ".jjjjj.", "..jjj..", ".jjjjj.", ".jjjjj.", ".j...j.", ".j...j."]);
   assert.deepEqual({ w: INKS.w, b: INKS.b, e: INKS.e, o: INKS.o, k: INKS.k, j: INKS.j, V: INKS.V, v: INKS.v },
     { w: "#AEB4BA", b: "#3A4046", e: "#F7768E", o: "#D97757", k: "#1A0E0A", j: "#B9BEC4", V: "#FFFFFF", v: "#15181C" });

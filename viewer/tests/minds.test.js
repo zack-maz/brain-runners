@@ -14,7 +14,7 @@ const count = (html, needle) => html.split(needle).length - 1;
 test("text from a log is escaped, never markup", () => {
   assert.equal(Minds.esc('<img src=x onerror="alert(1)">&\''), "&#60;img src=x onerror=&#34;alert(1)&#34;&#62;&#38;&#39;");
   const evil = "</pre><script>alert(1)</script>";
-  const html = Minds.mind({ player: "llm", questions: [{ system: evil }] },
+  const html = Minds.mind({ player: "haiku", questions: [{ system: evil }] },
     frame({ answers: { text: evil, stop_reason: evil }, chosen_action: evil, error: evil, q: 0 }), context());
   assert.equal(html.includes("<script>"), false);
   assert.equal(count(html, "&#60;script&#62;"), 5); // the move, the error, the answer, the stop reason, the question
@@ -29,6 +29,12 @@ test("the senses grid has a dark cell for every gap the player was shown", () =>
 test("the senses grid's column count follows the window it is given", () => {
   const html = Minds.sensesGrid(frame(), 2);
   assert.equal(count(html, "<rect"), 5 * 6);
+});
+
+test("the senses grid has as many rows as the player was shown, and says so", () => {
+  const html = Minds.sensesGrid({ ...frame(), ahead: [[0], [], []] }, 3);
+  assert.equal(count(html, "<rect"), 3 * 7);
+  assert.match(html, /aria-label="the 3 rows it was shown"/);
 });
 
 test("the verdict rates the choice against the solver's depths", () => {
@@ -141,6 +147,17 @@ test("Minds.ours names the calibrated four and says the rest were not tuned", ()
   assert.match(html, /cap, the step and the window length are fixed design choices of ours and were not tuned/);
 });
 
+test("Minds.ours says the fly was calibrated on v1 and not retuned for any other game", () => {
+  const looming = { gain_hz: 25, falloff: 1, max_hz: 250, step_hz: 25 };
+  const game = (version) => flyRun({ game: { version, looming } });
+  assert.match(Minds.ours(flyRun()), /practice tracks 1000 to 1199 of game v1/);
+  assert.doesNotMatch(Minds.ours(flyRun()), /not retuned/); // a run from before versions was v1
+  assert.doesNotMatch(Minds.ours(game("v1")), /not retuned/);
+  assert.match(Minds.ours(game("v2")), /This run is game v2; the fly was not retuned for it\./);
+  assert.match(Minds.ours(game("v1+look8")), /This run is game v1\+look8; the fly was not retuned for it\./);
+  assert.match(Minds.ours(game("<b>")), /This run is game &#60;b&#62;;/); // escaped like every log value
+});
+
 test("composed Jev shows its four answers with the chosen action marked, and says what is ours", () => {
   const answers = { gap_left: { noul: 0.97 }, gap_stay: { noul: 0.02 }, gap_right: { noul: 0.5 }, gap_jump: { noul: 0.01 } };
   const info = { model: "jev-latest", rule: "lowest_gap_probability", order: ["stay", "left", "right", "<b>jump</b>"] };
@@ -167,8 +184,17 @@ test("the visor shows how sure Jev was that the move it chose is safe", () => {
 });
 
 test("tags are short and uppercase, and an unknown player still gets one", () => {
-  assert.deepEqual(["fly", "jev_composed", "llm", "jev"].map(Minds.tagOf), ["FLY", "JEV", "LLM", "JEV ONE-SHOT"]);
+  assert.deepEqual(["fly", "jev_composed", "haiku", "jev", "glm"].map(Minds.tagOf),
+    ["FLY", "JEV", "HAIKU", "JEV ONE-SHOT", "GLM ONE-SHOT"]);
   assert.equal(Minds.tagOf("my_bot"), "MY_BOT");
+});
+
+test("the two one-shot chat models get the same panel", () => {
+  const answered = frame({ answers: { text: '{"action": "jump"}', stop_reason: "end_turn" }, chosen_action: "jump" });
+  const haiku = Minds.mind({ player: "haiku", questions: [] }, answered, context());
+  const glm = Minds.mind({ player: "glm", questions: [] }, answered, context());
+  assert.match(glm, /<pre class="answer">/);
+  assert.equal(glm, haiku);
 });
 
 test("a death and an error are marked bad, a stopped run is only a warning", () => {
@@ -205,4 +231,35 @@ test("the status line says how an episode ended", () => {
   assert.equal(Minds.statusLine(episode, { status: "running", row: 4.5, lane: -0.6 }, 12), "row 4, lane 11");
   const hostile = { ...episode, rows_survived: "<script>" };
   for (const status of ["dead", "cut", "finished"]) assert.doesNotMatch(Minds.statusLine(hostile, { status }, 12), /<script>/);
+});
+
+test("question-set players get the set panel; the composed Jev and the one-shots keep theirs", () => {
+  assert.deepEqual(["jev_choice", "jev_two_step", "jev_reader", "haiku_composed", "haiku_choice", "haiku_two_step", "haiku_reader"]
+    .map(Minds.isSetPlayer), [true, true, true, true, true, true, true]);
+  assert.deepEqual(["jev_composed", "jev", "haiku", "fly", "jev_other"].map(Minds.isSetPlayer), [false, false, false, false, false]);
+  assert.equal(Minds.tagOf("jev_two_step"), "JEV 2-STEP");
+  assert.equal(Minds.tagOf("haiku_reader"), "HAIKU READER");
+});
+
+test("the two-step panel shows both answers per move, marks the move made and names the rule as ours", () => {
+  const answers = {};
+  for (const a of ["left", "stay", "right", "jump"]) { answers["gap_" + a] = { noul: 0.1 }; answers["trapped_" + a] = { noul: 0.2 }; }
+  const html = Minds.setMind(frame({ answers, chosen_action: "left", info: { rule: "lowest_two_step_risk" } }));
+  assert.match(html, /lands on a gap<\/th><th>dead end after/);
+  assert.match(html, /<tr class="picked"><th>left<\/th>/);
+  assert.equal(count(html, "10%"), 4);
+  assert.match(html, /by lowest_two_step_risk\. The questions and that rule are ours\./);
+});
+
+test("the reader panel draws what it read, darker for surer gaps, and escapes a choice and a stop reason", () => {
+  const answers = { tile_r1_c: { noul: 0.9 }, tile_r1_l1: { noul: 0 }, tile_r1_r1: { noul: 0.25 }, tile_r2_c: { noul: 1 },
+                    tile_r2_l1: { noul: 0 }, tile_r2_r1: { noul: 0 } };
+  const html = Minds.setMind(frame({ answers, info: null }));
+  assert.match(html, /aria-label="the 6 tiles it read"/);
+  assert.match(html, /fill-opacity="0\.90"/);
+  assert.match(html, /by its rule\./);
+  const odd = Minds.setMind(frame({ answers: { action: { choice: "<b>" }, stop_reason: "<i>" } }));
+  assert.match(odd, /Chose &#60;b&#62;/);
+  assert.match(odd, /stopped: &#60;i&#62;/);
+  assert.equal(Minds.readGrid({ gap_left: { noul: 0.1 } }), "");
 });

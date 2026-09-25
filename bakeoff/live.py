@@ -13,13 +13,17 @@ from typing import Iterator
 
 from bakeoff.errors import RunAborted
 from bakeoff.game.engine import Game
-from bakeoff.game.track import MAX_ROWS, generate_track
+from bakeoff.game.rules import Rules, resolve
+from bakeoff.game.track import generate_track
 from bakeoff.players.base import Player
-from bakeoff.replay import META_KEYS, REPLAY_VERSION, build_replay, frame_of, summary_of
-from bakeoff.report import COLUMNS
+from bakeoff.replay import META_KEYS, build_replay, empty_replay, frame_of, summary_of
 from bakeoff.runner import _close, _now, _preflight, _requests, new_meta, play_row
 
 MAX_CONSECUTIVE_ERRORS = 5  # as the runner: a provider that keeps failing ends the run
+
+
+class Cancelled(Exception):
+    """`stop()` was called: the operator, or the page, gave up on a run that had begun."""
 
 
 class Broadcast:
@@ -30,6 +34,7 @@ class Broadcast:
         self._events: list[tuple[str, dict]] = []
         self._changed = threading.Condition()
         self.closed = False
+        self.abandoned = False  # nobody is coming: stop waiting for a browser
         self.listeners = 0
 
     def emit(self, name: str, data: dict) -> None:
@@ -45,9 +50,23 @@ class Broadcast:
             self.closed = True
             self._changed.notify_all()
 
+    def abandon(self) -> None:
+        """Nobody is coming (the run was cancelled before it began): wake whoever waits for a browser.
+        Not `close()`: the run still has a directory to close and a last event to send."""
+        with self._changed:
+            self.abandoned = True
+            self._changed.notify_all()
+
     def wait_for_listener(self, timeout: float | None = None) -> bool:
         with self._changed:
-            return self._changed.wait_for(lambda: self.listeners > 0 or self.closed, timeout)
+            return self._changed.wait_for(lambda: self.listeners > 0 or self.closed or self.abandoned, timeout)
+
+    def forget(self) -> None:
+        """Drop the history of a run that is over. A session plays run after run and each history is
+        every frame of a track; only the run on screen can still be asked for."""
+        with self._changed:
+            if self.closed:
+                self._events = []
 
     def listen(self, poll_seconds: float = 15.0) -> Iterator[tuple[str, dict] | None]:
         """Yields (name, data); None when nothing happened for `poll_seconds` (time for a keep-alive).
@@ -79,18 +98,21 @@ class LiveRun:
     a jumper stands two rows on and skips the next tick; the slowest mind sets the pace. Records are
     the runner's own (`play_row`), so the directory is a normal run and `bakeoff view` plays it."""
 
-    def __init__(self, players: list[Player], seed: int, out_root: Path | str = "runs", max_rows: int = MAX_ROWS,
-                 run_id: str | None = None, args: dict | None = None, broadcast: Broadcast | None = None):
+    def __init__(self, players: list[Player], seed: int, out_root: Path | str = "runs", rules: Rules | None = None,
+                 max_rows: int | None = None, run_id: str | None = None, args: dict | None = None,
+                 broadcast: Broadcast | None = None):
         names = [p.name for p in players]
         duplicates = sorted({n for n in names if names.count(n) > 1})
         if duplicates:
             raise ValueError(f"duplicate player names: {duplicates}")
-        self.players, self.seed, self.max_rows = players, seed, max_rows
+        self.players, self.seed, self.rules = players, seed, resolve(rules, max_rows)
         self.run_id = run_id or time.strftime("%Y%m%d-%H%M%S")
         self.run_dir = Path(out_root) / self.run_id
         self.args = args or {}
         self.broadcast = broadcast if broadcast is not None else Broadcast()
         self.status = "running"
+        self.replay: dict | None = None  # the empty replay a page starts from, filled by prepare()
+        self._stop = threading.Event()
         self.error: str | None = None  # why the run stopped early, when a cap or a failing provider stopped it
         self.meta: dict | None = None
 
@@ -98,19 +120,48 @@ class LiveRun:
         """Preflight, the run directory and meta.json. Returns the empty replay the page starts from."""
         _preflight(self.players)
         self.run_dir.mkdir(parents=True, exist_ok=False)
-        self.meta = new_meta(self.run_id, self.players, [self.seed], self.max_rows, self.args)
+        self.meta = new_meta(self.run_id, self.players, [self.seed], self.rules, self.args)
         self._write_meta()
-        return {"replay_version": REPLAY_VERSION,
-                "runs": [{"run_id": self.run_id, **{k: self.meta.get(k) for k in META_KEYS}}],
-                "players": [], "seeds": [self.seed], "tracks": {}, "episodes": [],
-                "scoreboard": {"columns": ["run_id", *COLUMNS], "rows": [], "same_seeds": True}}
+        self.replay = {**empty_replay(self.rules), "seeds": [self.seed],
+                       "runs": [{"run_id": self.run_id, **{k: self.meta.get(k) for k in META_KEYS}}]}
+        return self.replay
+
+    @property
+    def stopped(self) -> bool:
+        return self._stop.is_set()
+
+    def stop(self) -> None:
+        """Ask a run that has begun to stop. It is checked between decisions, so a decision already
+        in flight (a paid request) is finished and recorded first; the run then closes as a normal
+        run directory with status `interrupted`. A run that has not begun (it is waiting for a browser)
+        is woken, so it closes at once instead of waiting for a page that will never come."""
+        self._stop.set()
+        self.broadcast.abandon()
 
     def cancel(self) -> None:
-        """The operator gave up before the run began (Ctrl-C while waiting for a browser)."""
+        """The run was given up before it began (Ctrl-C, or Cancel, while waiting for a browser). It
+        ends like any other run: the same `end` event, so a page that is watching stops waiting and
+        goes back to its lobby instead of reconnecting to a stream that will never say anything."""
         self.status = "interrupted"
         self.meta.update(status=self.status, finished_at=_now())
         self._write_meta()
+        replay = build_replay([self.run_dir])  # the same last event as a run that played: read from disk
+        self.broadcast.emit("end", self._end_event(replay))
         self.broadcast.close()
+
+    def _end_event(self, replay: dict) -> dict:
+        """The last event of a run: what the page needs to settle. It carries the benchmark of the run
+        that just played, scored here rather than in the browser, so the Analysis tab fills in without
+        a reload. One track is rarely enough for an interval, and the numbers say so themselves."""
+        from bakeoff.bench import benchmark_of  # numpy: only when a run ends
+
+        try:
+            numbers, why = benchmark_of([self.run_dir])
+        except Exception as e:  # the run's end is what the page waits for: never lose it to the extra
+            numbers, why = None, f"the benchmark could not be scored: {e!r}"
+
+        return {"status": self.status, "runs": replay["runs"], "scoreboard": replay["scoreboard"],
+                "bench": numbers if numbers else {"why": why}}
 
     def _write_meta(self) -> None:
         (self.run_dir / "meta.json").write_text(json.dumps(self.meta, indent=2))
@@ -118,7 +169,7 @@ class LiveRun:
     def run(self) -> Path:
         if self.meta is None:
             self.prepare()
-        track = generate_track(self.seed, max_rows=self.max_rows)
+        track = generate_track(self.seed, self.rules)
         games = {p.name: Game(track) for p in self.players}
         questions: dict[str, list[dict]] = {p.name: [] for p in self.players}
         started: set[str] = set()
@@ -130,6 +181,8 @@ class LiveRun:
             row = 0
             while not all(game.over for game in games.values()):
                 for player in self.players:
+                    if self._stop.is_set():
+                        raise Cancelled("cancelled")
                     game = games[player.name]
                     if game.over or game.row != row:
                         continue  # fallen, finished, or in the air over this row
@@ -142,7 +195,7 @@ class LiveRun:
                         self.broadcast.emit("episode", {
                             "episode": {"player": player.name, "seed": self.seed, "run_id": self.run_id,
                                         "complete": False, "finished": False, "death_cause": None, "rows_survived": 0,
-                                        "max_rows": self.max_rows, "questions": questions[player.name]},
+                                        "max_rows": track.max_rows, "questions": questions[player.name]},
                             "track": track.to_json()})
                     self.broadcast.emit("frame", {"player": player.name, "seed": self.seed, "frame": frame,
                                                   "summary": summary_of(record)})
@@ -154,18 +207,24 @@ class LiveRun:
         except RunAborted as abort:  # a cap was reached (budget_exhausted) or a provider kept failing
             self.status, self.error = abort.status, str(abort)
             self.broadcast.emit("error", {"message": self.error})
-        except BaseException as e:  # Ctrl-C, or our bug: the directory is still a valid, incomplete run
+        except Cancelled:  # the page pressed cancel, or the operator did
             self.status = "interrupted"
-            if not isinstance(e, KeyboardInterrupt):
-                raise
+        except KeyboardInterrupt:  # the operator: the directory is still a valid, incomplete run
+            self.status = "interrupted"
+        except BaseException as e:  # our bug: say so, rather than looking like someone pressed Ctrl-C
+            self.status, self.error = "crashed", f"{type(e).__name__}: {e}"
+            self.broadcast.emit("error", {"message": "the run crashed: " + self.error})
+            raise
         finally:
             for log in logs.values():
                 log.close()
             for player in self.players:
                 _close(player)
             self.meta.update(status=self.status, finished_at=_now(), requests=_requests(self.players))
+            if self.error:
+                self.meta["error"] = self.error
             self._write_meta()
             replay = build_replay([self.run_dir])
-            self.broadcast.emit("end", {"status": self.status, "runs": replay["runs"], "scoreboard": replay["scoreboard"]})
+            self.broadcast.emit("end", self._end_event(replay))
             self.broadcast.close()
         return self.run_dir

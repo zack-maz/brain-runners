@@ -10,4 +10,6 @@ runs/
 data/
 .superpowers/
 /replay*.html
+/bench*.html
+/bench*.json
 .playwright-mcp/

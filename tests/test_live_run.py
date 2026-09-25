@@ -5,6 +5,7 @@ import json
 import pytest
 
 from bakeoff.errors import BudgetExhausted
+from bakeoff.game.rules import V1, V2
 from bakeoff.live import Broadcast, LiveRun
 from bakeoff.players import make_player
 from bakeoff.players.base import Decision
@@ -38,7 +39,8 @@ def events_of(live):
 
 
 def run_live(tmp_path, players, max_rows=40, seed=1001):
-    live = LiveRun(players, seed, out_root=tmp_path, max_rows=max_rows, run_id="live", args={"port": 0})
+    # v1: always-stay dies on the first 40 rows of this track
+    live = LiveRun(players, seed, out_root=tmp_path, rules=V1, max_rows=max_rows, run_id="live", args={"port": 0})
     live.run()
     return live, events_of(live)
 
@@ -67,7 +69,10 @@ def test_the_stream_is_the_replay_in_the_replays_own_shapes(tmp_path):
         assert set(header["episode"]) == set(episode) - {"frames"}
     assert events[0][0] == "episode" and events[1][0] == "frame"  # a runner is announced, then it moves
     name, end = events[-1]
-    assert name == "end" and end == {"status": "completed", "runs": replay["runs"], "scoreboard": replay["scoreboard"]}
+    assert name == "end"
+    # the benchmark of the run just played rides along (decision 36); the rest is the replay's own shapes
+    assert end.pop("bench")["runs"] == replay["runs"][0]["run_id"].split()  # one run, scored where it was recorded
+    assert end == {"status": "completed", "runs": replay["runs"], "scoreboard": replay["scoreboard"]}
     json.dumps(events)
 
 
@@ -112,14 +117,30 @@ def test_ctrl_c_is_an_interrupted_run_not_a_crash(tmp_path):
     assert len(load_steps(live.run_dir)) == 2
 
 
-def test_our_own_bug_still_closes_the_run_and_is_raised(tmp_path):
+def test_our_own_bug_closes_the_run_as_crashed_and_says_why(tmp_path):
+    """A crash is not someone pressing Ctrl-C. It was recorded as `interrupted` until 2026-09-24,
+    which is how a real crash in a live run (brian2 imported off the main thread) reached the page
+    as "RUN ENDED: Interrupted" with no reason."""
     class Buggy(Scripted):
         def act(self, senses): raise RuntimeError("our bug")
 
     live = LiveRun([Buggy("b", "stay")], 1001, out_root=tmp_path, max_rows=20, run_id="live")
     with pytest.raises(RuntimeError, match="our bug"):
         live.run()
-    assert json.loads((live.run_dir / "meta.json").read_text())["status"] == "interrupted" and live.broadcast.closed
+    meta = json.loads((live.run_dir / "meta.json").read_text())
+    assert meta["status"] == "crashed" and meta["error"] == "RuntimeError: our bug"
+    assert live.broadcast.closed
+    said = [e for e in live.broadcast._events if e[0] == "error"]
+    assert said and "our bug" in said[-1][1]["message"]  # the page is told, not left guessing
+
+
+def test_ctrl_c_is_still_an_interruption(tmp_path):
+    class Stopped(Scripted):
+        def act(self, senses): raise KeyboardInterrupt
+
+    live = LiveRun([Stopped("b", "stay")], 1001, out_root=tmp_path, max_rows=20, run_id="live")
+    live.run()
+    assert json.loads((live.run_dir / "meta.json").read_text())["status"] == "interrupted"
 
 
 def test_prepare_gives_the_page_an_empty_replay_that_names_the_run(tmp_path):
@@ -128,6 +149,7 @@ def test_prepare_gives_the_page_an_empty_replay_that_names_the_run(tmp_path):
     assert replay["episodes"] == [] and replay["seeds"] == [1001] and replay["scoreboard"]["rows"] == []
     (run,) = replay["runs"]
     assert run["run_id"] == "live" and run["status"] == "running" and run["game"]["lookahead"] == 6
+    assert replay["game"] == V2.variant(max_rows=20).to_json()  # what the page shows next to the track
     assert (live.run_dir / "meta.json").is_file()
 
 
@@ -163,6 +185,21 @@ def test_cancelling_before_the_run_began_leaves_an_interrupted_run_with_no_logs(
     meta = json.loads((live.run_dir / "meta.json").read_text())
     assert meta["status"] == "interrupted" and meta["finished_at"] and live.broadcast.closed
     assert list(live.run_dir.glob("*.jsonl")) == []
+    # and it ends like any other run, so a page watching it stops waiting instead of reconnecting
+    (name, data), = list(live.broadcast.listen())
+    assert name == "end" and data["status"] == "interrupted"
+    assert data["runs"][0]["status"] == "interrupted"
+    assert [row["runs"] for row in data["scoreboard"]["rows"]] == [0]  # nobody played a row
+
+
+def test_stopping_a_run_that_is_waiting_for_a_browser_wakes_it(tmp_path):
+    """`wait_for_listener` parks the run until a page opens the stream. A run nobody will ever watch
+    must still be able to stop, or its directory keeps saying `running` for ever."""
+    live = LiveRun([make_player("solver")], 1001, out_root=tmp_path, max_rows=20, run_id="live")
+    live.prepare()
+    live.stop()
+    assert live.broadcast.wait_for_listener(timeout=5) is True  # woken, with no listener in sight
+    assert live.stopped and not live.broadcast.listeners
 
 
 def test_an_event_is_a_snapshot_later_decisions_do_not_change_what_was_already_sent(tmp_path):

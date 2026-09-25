@@ -12,7 +12,7 @@ from bakeoff.clients.core import DiskCache, RequestBudget
 from bakeoff.game.engine import Game
 from bakeoff.game.track import generate_track
 from bakeoff.players.jev import JevPlayer
-from bakeoff.players.llm import LlmPlayer
+from bakeoff.players.haiku import HaikuPlayer
 from bakeoff.senses import compute_senses
 from tests.fakes import jev_reply, llm_reply
 
@@ -53,7 +53,7 @@ def test_the_real_anthropic_sdk_sends_the_documented_request_and_parses_the_repl
 
     sdk = anthropic.Anthropic(api_key="k", max_retries=0, timeout=60.0,
                               http_client=anthropic.DefaultHttpxClient(transport=httpx2.MockTransport(handler)))
-    player = LlmPlayer(cache=DiskCache(tmp_path), budget=RequestBudget(1), sdk=sdk)
+    player = HaikuPlayer(cache=DiskCache(tmp_path), budget=RequestBudget(1), sdk=sdk)
     decision = player.act(SENSES)
 
     assert len(requests) == 1
@@ -97,7 +97,7 @@ def test_an_anthropic_503_is_one_request_a_spent_budget_and_a_logged_error(tmp_p
     sdk = anthropic.Anthropic(api_key="k", max_retries=0, timeout=60.0,
                               http_client=anthropic.DefaultHttpxClient(transport=httpx2.MockTransport(handler)))
     budget = RequestBudget(1)
-    player = LlmPlayer(cache=DiskCache(tmp_path), budget=budget, sdk=sdk)
+    player = HaikuPlayer(cache=DiskCache(tmp_path), budget=budget, sdk=sdk)
     decision = player.act(SENSES)
 
     assert len(requests) == 1 and budget.used == 1

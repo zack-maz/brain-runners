@@ -99,47 +99,135 @@
     that, and any tournament seed, needs a new go-ahead. **Used (2026-09-21):** 460 Jev requests (232 for
     track 1000, 228 live on track 1001) and 92 Claude Haiku requests (0.054 USD); nothing on a seed below
     1000. What is left of this authorization ended with that session.
+20. **All eight updates in `docs/UPDATES.md` come before phase 6** (2026-09-21): a trained or better fly, two more
+    Jev variants with the LLM fed the same signals, the number of rows of vision, one live log tab per mind, any
+    seed live, a faster difficulty ramp, a benchmark for time, cost and performance, and the analysis moved to its
+    own tab. Worked on branch `phase6-updates`, starting with the game (vision and ramp).
+21. **Game v2** (2026-09-21, design `docs/superpowers/specs/2026-09-21-game-v2-design.md`, measured on practice
+    seeds 1000–1199 with free players only): the faster ramp's job is to separate the players sooner; the track is
+    150 rows and reaches full gap density by row 100 (perfect play still finishes 97%; the fly's stand-in brain
+    averages 68 rows instead of 124, random 24). Vision stays 6 rows × 3 lanes either side: perfect play gains
+    nothing from more on either ramp (v2, seeds 1000–1199: 97% of tracks finish with 6 rows, 98.5% with 8, 99%
+    with 10), and only the LLM and the one-shot Jev are given the whole view in words; the fly weighs rows 1–2
+    almost entirely and the composed Jev asks only about landing tiles.
+22. **Vision is a setting of the game** (`--lookahead`, `--window`), and a changed vision renames the game
+    (`v2+look3`), so an experiment can compare players at other depths without ever mixing scoreboards.
+23. **Named game versions** (approach A): `v1` stays playable and is tile for tile the game of phases 1 to 5 (a test
+    pins it); `v2` is the default. Every run records its rules in `meta.json`; a run from before versions reads as
+    v1; `view` refuses to mix games. The fly's frozen numbers were fixed on v1 tracks and are not retuned for v2;
+    the page says so.
+24. **Built as update 1** (plan `docs/superpowers/plans/2026-09-21-update1-game-v2.md`). Amended while prototyping:
+    `--max-rows` stays (a shorter track is a prefix of the same game, so it keeps its version).
+25. **The players update (items 1 and 2 of `docs/UPDATES.md`, 2026-09-21).** Measured first, for free, on v2 practice
+    seeds 1000–1199 with perfect answers: the composed Jev's one-step rule averages 112 rows (26% finish), a two-step
+    rule 140 (74%), the solver 149 (97%). The fly's input is two eye rates of 11 levels each, so a trained readout on
+    it could only learn a 121-entry table. The user chose: **the fly** gets richer input first (`fly_rich`,
+    untrained, calibrated once on practice seeds), then a trained readout of ours on the same wiring
+    (`fly_trained`); **three new Jev variants**: `jev_choice` (one Choice whose wording names each move's landing
+    tile), `jev_two_step` (landing plus safe-follow-up questions) and `jev_reader` (Jev reads every visible tile, code
+    plans over its answers); **an LLM twin for every question set** (composed Jev and the three new ones: Claude
+    Haiku answers the same questions, the same rule picks), so the model is the only difference. Built as update 2a
+    (the Jev family and twins), then 2b (the fly).
+26. **Budget for update 2 (2026-09-21):** Claude Haiku up to **5.00 USD** in total, on v2 practice seeds 1000 and up
+    only. Jev spend is not a concern to the user ("jev isn't costing me anything"); its requests stay capped and cached
+    as always. Paid runs start with one capped track. **Split (controller's ruling after run 1):** the four Jev
+    players and the four cheaper LLM twins on seeds 1000–1004, `llm_reader` (about 1 USD a track) on 1000 and 1001
+    only.
+27. **The LLM stays Claude Haiku** for update 2a (the user, 2026-09-21); a **GLM Flash** twin (Zhipu's free tier,
+    through an OpenAI-compatible client) comes later as another model, and is one of the players the page will let
+    the user select (items 9 and 10 of `docs/UPDATES.md`). OpenAI's GPT-5.6 Luna was considered (about 4 to 5 times
+    cheaper than Haiku); not chosen for now.
+28. **This file is the log only** (the user, 2026-09-21): numbered decisions, only ever added to. Where things
+    stand, the resume list, the open items and what the write-up must carry moved to `docs/NEXT.md`, which is
+    rewritten as the state changes.
+29. **Update 2b is `fly_rich` only** (the user, 2026-09-22): `fly_trained` is dropped for now. Aim: honest science,
+    what the real wiring can do with better input. The input says where a threat is, not just which side: each eye's
+    looming cells (LPLC2, LC4) are cut into bands, and each visible gap drives the band facing its lane with the
+    frozen v1 formula; the tile-to-band mapping is ours and labelled. Readout and rule unchanged; only the two
+    thresholds are chosen again, from one recording of the real brain on v2 practice seeds 1100–1299 (the solver's
+    path plus random detours) by a rule fixed beforehand, then frozen; `fly_rich` then plays 1000–1019 once. A probe
+    comes first: find an ordering of the cells that follows their view and check that the brain's output differs by
+    band; if it does not, `fly_rich` is not built and that is the result. `fly` is never touched.
+30. **Update 2b stops at the probe** (2026-09-22, spike 03, branch `spike/fly-bands`, `spikes/03-fly-bands/REPORT.md`).
+    Ordered by the eye positions of their columnar inputs, each eye's looming cells respond by band only in strength
+    (dorsal bands drive the Giant Fiber about 30% harder, one azimuth end turns about half as hard), never with a
+    different action. The user chose a play test with a rule fixed beforehand; on v2 practice seeds 1100-1104 with
+    the frozen v1 thresholds the band flies survived 21.6 and 29.6 rows against `fly`'s 58.2 and never jumped. So
+    `fly_rich` is not built; `fly` stays the only fly, and the report is the result for the write-up.
+31. **The benchmark (item 7)** (the user, 2026-09-22; design `docs/superpowers/specs/2026-09-22-benchmark-design.md`):
+    one report that says both who is better with confidence (paired comparisons on shared seeds, bootstrap
+    intervals, survival curves, seeds needed) and the cost/performance trade-off (USD and seconds per row). It reads
+    recorded runs only and spends nothing. `python -m bakeoff bench` prints the tables and writes `bench.json` and
+    its own offline page, `bench.html`, now; the Analysis tab of item 8 reuses it later.
+32. **The benchmark's intervals are t intervals** (2026-09-22, final review of item 7; controller's ruling under the
+    user's aim of honest science, decision 29). The spec's percentile bootstrap is too narrow at a handful of tracks:
+    at 5 tracks it gave a verdict about 1 time in 7 with no real difference, and one such verdict had been quoted in
+    `docs/COSTS.md`. Now: 95% Student t intervals (paired for pairs), none below 5 tracks; tracks needed is for an
+    80% chance of a verdict; a note counts the pairs compared and the verdicts chance alone would give; runs of
+    different lengths are refused. A test simulates the verdict rate with no difference (about 5%).
+33. **The GLM Flash twins** (the user, 2026-09-22; item 10 of `docs/UPDATES.md`): a third model on all four question
+    sets (`glm_composed`, `glm_choice`, `glm_two_step`, `glm_reader`), sent the same request as the Haiku twins
+    (`ChatSetPlayer`), so the model is what differs. `glm-4.5-flash` through the OpenAI-compatible endpoint
+    (`ZHIPU_API_KEY`, `GLM_BASE_URL` for a mainland account), called with the standard library: one HTTP request per
+    decision, no retries, the same cache and cap as every paid player. The free tier is priced at 0, so it reads as
+    free rather than unknown. First run capped at one practice track, then tracks 1001–1004 to match the others.
+34. **GLM Flash is parked after one track** (the user, 2026-09-22). The four `glm_<set>` players work and track 1000
+    is recorded (`docs/COSTS.md`), but Zhipu's free tier throttles: about one request in five got through, and the
+    run of tracks 1001–1004 aborted on six refusals in a row. Item 10 is part done; pick it up when the quota
+    recovers. The page work (items 4, 5, 8, 9) comes next, with GLM among the selectable players.
+35. **The page runs the show** (the user, 2026-09-22; items 4, 5, 8, 9; design
+    `docs/superpowers/specs/2026-09-22-page-control-design.md`). `bakeoff live` opens a lobby: the page picks the
+    track and the runners, starts and cancels runs, and can set up another when one ends (the old flags stay, plus
+    `--start`). The page may start paid runs after showing the worst-case cost and asking, but the command keeps the
+    ceiling: `--max-requests` is the session's cap per paid player and `--tournament` is still needed below seed
+    1000, and the server refuses anything beyond that. Each mind panel gains an expandable running log (item 4);
+    the page splits into Run and Analysis, the latter holding the findings, the scoreboard and the benchmark's
+    charts from `bench.json` (item 8); one player picker governs live runs and replays (item 9). Built as 3a (the
+    server and the lobby) and 3b (the panels and the tabs), each with its own plan.
 
-## Open
+36. **Update 3b's two open questions** (the user, 2026-09-23). The Analysis tab draws the benchmark with the same
+    code as the standalone page: `viewer/bench_app.js` becomes a renderer mounted into a container, used by both
+    `bench.html` and the Analysis tab, so there is one drawing code and one set of tests. And a live run's numbers
+    come from the server: when a run ends, it scores that run directory with `bakeoff/bench.py` and sends the
+    numbers with the end event, so the Analysis tab fills in without a reload (the spec's "live runs show it once
+    the run has ended").
 
-- Whether the tournament reuses seeds 0–19 or takes fresh seeds below 1000.
-- Left from the PR #2 review for phase 3 or later (details in the PR comments): `meta.json` and the logged `looming`
-  ignore per-player overrides of the fly constants; `calibrate.play` duplicates the game loop without the fallback
-  rule; `fetch_fly_data` cannot repair an existing clone; `Network.restore` copies static synapse arrays every
-  decision (measure before optimising).
-- Left from the second PR #2 review: the fly data is hashed twice per CLI run (preflight, then
-  `Brain`); `SurrogateBrain` raises a bare `KeyError` on a surface file missing a pin field. Done in
-  phase 3: `preflight()` runs inside `Runner.run`. Declined: turning a brain exception into a `stay`
-  fallback; phase 2 decided a simulator failure must end the run, because a silent `stay` would
-  change the fly's score.
-- Left from the final review of phase 5 (Minor): a crash in `live` (and in `run`) closes the run as `interrupted`,
-  the same status as Ctrl-C; a status of its own would be the more honest record. A hard kill leaves `status:
-  running` behind. `viewer/tunnel.js` knows that rows past the finish line never kill (drawing only, commented and
-  tested); a `finish_row` in the track JSON would remove the one rule of the game that also lives in JavaScript.
-  The live `episode` event carries the question sets known at that moment; a player that changed its questions
-  mid-episode would show nothing under "What it was asked" for the later ones (no player does).
+37. **The level table stops toggling players** (the user, 2026-09-23; update 3b, spec section F). The new picker
+    over the tunnel is the one control over who is in it: it shows and hides a replay's runners, and a player that
+    did not run the track in view can never be turned on. The level table keeps only its track buttons, and picking
+    a track returns to the Run tab, where the track is watched. Two controls over the same thing could disagree;
+    one cannot.
 
-## Next step
+38. **Two rows in one Players section** (the user, 2026-09-24; update 3b's review, Minor 8). Spec F reads as one
+    control for both jobs; what is built keeps two, because they answer different questions at different moments:
+    *Who runs next* (the lobby's ticks, live only, with each player's price, what is left of the cap and whether the
+    track was played before) and *Who is in the tunnel* (the picker, which shows and hides the runners of whatever
+    is on screen, live or replay). They now sit in one section, "Players", one labelled row under the other, in the
+    same tile style, so they read as one control with two jobs; a saved replay file has no lobby and so shows one
+    row only. Whoever is ticked to play is shown when the run starts, so nobody has to say it twice. A single
+    button would have to mean "play" before a run and "show" during one, which is the misreading this avoids.
 
-A plain-language tour of everything built so far, from the idea down to the code: `docs/EXPLAINER.html`.
+39. **Claude Haiku's players are `haiku*`, not `llm*`** (the user, 2026-09-24). With a second chat model in the
+    bakeoff, `llm_composed` beside `glm_composed` read as two unlike things when they are the same question set
+    asked of two models. The players are now `haiku`, `haiku_composed`, `haiku_choice`, `haiku_two_step` and
+    `haiku_reader`, and the page's tags say HAIKU. Nothing recorded changes: the response cache is keyed by
+    provider, model, senses and questions, so every answer already paid for still replays (checked:
+    `haiku_composed` replays practice track 1000 from 131 cache hits, 0 requests, the same 132 rows); the run
+    directories keep their `llm*.jsonl` files; and `bakeoff/players/names.py` maps the old names to the new ones
+    wherever a name is read — the command line, a `DIR:player,...` source, the lobby, and every record and
+    `meta.json` that `load_steps`/`load_meta` return. So an old run and a new one merge as one player, and a saved
+    command still works. The provider ids in `bakeoff/clients/` (`llm`, `jev`, `glm`) are part of the cache path
+    and stay as they are.
 
-Phases 1 to 5 are built and on `main`. Phase 5 (5a the composed Jev, 5b the demo player, 5c go live) was PR #4,
-merged on 2026-09-21 at the user's request. Plans:
-`docs/superpowers/plans/2026-09-21-phase5a-jev-composed.md`, `...-phase5b-demo-player.md`, `...-phase5c-go-live.md`
-(each ends with the rulings on its reviews).
+40. **GLM Flash joins the one broad question, as `glm`** (the user, 2026-09-24). The lobby's grid had one empty
+    cell: every question set was asked of all three models, but the one broad question ("which move?", asked once,
+    with no pointed question under it) was asked only of Jev and Claude Haiku. `glm` fills it, built as the twin of
+    `haiku`: the same briefing and the same one-action schema, `GlmClient` instead of Anthropic's, so the model is
+    the only difference. Its one departure is reading the reply — GLM wraps its JSON in a markdown fence, which is
+    stripped for the parse only, so the log still keeps the answer as it came. Free tier, so its price is 0, and it
+    spends nothing until someone plays it with `--max-requests`.
 
-To look at it: `uv run python -m bakeoff view runs/20260919-151934 runs/20260920-102919 runs/20260921-120903`
-(practice track 1000: the fly, the LLM, the composed Jev) and `uv run python -m bakeoff view runs/20260921-132459`
-(the live run on track 1001), then open the HTML file; or `uv run python -m bakeoff live` with the default cap
-of 0 and `--seed 1001`, which replays the paid answers of that run from the cache for free (the fly is
-simulated again, about a minute to build and a second a row).
-
-Then phase 6, the tournament and the write-up. It starts by settling the first open item above (which seeds),
-and it needs a new budget go-ahead: the tournament is the first paid use of seeds below 1000 (`--tournament`).
-Things the write-up must carry from phase 5: the composed Jev's wording and rule are ours and it looks one
-step ahead only; it wanders on safe rows because its four answers rarely tie; on both practice tracks it died
-only where all four landing tiles were gaps; the one-shot Jev stays in for comparison; all of this is one or
-two practice tracks, an impression and not a result.
+Where we are and what comes next: `docs/NEXT.md`.
 
 ## Prior art to reuse
 

@@ -15,11 +15,12 @@ from bakeoff.errors import BudgetExhausted, PreflightError, RunAborted  # noqa: 
 from bakeoff.fly import data as fly_data
 from bakeoff.fly.reading import WINDOW_MS
 from bakeoff.game.engine import ACTIONS, Game
-from bakeoff.game.track import LANES, LOOKAHEAD, MAX_ROWS, generate_track
+from bakeoff.game.rules import Rules, resolve
+from bakeoff.game.track import generate_track
 from bakeoff.players import fly
 from bakeoff.players.base import Player
 from bakeoff.players.solver import solve_depths
-from bakeoff.senses import (LOOMING_FALLOFF, LOOMING_GAIN_HZ, LOOMING_STEP_HZ, MAX_HZ, WINDOW, compute_senses,
+from bakeoff.senses import (LOOMING_FALLOFF, LOOMING_GAIN_HZ, LOOMING_STEP_HZ, MAX_HZ, compute_senses,
                             ground_truth, looming_rates)
 
 SCHEMA_VERSION = 1
@@ -81,7 +82,10 @@ def _preflight(players: list[Player]) -> None:
 
 
 def _requests(players: list[Player]) -> dict:
-    """Live requests spent against each paid player's cap (failed requests included)."""
+    """Live requests spent against each paid player's cap (failed requests included). In a `bakeoff live`
+    session the cap belongs to the session, so `max` here is what was left of it when this run began,
+    while `args.max_requests` is the cap the command set: a second run of a session shows the smaller
+    number, and `used` is always what this run alone spent."""
     return {p.name: {"max": p.budget.max_requests, "used": p.budget.used}
             for p in players if getattr(p, "budget", None) is not None}
 
@@ -93,7 +97,7 @@ def play_row(player: Player, game: Game, seed: int, run_id: str, first: bool) ->
     senses = compute_senses(game)
     left_hz, right_hz = looming_rates(senses)
     truth = ground_truth(game)
-    depths = solve_depths(senses)
+    depths = solve_depths(senses, game.track.rules.window)
     row, lane = game.row, game.lane
     decision = player.act(senses)
     invalid = decision.invalid or (
@@ -115,13 +119,13 @@ def play_row(player: Player, game: Game, seed: int, run_id: str, first: bool) ->
     }
 
 
-def new_meta(run_id: str, players: list[Player], seeds: Sequence[int], max_rows: int, args: dict | None) -> dict:
+def new_meta(run_id: str, players: list[Player], seeds: Sequence[int], rules: Rules, args: dict | None) -> dict:
     """meta.json as a run starts: status `running`, no finish time yet."""
     return {
         "run_id": run_id, "schema_version": SCHEMA_VERSION, "git_sha": _git_sha(), "git_dirty": _git_dirty(),
         "started_at": _now(), "finished_at": None, "status": "running",
         "players": [p.name for p in players], "seeds": list(seeds),
-        "game": {"lanes": LANES, "max_rows": max_rows, "lookahead": LOOKAHEAD, "window": WINDOW,
+        "game": {**rules.to_json(),
                  "looming": {"gain_hz": LOOMING_GAIN_HZ, "falloff": LOOMING_FALLOFF, "step_hz": LOOMING_STEP_HZ,
                              "max_hz": MAX_HZ, "provisional": not fly.CALIBRATED}},
         "fly": {"turn_threshold_hz": fly.TURN_THRESHOLD_HZ, "jump_threshold_hz": fly.JUMP_THRESHOLD_HZ,
@@ -143,9 +147,9 @@ class Runner:
         # call: a whole-run circuit breaker, not a per-seed one.
         self._error_streak = 0
 
-    def run_seed(self, player: Player, seed: int, run_id: str, max_rows: int = MAX_ROWS,
+    def run_seed(self, player: Player, seed: int, run_id: str, rules: Rules | None = None, max_rows: int | None = None,
                  sink: Callable[[dict], None] | None = None) -> list[dict]:
-        track = generate_track(seed, max_rows=max_rows)
+        track = generate_track(seed, rules, max_rows)
         game = Game(track)
         player.reset(game, seed)
         records: list[dict] = []
@@ -159,8 +163,9 @@ class Runner:
                 raise RunAborted(f"{self._error_streak} consecutive player errors; last: {record['error']}")
         return records
 
-    def run(self, players: list[Player], seeds: Sequence[int], max_rows: int = MAX_ROWS,
+    def run(self, players: list[Player], seeds: Sequence[int], rules: Rules | None = None, max_rows: int | None = None,
             run_id: str | None = None, args: dict | None = None) -> Path:
+        rules = resolve(rules, max_rows)
         names = [p.name for p in players]
         duplicates = sorted({n for n in names if names.count(n) > 1})
         if duplicates:  # two players would write the same <name>.jsonl
@@ -170,7 +175,7 @@ class Runner:
         run_dir = self.out_root / run_id
         run_dir.mkdir(parents=True, exist_ok=False)
         meta_path = run_dir / "meta.json"
-        meta = new_meta(run_id, players, seeds, max_rows, args)
+        meta = new_meta(run_id, players, seeds, rules, args)
         meta_path.write_text(json.dumps(meta, indent=2))
         self._error_streak = 0
         try:
@@ -182,14 +187,17 @@ class Runner:
                             f.flush()
 
                         for seed in seeds:
-                            self.run_seed(player, seed, run_id, max_rows=max_rows, sink=sink)
+                            self.run_seed(player, seed, run_id, rules, sink=sink)
                 finally:
                     _close(player)
         except RunAborted as abort:
             meta["status"] = abort.status
             raise
-        except BaseException:
+        except KeyboardInterrupt:
             meta["status"] = "interrupted"
+            raise
+        except BaseException as e:  # our bug: a crash is not someone pressing Ctrl-C
+            meta["status"], meta["error"] = "crashed", f"{type(e).__name__}: {e}"
             raise
         else:
             meta["status"] = "completed"

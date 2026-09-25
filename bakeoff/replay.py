@@ -8,18 +8,29 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from bakeoff.game.rules import Rules
 from bakeoff.report import COLUMNS, load_meta, load_steps, summarize
 
 REPLAY_VERSION = 1
 SCHEMA_VERSION = 1  # the step record this module reads; the runner writes it (a test keeps the two equal)
-# shown first, in this order: the demo's three (the composed Jev is its Jev), then the one-shot Jev;
+# shown first, in this order: the demo's three (the composed Jev is its Jev), then the one-shot pair's rest;
 # everyone else in order of appearance
-CONTESTANTS = ("fly", "jev_composed", "llm", "jev")
+CONTESTANTS = ("fly", "jev_composed", "haiku", "jev", "glm", "jev_choice", "haiku_choice", "haiku_composed",
+               "jev_two_step", "haiku_two_step", "jev_reader", "haiku_reader",
+               "glm_composed", "glm_choice", "glm_two_step", "glm_reader")
 # what a frame leaves out of its step record: the first three name the episode, the others are
 # replaced by `ahead`, `q` and the replay's `tracks`
 DROPPED = ("run_id", "player", "seed", "senses", "questions", "track")
 META_KEYS = ("status", "git_sha", "git_dirty", "started_at", "finished_at", "players", "seeds", "game", "fly",
              "models", "requests")
+
+
+def empty_replay(rules: Rules) -> dict:
+    """The replay a page starts from before anything has been played: the game and nothing else.
+    `bakeoff live` embeds it, and a run that begins fills it through the event stream."""
+    return {"replay_version": REPLAY_VERSION, "game": rules.to_json(), "runs": [], "players": [], "seeds": [],
+            "tracks": {}, "episodes": [],
+            "scoreboard": {"columns": ["run_id", *COLUMNS], "rows": [], "same_seeds": True}}
 
 
 def landing(row: int, lane: int, executed_action: str, lanes: int) -> list[int]:
@@ -71,6 +82,7 @@ def build_replay(run_dirs: list[Path | str]) -> dict:
     same episode would let the viewer show either, so that is an error, not a silent pick."""
     runs, episodes, tracks, scoreboard = [], [], {}, []
     owner: dict[tuple[str, int], str] = {}
+    game: tuple[str, Rules] | None = None  # the first run that recorded its game, and that game
     for run_dir in map(Path, run_dirs):
         steps = load_steps(run_dir)
         meta = load_meta(run_dir)
@@ -78,6 +90,13 @@ def build_replay(run_dirs: list[Path | str]) -> dict:
         if (meta or {}).get("schema_version", SCHEMA_VERSION) != SCHEMA_VERSION:
             raise ValueError(f"{run_id} has schema_version {meta['schema_version']}; "
                              f"this viewer reads {SCHEMA_VERSION}")
+        if (meta or {}).get("game"):
+            rules = Rules.from_json(meta["game"])
+            if game is None:
+                game = (run_id, rules)
+            elif not game[1].same_game(rules):  # one seed is a different track in another game
+                raise ValueError(f"{game[0]} is game {game[1].version} but {run_id} is game {rules.version}; "
+                                 "a replay shows one game")
         runs.append({"run_id": run_id, **{k: (meta or {}).get(k) for k in META_KEYS}})
         grouped: dict[tuple[str, int], list[dict]] = {}
         for s in steps:
@@ -107,7 +126,7 @@ def build_replay(run_dirs: list[Path | str]) -> dict:
         if e["complete"]:
             seeds_of[(e["run_id"], e["player"])].add(e["seed"])
     return {
-        "replay_version": REPLAY_VERSION, "runs": runs, "players": players,
+        "replay_version": REPLAY_VERSION, "game": game[1].to_json() if game else None, "runs": runs, "players": players,
         "seeds": sorted({e["seed"] for e in episodes}), "tracks": tracks, "episodes": episodes,
         "scoreboard": {"columns": ["run_id", *COLUMNS], "rows": scoreboard,
                        # true only when every scoreboard row (one per run, player) averages the same seeds;

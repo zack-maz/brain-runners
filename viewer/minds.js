@@ -8,7 +8,13 @@
     ["DNa01", "steering"], ["DNb01", "steering"], ["DNp01", "Giant Fiber, escape jump"], ["DNa02", "logged only"],
   ];
   // the short uppercase tag a runner carries in the tunnel and on its panel
-  const TAGS = { fly: "FLY", jev_composed: "JEV", llm: "LLM", jev: "JEV ONE-SHOT", solver: "SOLVER", random: "RANDOM", always_jump: "JUMPER" };
+  const TAGS = { fly: "FLY", jev_composed: "JEV", haiku: "HAIKU", jev: "JEV ONE-SHOT", glm: "GLM ONE-SHOT", solver: "SOLVER", random: "RANDOM", always_jump: "JUMPER",
+    jev_choice: "JEV CHOICE", jev_two_step: "JEV 2-STEP", jev_reader: "JEV READER", haiku_composed: "HAIKU COMPOSED",
+    haiku_choice: "HAIKU CHOICE", haiku_two_step: "HAIKU 2-STEP", haiku_reader: "HAIKU READER",
+    glm_composed: "GLM COMPOSED", glm_choice: "GLM CHOICE", glm_two_step: "GLM 2-STEP", glm_reader: "GLM READER" };
+  // players that ask a question set (bakeoff/players/question_sets.py): Jev, Claude Haiku or GLM, and the set's name
+  const SET_PLAYER = /^(jev|haiku|glm)_(composed|choice|two_step|reader)$/;
+  const isSetPlayer = (player) => SET_PLAYER.test(player) && player !== "jev_composed";
   const tagOf = (player) => TAGS[player] || String(player).toUpperCase();
   const DEATHS = {
     ran_into_gap: "ran straight into a gap",
@@ -35,7 +41,7 @@
     return '<span class="bar"><i class="fill" style="width:' + width.toFixed(1) + '%"></i>' + tick + "</span>";
   }
 
-  // The senses as the player got them: 6 rows ahead (far at the top), `window` lanes either side, gaps dark.
+  // The senses as the player got them: the game's rows ahead (far at the top), `window` lanes either side, gaps dark.
   function sensesGrid(frame, window) {
     let cells = "";
     for (let r = frame.ahead.length - 1; r >= 0; r--) {
@@ -46,7 +52,8 @@
       }
     }
     const height = frame.ahead.length * 8, width = (2 * window + 1) * 12;
-    return '<svg class="senses" viewBox="0 0 ' + width + " " + (height + 8) + '" role="img" aria-label="the six rows it was shown">' +
+    return '<svg class="senses" viewBox="0 0 ' + width + " " + (height + 8) + '" role="img" aria-label="the ' + frame.ahead.length +
+      ' rows it was shown">' +
       cells + '<circle cx="' + (width / 2 - 0.5) + '" cy="' + (height + 4) + '" r="3" class="me"/></svg>';
   }
 
@@ -164,7 +171,39 @@
     return answer && typeof answer.noul === "number" ? 1 - answer.noul : null;
   }
 
-  function llmMind(frame) {
+  // What a question-set player was told (docs/superpowers/specs/2026-09-21-jev-family-design.md): the read tiles as a
+  // grid (darker = more sure it is a gap), each move's yes/no answers as bars, or the Choice it made.
+  function readGrid(answers) {
+    const tiles = Object.keys(answers).map((id) => /^tile_r(\d+)_(c|l\d+|r\d+)$/.exec(id)).filter(Boolean).map((m) => ({
+      row: Number(m[1]), offset: m[2] === "c" ? 0 : (m[2][0] === "l" ? -1 : 1) * Number(m[2].slice(1)), p: answers[m[0]].noul }));
+    if (!tiles.length) return "";
+    const rows = Math.max(...tiles.map((t) => t.row)), window_ = Math.max(...tiles.map((t) => Math.abs(t.offset)));
+    const cells = tiles.map((t) => '<rect x="' + (t.offset + window_) * 12 + '" y="' + (rows - t.row) * 8 +
+      '" width="11" height="7" class="tile"/>' + (typeof t.p === "number" ? '<rect x="' + (t.offset + window_) * 12 + '" y="' +
+      (rows - t.row) * 8 + '" width="11" height="7" class="gap" fill-opacity="' + Math.max(0, Math.min(1, t.p)).toFixed(2) + '"/>' : "")).join("");
+    return '<p class="label">What it read (darker = more sure it is a gap)</p><svg class="senses" viewBox="0 0 ' +
+      (2 * window_ + 1) * 12 + " " + rows * 8 + '" role="img" aria-label="the ' + tiles.length + ' tiles it read">' + cells + "</svg>";
+  }
+
+  function setMind(frame) {
+    const answers = frame.answers;
+    if (!answers) return "";
+    const noul = (id) => (answers[id] && typeof answers[id].noul === "number" ? answers[id].noul : null);
+    const kinds = [["gap_", "lands on a gap"], ["trapped_", "dead end after"]].filter(([prefix]) => ACTIONS.some((a) => answers[prefix + a]));
+    let html = readGrid(answers);
+    if (kinds.length) {
+      html += '<table class="probs"><tr><th></th>' + kinds.map(([, label]) => "<th>" + label + "</th>").join("") + "</tr>" +
+        ACTIONS.map((a) => "<tr" + (a === frame.chosen_action ? ' class="picked"' : "") + "><th>" + a + "</th>" +
+          kinds.map(([prefix]) => { const p = noul(prefix + a); return "<td>" + (p == null ? "–" : bar(p) + " " + percent(p)) + "</td>"; }).join("") +
+          "</tr>").join("") + "</table>";
+    }
+    if (answers.action && answers.action.choice != null) html += '<p class="label">Chose ' + esc(answers.action.choice) + "</p>";
+    if (answers.stop_reason != null && answers.stop_reason !== "end_turn") html += '<p class="warn">stopped: ' + esc(answers.stop_reason) + "</p>";
+    const rule = frame.info && frame.info.rule ? esc(frame.info.rule) : "its rule";
+    return html + '<p class="muted">Code picks the move from these answers by ' + rule + ". The questions and that rule are ours.</p>";
+  }
+
+  function chatMind(frame) {
     const answers = frame.answers;
     if (!answers) return "";
     return '<pre class="answer">' + esc(answers.text == null ? "" : answers.text) + "</pre>" +
@@ -202,8 +241,11 @@
       (run.fly.provisional
         ? '<li class="warn">These values were provisional when this run was made: not yet calibrated.</li>'
         : "<li>The gain, the falloff and the two thresholds were chosen once, by a rule fixed beforehand, on practice tracks " +
-          "1000 to 1199 that are not in the tournament, then frozen (calibration/REPORT.md). The cap, the step and the window " +
-          "length are fixed design choices of ours and were not tuned.</li>");
+          "1000 to 1199 of game v1 that are not in the tournament, then frozen (calibration/REPORT.md)." +
+          // a run from before game versions has no version and was v1
+          (run.game.version && run.game.version !== "v1"
+            ? " This run is game " + esc(run.game.version) + "; the fly was not retuned for it." : "") +
+          " The cap, the step and the window length are fixed design choices of ours and were not tuned.</li>");
   }
 
   // the whole panel for one decision; context = {windowMs, maxHz, window}, from the run's meta
@@ -211,7 +253,8 @@
     const body = episode.player === "fly" ? flyMind(frame, context)
       : episode.player === "jev" ? jevMind(frame)
       : episode.player === "jev_composed" ? jevComposedMind(frame)
-      : episode.player === "llm" ? llmMind(frame) : "";
+      : episode.player === "haiku" || episode.player === "glm" ? chatMind(frame)
+      : isSetPlayer(episode.player) ? setMind(frame) : "";
     return '<div class="saw">' + sensesGrid(frame, context.window) + verdict(frame) + "</div>" + body + cost(frame) + asked(episode, frame);
   }
 
@@ -224,8 +267,8 @@
     return "row " + Math.floor(state.row) + ", lane " + (((Math.round(state.lane) % lanes) + lanes) % lanes);
   }
 
-  const api = { esc, cell, bar, tagOf, sensesGrid, verdict, spikeRaster, flyMind, jevMind, jevComposedMind, visorP, llmMind, cost, asked,
-                ours, mind, statusLine };
+  const api = { esc, cell, bar, tagOf, sensesGrid, verdict, spikeRaster, flyMind, jevMind, jevComposedMind, visorP, chatMind, cost, asked,
+                ours, mind, statusLine, isSetPlayer, readGrid, setMind };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Minds = api;
 })(typeof window !== "undefined" ? window : globalThis);
