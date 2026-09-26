@@ -165,8 +165,8 @@ we found in my own words, as well as my opinions and thoughts. That can wait to 
   - Plain JavaScript, no build step, nothing from the network, pure modules tested under `node --test`, text from
     logs escaped; a live smoke with a fly after any change to the run path.
 - **Open, for the user:**
-  - The mind panels' tags now read "JEV STEP 1", "HAIKU PLAIN" (the rename made them systematic; the demo's short
-    "JEV", "HAIKU" can come back).
+  - Settled 2026-09-25: the mind panels' tags stay "JEV STEP 1", "HAIKU PLAIN" until Brain Battle, which labels each
+    fighter as on the character select, character and skin ("Jev · Step 1") in the skin's colour. The spec says so.
   - Settled 2026-09-25: `docs/COSTS.md`'s tables and `docs/UPDATES.md` item 2 keep the new names (with the note
     that the runs were recorded under the old ones).
   - The four uncommitted edits under `docs/research/2026-09-24-fly/` (`flywire/brain` became `flywire/motg-flywire`)
