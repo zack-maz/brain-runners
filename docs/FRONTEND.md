@@ -78,7 +78,8 @@ scoreboard, what is ours, the benchmark) go in the new flow.
   plus a Records entry on the home page for past runs.
 - **Look:** the user's brand everywhere: Smash's layout and energy in the dark palette and the two brand fonts,
   blue still only the cursor.
-- **Track:** a screen of its own, after the stage select.
+- **Track:** a screen of its own. (First planned after a stage select; the stage select was dropped the same day, so
+  the character select leads straight to it.)
 - **Input:** mouse and keyboard. A click on a portrait drops the next token there; a slot's colour dot, or X and Y,
   cycles its skin; the arrow keys move a cursor.
 - **Replays:** only `bakeoff live` gets the new front for now; `bakeoff view` still opens on the replay.
@@ -119,3 +120,57 @@ scoreboard, what is ours, the benchmark) go in the new flow.
   move was worse than the best one, and which was fatal; it replaces "agreed with the solver", which is 97–100% for
   every recorded player and so says nothing), **asked live** and **from cache** as two rows, time per row, tokens,
   cost. Failed or unreadable answers are not a row: a warning line appears only when there were any.
+- **Records** (https://claude.ai/artifact/7VpmrDjh6XxKw3ZbNPhsh3), opened from home and from the results. The rest of
+  the old Analysis tab. A leaderboard of every player on the v2 practice tracks (mean rows and the 95% interval, the
+  yardsticks greyed, a player with under 3 tracks "not ranked", and the warning that overlapping intervals are no
+  verdict); head to head, where a pair is picked and shows its difference, its interval around 0, wins / ties /
+  losses, tracks needed and the verdict (`bakeoff bench`'s own numbers); the past runs, newest first, with their
+  status (a run playing now pulses and offers Watch live), Watch and Results; and "What is ours" as a panel. The
+  mock-up's numbers are real (`bakeoff bench` over the v2 practice runs, 2026-09-25).
+
+The mock-ups' sources are kept in `docs/mockups/brain-battle/` (the artifacts' `.dc.html` pages: a design canvas
+format, not viewer code). They are the approved look; the build writes the viewer's own plain JavaScript from them.
+
+## Later: the Writeup page (the last step)
+
+Added by the user on 2026-09-25, after the Records mock-up: "a Writeup page that does a scientific analysis of what
+we found in my own words, as well as my opinions and thoughts. That can wait to be the final step at the end."
+
+- A page of its own in Brain Battle (reached from home, next to Records), written in the user's words: the
+  scientific analysis of the findings, and the user's own opinions and thoughts, kept apart from the analysis.
+- It is the **last** step, after Brain Battle is built. It goes with phase 6's write-up (`docs/NEXT.md`, "What the
+  write-up must carry"): the tournament's results are what it analyses, and the honesty rules hold on it (what is
+  ours is labelled; one track or five is not a result).
+- Not in this spec. It gets its own brainstorm when its turn comes; the numbers it cites come from Records.
+
+## Where this stands (2026-09-25) — resume here
+
+- **Done:** the request and every answer are recorded above; all five screens are mocked and approved (home,
+  character select, track select, results with More numbers, records); decision 44, the rename to plain, guided,
+  step1, step2 and map, is built and verified on this branch (`610291e`, `373affa`; 540 fast tests; the cache
+  replays under old and new names spend nothing).
+- **Next: the spec.** `docs/superpowers/specs/2026-09-25-brain-battle-design.md`, written from this file and the
+  mock-ups, reviewed by the user, then a plan (`superpowers:writing-plans`), then the build. Points the spec must
+  settle:
+  - The flow: home → character select → track select → the Run screen (as today, runners in their skin colours) →
+    results; Records from home and results. `bakeoff live` only; `bakeoff view` opens on the replay as before.
+  - What the server gives the page instead of the page typing it in: the characters and their skins (from the
+    registry and `names.py`), prices (`session.PRICE_USD`), played-before seeds (`session.played_before`), the real
+    track for the preview (the rules stay in Python), a run's results (the report's numbers) and the records
+    (`bakeoff.bench.benchmark_of` over the recorded runs, and the runs' `meta.json`).
+  - The worst-case cost moves from the lobby to the track select; the ceiling, the token and one run at a time stay
+    as update 3a built them.
+  - Wrong moves (rows where the chosen move was worse than the best, which was fatal) is a new number for the
+    report and the results; failures appear only when there are any.
+  - Plain JavaScript, no build step, nothing from the network, pure modules tested under `node --test`, text from
+    logs escaped; a live smoke with a fly after any change to the run path.
+- **Open, for the user:**
+  - The mind panels' tags now read "JEV STEP 1", "HAIKU PLAIN" (the rename made them systematic; the demo's short
+    "JEV", "HAIKU" can come back).
+  - `docs/COSTS.md`'s measured tables were renamed to the new names with a note; keep, or restore them word for
+    word.
+  - `docs/UPDATES.md` item 2, the user's own words, now uses the new names; keep or restore.
+  - Four uncommitted edits in this worktree under `docs/research/2026-09-24-fly/` (the path `flywire/brain` became
+    `flywire/motg-flywire`) were not made by this work; left uncommitted until the user says whose they are.
+  - Merging: the other session (fly2's tracks, `fly2-settle`) edits `docs/NEXT.md` too, so whichever branch merges
+    second merges that file by hand; that session should hear about decision 44.

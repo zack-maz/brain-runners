@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brain Battle records</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,400;0,600;0,800;0,900;1,800;1,900&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap">
+<style>
+body{margin:0;background:#0A0A0A;font-family:"Hanken Grotesk","Helvetica Neue",sans-serif;color:#C9CDD2}
+a{color:#7AA2F7}a:hover{color:#E8EBED}
+@keyframes bb-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.bb-live{animation:bb-pulse 1.4s ease-in-out infinite}
+button{font-family:inherit}
+button:focus-visible{outline:2px solid #7AA2F7;outline-offset:3px}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; overflow: hidden; background: #0A0A0A; display: flex; flex-direction: column; padding: 0 40px 24px; position: relative;">
+
+<div style="display: flex; justify-content: space-between; align-items: center; height: 76px; flex-shrink: 0;">
+<a href="#" style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #7C848D; text-decoration: none;">‹ Home</a>
+<div style="font-weight: 900; font-style: italic; font-size: 44px; letter-spacing: -0.02em; color: #E8EBED; transform: skewX(-9deg);">RECORDS</div>
+<button type="button" onClick="{{toggleOurs}}" style="height: 36px; padding: 0 14px; background: transparent; border: 1px solid #2A2F35; color: #C9CDD2; font-weight: 600; font-size: 14px; cursor: pointer;">What is ours</button>
+</div>
+
+<div style="display: flex; gap: 20px; min-height: 0;">
+
+<div style="width: 660px; flex-shrink: 0; border: 1px solid #1E2227; background: #0D0F12; padding: 14px 18px 12px; display: flex; flex-direction: column; gap: 4px;">
+<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #7C848D;">Leaderboard · game v2 practice tracks</span>
+<span style="font-size: 12px; color: #7C848D;">mean rows · bar is the 95% interval</span>
+</div>
+<sc-for list="{{board}}" as="b" hint-placeholder-count="14">
+<div style="display: grid; grid-template-columns: 22px 14px 150px 44px 1fr 48px; align-items: center; gap: 10px; height: 25px;">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #7C848D; text-align: right;">{{b.rank}}</span>
+<span style="width: 12px; height: 12px; background: {{b.color}}; box-shadow: inset 0 0 0 1px {{b.edge}};"></span>
+<span style="font-size: 14px; color: {{b.ink}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{b.name}}</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #7C848D;">{{b.tracks}}</span>
+<div style="position: relative; height: 12px; background: #15181C;">
+<div style="position: absolute; top: 3px; height: 6px; left: {{b.lo}}; width: {{b.span}}; background: {{b.band}};"></div>
+<div style="position: absolute; top: 0; height: 12px; width: 2px; left: {{b.mean}}; background: #E8EBED;"></div>
+</div>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #E8EBED; text-align: right;">{{b.value}}</span>
+</div>
+</sc-for>
+<span style="margin-top: 6px; font-size: 12px; color: #E0AF68;">Most players have 5 tracks: their intervals overlap, so this order is not a verdict. Pick a pair to see what the numbers can tell apart.</span>
+</div>
+
+<div style="flex-grow: 1; min-width: 0; border: 1px solid #1E2227; background: #0D0F12; padding: 14px 18px 16px; display: flex; flex-direction: column; gap: 12px;">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #7C848D;">Head to head</span>
+<div style="display: flex; flex-wrap: wrap; gap: 6px;">
+<sc-for list="{{pairs}}" as="p" hint-placeholder-count="6">
+<button type="button" onClick="{{p.pick}}" style="height: 32px; padding: 0 10px; background: transparent; border: 1px solid {{p.border}}; color: {{p.ink}}; font-size: 13px; cursor: pointer;">{{p.label}}</button>
+</sc-for>
+</div>
+<div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
+<span style="font-weight: 900; font-style: italic; font-size: 24px; color: #E8EBED;">{{pair.a}}</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #7C848D;">VS</span>
+<span style="font-weight: 900; font-style: italic; font-size: 24px; color: #E8EBED;">{{pair.b}}</span>
+</div>
+<div style="display: flex; align-items: baseline; gap: 10px;">
+<span style="font-weight: 900; font-style: italic; font-size: 44px; line-height: 1; color: #E8EBED;">{{pair.diff}}</span>
+<span style="font-size: 15px; color: #C9CDD2;">rows a track, on {{pair.tracks}} tracks both played</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px;">
+<div style="position: relative; height: 26px; background: #15181C;">
+<div style="position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: #7C848D;"></div>
+<div style="position: absolute; top: 9px; height: 8px; left: {{pair.lo}}; width: {{pair.span}}; background: {{pair.band}};"></div>
+<div style="position: absolute; top: 3px; height: 20px; width: 2px; left: {{pair.mean}}; background: #E8EBED;"></div>
+</div>
+<div style="display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #7C848D;">
+<span>{{pair.b}} ahead</span><span>0</span><span>{{pair.a}} ahead</span>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;">
+<div style="display: flex; flex-direction: column; gap: 2px;">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #7C848D;">95% interval</span>
+<span style="font-size: 15px; color: #E8EBED;">{{pair.interval}}</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px;">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #7C848D;">Wins / ties / losses</span>
+<span style="font-size: 15px; color: #E8EBED;">{{pair.wtl}}</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px;">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #7C848D;">Tracks for a verdict</span>
+<span style="font-size: 15px; color: #E8EBED;">{{pair.needed}}</span>
+</div>
+</div>
+<div style="margin-top: auto; padding: 12px 14px; border: 1px solid {{pair.verdictEdge}}; display: flex; align-items: center; gap: 12px;">
+<span style="font-weight: 900; font-style: italic; font-size: 22px; color: {{pair.verdictInk}}; text-transform: uppercase;">{{pair.verdict}}</span>
+<span style="font-size: 13px; color: #7C848D;">{{pair.note}}</span>
+</div>
+</div>
+
+</div>
+
+<div style="margin-top: 16px; flex-grow: 1; min-height: 0; border: 1px solid #1E2227; background: #0D0F12; padding: 12px 18px; display: flex; flex-direction: column; gap: 2px; overflow: hidden;">
+<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #7C848D;">Past runs · newest first</span>
+<button type="button" style="height: 28px; padding: 0 10px; background: transparent; border: 1px solid #2A2F35; color: #C9CDD2; font-size: 13px; cursor: pointer;">Show all 26</button>
+</div>
+<sc-for list="{{runs}}" as="r" hint-placeholder-count="5">
+<div style="display: grid; grid-template-columns: 150px 120px 1fr 150px 176px; align-items: center; gap: 12px; height: 30px; border-top: 1px solid #1E2227;">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #C9CDD2;">{{r.when}}</span>
+<span style="font-size: 13px; color: #C9CDD2;">{{r.tracks}}</span>
+<span style="font-size: 13px; color: #E8EBED; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{r.players}}</span>
+<span class="{{r.cls}}" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: {{r.statusInk}};">{{r.status}}</span>
+<div style="display: flex; gap: 6px; justify-content: flex-end;">
+<button type="button" style="height: 26px; padding: 0 10px; background: transparent; border: 1px solid #2A2F35; color: #C9CDD2; font-size: 12px; cursor: pointer;">{{r.watch}}</button>
+<button type="button" style="height: 26px; padding: 0 10px; background: transparent; border: 1px solid #2A2F35; color: #C9CDD2; font-size: 12px; cursor: pointer;">Results</button>
+</div>
+</div>
+</sc-for>
+</div>
+
+<sc-if value="{{ours}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; top: 76px; right: 40px; width: 460px; padding: 18px 20px; background: #0D0F12; border: 1px solid #2A2F35; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 16px 48px rgba(0,0,0,.6);">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #7C848D;">What is ours, not theirs</span>
+<span style="font-size: 14px; line-height: 1.5; color: #C9CDD2;">Every question Jev, Haiku and GLM Flash are asked, and the code rule that turns their answers into a move, are ours: a skin is a question set plus its rule.</span>
+<span style="font-size: 14px; line-height: 1.5; color: #C9CDD2;">The flies are untrained and use only their innate wiring. How gaps become input to their eyes, which neurons we read as a turn or a jump, and the thresholds are ours, fixed on practice tracks and frozen.</span>
+<span style="font-size: 14px; line-height: 1.5; color: #C9CDD2;">Prices are our estimates per request; Jev is not billed per request.</span>
+<button type="button" onClick="{{toggleOurs}}" style="align-self: flex-end; height: 32px; padding: 0 14px; background: transparent; border: 1px solid #2A2F35; color: #E8EBED; font-size: 13px; cursor: pointer;">Close</button>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+constructor(props) { super(props); this.state = { pair: 0, ours: false }; }
+renderVals() {
+const st = this.state;
+// bakeoff bench over v2 practice runs 20260921-165433, -171044, -185546, -191326, -155758, 20260925-101614
+const B = [
+["Solver", "yardstick", 20, 150.0, 150.0, 150.0, "#7AA2F7"],
+["Jev · Step 2", "", 5, 144.6, 129.6, 150.0, "#B8404F"],
+["Haiku · Step 1", "", 5, 132.2, 114.3, 150.0, "#E6B422"],
+["Jev · Step 1", "", 5, 124.2, 82.5, 150.0, "#E6B422"],
+["Haiku · Step 2", "", 5, 109.6, 79.7, 139.5, "#B8404F"],
+["Jev · Guided", "", 5, 78.2, 32.4, 124.0, "#5FA35A"],
+["Fly · Sideways", "", 20, 78.2, 61.8, 94.6, "#F7768E"],
+["Haiku · Guided", "", 5, 72.6, 29.5, 115.7, "#5FA35A"],
+["Fly · Looming", "", 20, 66.5, 52.6, 80.5, "#AEB4BA"],
+["Haiku · Plain", "", 5, 56.6, 12.4, 100.8, "#D97757"],
+["Jev · Map", "", 5, 49.6, 34.0, 65.2, "#1E2227"],
+["Always jump", "yardstick", 20, 38.7, 28.9, 48.5, "#E8EBED"],
+["Random", "yardstick", 20, 24.4, 16.9, 32.0, "#8A9097"],
+["Haiku · Map", "not ranked", 2, 150.0, null, null, "#1E2227"]
+];
+const pct = (x) => (x / 150 * 100) + "%";
+let rank = 0;
+const board = B.map(([name, kind, tracks, mean, lo, hi, color]) => {
+const ranked = lo !== null && kind !== "yardstick";
+if (ranked) rank++;
+return { rank: ranked ? String(rank) : "", name: kind === "yardstick" ? name + " (yardstick)" : name, ink: kind ? "#7C848D" : "#E8EBED",
+tracks: tracks + " tr", color, edge: color === "#1E2227" ? "#7AA2F7" : "transparent",
+lo: pct(lo === null ? mean : lo), span: lo === null ? "0%" : pct(hi - lo), mean: "calc(" + pct(mean) + " - 1px)",
+band: kind === "yardstick" ? "#2A2F35" : "#3A4046", value: lo === null ? "2 tracks" : mean.toFixed(1) };
+});
+const P = [
+["Fly · Sideways", "Fly · Looming", 20, 11.7, -4.5, 27.8, "12 / 3 / 5", "can't tell yet", "69"],
+["Jev · Step 2", "Jev · Guided", 5, 66.4, 11.8, 121.0, "5 / 0 / 0", "Jev · Step 2 ahead", "5"],
+["Jev · Step 2", "Haiku · Step 1", 5, 12.4, -17.9, 42.7, "4 / 0 / 1", "can't tell yet", "31"],
+["Haiku · Step 1", "Jev · Step 1", 5, 8.0, -35.7, 51.7, "2 / 0 / 3", "can't tell yet", "152"],
+["Jev · Guided", "Haiku · Guided", 5, 5.6, -66.0, 77.2, "4 / 0 / 1", "can't tell yet", "832"],
+["Jev · Step 1", "Jev · Guided", 5, 46.0, -36.3, 128.3, "3 / 0 / 2", "can't tell yet", "17"]
+];
+const R = 150; // the axis runs from -150 (B ahead) to +150 (A ahead)
+const ax = (x) => ((Math.max(-R, Math.min(R, x)) + R) / (2 * R) * 100) + "%";
+const q = P[st.pair];
+const tell = q[7] !== "can't tell yet";
+const pair = { a: q[0], b: q[1], tracks: q[2], diff: (q[3] >= 0 ? "+" : "") + q[3].toFixed(1),
+lo: ax(q[4]), span: ((q[5] - q[4]) / (2 * R) * 100) + "%", mean: "calc(" + ax(q[3]) + " - 1px)",
+band: tell ? "#9ECE6A" : "#3A4046", interval: q[4].toFixed(1) + " to " + q[5].toFixed(1), wtl: q[6], needed: "about " + q[8],
+verdict: q[7], verdictInk: tell ? "#9ECE6A" : "#E0AF68", verdictEdge: tell ? "#9ECE6A" : "#2A2F35",
+note: tell ? "The interval stays clear of 0 on the tracks both played." : "The interval crosses 0: on these tracks either could be ahead." };
+const pairs = P.map((p, i) => ({ label: p[0] + " vs " + p[1], border: i === st.pair ? "#7AA2F7" : "#2A2F35",
+ink: i === st.pair ? "#E8EBED" : "#C9CDD2", pick: () => this.setState({ pair: i }) }));
+// the newest of the 26 run directories, names as they read now (decision 44)
+const runs = [
+{ when: "25 Sep 16:39", tracks: "1400–1499 (100)", players: "Fly · Looming, Fly · Sideways", status: "running now", statusInk: "#E8EBED", cls: "bb-live", watch: "Watch live" },
+{ when: "25 Sep 10:16", tracks: "1000–1019 (20)", players: "Fly · Looming, Fly · Sideways", status: "completed", statusInk: "#7C848D", cls: "", watch: "Watch" },
+{ when: "24 Sep 21:16", tracks: "1001", players: "Jev · Step 1, Guided, Step 2, Map, Plain; Fly · Looming", status: "budget used up", statusInk: "#E0AF68", cls: "", watch: "Watch" },
+{ when: "24 Sep 13:55", tracks: "1001", players: "Jev · Step 1, Fly · Looming", status: "completed", statusInk: "#7C848D", cls: "", watch: "Watch" },
+{ when: "24 Sep 11:12", tracks: "1001", players: "Fly · Looming, Jev · Step 1, Haiku · Plain", status: "completed", statusInk: "#7C848D", cls: "", watch: "Watch" },
+{ when: "24 Sep 10:58", tracks: "1001", players: "Fly · Looming, Jev · Step 1, Haiku · Plain", status: "interrupted", statusInk: "#E0AF68", cls: "", watch: "Watch" }
+];
+const toggleOurs = () => this.setState({ ours: !st.ours });
+return { board, pairs, pair, runs, ours: st.ours, toggleOurs };
+}
+}
+</script>
+</body>
+</html>

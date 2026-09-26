@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brain Battle results</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,400;0,600;0,800;0,900;1,800;1,900&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap">
+<style>
+body{margin:0;background:#0A0A0A;font-family:"Hanken Grotesk","Helvetica Neue",sans-serif;color:#C9CDD2}
+a{color:#7AA2F7}a:hover{color:#E8EBED}
+@keyframes bb-rise{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+.bb-card{animation:bb-rise 420ms cubic-bezier(.2,.7,.2,1) both}
+button{font-family:inherit}
+button:focus-visible{outline:2px solid #7AA2F7;outline-offset:3px}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; overflow: hidden; background: #0A0A0A; display: flex; flex-direction: column; padding: 0 40px 28px;">
+
+<div style="display: flex; justify-content: space-between; align-items: center; height: 80px; flex-shrink: 0;">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #7C848D;">Run ended · 3 fighters</span>
+<div style="font-weight: 900; font-style: italic; font-size: 48px; letter-spacing: -0.02em; color: #E8EBED; transform: skewX(-9deg);">RESULTS</div>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #C9CDD2;">Track 1000 · game v2 · 150 rows</span>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;">
+<sc-for list="{{cards}}" as="p" hint-placeholder-count="3">
+<div class="bb-card" style="animation-delay: {{p.delay}}; height: {{p.height}}; box-sizing: border-box; background: #0D0F12; border: 2px solid {{p.border}}; display: flex; flex-direction: column; padding: 16px 20px 18px; position: relative; overflow: hidden;">
+<div style="display: flex; justify-content: space-between; align-items: flex-start;">
+<span style="font-weight: 900; font-style: italic; font-size: 88px; line-height: 0.9; color: {{p.placeInk}}; transform: skewX(-9deg);">{{p.place}}</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: #C9CDD2;">{{p.label}}</span>
+</div>
+<sc-if value="{{p.showArt}}" hint-placeholder-val="{{ true }}">
+<div style="height: 120px; display: flex; align-items: center; justify-content: center;">
+<div style="display: grid; grid-template-columns: {{p.cols}};">
+<sc-for list="{{p.cells}}" as="c" hint-placeholder-count="81">
+<div style="width: 11px; height: 11px; background: {{c}};"></div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<div style="font-weight: 900; font-style: italic; font-size: 26px; color: #E8EBED; line-height: 1.1;">{{p.title}}</div>
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #7C848D; margin-top: 2px;">{{p.player}}</div>
+<div style="display: flex; align-items: baseline; gap: 8px; margin-top: 12px;">
+<span style="font-weight: 900; font-style: italic; font-size: 44px; color: #E8EBED; line-height: 1;">{{p.rows}}</span>
+<span style="font-size: 15px; color: #C9CDD2;">rows</span>
+<span style="margin-left: auto; font-size: 14px; color: #F7768E;">{{p.death}}</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: auto; padding-top: 12px; border-top: 1px solid #1E2227;">
+<div style="display: flex; flex-direction: column; gap: 2px;">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #7C848D;">Per row</span>
+<span style="font-size: 15px; color: #E8EBED;">{{p.perRow}}</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px;">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #7C848D;">Requests</span>
+<span style="font-size: 15px; color: #E8EBED;">{{p.requests}}</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px;">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #7C848D;">Cost</span>
+<span style="font-size: 15px; color: {{p.costInk}};">{{p.cost}}</span>
+</div>
+</div>
+</div>
+</sc-for>
+</div>
+
+<div style="margin-top: 16px; padding: 14px 20px 16px; border: 1px solid #1E2227; background: #0D0F12; display: flex; flex-direction: column; gap: 10px;">
+<div style="display: flex; align-items: center; gap: 16px;">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #7C848D; flex-shrink: 0;">{{panelTitle}}</span>
+<span style="font-size: 14px; color: #E0AF68; flex-grow: 1;">One track is not a result: 94 against 93 rows can be this track&#39;s luck. Records holds the benchmark over many tracks.</span>
+<button type="button" onClick="{{toggle}}" aria-expanded="{{moreAria}}" style="flex-shrink: 0; height: 36px; padding: 0 14px; background: transparent; border: 1px solid #2A2F35; color: #E8EBED; font-weight: 600; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px;">{{toggleLabel}}<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" style="transform: {{chevron}};"><path d="M2 4l4 4 4-4"></path></svg></button>
+</div>
+<sc-if value="{{less}}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{bars}}" as="b" hint-placeholder-count="4">
+<div style="display: flex; align-items: center; gap: 12px;">
+<span style="width: 150px; font-size: 13px; color: {{b.ink}}; flex-shrink: 0;">{{b.name}}</span>
+<div style="position: relative; flex-grow: 1; height: 10px; background: #15181C;">
+<div style="position: absolute; left: 0; top: 0; bottom: 0; width: {{b.width}}; background: {{b.color}};"></div>
+</div>
+<span style="width: 40px; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #C9CDD2;">{{b.rows}}</span>
+</div>
+</sc-for>
+</sc-if>
+<sc-if value="{{more}}" hint-placeholder-val="{{ false }}">
+<div style="display: grid; grid-template-columns: 260px repeat(3, minmax(0, 1fr)); font-size: 13px;">
+<span style="padding: 4px 0; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #7C848D;"></span>
+<sc-for list="{{heads}}" as="h" hint-placeholder-count="3">
+<span style="padding: 4px 8px; font-weight: 800; font-style: italic; color: #E8EBED; border-bottom: 1px solid #2A2F35;">{{h}}</span>
+</sc-for>
+<sc-for list="{{table}}" as="r" hint-placeholder-count="9">
+<span style="padding: 3px 0; color: #C9CDD2; border-bottom: 1px solid #1E2227;">{{r.name}} <span style="color: #7C848D;">{{r.hint}}</span></span>
+<sc-for list="{{r.vals}}" as="v" hint-placeholder-count="3">
+<span style="padding: 3px 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #E8EBED; border-bottom: 1px solid #1E2227;">{{v}}</span>
+</sc-for>
+</sc-for>
+</div>
+<sc-if value="{{hasFailures}}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{failures}}" as="f" hint-placeholder-count="1">
+<span style="font-size: 13px; color: #E0AF68;">{{f}}</span>
+</sc-for>
+</sc-if>
+<span style="font-size: 12px; color: #7C848D;">Probability scores are left out: the Guided set asks one choice, not probabilities. The fly is asked nothing; how gaps become its input is ours. Costs are requests times the page&#39;s price per request.</span>
+</sc-if>
+</div>
+
+<div style="margin-top: auto; display: flex; justify-content: center; gap: 12px;">
+<button type="button" style="height: 52px; padding: 0 28px; background: transparent; border: 2px solid #7AA2F7; color: #E8EBED; font-weight: 800; font-style: italic; font-size: 20px; cursor: pointer; display: flex; align-items: center; gap: 10px;"><span style="color: #7AA2F7; font-style: normal; font-size: 13px;">▶</span>Run again</button>
+<button type="button" style="height: 52px; padding: 0 24px; background: transparent; border: 1px solid #2A2F35; color: #C9CDD2; font-weight: 600; font-size: 16px; cursor: pointer;">New track</button>
+<button type="button" style="height: 52px; padding: 0 24px; background: transparent; border: 1px solid #2A2F35; color: #C9CDD2; font-weight: 600; font-size: 16px; cursor: pointer;">Fighters</button>
+<button type="button" style="height: 52px; padding: 0 24px; background: transparent; border: 1px solid #2A2F35; color: #C9CDD2; font-weight: 600; font-size: 16px; cursor: pointer;">Watch the replay</button>
+<button type="button" style="height: 52px; padding: 0 24px; background: transparent; border: 1px solid #2A2F35; color: #C9CDD2; font-weight: 600; font-size: 16px; cursor: pointer;">Records</button>
+<button type="button" style="height: 52px; padding: 0 24px; background: transparent; border: 1px solid #2A2F35; color: #7C848D; font-weight: 600; font-size: 16px; cursor: pointer;">Home</button>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+constructor(props) { super(props); this.state = { more: false }; }
+renderVals() {
+const INK = { b: "#3A4046", e: "#F7768E", w: "#AEB4BA", k: "#1A0E0A", V: "#FFFFFF", v: "#15181C" };
+// recorded: v2 track 1000; jev_guided and haiku_guided in runs/20260921-165433, fly2 in runs/20260925-101614
+const P = [
+{ label: "P1", title: "Jev · Guided", player: "jev_guided", body: "j", color: "#5FA35A", inks: {}, rows: 94, death: "Jumped into a gap",
+perRow: "204 ms", requests: "81", cost: "0.0032 USD", paid: true,
+grid: [".jjjjj.", "jjjjjjj", "jVVVvvj", "jjjjjjj", ".jjjjj.", "..jjj..", ".jjjjj.", ".jjjjj.", ".j...j.", ".j...j."] },
+{ label: "P2", title: "Haiku · Guided", player: "haiku_guided", body: "o", color: "#5FA35A", inks: {}, rows: 93, death: "Dodged into a gap",
+perRow: "750 ms", requests: "92", cost: "0.0828 USD", paid: true,
+grid: [".ooooooo.", ".ooooooo.", ".okoookoo", "ooooooooo", ".ooooooo.", ".ooooooo.", ".o.o.o.o.", ".o.o.o.o."] },
+{ label: "P3", title: "Fly · Sideways", player: "fly2", body: "w", color: "#F7768E", inks: { e: "#AEB4BA" }, rows: 72, death: "Jumped into a gap",
+perRow: "494 ms", requests: "none", cost: "free", paid: false,
+grid: ["..ee.ee..", "w..bbb..w", "ww.bbb.ww", "wwwbbbwww", "ww.bbb.ww", "w..bbb..w", "...bbb...", "...b.b...", "..b...b.."] }
+];
+const cells = (p) => { const out = []; p.grid.forEach((row) => { for (const x of row) out.push(x === "." ? "transparent" : x === p.body ? p.color : (p.inks[x] || INK[x])); }); return out; };
+const more = !!this.state.more;
+const ranked = P.slice().sort((a, b) => b.rows - a.rows);
+const cards = ranked.map((p, i) => ({
+place: String(i + 1), placeInk: i === 0 ? "#E8EBED" : "#3A4046", border: i === 0 ? "#E8EBED" : "#1E2227",
+label: p.label, title: p.title, player: p.player, rows: p.rows, death: p.death + " · row " + p.rows,
+perRow: p.perRow, requests: p.requests, cost: p.cost, costInk: p.paid ? "#E0AF68" : "#7C848D",
+cols: "repeat(" + p.grid[0].length + ", 11px)", cells: cells(p), delay: (i * 90) + "ms",
+height: more ? "236px" : "380px", showArt: !more
+}));
+const bars = ranked.map((p) => ({ name: p.title, rows: p.rows, width: (p.rows / 150 * 100) + "%", color: p.color, ink: "#C9CDD2" }));
+bars.push({ name: "Solver (yardstick)", rows: 150, width: "100%", color: "#3A4046", ink: "#7C848D" });
+const heads = ranked.map((p) => p.title);
+const byName = { jev_guided: 0, haiku_guided: 1, fly2: 2 };
+const col = (vals) => ranked.map((p) => vals[byName[p.player]]);
+const table = [
+{ name: "Rows survived", hint: "of 150", vals: col(["94", "93", "72"]) },
+{ name: "Death", hint: "", vals: col(["jumped into a gap", "dodged into a gap", "jumped into a gap"]) },
+{ name: "Moves that were jumps", hint: "", vals: col(["17%", "2.2%", "2.8%"]) },
+{ name: "Wrong moves", hint: "worse than the best", vals: col(["1 · fatal, row 93: jump (stay safe)", "1 · fatal, row 93: right (stay safe)", "1 · fatal, row 71: jump (left safe)"]) },
+{ name: "Asked live", hint: "requests", vals: col(["81", "92", "none (simulated)"]) },
+{ name: "From cache", hint: "replayed, free", vals: col(["0", "0", "none"]) },
+{ name: "Time per row", hint: "mean", vals: col(["204 ms", "750 ms", "494 ms"]) },
+{ name: "Tokens", hint: "in / out", vals: col(["68,752 / 3,645", "71,435 / 828", "none"]) },
+{ name: "Cost", hint: "estimate", vals: col(["0.0032 USD", "0.0828 USD", "free"]) }
+];
+const failures = [];
+return { cards, bars, more, less: !more, heads, table, failures, hasFailures: failures.length > 0, moreAria: more ? "true" : "false",
+panelTitle: more ? "The numbers" : "How far each got", toggleLabel: more ? "Fewer numbers" : "More numbers",
+chevron: more ? "rotate(180deg)" : "none", toggle: () => this.setState({ more: !more }) };
+}
+}
+</script>
+</body>
+</html>
