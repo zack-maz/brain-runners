@@ -43,10 +43,10 @@ def test_an_impossible_vision_is_a_usage_error(tmp_path, capsys):
 
 
 def test_a_question_set_that_needs_more_vision_is_a_usage_error_before_anything_is_played(tmp_path, capsys):
-    args = ["run", "--players", "jev_composed,jev_two_step", "--lookahead", "3", "--max-requests", "5",
+    args = ["run", "--players", "jev_step1,jev_step2", "--lookahead", "3", "--max-requests", "5",
             "--seed-start", "1000", "--out", str(tmp_path / "runs"), "--cache", str(tmp_path / "cache")]
     assert main(args) == 2
-    assert "the two-step questions need 4 rows" in capsys.readouterr().err
+    assert "the step2 questions need 4 rows" in capsys.readouterr().err
     assert not (tmp_path / "runs").exists() or list((tmp_path / "runs").iterdir()) == []
 
 
@@ -137,12 +137,12 @@ def fake_paid(monkeypatch, action="stay"):
         sdks.append(FakeTypeSafe(jev_reply(action)))
         return JevPlayer(cache=cache, budget=budget, sdk=sdks[-1])
 
-    monkeypatch.setitem(REGISTRY, "jev", factory)
+    monkeypatch.setitem(REGISTRY, "jev_plain", factory)
     return sdks
 
 
 def paid_args(tmp_path, *extra):
-    return ["run", "--players", "jev", "--seeds", "1", "--seed-start", "1000", "--max-rows", "12",
+    return ["run", "--players", "jev_plain", "--seeds", "1", "--seed-start", "1000", "--max-rows", "12",
             "--out", str(tmp_path / "runs"), "--cache", str(tmp_path / "cache"), *extra]
 
 
@@ -153,8 +153,8 @@ def test_without_max_requests_a_paid_player_cannot_spend_anything(tmp_path, caps
     assert sdks[0].calls == []
     (run_dir,) = (tmp_path / "runs").iterdir()
     meta = json.loads((run_dir / "meta.json").read_text())
-    assert meta["status"] == "budget_exhausted" and meta["requests"] == {"jev": {"max": 0, "used": 0}}
-    assert meta["models"] == {"jev": "jev-latest"}
+    assert meta["status"] == "budget_exhausted" and meta["requests"] == {"jev_plain": {"max": 0, "used": 0}}
+    assert meta["models"] == {"jev_plain": "jev-latest"}
 
 
 def test_the_cap_stops_the_run_and_the_next_run_continues_from_the_cache(tmp_path, capsys, monkeypatch):
@@ -164,11 +164,11 @@ def test_the_cap_stops_the_run_and_the_next_run_continues_from_the_cache(tmp_pat
     time.sleep(1.1)  # run ids have one-second resolution
     assert main(paid_args(tmp_path, "--max-requests", "50")) == 0
     first, second = sorted((tmp_path / "runs").iterdir())
-    assert json.loads((first / "meta.json").read_text())["requests"] == {"jev": {"max": 2, "used": 2}}
-    steps = [json.loads(line) for line in (second / "jev.jsonl").read_text().splitlines()]
+    assert json.loads((first / "meta.json").read_text())["requests"] == {"jev_plain": {"max": 2, "used": 2}}
+    steps = [json.loads(line) for line in (second / "jev_plain.jsonl").read_text().splitlines()]
     assert [s["cache_hit"] for s in steps[:2]] == [True, True] and not any(s["cache_hit"] for s in steps[2:])
     meta = json.loads((second / "meta.json").read_text())
-    assert meta["status"] == "completed" and meta["requests"]["jev"]["used"] == len(steps) - 2
+    assert meta["status"] == "completed" and meta["requests"]["jev_plain"]["used"] == len(steps) - 2
     time.sleep(1.1)
     assert main(paid_args(tmp_path)) == 0  # a full replay needs no budget at all
     assert len(sdks[2].calls) == 0
@@ -184,7 +184,7 @@ def test_a_missing_key_is_a_usage_error_before_the_run_directory_exists(tmp_path
     args = ["run", "--players", "solver,haiku", "--seeds", "1", "--seed-start", "1000", "--max-requests", "3",
             "--out", str(tmp_path / "runs"), "--cache", str(tmp_path / "cache")]
     assert main(args) == 2
-    assert "haiku: ANTHROPIC_API_KEY is not set" in capsys.readouterr().err
+    assert "haiku_plain: ANTHROPIC_API_KEY is not set" in capsys.readouterr().err
     assert not (tmp_path / "runs").exists()
 
 
@@ -194,7 +194,7 @@ def test_a_negative_cap_is_a_usage_error(tmp_path, capsys):
 
 
 def low_seed_paid_args(tmp_path, *extra):
-    return ["run", "--players", "jev", "--seeds", "1", "--max-rows", "12",
+    return ["run", "--players", "jev_plain", "--seeds", "1", "--max-rows", "12",
             "--out", str(tmp_path / "runs"), "--cache", str(tmp_path / "cache"), *extra]
 
 
@@ -215,16 +215,16 @@ def test_the_tournament_flag_allows_a_paid_cap_on_seeds_below_1000(tmp_path, mon
     assert meta["args"]["tournament"] is True
 
 
-def test_the_composed_jev_is_a_paid_player_for_the_seed_rule_and_the_help(tmp_path, capsys):
-    args = ["run", "--players", "jev_composed", "--seeds", "1", "--max-rows", "12", "--max-requests", "5",
+def test_jev_step1_is_a_paid_player_for_the_seed_rule_and_the_help(tmp_path, capsys):
+    args = ["run", "--players", "jev_step1", "--seeds", "1", "--max-rows", "12", "--max-requests", "5",
             "--out", str(tmp_path / "runs"), "--cache", str(tmp_path / "cache")]
     assert main(args) == 2
     assert "paid players may not spend requests on seeds below 1000" in capsys.readouterr().err
     assert not (tmp_path / "runs").exists()
     with pytest.raises(SystemExit):
         main(["run", "--help"])
-    assert ("EACH paid player (jev, jev_composed, haiku, glm, jev_choice, jev_two_step, jev_reader, haiku_composed, "
-            "haiku_choice, haiku_two_step, haiku_reader, glm_composed, glm_choice, glm_two_step, glm_reader)"
+    assert ("EACH paid player (jev_plain, jev_step1, haiku_plain, glm_plain, jev_guided, jev_step2, jev_map, haiku_step1, "
+            "haiku_guided, haiku_step2, haiku_map, glm_step1, glm_guided, glm_step2, glm_map)"
             ) in " ".join(capsys.readouterr().out.split())
 
 

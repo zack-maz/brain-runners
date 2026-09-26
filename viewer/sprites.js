@@ -12,7 +12,7 @@
     chat: [".ooooooo.", ".ooooooo.", ".okoookoo", "ooooooooo", ".ooooooo.", ".ooooooo.", ".o.o.o.o.", ".o.o.o.o."],
     // "the visor": a pale monolith with one slit of five cells, V lit and v unlit (see visorCells)
     visor: [".jjjjj.", "jjjjjjj", "jVVVvvj", "jjjjjjj", ".jjjjj.", "..jjj..", ".jjjjj.", ".jjjjj.", ".j...j.", ".j...j."],
-    // baselines and the one-shot Jev: a plain grey block
+    // baselines and jev_plain: a plain grey block
     block: ["ggggg", "ggggg", "ggggg", "ggggg", "ggggg", "ggggg", "ggggg"],
   };
   const INKS = { w: "#AEB4BA", b: "#3A4046", e: "#F7768E", o: "#D97757", k: "#1A0E0A", j: "#B9BEC4", V: "#FFFFFF", v: "#15181C", g: "#7C848D" };

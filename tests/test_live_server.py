@@ -93,8 +93,8 @@ def test_state_says_what_can_be_run(server):
     status, state = payload(httpd, "GET", "/state?seed=1001")
     assert status == 200 and state["status"] == "lobby" and state["seed"] == 1001
     assert state["game"]["version"] == "v2" and state["max_rows"] == 12
-    assert {p["name"] for p in state["players"]} >= {"solver", "fly", "haiku", "jev_composed"}
-    assert [p["requests_left"] for p in state["players"] if p["name"] == "haiku"] == [0]
+    assert {p["name"] for p in state["players"]} >= {"solver", "fly", "haiku_plain", "jev_step1"}
+    assert [p["requests_left"] for p in state["players"] if p["name"] == "haiku_plain"] == [0]
 
 
 def test_a_run_started_from_the_page_streams_its_frames_and_ends_in_the_lobby(server):
@@ -121,7 +121,7 @@ def test_a_run_started_from_the_page_streams_its_frames_and_ends_in_the_lobby(se
 
 def test_a_refusal_names_its_reason_and_starts_nothing(server):
     httpd, session = server
-    status, refused = payload(httpd, "POST", "/run", {"seed": 7, "players": ["solver", "haiku"]})
+    status, refused = payload(httpd, "POST", "/run", {"seed": 7, "players": ["solver", "haiku_plain"]})
     assert status == 409 and refused["ok"] is False
     assert "seeds below 1000" in refused["error"] and session.run is None
     status, refused = payload(httpd, "POST", "/run", {"seed": 1001, "players": ["nobody"]})

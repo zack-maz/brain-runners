@@ -30,8 +30,8 @@ def jev_reply(action="stay", gap_ahead=0.1, left_safe=0.9):
                         "left_safe": {"type": "noul", "noul": left_safe}}}
 
 
-def jev_composed_reply(left=0.1, stay=0.1, right=0.1, jump=0.1):
-    """P(lands on a gap) per action, as the four Nouls of the composed Jev."""
+def jev_step1_reply(left=0.1, stay=0.1, right=0.1, jump=0.1):
+    """P(lands on a gap) per action, as the four Nouls of jev_step1."""
     nouls = {"left": left, "stay": stay, "right": right, "jump": jump}
     return {"model": "jev-latest", "usage": {"input_tokens": 300, "output_tokens": 4},
             "answers": {f"gap_{action}": {"type": "noul", "noul": p} for action, p in nouls.items()}}

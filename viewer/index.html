@@ -108,18 +108,18 @@
         <li>Giant Fiber rates of 100 to 200 Hz are not realistic (a real one fires about once per escape); the rate
           is used as a graded signal.</li>
       </ul>
-      <p>Jev and the LLM. The Jev in this player is the composed Jev: each row it is asked four yes/no questions in one
+      <p>Jev and the LLM. The Jev in this player is <code>jev_step1</code>: each row it is asked four yes/no questions in one
         request, one per action ("would <code>left</code> land the runner on a gap, that is, does
         <code>ahead[0].gaps_relative</code> contain -1?"), and code picks the action it thinks least likely to land on a
         gap, ties in the order stay, left, right, jump. TypeSafe runs the questions of one request in parallel and
         they cannot see one another's answers, so the four answers are four separate judgments and the only thing
         that combines them is our code. The wording of those questions and that rule are ours, not
-        TypeSafe's, and the rule looks one step ahead only; it does not plan. We built it after measuring the one-shot
-        Jev, which answers a single broad question ("which action?"): on the dangerous rows of practice track 1000 its
+        TypeSafe's, and the rule looks one step ahead only; it does not plan. We built it after measuring
+        <code>jev_plain</code>, which answers a single broad question ("which action?"): on the dangerous rows of practice track 1000 its
         choice landed on a gap about as often as always staying would have, while its narrow yes/no answers were almost
-        always right. The one-shot Jev is still in the level table for comparison; its request also carries two yes/no
+        always right. <code>jev_plain</code> is still in the level table for comparison; its request also carries two yes/no
         questions for calibration, which for the same reason are not a scaffold for its move. The LLM answers one question per
-        row and is told the rules in the same words as the one-shot Jev; what each was asked is under every panel.</p>
+        row and is told the rules in the same words as <code>jev_plain</code>; what each was asked is under every panel.</p>
       <p>The figures are ours too: a fruit fly, a visor whose slit shows how sure Jev is that its move is safe, and an
         orange critter for the LLM, which is our own drawing and nobody's official artwork.</p>
     </div>

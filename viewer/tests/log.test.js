@@ -2,32 +2,32 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const { asked, answered, move, timing, line, lines, short } = require("../log.js");
 
-const composed = { player: "jev_composed", questions: [{ gap_left: {}, gap_stay: {}, gap_right: {}, gap_jump: {} }] };
+const step1 = { player: "jev_step1", questions: [{ gap_left: {}, gap_stay: {}, gap_right: {}, gap_jump: {} }] };
 const frame = (extra) => ({ row: 7, chosen_action: "stay", executed_action: "stay", q: 0, cache_hit: false,
                             latency_ms: 212.4, answers: { gap_stay: { noul: 0.05 } }, ...extra });
 
 test("asked counts a question set's questions and calls a prompt one", () => {
-  assert.equal(asked(composed, frame()), "4 questions");
+  assert.equal(asked(step1, frame()), "4 questions");
   assert.equal(asked({ questions: [{ system: "rules", user: "row" }] }, frame()), "one prompt");
   assert.equal(asked({ questions: [{ action: {} }] }, frame()), "1 question");
 });
 
 test("asked says nothing when the frame points at no questions", () => {
-  assert.equal(asked(composed, frame({ q: null })), "");
+  assert.equal(asked(step1, frame({ q: null })), "");
   assert.equal(asked({ player: "fly" }, frame({ q: null })), "");
 });
 
 test("answered quotes the chosen move's gap probability", () => {
-  assert.equal(answered(composed, frame()), "5% it lands on a gap");
+  assert.equal(answered(step1, frame()), "5% it lands on a gap");
 });
 
 test("answered falls back to the choice when there is no per-move number", () => {
-  assert.equal(answered({ player: "jev_choice" }, frame({ answers: { action: { choice: "jump" } } })), "chose jump");
+  assert.equal(answered({ player: "jev_guided" }, frame({ answers: { action: { choice: "jump" } } })), "chose jump");
 });
 
 test("answered shortens a written reply to one line", () => {
   const text = "line one\nline two that goes on and on and on and on and on and on and on and on";
-  const out = answered({ player: "haiku" }, frame({ answers: { text } }));
+  const out = answered({ player: "haiku_plain" }, frame({ answers: { text } }));
   assert.ok(out.endsWith("…"));
   assert.ok(!out.includes("\n"));
   assert.ok(out.length <= 64);
@@ -41,7 +41,7 @@ test("answered gives the fly its rates, signals and spike count, and says the in
 });
 
 test("a rounded chance never reads as certainty", () => {
-  const jev = { player: "jev_composed" };
+  const jev = { player: "jev_step1" };
   assert.equal(answered(jev, frame({ chosen_action: "stay", answers: { gap_stay: { noul: 0.004 } } })),
     "<1% it lands on a gap");
   assert.equal(answered(jev, frame({ chosen_action: "stay", answers: { gap_stay: { noul: 0.998 } } })),
@@ -51,7 +51,7 @@ test("a rounded chance never reads as certainty", () => {
 });
 
 test("a set that asks about being trapped says both halves, because the rule used both", () => {
-  const two = { player: "jev_two_step" };
+  const two = { player: "jev_step2" };
   assert.equal(answered(two, frame({ chosen_action: "left", answers: { gap_left: { noul: 0.3 }, trapped_left: { noul: 0.02 } } })),
     "lands on a gap 30% · trapped after it 2%");
 });
@@ -86,7 +86,7 @@ test("timing prefers the cache over a latency", () => {
 });
 
 test("a line carries the row, the move and the timing", () => {
-  const html = line(composed, frame());
+  const html = line(step1, frame());
   assert.ok(html.includes("0007"));
   assert.ok(html.includes("stay"));
   assert.ok(html.includes("212 ms"));
@@ -94,20 +94,20 @@ test("a line carries the row, the move and the timing", () => {
 });
 
 test("an error is shown in --bad, escaped", () => {
-  const html = line(composed, frame({ error: "<script>x</script>" }));
+  const html = line(step1, frame({ error: "<script>x</script>" }));
   assert.ok(html.includes('<span class="bad">'));
   assert.ok(!html.includes("<script>"));
   assert.ok(html.includes("&#60;script&#62;"));
 });
 
 test("a written answer is escaped, never markup", () => {
-  const html = line({ player: "haiku", questions: [] }, frame({ q: null, answers: { text: '<img src=x onerror="a">' } }));
+  const html = line({ player: "haiku_plain", questions: [] }, frame({ q: null, answers: { text: '<img src=x onerror="a">' } }));
   assert.ok(!html.includes("<img"));
   assert.ok(html.includes("&#60;img"));
 });
 
 test("lines keeps the frames' order, oldest first", () => {
-  const html = lines(composed, [frame({ row: 1 }), frame({ row: 2 })]);
+  const html = lines(step1, [frame({ row: 1 }), frame({ row: 2 })]);
   assert.ok(html.indexOf("0001") < html.indexOf("0002"));
 });
 

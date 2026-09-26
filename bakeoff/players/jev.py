@@ -21,7 +21,7 @@ QUESTIONS = {
 
 
 class JevPlayer(PaidPlayer):
-    name = "jev"
+    name = "jev_plain"
     client_class = JevClient
     questions = QUESTIONS
 

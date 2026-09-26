@@ -1,4 +1,4 @@
-"""GLM Flash asked the one broad question: the twin of `haiku`, sent exactly what Claude Haiku is sent (the same
+"""GLM Flash asked the one broad question: the twin of `haiku_plain`, sent exactly what Claude Haiku is sent (the same
 briefing, the same one-action schema), so the model is what differs. Its only difference in reading the reply is
 the markdown fence GLM likes to wrap its JSON in."""
 
@@ -10,7 +10,7 @@ from bakeoff.players.paid import unfenced
 
 
 class GlmPlayer(HaikuPlayer):
-    name = "glm"
+    name = "glm_plain"
     client_class = GlmClient
 
     def read(self, payload: dict) -> tuple[str | None, bool, dict]:

@@ -157,12 +157,12 @@ def test_cache_hits_are_counted_apart_from_requests():
 
 
 def test_spent_comes_from_meta_requests_used_while_requests_counts_only_live_calls():
-    steps = [step(player="jev", row=i, latency_ms=50.0, usage={"input_tokens": 10, "output_tokens": 1})
+    steps = [step(player="jev_plain", row=i, latency_ms=50.0, usage={"input_tokens": 10, "output_tokens": 1})
              for i in range(5)]
     steps.append(step(player="solver", alive=False))
-    meta = {"requests": {"jev": {"max": 300, "used": 7}}}
+    meta = {"requests": {"jev_plain": {"max": 300, "used": 7}}}
     rows = {r["player"]: r for r in summarize(steps, meta)}
-    assert rows["jev"]["spent"] == 7 and rows["jev"]["requests"] == 5
+    assert rows["jev_plain"]["spent"] == 7 and rows["jev_plain"]["requests"] == 5
     assert rows["solver"]["spent"] is None
     assert {r["spent"] for r in summarize(steps)} == {None}  # no meta, no spent count
     assert COLUMNS[COLUMNS.index("requests") + 1] == "spent"
@@ -171,12 +171,12 @@ def test_spent_comes_from_meta_requests_used_while_requests_counts_only_live_cal
 def test_cost_comes_from_live_tokens_and_the_price_of_the_model_in_meta():
     steps = [step(player="llm", latency_ms=100.0, usage={"input_tokens": 500_000, "output_tokens": 10_000}),
              step(player="llm", row=1, cache_hit=True, usage={"input_tokens": 9_000_000, "output_tokens": 0}),
-             step(player="jev", latency_ms=50.0, usage={"input_tokens": 400, "output_tokens": 3}),
+             step(player="jev_plain", latency_ms=50.0, usage={"input_tokens": 400, "output_tokens": 3}),
              step(player="solver")]
-    meta = {"models": {"llm": "claude-haiku-4-5-20251001", "jev": "jev-latest"}}
+    meta = {"models": {"llm": "claude-haiku-4-5-20251001", "jev_plain": "jev-latest"}}
     rows = {r["player"]: r for r in summarize(steps, meta)}
     assert rows["llm"]["cost_usd"] == pytest.approx(0.5 * 1.00 + 0.01 * 5.00)
-    assert rows["jev"]["cost_usd"] is None  # price not known: never shown as free
+    assert rows["jev_plain"]["cost_usd"] is None  # price not known: never shown as free
     assert rows["solver"]["cost_usd"] is None
     assert {r["cost_usd"] for r in summarize(steps)} == {None}  # no meta, no model, no price
 
@@ -206,15 +206,15 @@ def test_brier_is_none_for_a_player_that_answers_no_nouls():
     assert row["brier_gap_ahead"] is None and row["brier_left_safe"] is None
 
 
-def test_brier_scores_the_composed_jevs_four_nouls_against_what_the_senses_show():
-    def composed(row, gaps_row_1, gaps_row_2, **nouls):
+def test_brier_scores_jev_step1s_four_nouls_against_what_the_senses_show():
+    def step1(row, gaps_row_1, gaps_row_2, **nouls):
         senses = {"ahead": [{"row": 1, "gaps_relative": gaps_row_1}, {"row": 2, "gaps_relative": gaps_row_2}]}
-        return step(player="jev_composed", row=row, senses=senses,
+        return step(player="jev_step1", row=row, senses=senses,
                     ground_truth={"gap_ahead": 0 in gaps_row_1, "left_safe": -1 not in gaps_row_1},
                     answers={f"gap_{a}": {"type": "noul", "noul": p} for a, p in nouls.items()})
 
-    steps = [composed(0, [-1, 0], [], left=0.9, stay=0.7, right=0.0, jump=0.5),
-             composed(1, [], [0], left=0.2, stay=0.1, right=0.0, jump=1.0, cache_hit=True)]
+    steps = [step1(0, [-1, 0], [], left=0.9, stay=0.7, right=0.0, jump=0.5),
+             step1(1, [], [0], left=0.2, stay=0.1, right=0.0, jump=1.0, cache_hit=True)]
     (row,) = summarize(steps)
     assert row["brier_gap_left"] == pytest.approx((0.1 ** 2 + 0.2 ** 2) / 2)
     assert row["brier_gap_stay"] == pytest.approx((0.3 ** 2 + 0.1 ** 2) / 2)
@@ -228,7 +228,7 @@ def test_brier_all_scores_every_question_set_noul_it_can_check():
     senses = {"ahead": [{"row": r, "gaps_relative": [0] if r == 1 else []} for r in range(1, 7)]}
     answers = {"tile_r1_c": {"noul": 0.8}, "tile_r2_l1": {"noul": 0.4}, "trapped_stay": {"noul": 0.5},
                "tile_r9_c": {"noul": 1.0}, "text": "{}", "stop_reason": "end_turn", "flag": {"noul": True}}
-    (row,) = summarize([step(player="llm_reader", senses=senses, ground_truth={}, answers=answers)])
+    (row,) = summarize([step(player="haiku_map", senses=senses, ground_truth={}, answers=answers)])
     assert row["brier_all"] == pytest.approx((0.2 ** 2 + 0.4 ** 2 + 0.5 ** 2) / 3)  # row 9 is out of view
     assert row["brier_gap_left"] is None
 
@@ -236,11 +236,11 @@ def test_brier_all_scores_every_question_set_noul_it_can_check():
 def test_brier_leaves_out_an_answer_that_is_not_a_probability():
     senses = {"ahead": [{"row": r, "gaps_relative": [0] if r == 1 else []} for r in range(1, 7)]}
     answers = {"tile_r1_c": {"noul": 1.7}, "tile_r2_c": {"noul": -0.2}, "tile_r2_l1": {"noul": 0.4}}
-    (row,) = summarize([step(player="llm_reader", senses=senses, ground_truth={}, answers=answers)])
+    (row,) = summarize([step(player="haiku_map", senses=senses, ground_truth={}, answers=answers)])
     assert row["brier_all"] == pytest.approx(0.4 ** 2)
 
 
-def test_the_four_composed_columns_then_brier_all_close_the_table():
+def test_the_four_step1_columns_then_brier_all_close_the_table():
     assert COLUMNS[-5:] == ("brier_gap_left", "brier_gap_stay", "brier_gap_right", "brier_gap_jump", "brier_all")
     (row,) = summarize([step(answers={"gap_ahead": {"type": "noul", "noul": 0.5}}, ground_truth={"gap_ahead": True})])
     assert [row[c] for c in COLUMNS[-5:-1]] == [None] * 4 and row["brier_gap_ahead"] == row["brier_all"] == 0.25

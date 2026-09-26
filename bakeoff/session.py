@@ -19,7 +19,7 @@ from bakeoff.clients.core import DiskCache, RequestBudget, SharedBudget
 from bakeoff.game.rules import Rules
 from bakeoff.live import LiveRun
 from bakeoff.players import PAID, REGISTRY, fly2, make_player
-from bakeoff.players.names import RENAMED, canonical
+from bakeoff.players.names import canonical
 from bakeoff.replay import CONTESTANTS
 
 # tournament seeds are below this and must not be paid for, or shape prompts, before the tournament
@@ -28,13 +28,13 @@ FIRST_PRACTICE_SEED = 1000
 # USD per live request, measured in docs/COSTS.md (update 2a) and rounded up, because this number is what
 # the page asks the user to agree to: it must never be lower than what a request really costs. A price per
 # player, not per provider: the same model costs what its question set makes it read and write, and the
-# reader's set is about eleven times the one-shot's. The budget, not this table, enforces the ceiling.
+# map set is about eleven times the plain one's. The budget, not this table, enforces the ceiling.
 # Jev's prices are estimates (its provider does not bill per request; COSTS.md explains the token basis).
 # GLM Flash is free while its free tier lasts.
-PRICE_USD = {"haiku": 0.0006, "haiku_composed": 0.0010, "haiku_choice": 0.0009, "haiku_two_step": 0.0016,
-             "haiku_reader": 0.0065, "jev": 0.00004, "jev_composed": 0.00003, "jev_choice": 0.00004,
-             "jev_two_step": 0.00003, "jev_reader": 0.00012,
-             "glm": 0.0, "glm_composed": 0.0, "glm_choice": 0.0, "glm_two_step": 0.0, "glm_reader": 0.0}
+PRICE_USD = {"haiku_plain": 0.0006, "haiku_step1": 0.0010, "haiku_guided": 0.0009, "haiku_step2": 0.0016,
+             "haiku_map": 0.0065, "jev_plain": 0.00004, "jev_step1": 0.00003, "jev_guided": 0.00004,
+             "jev_step2": 0.00003, "jev_map": 0.00012,
+             "glm_plain": 0.0, "glm_step1": 0.0, "glm_guided": 0.0, "glm_step2": 0.0, "glm_map": 0.0}
 
 # every player here asks its provider once a row, so a track of N rows costs at worst N requests
 REQUESTS_PER_ROW = 1
@@ -45,10 +45,6 @@ def model_of(name: str) -> str | None:
     model, so this is what a run really uses, and the page says it rather than a name typed by hand."""
     client = getattr(REGISTRY.get(name), "client_class", None)
     return getattr(client, "default_model", None)
-
-
-# the names a player's records may be filed under: its own, and the one it was renamed from (decision 39)
-_WAS = {new: old for old, new in RENAMED.items()}
 
 
 def _first_model(path: Path) -> str | None:
@@ -125,8 +121,8 @@ def played_before(out_root: Path | str, game_version: str) -> dict[str, list[int
             continue  # a half-written or unreadable directory tells us nothing
         if (meta.get("game") or {}).get("version") != game_version:
             continue  # another game is another set of questions, so another set of cached answers
-        for player in meta.get("players") or []:
-            played.setdefault(player, set()).update(meta.get("seeds") or [])
+        for player in meta.get("players") or []:  # an old name (decisions 39 and 44) counts as the new one
+            played.setdefault(canonical(player), set()).update(meta.get("seeds") or [])
     return {player: sorted(seeds) for player, seeds in played.items()}
 
 

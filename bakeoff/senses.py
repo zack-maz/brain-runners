@@ -19,7 +19,7 @@ ACTION_DESCRIPTIONS = {
     "jump": "clear the next row, land on the one after", "stay": "run straight",
 }
 # Where each action lands, as (index into `ahead`, lane offset): the rule of the game, written once for
-# everything that reads senses (the composed Jev's questions, the report's truth for them).
+# everything that reads senses (the step1 set's questions, the report's truth for them).
 LANDS = {"left": (0, -1), "stay": (0, 0), "right": (0, 1), "jump": (1, 0)}
 
 
@@ -58,14 +58,14 @@ def ground_truth(game: Game) -> dict:
 
 def lands_on_gap(senses: dict, action: str) -> bool:
     """Does `action` land on a tile the senses show as a gap? Read from the senses alone, so it can be
-    asked of a logged record. It is the truth of the composed Jev's questions, which ask about the senses;
+    asked of a logged record. It is the truth of the step1 set's questions, which ask about the senses;
     the engine differs only past the finish line, where a gap no longer kills."""
     ahead, offset = LANDS[action]
     return offset in senses["ahead"][ahead]["gaps_relative"]
 
 
 def trapped(senses: dict, action: str) -> bool:
-    """After `action`, would every next move land on a gap the senses show? (The two-step question sets
+    """After `action`, would every next move land on a gap the senses show? (The step2 question sets
     ask this; it needs two more rows in view beyond the landing row.)"""
     ahead, offset = LANDS[action]
     if ahead + 2 >= len(senses["ahead"]):

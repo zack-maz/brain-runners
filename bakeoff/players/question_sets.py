@@ -12,9 +12,9 @@ from typing import Callable
 from bakeoff.game.engine import ACTIONS
 from bakeoff.game.rules import Rules
 from bakeoff.players.briefing import RULES as BRIEFING
-from bakeoff.players.jev_composed import ORDER
-from bakeoff.players.jev_composed import QUESTIONS as COMPOSED_QUESTIONS
-from bakeoff.players.jev_composed import pick as pick_composed
+from bakeoff.players.jev_step1 import ORDER
+from bakeoff.players.jev_step1 import QUESTIONS as STEP1_QUESTIONS
+from bakeoff.players.jev_step1 import pick as pick_step1
 from bakeoff.players.solver import solve
 from bakeoff.senses import ACTION_DESCRIPTIONS, LANDS, parse_tile_id, tile_id
 
@@ -49,32 +49,32 @@ def values_of(questions: dict, answers: dict) -> dict | None:
     return values
 
 
-# composed: the composed Jev's four Nouls, byte for byte, and its rule
-def _pick_composed(values: dict) -> str:
-    return pick_composed({action: values[f"gap_{action}"] for action in ORDER})
+# step1: jev_step1's four Nouls, byte for byte, and its rule
+def _pick_step1(values: dict) -> str:
+    return pick_step1({action: values[f"gap_{action}"] for action in ORDER})
 
 
-COMPOSED = QuestionSet("composed", "lowest_gap_probability", "four yes/no questions a row, one per move",
-                       lambda rules: dict(COMPOSED_QUESTIONS), _pick_composed)
+STEP1 = QuestionSet("step1", "lowest_gap_probability", "four yes/no questions a row, one per move",
+                       lambda rules: dict(STEP1_QUESTIONS), _pick_step1)
 
 
-# choice: one Choice whose options name the tile each move lands on
+# guided: one Choice whose options name the tile each move lands on
 def _landing(action: str) -> str:
     ahead, offset = LANDS[action]
     return f"lands on offset {offset} of `ahead[{ahead}]`, a gap if `ahead[{ahead}].gaps_relative` contains {offset}"
 
 
-CHOICE_QUESTIONS = {
+GUIDED_QUESTIONS = {
     "action": {"type": "choice",
                "instructions": BRIEFING + " Which action should the runner take now? Choose one whose landing tile "
                                           "is not a gap.",
                "criteria": {action: f"{ACTION_DESCRIPTIONS[action]}; {_landing(action)}" for action in ORDER}},
 }
-CHOICE = QuestionSet("choice", "the_choice", "one question a row: which move, each move's landing tile named",
-                     lambda rules: dict(CHOICE_QUESTIONS), lambda values: values["action"])
+GUIDED = QuestionSet("guided", "the_choice", "one question a row: which move, each move's landing tile named",
+                     lambda rules: dict(GUIDED_QUESTIONS), lambda values: values["action"])
 
 
-# two_step: the four landing Nouls, and for each move whether every next move from its landing is a gap
+# step2: the four landing Nouls, and for each move whether every next move from its landing is a gap
 def _trapped_question(action: str) -> dict:
     ahead, o = LANDS[action]
     return {"type": "noul",
@@ -83,13 +83,13 @@ def _trapped_question(action: str) -> dict:
                             f"{o - 1}, {o} and {o + 1}, and does `ahead[{ahead + 2}].gaps_relative` contain {o}?"}
 
 
-def _build_two_step(rules: Rules) -> dict:
+def _build_step2(rules: Rules) -> dict:
     if rules.lookahead < 4 or rules.window < 2:
-        raise ValueError("the two-step questions need 4 rows and 2 lanes either side in view")
-    return {**COMPOSED_QUESTIONS, **{f"trapped_{action}": _trapped_question(action) for action in ORDER}}
+        raise ValueError("the step2 questions need 4 rows and 2 lanes either side in view")
+    return {**STEP1_QUESTIONS, **{f"trapped_{action}": _trapped_question(action) for action in ORDER}}
 
 
-def _pick_two_step(values: dict) -> str:
+def _pick_step2(values: dict) -> str:
     """Lowest risk that the move or the move after it lands on a gap, then lowest P(gap); ties in ORDER."""
     def risk(action: str) -> tuple[float, float]:
         gap, trapped = values[f"gap_{action}"], values[f"trapped_{action}"]
@@ -98,20 +98,20 @@ def _pick_two_step(values: dict) -> str:
     return min(ORDER, key=risk)
 
 
-TWO_STEP = QuestionSet("two_step", "lowest_two_step_risk",
+STEP2 = QuestionSet("step2", "lowest_two_step_risk",
                        "eight yes/no questions a row: each move's landing, and whether it leaves a way on",
-                       _build_two_step, _pick_two_step)
+                       _build_step2, _pick_step2)
 
 
-# reader: one Noul per visible tile; the reference solver plans over the tiles read as gaps
-def _build_reader(rules: Rules) -> dict:
+# map: one Noul per visible tile; the reference solver plans over the tiles read as gaps
+def _build_map(rules: Rules) -> dict:
     return {tile_id(row, offset): {"type": "noul",
                                    "instructions": f"Is offset {offset} of `ahead[{row - 1}]` a gap, that is, does "
                                                    f"`ahead[{row - 1}].gaps_relative` contain {offset}?"}
             for row in range(1, rules.lookahead + 1) for offset in range(-rules.window, rules.window + 1)}
 
 
-def _pick_reader(values: dict) -> str:
+def _pick_map(values: dict) -> str:
     """The tiles read as more likely gap than floor become the picture the solver plans over."""
     tiles = {parse_tile_id(qid): p for qid, p in values.items()}
     rows = max(row for row, _ in tiles)
@@ -121,8 +121,8 @@ def _pick_reader(values: dict) -> str:
     return solve(senses, window)
 
 
-READER = QuestionSet("reader", "solver_over_read_tiles",
+MAP = QuestionSet("map", "solver_over_read_tiles",
                      "reads every visible tile (a yes/no question each), then plans like the solver",
-                     _build_reader, _pick_reader)
+                     _build_map, _pick_map)
 
-SETS = {s.name: s for s in (COMPOSED, CHOICE, TWO_STEP, READER)}
+SETS = {s.name: s for s in (STEP1, GUIDED, STEP2, MAP)}

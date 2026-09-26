@@ -7,18 +7,18 @@ const SAFE = { left: 6, stay: 6, right: 6, jump: 6 };
 const running = (id, depths) => ({ id, status: "running", frame: { solver_depths: { ...SAFE, ...depths } } });
 
 test("three runners on the start tile are translucent, fanned out and their tags stack", () => {
-  const out = overlaps([at("fly", 0, 6), at("jev_composed", 0, 6), at("haiku", 0, 6)], 12);
+  const out = overlaps([at("fly", 0, 6), at("jev_step1", 0, 6), at("haiku_plain", 0, 6)], 12);
   assert.deepEqual(out.fly, { alpha: OVERLAP_ALPHA, fan: -1, stack: 0 });
-  assert.deepEqual(out.jev_composed, { alpha: OVERLAP_ALPHA, fan: 0, stack: 1 });
-  assert.deepEqual(out.haiku, { alpha: OVERLAP_ALPHA, fan: 1, stack: 2 });
+  assert.deepEqual(out.jev_step1, { alpha: OVERLAP_ALPHA, fan: 0, stack: 1 });
+  assert.deepEqual(out.haiku_plain, { alpha: OVERLAP_ALPHA, fan: 1, stack: 2 });
   assert.equal(OVERLAP_ALPHA, 0.55);
 });
 
 test("a runner alone on its tile is opaque and where it stands", () => {
-  const out = overlaps([at("fly", 4, 5), at("jev_composed", 4, 6), at("haiku", 4, 6.4)], 12);
+  const out = overlaps([at("fly", 4, 5), at("jev_step1", 4, 6), at("haiku_plain", 4, 6.4)], 12);
   assert.deepEqual(out.fly, { alpha: 1, fan: 0, stack: 0 });
-  assert.deepEqual(out.jev_composed, { alpha: OVERLAP_ALPHA, fan: -0.5, stack: 0 }); // within half a lane of haiku
-  assert.deepEqual(out.haiku, { alpha: OVERLAP_ALPHA, fan: 0.5, stack: 1 });
+  assert.deepEqual(out.jev_step1, { alpha: OVERLAP_ALPHA, fan: -0.5, stack: 0 }); // within half a lane of haiku
+  assert.deepEqual(out.haiku_plain, { alpha: OVERLAP_ALPHA, fan: 0.5, stack: 1 });
 });
 
 test("overlap needs the same row, and lanes are compared round the ring", () => {
@@ -49,34 +49,34 @@ test("safe actions are the ones the solver does not see landing on a gap", () =>
 });
 
 test("auto-focus cuts to the runner in danger, the one with the fewest safe actions", () => {
-  const states = [running("fly", { stay: 0 }), running("jev_composed", { stay: 0, left: 0 }), running("haiku", {})];
-  assert.deepEqual(autoFocus("haiku", states, 0, 10), { focus: "jev_composed", heldSince: 10 });
-  const tie = [running("fly", { stay: 0 }), running("jev_composed", { jump: 0 }), running("haiku", {})];
-  assert.deepEqual(autoFocus("jev_composed", tie, 0, 10), { focus: "jev_composed", heldSince: 0 }); // a tie stays
-  assert.deepEqual(autoFocus("haiku", tie, 0, 10), { focus: "fly", heldSince: 10 }); // else panel order
+  const states = [running("fly", { stay: 0 }), running("jev_step1", { stay: 0, left: 0 }), running("haiku_plain", {})];
+  assert.deepEqual(autoFocus("haiku_plain", states, 0, 10), { focus: "jev_step1", heldSince: 10 });
+  const tie = [running("fly", { stay: 0 }), running("jev_step1", { jump: 0 }), running("haiku_plain", {})];
+  assert.deepEqual(autoFocus("jev_step1", tie, 0, 10), { focus: "jev_step1", heldSince: 0 }); // a tie stays
+  assert.deepEqual(autoFocus("haiku_plain", tie, 0, 10), { focus: "fly", heldSince: 10 }); // else panel order
 });
 
 test("auto-focus holds for three rows so it does not flicker", () => {
-  const states = [running("fly", { stay: 0 }), running("haiku", {})];
+  const states = [running("fly", { stay: 0 }), running("haiku_plain", {})];
   assert.equal(HOLD_ROWS, 3);
-  assert.deepEqual(autoFocus("haiku", states, 10, 12.9), { focus: "haiku", heldSince: 10 });
-  assert.deepEqual(autoFocus("haiku", states, 10, 13), { focus: "fly", heldSince: 13 });
-  assert.deepEqual(autoFocus("haiku", states, 10, 4), { focus: "fly", heldSince: 4 }); // scrubbed back: the hold is void
+  assert.deepEqual(autoFocus("haiku_plain", states, 10, 12.9), { focus: "haiku_plain", heldSince: 10 });
+  assert.deepEqual(autoFocus("haiku_plain", states, 10, 13), { focus: "fly", heldSince: 13 });
+  assert.deepEqual(autoFocus("haiku_plain", states, 10, 4), { focus: "fly", heldSince: 4 }); // scrubbed back: the hold is void
 });
 
 test("auto-focus leaves a runner that is no longer running once its hold is over", () => {
   const dead = { id: "fly", status: "dead", frame: { solver_depths: { left: 0, stay: 0, right: 0, jump: 0 } } };
-  const calm = [dead, running("jev_composed", {}), running("haiku", {})];
+  const calm = [dead, running("jev_step1", {}), running("haiku_plain", {})];
   assert.deepEqual(autoFocus("fly", calm, 58, 60), { focus: "fly", heldSince: 58 }); // the fall is still being read
-  assert.deepEqual(autoFocus("fly", calm, 58, 61), { focus: "jev_composed", heldSince: 61 }); // then on to the living
-  const over = [dead, { ...running("haiku", {}), status: "finished" }];
+  assert.deepEqual(autoFocus("fly", calm, 58, 61), { focus: "jev_step1", heldSince: 61 }); // then on to the living
+  const over = [dead, { ...running("haiku_plain", {}), status: "finished" }];
   assert.deepEqual(autoFocus("fly", over, 58, 300), { focus: "fly", heldSince: 58 }); // nobody left to cut to
 });
 
 test("auto-focus ignores the fallen and stays put when nobody is in danger", () => {
   const dead = { id: "fly", status: "dead", frame: { solver_depths: { left: 0, stay: 0, right: 0, jump: 0 } } };
-  assert.deepEqual(autoFocus("haiku", [dead, running("haiku", {})], 0, 50), { focus: "haiku", heldSince: 0 });
-  assert.deepEqual(autoFocus(null, [dead, running("haiku", {})], 0, 50), { focus: "haiku", heldSince: 50 }); // nothing chosen yet: someone running
+  assert.deepEqual(autoFocus("haiku_plain", [dead, running("haiku_plain", {})], 0, 50), { focus: "haiku_plain", heldSince: 0 });
+  assert.deepEqual(autoFocus(null, [dead, running("haiku_plain", {})], 0, 50), { focus: "haiku_plain", heldSince: 50 }); // nothing chosen yet: someone running
   assert.deepEqual(autoFocus(null, [dead], 0, 50), { focus: "fly", heldSince: 50 }); // or whoever there is
   assert.deepEqual(autoFocus(null, [], 0, 0), { focus: null, heldSince: 0 });
 });

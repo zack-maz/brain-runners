@@ -5,10 +5,10 @@ from bakeoff.errors import BudgetExhausted
 from bakeoff.game.engine import Game
 from bakeoff.game.track import generate_track
 from bakeoff.players import PAID, make_player
-from bakeoff.players.jev_composed import ORDER, QUESTIONS, JevComposedPlayer, pick
+from bakeoff.players.jev_step1 import ORDER, QUESTIONS, JevStep1Player, pick
 from bakeoff.runner import Runner
 from bakeoff.senses import LANDS, compute_senses, lands_on_gap
-from tests.fakes import FakeTypeSafe, jev_composed_reply
+from tests.fakes import FakeTypeSafe, jev_step1_reply
 
 
 def senses_for(seed=3):
@@ -17,7 +17,7 @@ def senses_for(seed=3):
 
 def player(tmp_path, reply, cap=10):
     sdk = FakeTypeSafe(reply)
-    return JevComposedPlayer(cache=DiskCache(tmp_path), budget=RequestBudget(cap), sdk=sdk), sdk
+    return JevStep1Player(cache=DiskCache(tmp_path), budget=RequestBudget(cap), sdk=sdk), sdk
 
 
 def test_four_pointed_nouls_one_per_action_worded_as_in_the_spike():
@@ -32,15 +32,15 @@ def test_four_pointed_nouls_one_per_action_worded_as_in_the_spike():
 
 
 def test_it_is_a_paid_player_in_the_registry(tmp_path):
-    assert "jev_composed" in PAID
-    made = make_player("jev_composed", cache=DiskCache(tmp_path), budget=RequestBudget(0))
-    assert isinstance(made, JevComposedPlayer) and made.name == "jev_composed" and made.model == "jev-latest"
+    assert "jev_step1" in PAID
+    made = make_player("jev_step1", cache=DiskCache(tmp_path), budget=RequestBudget(0))
+    assert isinstance(made, JevStep1Player) and made.name == "jev_step1" and made.model == "jev-latest"
 
 
 def test_the_sdk_gets_the_senses_and_four_typed_nouls_in_one_request(tmp_path):
     from typesafe_sdk import Noul
 
-    jev, sdk = player(tmp_path, jev_composed_reply())
+    jev, sdk = player(tmp_path, jev_step1_reply())
     senses = senses_for()
     jev.act(senses)
     (call,) = sdk.calls
@@ -51,7 +51,7 @@ def test_the_sdk_gets_the_senses_and_four_typed_nouls_in_one_request(tmp_path):
 
 
 def test_the_move_is_the_action_least_likely_to_land_on_a_gap(tmp_path):
-    jev, _ = player(tmp_path, jev_composed_reply(left=0.9, stay=0.8, right=0.03, jump=0.4))
+    jev, _ = player(tmp_path, jev_step1_reply(left=0.9, stay=0.8, right=0.03, jump=0.4))
     decision = jev.act(senses_for())
     assert decision.chosen_action == "right" and not decision.needs_fallback and not decision.gated
     assert decision.questions == QUESTIONS
@@ -72,15 +72,15 @@ def test_ties_after_rounding_to_two_decimals_go_in_the_solvers_order():
 
 
 def test_it_is_never_gated_even_when_every_action_looks_fatal(tmp_path):
-    jev, _ = player(tmp_path, jev_composed_reply(left=0.99, stay=0.98, right=0.99, jump=0.99))
+    jev, _ = player(tmp_path, jev_step1_reply(left=0.99, stay=0.98, right=0.99, jump=0.99))
     decision = jev.act(senses_for())
     assert decision.chosen_action == "stay" and not decision.gated and not decision.needs_fallback
 
 
 @pytest.mark.parametrize("broken", [None, "0.2", True, float("nan"), {"type": "noul"}])
 def test_a_missing_or_non_numeric_noul_is_invalid_never_half_a_judgment(tmp_path, broken):
-    jev, _ = player(tmp_path, jev_composed_reply())
-    answers = jev_composed_reply(right=0.0)["answers"]
+    jev, _ = player(tmp_path, jev_step1_reply())
+    answers = jev_step1_reply(right=0.0)["answers"]
     answers["gap_jump"] = broken if isinstance(broken, dict) else {"type": "noul", "noul": broken}
     action, invalid, logged = jev.read({"answers": answers})
     assert action is None and invalid and logged == answers
@@ -88,7 +88,7 @@ def test_a_missing_or_non_numeric_noul_is_invalid_never_half_a_judgment(tmp_path
 
 
 def test_an_invalid_answer_is_logged_and_left_to_the_runners_fallback(tmp_path):
-    reply = jev_composed_reply(right=0.0)
+    reply = jev_step1_reply(right=0.0)
     del reply["answers"]["gap_jump"]
     jev, _ = player(tmp_path, reply)
     decision = jev.act(senses_for())
@@ -98,7 +98,7 @@ def test_an_invalid_answer_is_logged_and_left_to_the_runners_fallback(tmp_path):
 
 
 def test_the_same_senses_are_answered_from_the_cache_without_spending(tmp_path):
-    jev, sdk = player(tmp_path, jev_composed_reply(left=0.0))
+    jev, sdk = player(tmp_path, jev_step1_reply(left=0.0))
     senses = senses_for()
     jev.act(senses)
     again = jev.act(senses)
@@ -106,13 +106,13 @@ def test_the_same_senses_are_answered_from_the_cache_without_spending(tmp_path):
     assert len(sdk.calls) == 1 and jev.budget.used == 1
 
 
-def test_the_one_shot_jev_never_answers_from_the_composed_jevs_cache(tmp_path):
+def test_jev_plain_never_answers_from_jev_step1s_cache(tmp_path):
     from bakeoff.players.jev import JevPlayer
     from tests.fakes import jev_reply
 
-    composed, _ = player(tmp_path, jev_composed_reply())
+    step1, _ = player(tmp_path, jev_step1_reply())
     senses = senses_for()
-    composed.act(senses)
+    step1.act(senses)
     one_shot = JevPlayer(cache=DiskCache(tmp_path), budget=RequestBudget(0), sdk=FakeTypeSafe(jev_reply()))
     with pytest.raises(BudgetExhausted):  # same provider, model and senses, other questions: another key
         one_shot.act(senses)
@@ -125,7 +125,7 @@ def test_a_provider_error_becomes_a_logged_error_and_the_cap_ends_the_run(tmp_pa
     decision = jev.act(senses_for())
     assert decision.chosen_action is None and decision.error == "TypeSafeAPIConnectionError: connection refused"
     assert decision.info is None and decision.questions == QUESTIONS
-    capped, sdk = player(tmp_path / "other", jev_composed_reply(), cap=0)
+    capped, sdk = player(tmp_path / "other", jev_step1_reply(), cap=0)
     with pytest.raises(BudgetExhausted):
         capped.act(senses_for())
     assert sdk.calls == []
@@ -135,13 +135,13 @@ class TruthfulTypeSafe(FakeTypeSafe):
     """Answers the four questions from the state it is sent, as a Jev that reads the track perfectly would."""
 
     def system_one(self, state, questions, model=None):
-        self.reply = jev_composed_reply(**{action: float(lands_on_gap(state, action)) for action in LANDS})
+        self.reply = jev_step1_reply(**{action: float(lands_on_gap(state, action)) for action in LANDS})
         return super().system_one(state, questions, model)
 
 
 def test_with_perfect_answers_it_runs_a_practice_track_through_the_runner(tmp_path):
     sdk = TruthfulTypeSafe(None)
-    jev = JevComposedPlayer(cache=DiskCache(tmp_path), budget=RequestBudget(100), sdk=sdk)
+    jev = JevStep1Player(cache=DiskCache(tmp_path), budget=RequestBudget(100), sdk=sdk)
     records = Runner(tmp_path / "runs").run_seed(jev, 1001, "r", max_rows=60)
     assert records[-1]["finished"] and records[-1]["rows_survived"] == 60
     assert all(r["executed_action"] == r["chosen_action"] and not r["invalid"] for r in records)

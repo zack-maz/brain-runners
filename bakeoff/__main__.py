@@ -19,7 +19,7 @@ from bakeoff.runner import RunAborted, Runner
 from bakeoff.session import FIRST_PRACTICE_SEED, LiveSession, LobbyError
 from bakeoff.view import render_html
 
-DEMO_PLAYERS = "fly,jev_composed,haiku"  # the demo's three: what the lobby offers first
+DEMO_PLAYERS = "fly,jev_step1,haiku_plain"  # the demo's three: what the lobby offers first
 DEMO_SEED = 1001
 
 

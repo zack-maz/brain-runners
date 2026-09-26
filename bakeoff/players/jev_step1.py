@@ -1,8 +1,8 @@
-"""Composed Jev: one request per row with four pointed yes/no questions, one per action ("would this
-action land on a gap?", naming the value to look up), and code that picks the action Jev thinks is
-least likely to land on a gap. OURS, not TypeSafe's: the wording of the questions and the rule that
+"""jev_step1 (Jev asked the step1 set; `jev_composed` until decision 44): one request per row with
+four pointed yes/no questions, one per action ("would this action land on a gap?", naming the value
+to look up), and code that picks the action Jev thinks is least likely to land on a gap. OURS, not TypeSafe's: the wording of the questions and the rule that
 turns four answers into a move (docs/DECISIONS.md, decisions 14 and 15). It looks one step ahead only;
-it does not plan. The one-shot `jev` stays as it was, for comparison."""
+it does not plan. `jev_plain`, the one broad question, stays as it was, for comparison."""
 
 from __future__ import annotations
 
@@ -29,8 +29,8 @@ def pick(nouls: dict[str, float]) -> str:
     return min(ORDER, key=lambda action: round(nouls[action], 2))
 
 
-class JevComposedPlayer(PaidPlayer):
-    name = "jev_composed"
+class JevStep1Player(PaidPlayer):
+    name = "jev_step1"
     client_class = JevClient
     questions = QUESTIONS
 

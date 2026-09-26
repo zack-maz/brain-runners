@@ -8,13 +8,14 @@
     ["DNa01", "steering"], ["DNb01", "steering"], ["DNp01", "Giant Fiber, escape jump"], ["DNa02", "logged only"],
   ];
   // the short uppercase tag a runner carries in the tunnel and on its panel
-  const TAGS = { fly: "FLY", fly2: "FLY2", jev_composed: "JEV", haiku: "HAIKU", jev: "JEV ONE-SHOT", glm: "GLM ONE-SHOT", solver: "SOLVER", random: "RANDOM", always_jump: "JUMPER",
-    jev_choice: "JEV CHOICE", jev_two_step: "JEV 2-STEP", jev_reader: "JEV READER", haiku_composed: "HAIKU COMPOSED",
-    haiku_choice: "HAIKU CHOICE", haiku_two_step: "HAIKU 2-STEP", haiku_reader: "HAIKU READER",
-    glm_composed: "GLM COMPOSED", glm_choice: "GLM CHOICE", glm_two_step: "GLM 2-STEP", glm_reader: "GLM READER" };
+  const TAGS = { fly: "FLY", fly2: "FLY2", solver: "SOLVER", random: "RANDOM", always_jump: "JUMPER",
+    jev_plain: "JEV PLAIN", jev_guided: "JEV GUIDED", jev_step1: "JEV STEP 1", jev_step2: "JEV STEP 2", jev_map: "JEV MAP",
+    haiku_plain: "HAIKU PLAIN", haiku_guided: "HAIKU GUIDED", haiku_step1: "HAIKU STEP 1", haiku_step2: "HAIKU STEP 2",
+    haiku_map: "HAIKU MAP",
+    glm_plain: "GLM PLAIN", glm_guided: "GLM GUIDED", glm_step1: "GLM STEP 1", glm_step2: "GLM STEP 2", glm_map: "GLM MAP" };
   // players that ask a question set (bakeoff/players/question_sets.py): Jev, Claude Haiku or GLM, and the set's name
-  const SET_PLAYER = /^(jev|haiku|glm)_(composed|choice|two_step|reader)$/;
-  const isSetPlayer = (player) => SET_PLAYER.test(player) && player !== "jev_composed";
+  const SET_PLAYER = /^(jev|haiku|glm)_(step1|guided|step2|map)$/;
+  const isSetPlayer = (player) => SET_PLAYER.test(player) && player !== "jev_step1";
   const tagOf = (player) => TAGS[player] || String(player).toUpperCase();
   const DEATHS = {
     ran_into_gap: "ran straight into a gap",
@@ -191,8 +192,8 @@
     return html + '<p class="muted">The two yes/no questions are asked alongside the move and never influence it.</p>';
   }
 
-  // Composed Jev: four yes/no answers, one per action, and the rule that turns them into a move.
-  function jevComposedMind(frame) {
+  // jev_step1: four yes/no answers, one per action, and the rule that turns them into a move.
+  function jevStep1Mind(frame) {
     const answers = frame.answers;
     if (!answers) return "";
     const rows = ACTIONS.map((a) => {
@@ -207,7 +208,7 @@
       ". The wording and that rule are ours. It looks one step ahead only.</p>";
   }
 
-  // How sure the composed Jev was that the move it chose does not land on a gap (the visor's slit), or null
+  // How sure jev_step1 was that the move it chose does not land on a gap (the visor's slit), or null
   function visorP(frame) {
     const answer = (frame.answers || {})["gap_" + frame.chosen_action];
     return answer && typeof answer.noul === "number" ? 1 - answer.noul : null;
@@ -323,9 +324,9 @@
   function mind(episode, frame, context) {
     const body = episode.player === "fly" ? flyMind(frame, context)
       : episode.player === "fly2" ? fly2Mind(frame, context)
-      : episode.player === "jev" ? jevMind(frame)
-      : episode.player === "jev_composed" ? jevComposedMind(frame)
-      : episode.player === "haiku" || episode.player === "glm" ? chatMind(frame)
+      : episode.player === "jev_plain" ? jevMind(frame)
+      : episode.player === "jev_step1" ? jevStep1Mind(frame)
+      : episode.player === "haiku_plain" || episode.player === "glm_plain" ? chatMind(frame)
       : isSetPlayer(episode.player) ? setMind(frame) : "";
     return '<div class="saw">' + sensesGrid(frame, context.window) + verdict(frame) + "</div>" + body + cost(frame) + asked(episode, frame);
   }
@@ -339,7 +340,7 @@
     return "row " + Math.floor(state.row) + ", lane " + (((Math.round(state.lane) % lanes) + lanes) % lanes);
   }
 
-  const api = { esc, cell, bar, tagOf, sensesGrid, verdict, spikeRaster, flyMind, fly2Mind, oursFly2, jevMind, jevComposedMind, visorP, chatMind, cost, asked,
+  const api = { esc, cell, bar, tagOf, sensesGrid, verdict, spikeRaster, flyMind, fly2Mind, oursFly2, jevMind, jevStep1Mind, visorP, chatMind, cost, asked,
                 ours, mind, statusLine, isSetPlayer, readGrid, setMind };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Minds = api;

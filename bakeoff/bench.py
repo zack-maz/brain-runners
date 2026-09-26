@@ -24,7 +24,7 @@ class Source:
 
 
 def parse_source(arg: str) -> Source:
-    """`runs/X` or `runs/X:haiku,jev_composed`. The last `:` separates the players, unless what follows it is a path."""
+    """`runs/X` or `runs/X:haiku_plain,jev_step1`. The last `:` separates the players, unless what follows it is a path."""
     path, sep, names = arg.rpartition(":")
     if not sep or "/" in names:
         return Source(Path(arg), None)

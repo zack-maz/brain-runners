@@ -72,11 +72,11 @@
   // through) crossed with a model (who is asked). Both are ours except the models themselves, and
   // this is the one place the page says what each row and column means.
   const SETS = [
-    { key: "composed", title: "Four yes/no questions", says: "Would each move land on a gap? Code picks the move least likely to. One step ahead." },
-    { key: "choice", title: "One choice", says: "One question over the four moves, naming the tile each would land on. Code takes its favourite." },
-    { key: "two_step", title: "Eight questions, two moves ahead", says: "Each move's landing, and whether it leaves a way on. Code takes the lowest combined risk." },
-    { key: "reader", title: "Reads every tile", says: "One question per visible tile (42 of them), then code plans a path through what it read, like the solver." },
-    { key: "", title: "One broad question", says: "\u201cWhich move?\u201d, asked once, with no pointed question under it. Kept because it is how this started." },
+    { key: "step1", title: "Step 1", says: "Would each move land on a gap? Code picks the move least likely to. One step ahead." },
+    { key: "guided", title: "Guided", says: "One question over the four moves, naming the tile each would land on. Code takes its favourite." },
+    { key: "step2", title: "Step 2", says: "Each move's landing, and whether it leaves a way on. Code takes the lowest combined risk." },
+    { key: "map", title: "Map", says: "One question per visible tile (42 of them), then code plans a path through what it read, like the solver." },
+    { key: "plain", title: "Plain", says: "\u201cWhich move?\u201d, asked once, with no pointed question under it. Kept because it is how this started." },
   ];
   const MODELS = [
     { key: "jev", title: "Jev", says: "TypeSafe\u2019s System One model: answers are probabilities, made in parallel, each blind to the others." },
@@ -118,9 +118,7 @@
 
   // the name of the player at (set, model), or null where there is none
   function playerAt(set, model) {
-    if (set === "") return model;                                    // jev, haiku, glm
-    if (set === "composed" && model === "jev") return "jev_composed"; // its own class, same questions
-    return model + "_" + set;
+    return model + "_" + set; // jev_step1 is its own class, with the same questions as the others' step1
   }
 
   // What a cell says under its tick: what it costs, what is left, whether this track was played.
@@ -136,7 +134,7 @@
     return notes.join(" \u00b7 ");
   }
 
-  // A cell names the player as the command line does (`jev_composed`), because the row and the column
+  // A cell names the player as the command line does (`jev_step1`), because the row and the column
   // already say what it is asked and who is asked; its tag would only repeat them, and disagree.
   function cell(player, chosen) {
     if (!player) return '<td class="none" aria-label="no such player">\u2014</td>';

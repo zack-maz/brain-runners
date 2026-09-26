@@ -1,8 +1,8 @@
 """Players that ask a question set (bakeoff/players/question_sets.py): `jev_<set>` asks Jev, `haiku_<set>` asks
 Claude Haiku and `glm_<set>` asks GLM Flash the same questions, and the set's rule picks the move from any of their
 answers. The two chat models are sent the same request, built once in ChatSetPlayer, so only the model differs.
-The same cache, cap, error and fallback rules as every paid player (PaidPlayer). The composed set's Jev is
-`jev_composed`, which stays its own class."""
+The same cache, cap, error and fallback rules as every paid player (PaidPlayer). The step1 set's Jev is
+`jev_step1`, which stays its own class."""
 
 from __future__ import annotations
 
@@ -15,9 +15,9 @@ from bakeoff.game.engine import Game
 from bakeoff.game.rules import DEFAULT, RULES
 from bakeoff.players.base import Decision
 from bakeoff.players.briefing import RULES as BRIEFING
-from bakeoff.players.jev_composed import ORDER
+from bakeoff.players.jev_step1 import ORDER
 from bakeoff.players.paid import PaidPlayer, unfenced
-from bakeoff.players.question_sets import CHOICE, COMPOSED, READER, TWO_STEP, QuestionSet, values_of
+from bakeoff.players.question_sets import GUIDED, STEP1, MAP, STEP2, QuestionSet, values_of
 
 
 CHAT_SYSTEM = (BRIEFING + " The user message is the runner's current view as JSON. Answer every question below, "
@@ -112,50 +112,50 @@ class GlmSetPlayer(ChatSetPlayer):
     client_class = GlmClient
 
 
-class JevChoicePlayer(JevSetPlayer):
-    name, question_set = "jev_choice", CHOICE
+class JevGuidedPlayer(JevSetPlayer):
+    name, question_set = "jev_guided", GUIDED
 
 
-class JevTwoStepPlayer(JevSetPlayer):
-    name, question_set = "jev_two_step", TWO_STEP
+class JevStep2Player(JevSetPlayer):
+    name, question_set = "jev_step2", STEP2
 
 
-class JevReaderPlayer(JevSetPlayer):
-    name, question_set = "jev_reader", READER
+class JevMapPlayer(JevSetPlayer):
+    name, question_set = "jev_map", MAP
 
 
-class HaikuComposedPlayer(HaikuSetPlayer):
-    name, question_set = "haiku_composed", COMPOSED
+class HaikuStep1Player(HaikuSetPlayer):
+    name, question_set = "haiku_step1", STEP1
 
 
-class HaikuChoicePlayer(HaikuSetPlayer):
-    name, question_set = "haiku_choice", CHOICE
+class HaikuGuidedPlayer(HaikuSetPlayer):
+    name, question_set = "haiku_guided", GUIDED
 
 
-class HaikuTwoStepPlayer(HaikuSetPlayer):
-    name, question_set = "haiku_two_step", TWO_STEP
+class HaikuStep2Player(HaikuSetPlayer):
+    name, question_set = "haiku_step2", STEP2
 
 
-class HaikuReaderPlayer(HaikuSetPlayer):
-    name, question_set = "haiku_reader", READER
+class HaikuMapPlayer(HaikuSetPlayer):
+    name, question_set = "haiku_map", MAP
 
 
-class GlmComposedPlayer(GlmSetPlayer):
-    name, question_set = "glm_composed", COMPOSED
+class GlmStep1Player(GlmSetPlayer):
+    name, question_set = "glm_step1", STEP1
 
 
-class GlmChoicePlayer(GlmSetPlayer):
-    name, question_set = "glm_choice", CHOICE
+class GlmGuidedPlayer(GlmSetPlayer):
+    name, question_set = "glm_guided", GUIDED
 
 
-class GlmTwoStepPlayer(GlmSetPlayer):
-    name, question_set = "glm_two_step", TWO_STEP
+class GlmStep2Player(GlmSetPlayer):
+    name, question_set = "glm_step2", STEP2
 
 
-class GlmReaderPlayer(GlmSetPlayer):
-    name, question_set = "glm_reader", READER
+class GlmMapPlayer(GlmSetPlayer):
+    name, question_set = "glm_map", MAP
 
 
-SET_PLAYERS = (JevChoicePlayer, JevTwoStepPlayer, JevReaderPlayer,
-               HaikuComposedPlayer, HaikuChoicePlayer, HaikuTwoStepPlayer, HaikuReaderPlayer,
-               GlmComposedPlayer, GlmChoicePlayer, GlmTwoStepPlayer, GlmReaderPlayer)
+SET_PLAYERS = (JevGuidedPlayer, JevStep2Player, JevMapPlayer,
+               HaikuStep1Player, HaikuGuidedPlayer, HaikuStep2Player, HaikuMapPlayer,
+               GlmStep1Player, GlmGuidedPlayer, GlmStep2Player, GlmMapPlayer)

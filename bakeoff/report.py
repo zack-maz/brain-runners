@@ -88,7 +88,7 @@ def _cost_usd(model: str | None, input_tokens: int, output_tokens: int) -> float
 
 
 def _truth(step: dict, noul: str) -> bool | None:
-    """The logged `ground_truth` for the one-shot Jev's two Nouls. The question sets' Nouls (`gap_<action>`,
+    """The logged `ground_truth` for jev_plain's two Nouls. The question sets' Nouls (`gap_<action>`,
     `trapped_<action>`, `tile_r<row>_<side>`) ask what the senses show, so their truth is read from the
     record's senses (bakeoff.senses.truth_of)."""
     truth = (step.get("ground_truth") or {}).get(noul)
