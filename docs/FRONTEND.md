@@ -167,10 +167,9 @@ we found in my own words, as well as my opinions and thoughts. That can wait to 
 - **Open, for the user:**
   - The mind panels' tags now read "JEV STEP 1", "HAIKU PLAIN" (the rename made them systematic; the demo's short
     "JEV", "HAIKU" can come back).
-  - `docs/COSTS.md`'s measured tables were renamed to the new names with a note; keep, or restore them word for
-    word.
-  - `docs/UPDATES.md` item 2, the user's own words, now uses the new names; keep or restore.
-  - Four uncommitted edits in this worktree under `docs/research/2026-09-24-fly/` (the path `flywire/brain` became
-    `flywire/motg-flywire`) were not made by this work; left uncommitted until the user says whose they are.
+  - Settled 2026-09-25: `docs/COSTS.md`'s tables and `docs/UPDATES.md` item 2 keep the new names (with the note
+    that the runs were recorded under the old ones).
+  - The four uncommitted edits under `docs/research/2026-09-24-fly/` (`flywire/brain` became `flywire/motg-flywire`)
+    are the user's own; this work leaves them for the user to commit.
   - Merging: the other session (fly2's tracks, `fly2-settle`) edits `docs/NEXT.md` too, so whichever branch merges
     second merges that file by hand; that session should hear about decision 44.
