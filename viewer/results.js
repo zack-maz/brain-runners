@@ -115,6 +115,7 @@
       title: labelOf(roster, r.entry.player),
       rows: single ? (r.entry.tracks[0] ? r.entry.tracks[0].rows : 0) : (r.entry.mean_rows == null ? "-" : r.entry.mean_rows.toFixed(1)),
       rowsWord: single ? "rows" : "rows a track", death: death(r.entry, single), stopped: r.stopped,
+      finished: single ? !!(r.entry.tracks[0] && r.entry.tracks[0].finished) : false,
       perRow: perRow(r.entry.s_per_row), requests: requestsText(r.entry, roster), cost: costText(r.entry),
       paid: !!(r.entry.paid && r.entry.price_usd > 0),
     }));
@@ -189,19 +190,20 @@
 
   // ---- the markup --------------------------------------------------------------------------------
   function cardsHtml(list, more) {
-    return list.map((c, i) => '<article class="card' + (c.top ? " top" : "") + (c.stopped ? " stopped" : "") + '" style="animation-delay:' +
+    // a finish is not a death: only a fall is --bad, and a stopped run is --warn
+    return list.map((c, i) => '<article class="card' + (c.top ? " leader" : "") + (c.stopped ? " stopped" : "") + '" style="animation-delay:' +
       i * 90 + 'ms"><div class="card-top"><span class="place">' + c.place + '</span><span class="label who">' + esc(c.label) +
       "</span></div>" + (more ? "" : '<div class="art"><canvas class="sprite" data-player="' + esc(c.player) + '" data-px="11"></canvas></div>') +
       '<span class="title">' + esc(c.title) + '</span><span class="player">' + esc(c.player) + "</span>" +
       '<div class="rows"><span class="n">' + esc(c.rows) + '</span><span class="word">' + esc(c.rowsWord) + '</span><span class="death' +
-      (c.stopped ? " warn" : " bad") + '">' + esc(c.death) + "</span></div>" +
+      (c.stopped ? " warn" : c.finished ? "" : " bad") + '">' + esc(c.death) + "</span></div>" +
       '<div class="stats"><span><span class="label">Per row</span>' + esc(c.perRow) + '</span><span><span class="label">Requests</span>' +
       esc(c.requests) + '</span><span><span class="label">Cost</span><span class="' + (c.paid ? "warn" : "muted") + '">' + esc(c.cost) +
       "</span></span></div></article>").join("");
   }
 
   function barsHtml(list, colourOf) {
-    return list.map((b) => '<div class="bar' + (b.yardstick ? " yardstick" : "") + '"><span class="name">' + esc(b.name) + "</span>" +
+    return list.map((b) => '<div class="result-bar' + (b.yardstick ? " yardstick" : "") + '"><span class="name">' + esc(b.name) + "</span>" +
       '<span class="track"><span class="fill" style="width:' + (b.width * 100).toFixed(2) + "%" +
       (b.yardstick ? "" : ";background:" + esc(colourOf(b.player) || "#3A4046")) + '"></span></span>' +
       '<span class="n">' + esc(typeof b.rows === "number" && !Number.isInteger(b.rows) ? b.rows.toFixed(1) : b.rows) + "</span></div>").join("");

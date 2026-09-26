@@ -33,7 +33,7 @@ test("the cards are ranked by rows survived, each keeping its slot's label", () 
   assert.deepEqual(cards.map((c) => [c.place, c.label, c.title, c.rows]),
     [[1, "P2", "Jev · Guided", 94], [2, "P3", "Haiku · Guided", 93], [3, "P1", "Fly · Sideways", 72]]);
   assert.deepEqual(cards[0], { place: 1, top: true, label: "P2", player: "jev_guided", title: "Jev · Guided", rows: 94,
-                               rowsWord: "rows", death: "Jumped into a gap · row 94", stopped: false, perRow: "175 ms",
+                               rowsWord: "rows", death: "Jumped into a gap · row 94", stopped: false, finished: false, perRow: "175 ms",
                                requests: "81", cost: "0.0032 USD", paid: true }); // Lobby.usd, the page's one way to write money
   assert.equal(cards[2].requests, "none (simulated)");
   assert.equal(cards[2].cost, "free");
@@ -49,6 +49,8 @@ test("ties share a place, and a stopped runner comes last and is never a death",
   const cards = Results.cards(tied, ROSTER);
   assert.deepEqual(cards.map((c) => [c.player, c.place]), [["jev_guided", 1], ["haiku_guided", 1], ["glm_plain", 3], ["fly2", 4]]);
   assert.equal(cards[0].death, "Reached the finish line");
+  assert.equal(cards[0].finished, true);
+  assert.match(Results.cardsHtml(cards, false), /<span class="death">Reached the finish line<\/span>/); // not --bad
   assert.equal(cards[3].death, "Stopped at row 140: not a death");
   assert.equal(cards[3].stopped, true);
   assert.equal(cards[3].top, false);
@@ -118,6 +120,6 @@ test("the header and the markup, every text escaped", () => {
   const html = Results.cardsHtml(Results.cards(evil, ROSTER), false) + Results.tableHtml(Results.table(evil, ROSTER)) +
     Results.barsHtml(Results.bars(evil, ROSTER), () => "#5FA35A");
   assert.equal(html.includes("<b>"), false);
-  assert.match(Results.cardsHtml(Results.cards(RESULTS, ROSTER), true), /^<article class="card top"/);
+  assert.match(Results.cardsHtml(Results.cards(RESULTS, ROSTER), true), /^<article class="card leader"/);
   assert.equal(Results.cardsHtml(Results.cards(RESULTS, ROSTER), true).includes("canvas"), false); // More numbers hides the art
 });

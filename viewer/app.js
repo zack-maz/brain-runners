@@ -420,8 +420,10 @@
     view.t = Math.min(end, view.t + ((now - lastTick) / 1000) * view.speed);
     lastTick = now;
     draw();
-    if (view.t >= end && store.ended) setPlaying(false);
-    else requestAnimationFrame(tick);
+    if (view.t >= end && store.ended) {
+      setPlaying(false);
+      if (window.Front) Front.reachedEnd(); // the tunnel on screen has shown the last row
+    } else requestAnimationFrame(tick);
   }
 
   function setPlaying(on) {
@@ -520,11 +522,13 @@
         (c === "player" ? "<th>" + cell(row[c]) + "</th>" : "<td>" + cell(row[c]) + "</td>")).join("") + "</tr>").join("") + "</tbody>";
     $("fairness").hidden = board.same_seeds;
     $("board").hidden = !board.rows.length; // a live run has no scoreboard until it ends
-    const flyRun = store.runs.find((run) => run.fly && (run.players || []).includes("fly")) || store.runs.find((run) => run.fly);
-    $("ours").innerHTML = Minds.ours(flyRun);
-    const fly2Run = store.runs.find((run) => run.fly2 && (run.players || []).includes("fly2"));
-    $("ours-fly2").innerHTML = Minds.oursFly2(fly2Run);
-    $("honesty-fly2").hidden = !fly2Run;
+    if (!liveUrl) { // live, the front writes these from the records' numbers, on the records screen
+      const flyRun = store.runs.find((run) => run.fly && (run.players || []).includes("fly")) || store.runs.find((run) => run.fly);
+      $("ours").innerHTML = Minds.ours(flyRun);
+      const fly2Run = store.runs.find((run) => run.fly2 && (run.players || []).includes("fly2"));
+      $("ours-fly2").innerHTML = Minds.oursFly2(fly2Run);
+      $("honesty-fly2").hidden = !fly2Run;
+    }
     $("runs").innerHTML = store.runs.map((run) => {
       const sha = run.git_sha ? run.git_sha.slice(0, 7) + (run.git_dirty ? ", uncommitted changes" : "") : "unknown commit";
       const status = run.status === "completed" ? "completed" : '<span class="warn">' + esc(run.status || "status unknown") + "</span>";
@@ -572,6 +576,24 @@
     },
     watch,
     watching: () => race.watching,
+    // a recorded run, from the start (Records' Watch): no stream, nothing more will arrive
+    load(replay) {
+      if (race.source) race.source.close();
+      race.source = null;
+      race.watching = null;
+      resetTo(replay);
+      store.ended = true;
+      setFollowingOff();
+      notice(null);
+      renderAll();
+    },
+    rewind() { // Watch the replay: the run just played, from row 0
+      setPlaying(false);
+      if (liveUrl) setFollowingOff();
+      view.t = 0;
+      draw();
+    },
+    atEnd: () => store.ended && view.t >= horizon(),
   };
 
   // ---- start --------------------------------------------------------------------------------

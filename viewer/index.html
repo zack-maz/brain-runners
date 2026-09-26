@@ -83,6 +83,59 @@
     </div>
   </div>
 </section>
+
+<section id="screen-results" class="screen results" hidden aria-label="Results">
+  <div class="screen-head"><span class="label" id="results-left"></span><h2 class="shout big">RESULTS</h2>
+    <span class="label bright" id="results-right"></span></div>
+  <p class="warn" id="results-why" hidden></p>
+  <div id="cards" class="cards"></div>
+  <div class="panel numbers-box">
+    <div class="numbers-head"><span class="label" id="numbers-title"></span><span class="warn small grow" id="results-warning"></span>
+      <button type="button" id="more" class="toggle" aria-expanded="false"></button></div>
+    <div id="numbers"></div>
+    <div id="failures"></div>
+    <p class="muted small" id="results-note" hidden></p>
+  </div>
+  <div class="results-actions">
+    <button type="button" id="again" class="launch small-launch"><span aria-hidden="true">&#9654;</span>Run again</button>
+    <button type="button" id="new-track" class="plain">New track</button>
+    <button type="button" id="to-fighters" class="plain">Fighters</button>
+    <button type="button" id="watch-replay" class="plain">Watch the replay</button>
+    <button type="button" id="results-records" class="plain">Records</button>
+    <button type="button" id="results-home" class="plain">Home</button>
+  </div>
+</section>
+
+<section id="screen-records" class="screen records" hidden aria-label="Records">
+  <div class="screen-head"><button type="button" class="back label" data-back id="records-back">&lsaquo; Home</button>
+    <h2 class="shout big">RECORDS</h2><button type="button" id="ours-toggle" class="toggle" aria-expanded="false">What is ours</button></div>
+  <p class="warn" id="records-why" hidden></p>
+  <div class="records-top">
+    <div class="panel board-box">
+      <div class="row"><span class="label" id="board-title"></span><span class="muted small">mean rows &middot; bar is the 95% interval</span></div>
+      <div id="leaderboard" class="board"></div>
+      <div id="board-notes" class="board-notes"></div>
+    </div>
+    <div class="panel pair-box">
+      <span class="label">Head to head</span>
+      <div id="chips" class="chips"></div>
+      <p class="muted small">Or pick two rows of the leaderboard.</p>
+      <div id="pair" class="pair"></div>
+    </div>
+  </div>
+  <div class="panel runs-box">
+    <div class="row"><span class="label">Past runs &middot; newest first</span><button type="button" id="all-runs" class="toggle"></button></div>
+    <div id="past" class="past-list"></div>
+  </div>
+  <div id="ours-panel" class="ours-panel" hidden>
+    <span class="label">What is ours, not theirs</span>
+    <p>Every question Jev, Haiku and GLM Flash are asked, and the code rule that turns their answers into a move, are ours: a skin is a question set plus its rule.</p>
+    <p>The flies are untrained and use only their innate wiring. How gaps become input to their eyes, which neurons we read as a turn or a jump, and the thresholds are ours, fixed on practice tracks and frozen.</p>
+    <p>Prices are our estimates per request; Jev is not billed per request.</p>
+    <div id="ours-slot"></div>
+    <button type="button" id="ours-close" class="toggle">Close</button>
+  </div>
+</section>
 </div>
 
 <main id="app" hidden>
@@ -240,6 +293,8 @@
 <script src="screens.js"></script>
 <script src="select.js"></script>
 <script src="trackpick.js"></script>
+<script src="results.js"></script>
+<script src="records.js"></script>
 <script src="front.js"></script>
 <script src="app.js"></script>
 </body>

@@ -76,8 +76,15 @@ def test_the_page_carries_the_chart_rules_the_analysis_tab_draws_with():
 def test_every_script_the_page_names_exists_and_app_comes_last():
     names = re.findall(r'<script src="([^"]+)"></script>', (VIEWER_DIR / "index.html").read_text())
     assert names == ["timeline.js", "tunnel.js", "sprites.js", "roster.js", "stage.js", "minds.js", "log.js", "picker.js", "tabs.js",
-                     "feed.js", "lobby.js", "bench.js", "bench_view.js", "screens.js", "select.js", "trackpick.js", "front.js", "app.js"]
+                     "feed.js", "lobby.js", "bench.js", "bench_view.js", "screens.js", "select.js", "trackpick.js", "results.js", "records.js", "front.js", "app.js"]
     assert all((VIEWER_DIR / name).is_file() for name in names)
+
+
+def test_every_id_on_the_page_is_unique():
+    """The Brain Battle screens share one page with the replay's own sections: two elements with one id would
+    let a screen write into another's (getElementById answers the first)."""
+    ids = re.findall(r'\bid="([^"]+)"', (VIEWER_DIR / "index.html").read_text())
+    assert len(ids) == len(set(ids)), sorted({i for i in ids if ids.count(i) > 1})
 
 
 def test_the_two_brand_fonts_are_embedded_not_fetched():

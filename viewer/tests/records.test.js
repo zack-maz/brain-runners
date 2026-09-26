@@ -98,7 +98,7 @@ test("past runs: only this session's run is live; another that says running is n
   assert.equal(rows[2].when, "-");
   const html = Records.runsHtml(rows);
   assert.equal(html.includes("<b>"), false);
-  assert.match(html, /data-watch="20260925-163957" data-live="true"/);
+  assert.match(html, /data-watch="20260925-163957" data-now="true"/);
 });
 
 test("the first ten past runs, then all of them when asked", () => {

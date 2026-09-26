@@ -27,6 +27,8 @@
   const front = {
     screen: "home", from: "home", state: null, sel: Select.make(roster, []), seed: null, armed: false, refusal: null,
     timer: null, leaving: false,
+    results: null, more: false, autoResults: false, // the results on screen, and whether the run's end opens them
+    records: null, pair: [], allRuns: false, // the records on screen, and the two players compared
   };
 
   async function control(path, options) {
@@ -72,6 +74,8 @@
     if (front.screen === "home") renderHome();
     if (front.screen === "select") renderSelect();
     if (front.screen === "track") renderTrack();
+    if (front.screen === "results") renderResults();
+    if (front.screen === "records") renderRecords();
     renderRunBar();
   }
 
@@ -210,6 +214,8 @@
     $("run-what").textContent = run ? "Track " + run.seed + (running() ? " · live" : " · " + run.status) : "";
     $("run-cancel").hidden = !running();
     $("run-home").textContent = front.leaving ? "Home? The run keeps going" : "‹ Home";
+    // the results of the run on screen, for a viewer who scrubbed back and was not taken there
+    $("run-results").hidden = !(front.results && !front.results.why && run && front.results.run_id === run.run_id && !running());
   }
 
   // Going home does not cancel the run, so while one is going the first press says so and the second goes.
@@ -222,6 +228,145 @@
     const { ok, body } = await control("/cancel", { method: "POST" });
     if (ok && body.state) applyState(body.state);
   });
+
+  $("run-results").addEventListener("click", () => show("results"));
+
+  // ---- results --------------------------------------------------------------------------------------
+  function renderResults() {
+    const results = front.results;
+    $("results-why").hidden = !(results && results.why);
+    $("results-why").textContent = results && results.why ? results.why : "";
+    if (!results || results.why) {
+      for (const id of ["cards", "numbers", "failures"]) $(id).innerHTML = "";
+      return;
+    }
+    const head = Results.header(results);
+    $("results-left").textContent = head.left;
+    $("results-right").textContent = head.right;
+    const more = front.more;
+    $("cards").innerHTML = Results.cardsHtml(Results.cards(results, roster), more);
+    $("cards").dataset.count = String(Math.min(4, results.players.length));
+    paintSprites($("cards"));
+    $("numbers-title").textContent = more ? "The numbers" : "How far each got";
+    $("results-warning").textContent = Results.warning(results, roster);
+    $("more").textContent = more ? "Fewer numbers" : "More numbers";
+    $("more").setAttribute("aria-expanded", String(more));
+    $("numbers").innerHTML = more ? Results.tableHtml(Results.table(results, roster))
+      : Results.barsHtml(Results.bars(results, roster), looks.colour);
+    const failures = more ? Results.failures(results, roster) : [];
+    $("failures").innerHTML = failures.map((line) => '<p class="warn small">' + Minds.esc(line) + "</p>").join("");
+    $("results-note").hidden = !more;
+    $("results-note").textContent = Results.note(results, roster);
+  }
+
+  // The lineup and track of the results on screen, for Run again, New track and Fighters: a past run's
+  // results start from its own lineup, as the run just played does.
+  function takeLineup() {
+    const results = front.results;
+    if (!results || results.why) return;
+    front.sel = Select.make(roster, results.players.map((p) => p.player));
+    if ((results.seeds || []).length) front.seed = results.seeds[0];
+    front.armed = false;
+    front.refusal = null;
+  }
+
+  async function goTrack() {
+    takeLineup();
+    show("track");
+    await refreshState();
+  }
+
+  $("more").addEventListener("click", () => { front.more = !front.more; renderResults(); });
+  $("again").addEventListener("click", async () => { await goTrack(); pressedRun(); }); // straight to RUN's confirmation
+  $("new-track").addEventListener("click", goTrack);
+  $("to-fighters").addEventListener("click", () => { takeLineup(); show("select"); });
+  $("watch-replay").addEventListener("click", async () => {
+    const results = front.results;
+    if (results && Race.watching() !== results.run_id) { // a past run's results: load that run first
+      const { ok, body } = await control("/replay?run=" + encodeURIComponent(results.run_id));
+      if (!ok) { results.why = body.error || "the replay could not be read"; return renderResults(); }
+      Race.load(body);
+    }
+    show("run");
+    Race.rewind();
+  });
+  $("results-records").addEventListener("click", openRecords);
+  $("results-home").addEventListener("click", () => show("home"));
+
+  async function openResults(runId) {
+    const { ok, body } = await control("/results?run=" + encodeURIComponent(runId));
+    front.results = ok ? body : { why: body.error || "the results could not be read" };
+    front.autoResults = false;
+    front.more = false;
+    show("results");
+  }
+
+  // ---- records --------------------------------------------------------------------------------------
+  async function openRecords() {
+    show("records");
+    const { ok, body } = await control("/records");
+    front.records = ok ? body : { why: body.error || "the records could not be read", runs: [], bench: null };
+    const chips = ok ? Records.chips(front.records, roster) : [];
+    if (front.pair.length !== 2 && chips.length) front.pair = [chips[0].a, chips[0].b];
+    renderRecords();
+  }
+
+  function renderRecords() {
+    const records = front.records;
+    $("records-back").textContent = front.from === "results" ? "‹ Results" : "‹ Home";
+    if (!records) return;
+    $("records-why").hidden = !records.why;
+    $("records-why").textContent = records.why || "";
+    $("board-title").textContent = "Leaderboard · game " + records.game + " practice tracks" +
+      (records.tracks ? " " + records.tracks[0] + "–" + records.tracks[1] : "");
+    $("leaderboard").innerHTML = Records.boardHtml(Records.board(records, roster), front.pair);
+    $("board-notes").innerHTML = Records.boardNotes(records, roster).map((n) => '<p class="warn small">' + Minds.esc(n) + "</p>").join("");
+    const [a, b] = front.pair;
+    $("chips").innerHTML = Records.chipsHtml(Records.chips(records, roster), a, b);
+    const pair = a && b ? Records.pairOf(records, a, b) : null;
+    $("pair").innerHTML = pair ? Records.pairHtml(Records.pairView(pair, roster, records.max_rows))
+      : '<p class="muted small">Pick two players to compare them on the tracks both played.</p>';
+    const past = Records.pastRuns(records, roster, front.allRuns);
+    $("past").innerHTML = Records.runsHtml(past.rows);
+    $("all-runs").hidden = past.total <= Records.SHOWN_RUNS;
+    $("all-runs").textContent = front.allRuns ? "Show the newest " + Records.SHOWN_RUNS : "Show all " + past.total;
+    $("ours").innerHTML = Minds.ours(records.ours);
+    $("ours-fly2").innerHTML = Minds.oursFly2(records.ours);
+    $("honesty-fly2").hidden = !(records.ours && records.ours.fly2);
+  }
+
+  $("open-records").addEventListener("click", openRecords);
+  $("leaderboard").addEventListener("click", (event) => { // two rows make a pair: a third starts a new one
+    const row = event.target.closest("button[data-player]");
+    if (!row) return;
+    const player = row.dataset.player;
+    front.pair = front.pair.length === 1 && front.pair[0] !== player ? [front.pair[0], player] : [player];
+    renderRecords();
+  });
+  $("chips").addEventListener("click", (event) => {
+    const chip = event.target.closest("button[data-a]");
+    if (chip) { front.pair = [chip.dataset.a, chip.dataset.b]; renderRecords(); }
+  });
+  $("all-runs").addEventListener("click", () => { front.allRuns = !front.allRuns; renderRecords(); });
+  $("past").addEventListener("click", async (event) => {
+    const button = event.target.closest("button");
+    if (!button) return;
+    if (button.dataset.results) return openResults(button.dataset.results);
+    if (button.dataset.now) { // this session's run, playing now: the stream is already this page's
+      await refreshState();
+      return show("run");
+    }
+    const { ok, body } = await control("/replay?run=" + encodeURIComponent(button.dataset.watch));
+    if (!ok) { front.records.why = body.error || "the replay could not be read"; return renderRecords(); }
+    Race.load(body);
+    show("run");
+  });
+  const setOurs = (open) => {
+    $("ours-panel").hidden = !open;
+    $("ours-toggle").setAttribute("aria-expanded", String(open));
+  };
+  $("ours-toggle").addEventListener("click", () => setOurs($("ours-panel").hidden));
+  $("ours-close").addEventListener("click", () => setOurs(false));
 
   // ---- keys and Back -------------------------------------------------------------------------------
   document.addEventListener("click", (event) => {
@@ -280,18 +425,31 @@
     render();
   }
 
-  // app.js calls this when a run has ended: the state says so, and the bar stops offering Cancel.
-  function ended() {
+  // app.js calls this when a run has ended, with its end event: the results arrive with it, and open by
+  // themselves once the tunnel on screen has shown the last row (reachedEnd). A viewer who scrubbed back is
+  // not pulled away: the bar offers "Results" instead.
+  function ended(end) {
     front.leaving = false;
+    front.results = end.results || { why: "the run ended without results" };
+    front.more = false;
+    front.autoResults = true;
     refreshState();
+    if (Race.atEnd()) reachedEnd();
+  }
+
+  function reachedEnd() {
+    if (!front.autoResults || front.screen !== "run") return;
+    front.autoResults = false;
+    setTimeout(() => { if (front.screen === "run") show("results"); }, 1200); // a moment on the last fall first
   }
 
   // app.js calls this once the run screen is ready (live only).
   function start() {
     paintBrain();
+    $("ours-slot").appendChild($("honesty")); // the whole "what is ours" section, moved into Records unchanged
     show("home");
     refreshState();
   }
 
-  root.Front = { start, ended };
+  root.Front = { start, ended, reachedEnd };
 })(typeof window !== "undefined" ? window : globalThis);
