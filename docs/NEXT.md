@@ -102,10 +102,12 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
    (+11.7 rows, 95% interval -4.5 to 27.8, about 69 tracks for a verdict). The live smoke is done too: `bakeoff
    live` on v2 track 1001 with fly and fly2 ticked completed, one shared brain (peak 720 MB), every decision
    matching the same track played with fly2 on a brain of its own. Whole-branch design review done ("ready with
-   fixes", 0 Critical, 3 Important, 10 Minor, all fixed and re-reviewed). Merged to `main` as PR #7 on 2026-09-25.
-   What is left: the trained fly (track 2 of decision 41) and a fast
-   engine each get their own spec later; and whether to settle fly2 vs fly with about 69 more tracks before
-   phase 6.
+   fixes", 0 Critical, 3 Important, 10 Minor, all fixed and re-reviewed). Merged to `main` as PR #7 on 2026-09-25. **Settled on 2026-09-25**: on 100 fresh v2 seeds 1400–1499
+   (`runs/20260925-163957`) fly2 scored 79.45 rows against fly's 66.02, +13.4 (95% interval 5.3 to 21.6), bench
+   verdict "fly2 ahead" (`docs/COSTS.md`).
+   What is left: fly3, the trained fly (track 2 of decision 41), and a fast engine, each with its own spec. fly3's
+   brainstorm has begun (the user: science first, then the page; per-cell input) and is paused on how to pay for the
+   brain time. Phase 6 waits.
 1. **Parked**: GLM Flash's tracks 1001–1004 (decision 34), while Zhipu's free tier throttles. To pick it up, check
    it answers (a few requests through `bakeoff.clients.glm.HttpTransport`), then
    `uv run python -m bakeoff run --players glm_composed,glm_choice,glm_two_step --seeds 5 --seed-start 1000 --max-requests 700`

@@ -257,3 +257,18 @@ seeds, against the 78.20 the real brain scored.
 
 `bakeoff bench` on the same run: fly2 minus fly is +11.7 rows (95% interval -4.5 to 27.8, 12 wins / 3 ties / 5
 losses) — "can't tell yet"; about 69 tracks would be needed for a verdict.
+
+**The settle run** (`uv run python -m bakeoff run --players fly,fly2 --seeds 100 --seed-start 1400`,
+`runs/20260925-163957`, game v2, `completed`, about 2 h 10 min wall). Seeds 1400–1499 were never used by either fly's
+calibration (fly2's rule saw 1000–1199 and scored its winner on 1200–1399), so this is fly2's first test on tracks
+nothing of ours was fitted to:
+
+| player | mean rows | 95% interval | median | finished | deaths jumped / dodged into a gap | s per row |
+| --- | --- | --- | --- | --- | --- | --- |
+| fly | 66.02 | 61.5 to 70.6 | 68 | 0 of 100 | 99 / 1 | 0.46 |
+| fly2 | 79.45 | 72.6 to 86.3 | 79 | 8 of 100 | 61 / 31 | 0.53 |
+
+`bakeoff bench`: fly2 minus fly is **+13.4 rows (95% interval 5.3 to 21.6), 63 wins / 4 ties / 33 losses —
+"fly2 ahead"**. The question left open by the 20-track run is settled: fly2 is the better pure fly. Its deaths
+change kind: fly dies by jumping into a gap, fly2 a third of the time by dodging into one (the rule dodges before
+it jumps, and a dodge does not look where it lands).
