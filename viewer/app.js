@@ -652,6 +652,18 @@
     if (!why) BenchView.mount($("bench"), benchData);
   }
 
+  // ---- the race, as the front drives it (front.js, live only) -----------------------------------
+  // The front owns the screens; the run screen is this page. It is shown and hidden through setShown, so
+  // the transport and its keys work only while the race is on screen.
+  window.Race = {
+    setShown(on) {
+      if (on) return showTab("run");
+      view.tab = "off";
+      $("transport").hidden = true;
+      setPlaying(false);
+    },
+  };
+
   // ---- start --------------------------------------------------------------------------------
   let ready = false;
   Feed.fromEmbedded(embedded, handlers);
@@ -669,7 +681,11 @@
     const clear = handlers.onFrame;
     // a frame means the stream is alive: the waiting or the lost-connection notice goes, a real error stays
     handlers.onFrame = (...args) => { if (store.error == null) notice(null); clear(...args); };
-    $("lobby").hidden = false; // the page runs the show; a replay file has no server and no controls
-    refreshState();
+    // the page runs the show through the Brain Battle front (front.js); a replay file has no server and no
+    // front, and keeps the two tabs
+    document.querySelector(".tabs").hidden = true;
+    document.querySelector(".top").hidden = true;
+    document.title = "Brain Battle";
+    Front.start();
   }
 })();

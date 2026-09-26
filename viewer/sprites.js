@@ -110,7 +110,17 @@
     ctx.drawImage(image, -Math.round(image.width / 2), -image.height);
   }
 
-  const api = { GRIDS, INKS, BODY, visorCells, pixels, sizeOf, drawSprite };
+  // Paints the sprite into a canvas of its own, sized to it: the screens' portraits, slots and cards.
+  function paint(canvas, name, px, options) {
+    const image = bitmap(name, px, options);
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const ctx = canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(image, 0, 0);
+  }
+
+  const api = { GRIDS, INKS, BODY, paint, visorCells, pixels, sizeOf, drawSprite };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Sprites = api;
 })(typeof window !== "undefined" ? window : globalThis);
