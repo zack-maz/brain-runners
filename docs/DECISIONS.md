@@ -314,6 +314,32 @@
       rule and thresholds.
     - **One fly smoke covers plans a and b**, run once no other session holds a fly brain.
 
+47. **fly2 is the better pure fly** (2026-09-25). On 100 fresh v2 seeds 1400–1499 (`runs/20260925-163957`), never used
+    by either fly's calibration, fly2 scored 79.45 rows against fly's 66.02: +13.4 (95% interval 5.3 to 21.6), 63
+    wins / 4 ties / 33 losses, `bakeoff bench` verdict "fly2 ahead". A third of fly2's deaths are dodges into a gap.
+48. **fly3, the trained fly** (the user, 2026-09-25; design `docs/superpowers/specs/2026-09-25-fly3-design.md`). Track 2
+    of decision 41, a separate player labelled *trained*; decision 2 still binds `fly` and `fly2`. The user chose:
+    - **Purpose: science first, then the page.** It answers "does the fly's wiring help a learner play?"; fly3 is
+      offered in the lobby and the tournament only if it beats its no-brain control.
+    - **Input: per cell.** Each LPLC2/LC4 cell gets its own place on the eye and is driven by the gaps it would see
+      (ours, labelled), not by summed channels.
+    - **Learning: imitate the solver by DAgger** (supervised, NumPy), not reinforcement learning.
+    - **Readout: linear over every descending neuron, sparse** (a softmax over the four moves, L1 + L2).
+    - **Controls, all four** (the user left them to Claude): no brain (the same learner on the per-cell input),
+      blind brain, shuffled wiring (retrained), and fly and fly2 on the same evaluation tracks.
+    - **Seeds fixed beforehand:** training 1000–1399 only, evaluation 1400–1499 played once.
+    - **A probe first (spike 05)**, on today's Brian2, which also decides the engine. Into it go five questions the
+      user asked to be investigated: the "any safe move" target, weighting the rows where a wrong move kills, the
+      input strength against how many DNs fire, early/late timing within the window, and noise averaging.
+49. **fly3 stops at its probe** (the user accepted it on 2026-09-26; spike 05, branch `spike/fly3-probe`, local,
+    `spikes/05-fly3-probe/REPORT.md`, DONE `stop C`). Part A passed (every LPLC2/LC4 cell gets a place on the eye from
+    its lobula-plate layers, by a published rule) and part B passed (the DNs name a single gap's lane 79% of the time
+    at the strongest gain). Part C, the play test on seeds 1300–1309: fly3 86.5 rows, the same learner on the input
+    with no brain 112.5, the same readout on a blind brain 19.6. With the same learner the frozen wiring is a worse
+    layer of features than the input it is given, so the answer to decision 48's question for this game is no. fly3
+    is not built and stays off the page and out of the tournament. The one lever left untested is a stronger input
+    (gains above 4000; about 1.5 h, judged against the same no-brain bar of 112.5), only if the user asks for it.
+
 Where we are and what comes next: `docs/NEXT.md`.
 
 ## Prior art to reuse

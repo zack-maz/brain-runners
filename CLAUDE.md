@@ -54,7 +54,10 @@ reviewed and fixed; decisions 36–39 settle their open questions and the rename
 GLM Flash's parked tracks. `fly2`, a second pure fly with a richer input of ours (M3, a sideways channel), is
 built, calibrated, played and on `main` (PR #7, merged 2026-09-25; decisions 41–43, spec
 `docs/superpowers/specs/2026-09-24-fly2-design.md`, plan `docs/superpowers/plans/2026-09-24-fly2.md`): its numbers
-are frozen (`calibration/FLY2_REPORT.md`), its real run and its live smoke are done. Then phase 6, the tournament and the write-up, which needs a new budget go-ahead. Each
+are frozen (`calibration/FLY2_REPORT.md`), its real run and its live smoke are done; on 100 fresh seeds it beats `fly` by 13.4 rows (decision 47).
+`fly3`, a trained readout on the frozen wiring (decision 48), stopped at its probe: the same learner with no brain
+played better (spike 05, decision 49), so it is not built. Brain Battle, the front of `bakeoff live`, is on `main`
+(PR #9, merged 2026-09-26). Then phase 6, the tournament and the write-up, which needs a new budget go-ahead. Each
 phase gets its own plan. Resume from `docs/NEXT.md`.
 
 ## How we work here
@@ -113,15 +116,15 @@ phase gets its own plan. Resume from `docs/NEXT.md`.
   paid player for the whole session (`SharedBudget` gives each run its own record of what it spent), runs one
   `LiveRun` at a time and keeps serving so another track can be played without restarting. `--start` plays the
   command line's own run at once, as before, and holds its first decision until a browser is listening.
-- Brain Battle (decision 45, spec `docs/superpowers/specs/2026-09-25-brain-battle-design.md`) is being built on branch
-  `brain-battle` in two plans. Plan a is built: `bakeoff/roster.py` is the one list of characters and skins (a test
+- Brain Battle (decision 45, spec `docs/superpowers/specs/2026-09-25-brain-battle-design.md`) is on `main` (PR #9,
+  merged 2026-09-26), built in two plans. Plan a: `bakeoff/roster.py` is the one list of characters and skins (a test
   keeps it equal to the registry), embedded in every page, so runners wear their skin's colours and are labelled
   "Jev · Step 1" (`viewer/roster.js`); `bakeoff/results.py` gives a run's numbers (also on the `end` event),
   `bakeoff/records.py` the leaderboard, pairs and past runs (each player and track from the newest run that completed
   it, practice seeds only); the report has `wrong_moves` and `fatal_wrong_moves`. Three read-only routes sit behind
   the token: `GET /results?run=`, `GET /records`, `GET /replay?run=`; `run=` must be a run id naming a directory
   under the session's `--out` with a `meta.json`, or it is a 404. Plan b, the screens
-  (`docs/superpowers/plans/2026-09-25-brain-battle-b.md`, decision 46), is built: `bakeoff live` opens on the front
+  (`docs/superpowers/plans/2026-09-25-brain-battle-b.md`, decision 46): `bakeoff live` opens on the front
   (home, character select, track select, the run screen, results that open by themselves, Records with the
   leaderboard on practice tracks 1000–1019, head to head, past runs and the whole "what is ours" section); the
   lobby's grid is gone (`lobby.js` keeps the money helpers). A lineup that can spend is confirmed once, with its
