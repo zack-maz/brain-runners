@@ -31,6 +31,15 @@ def test_load_merges_directories_and_takes_only_the_named_players(tmp_path):
     assert loaded.game.version == "v2" and loaded.run_ids == ("a", "b") and loaded.episodes[1].model == "m"
 
 
+def test_a_source_can_be_narrowed_to_some_player_and_track_pairs(tmp_path):
+    a = write_run(tmp_path, "a", episode("fly", 1000, 3) + episode("fly", 1001, 4) + episode("haiku_plain", 1000, 2),
+                  {"game": V2})
+    b = write_run(tmp_path, "b", episode("fly", 1000, 9), {"game": V2})
+    loaded = load([Source(a, episodes=frozenset({("fly", 1001), ("haiku_plain", 1000)})), Source(b)])
+    assert sorted((e.player, e.seed, e.run_id) for e in loaded.episodes) == \
+        [("fly", 1000, "b"), ("fly", 1001, "a"), ("haiku_plain", 1000, "a")]
+
+
 def test_an_episode_that_neither_died_nor_finished_is_set_aside(tmp_path):
     stopped = [record(player="haiku_plain", seed=1000, row=r) for r in range(5)]  # alive at its last record
     run = write_run(tmp_path, "a", stopped + episode("haiku_plain", 1001, 3) + episode("solver", 1000, 150, finished=True))
