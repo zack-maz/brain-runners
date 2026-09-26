@@ -51,8 +51,10 @@ def test_the_page_says_what_is_ours_about_jev_and_the_figures():
     assert "looks one step ahead only" in page
     assert "landed on a gap about as often as always staying would have" in page
     assert "our own drawing and nobody's official artwork" in page
-    assert ("The blue marks the mind in focus and the tiles it was shown; elsewhere it is a skin's own colour "
-            "(Bot · Solver, the Map skins' eyes).") in page
+    assert ("The blue marks the mind in focus and the tiles it was shown; elsewhere it is a skin's own colour, "
+            "where the user chose blue.") in page
+    assert ("a skin that gives no such number shows no gauge (its slit is the visor's own colour, "
+            "or the Map skin's blue)") in page
 
 
 def test_the_page_keeps_every_caveat_about_the_fly_and_about_jevs_questions():

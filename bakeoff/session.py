@@ -181,8 +181,10 @@ class LiveSession:
                 "model_answered": answered.get(name) if paid else None,
                 "requests_left": self.budgets[name].remaining if paid else None,
                 "played_before": seed is not None and seed in played.get(name, []),
-                # every track it has a recorded run of, for the track select's marks
-                "seeds_played": played.get(name, []),
+                # the track select's own practice tracks it has a recorded run of, for its marks: a
+                # tournament seed or a bulk-run seed past the track select's own 20 is not offered there
+                "seeds_played": [s for s in played.get(name, [])
+                                 if FIRST_PRACTICE_SEED <= s < FIRST_PRACTICE_SEED + 20],
                 # why this player cannot play this track, so the page can say so before anything is asked
                 "why_not": None if seed is None else self.why_not(name, seed),
             })
@@ -194,8 +196,10 @@ class LiveSession:
             "max_requests": self.max_requests, "tournament": self.tournament,
             "first_practice_seed": FIRST_PRACTICE_SEED,
             "seed": seed,
-            # the real track, for the track select's preview: the rules stay in Python
-            "track": None if seed is None or seed < 0 else generate_track(seed, self.rules).to_json(),
+            # the real track, for the track select's preview: the rules stay in Python. A tournament seed
+            # is locked until the session is one, same as `why_not` locks paid players off it
+            "track": None if seed is None or (seed < FIRST_PRACTICE_SEED and not self.tournament)
+                     else generate_track(seed, self.rules).to_json(),
             "ready": {"seed": self.ready_seed, "players": list(self.ready_players)},
             "players": players,
             # `replay` is the empty replay of this run: the page resets itself to it and fills it from

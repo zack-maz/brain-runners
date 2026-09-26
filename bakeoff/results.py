@@ -48,8 +48,10 @@ def results_of(run_dir: Path | str) -> dict:
         price = PRICE_USD.get(player, 0.0) if paid else 0.0
         row = rows[player]
         players.append({**row, "paid": paid, "price_usd": price,
-                        # live requests at the page's price: an estimate, not the provider's bill
-                        "cost_estimate_usd": row["requests"] * price,
+                        # live requests at the page's price: an estimate, not the provider's bill.
+                        # meta.json's own count (`spent`) also bills a request that failed before it could
+                        # be timed; only when that is missing do we fall back to the steps actually answered
+                        "cost_estimate_usd": (row["spent"] if row["spent"] is not None else row["requests"]) * price,
                         "s_per_row": timing,
                         "tracks": [_ending(by_seed[seed]) for seed in sorted(by_seed)]})
     return {"run_id": meta.get("run_id") or run_dir.name, "status": meta.get("status"),

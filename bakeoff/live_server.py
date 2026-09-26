@@ -23,6 +23,7 @@ the run.
 from __future__ import annotations
 
 import json
+import re
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -32,6 +33,9 @@ EVENTS_PATH = "/events"
 HOST = "127.0.0.1"
 TOKEN_HEADER = "X-Bakeoff-Token"
 MAX_BODY = 64 * 1024  # a lobby request is a few hundred bytes; anything larger is not ours
+# a `?seed=` worth trying to parse: str.isdigit() is also true of non-ASCII digits and of strings past
+# int()'s own conversion limit, either of which used to reach int() uncaught
+SEED = re.compile(r"[0-9]{1,9}")
 
 
 def serve(page: str | None, session: LiveSession, port: int = 8000) -> ThreadingHTTPServer:
@@ -100,7 +104,7 @@ def serve(page: str | None, session: LiveSession, port: int = 8000) -> Threading
             elif self._route == "/state":
                 if self._token():
                     seed = self._query().get("seed")
-                    self._json(self.server.session.state(int(seed) if (seed or "").isdigit() else None))
+                    self._json(self.server.session.state(int(seed) if seed and SEED.fullmatch(seed) else None))
             elif self._route == EVENTS_PATH:
                 if self._token():
                     self._events()
@@ -144,6 +148,8 @@ def serve(page: str | None, session: LiveSession, port: int = 8000) -> Threading
                 out = session.results(wanted) if self._route == "/results" else session.replay(wanted)
             except (OSError, ValueError) as e:
                 return self._json({"ok": False, "error": f"cannot read that run: {e}"}, status=500)
+            except Exception as e:  # a record that parses but is not one of ours: still a reason, not a hangup
+                return self._json({"ok": False, "error": f"cannot read that run: {e!r}"}, status=500)
             if out is None:
                 return self.send_error(404)
             self._json(out)

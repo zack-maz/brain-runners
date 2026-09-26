@@ -10,14 +10,19 @@ other cell it recolours."""
 
 from __future__ import annotations
 
-# the question sets as skins, in the select screen's order (decision 44); plain is the default skin
+# the question sets as skins, in the select screen's order (decision 44); plain is the default skin. Each
+# line ends with what is ours about it (the honesty rule, CLAUDE.md): the wording of the questions, and the
+# code's rule for turning the answers into a move.
 SETS = (
-    ("plain", "Plain", "One broad question: “Which move?”, asked once, with no pointed question under it."),
+    ("plain", "Plain", "One broad question: “Which move?”, asked once. The question is ours."),
     ("guided", "Guided", "One question over the four moves, naming the tile each would land on. Code takes its "
-                         "favourite."),
-    ("step1", "Step 1", "Four yes/no questions: would each move land on a gap? Code picks the move least likely to."),
-    ("step2", "Step 2", "Eight questions, two moves ahead. Code takes the lowest combined risk."),
-    ("map", "Map", "One question per visible tile, then code plans a path through what it read."),
+                         "favourite. The question and the rule are ours."),
+    ("step1", "Step 1", "Four yes/no questions: would each move land on a gap? Code picks the move least likely "
+                        "to. The questions and the rule are ours."),
+    ("step2", "Step 2", "Eight questions, two moves ahead. Code takes the lowest combined risk. The questions "
+                        "and the rule are ours."),
+    ("map", "Map", "One question per visible tile, then code plans a path through what it read. The questions "
+                   "and the planner are ours."),
 )
 # per model, one look per set in the order above: plain is the character's own colour; guided green, step1
 # yellow, step2 red, map black with its eyes (or visor) lit blue, which the user chose (docs/FRONTEND.md)

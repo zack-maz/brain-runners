@@ -97,6 +97,14 @@ def test_state_says_what_can_be_run(server):
     assert [p["requests_left"] for p in state["players"] if p["name"] == "haiku_plain"] == [0]
 
 
+def test_an_oversized_seed_answers_200_with_no_seed_not_a_crash(server):
+    """str.isdigit() is true of a seed `int()` refuses (M2): a 4,300+ digit string is "digits" but
+    int() raises past Python's conversion limit, uncaught before this fix. The regex caps it at 9 digits."""
+    httpd, _ = server
+    status, state = payload(httpd, "GET", f"/state?seed={'9' * 5000}")
+    assert status == 200 and state["seed"] is None
+
+
 def test_a_run_started_from_the_page_streams_its_frames_and_ends_in_the_lobby(server):
     httpd, session = server
     status, started = payload(httpd, "POST", "/run", {"seed": 1001, "players": ["solver", "random"]})
@@ -252,5 +260,17 @@ def test_a_run_directory_that_cannot_be_read_is_an_error_that_says_why(server):
     session.wait(30)
     log = session.run_dir_of(started["run_id"]) / "solver.jsonl"
     log.write_text("not json\n" + log.read_text())  # broken before its last line: not a truncated tail
+    status, body = payload(httpd, "GET", f"/results?run={started['run_id']}")
+    assert status == 500 and body["ok"] is False and "cannot read that run" in body["error"]
+
+
+def test_a_keyless_record_answers_with_a_500_and_a_reason_not_a_dropped_connection(server):
+    """A record that parses but is not one of ours raises something other than OSError or ValueError deep
+    inside results_of (I3): the page must still get a reasoned 500, never a closed socket."""
+    httpd, session = server
+    started = payload(httpd, "POST", "/run", {"seed": 1001, "players": ["solver"]})[1]
+    session.wait(30)
+    log = session.run_dir_of(started["run_id"]) / "solver.jsonl"
+    log.write_text(json.dumps({"player": "solver", "seed": 1001}) + "\n")  # parses; no "row"
     status, body = payload(httpd, "GET", f"/results?run={started['run_id']}")
     assert status == 500 and body["ok"] is False and "cannot read that run" in body["error"]

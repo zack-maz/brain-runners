@@ -38,6 +38,15 @@ def test_every_colour_is_a_hex_colour_and_every_skin_says_what_it_does():
             assert skin["about"].endswith("."), skin
 
 
+def test_every_skin_but_the_yardsticks_says_what_is_ours():
+    for character in ROSTER:
+        for skin in character["skins"]:
+            if character["id"] == "bot":
+                assert "ours" not in skin["about"], skin  # a yardstick, not a contestant: nothing here is ours
+            else:
+                assert "ours" in skin["about"], skin
+
+
 def test_the_json_is_a_copy():
     data = roster_json()
     data[0]["skins"][0]["inks"]["x"] = "#000000"

@@ -32,7 +32,19 @@ test("the visor's pixels carry the slit, left to right", () => {
   const slit = (p) => pixels("visor", { p }).filter((c) => c.y === 2 && c.x >= 1 && c.x <= 5).map((c) => c.ink);
   assert.deepEqual(slit(1), Array(5).fill(INKS.V));
   assert.deepEqual(slit(0.4), [INKS.V, INKS.V, INKS.v, INKS.v, INKS.v]);
-  assert.deepEqual(slit(undefined), Array(5).fill(INKS.v));
+  // p: 0 is a real answer (Jev is sure the move is not safe): still dark, unlit, not "no gauge"
+  assert.deepEqual(slit(0), Array(5).fill(INKS.v));
+});
+
+test("a visor with no number at all shows no gauge, not a dark one (I1)", () => {
+  const slit = (options) => pixels("visor", options).filter((c) => c.y === 2 && c.x >= 1 && c.x <= 5).map((c) => c.ink);
+  // no skin: the slit is the visor's own body colour, not the unlit ink
+  assert.deepEqual(slit({ p: undefined }), Array(5).fill(INKS.j));
+  assert.deepEqual(slit({ p: null }), Array(5).fill(INKS.j));
+  // the Map look: no gauge question, but its blue ink for the slit still shows
+  assert.deepEqual(slit({ p: null, color: "#1E2227", inks: { V: "#7AA2F7" } }), Array(5).fill("#7AA2F7"));
+  // a skin with no V ink of its own falls back to its body colour, not a gauge
+  assert.deepEqual(slit({ p: null, color: "#5FA35A" }), Array(5).fill("#5FA35A"));
 });
 
 test("the fly opens its wings in a jump and keeps its red eyes", () => {

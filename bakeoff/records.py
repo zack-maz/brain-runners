@@ -11,15 +11,29 @@ from __future__ import annotations
 from pathlib import Path
 
 from bakeoff.bench import Source, benchmark, load
+from bakeoff.fly.fly2_rule import PRACTICE_SEEDS  # cheap: no brian2 (bakeoff/fly/__init__.py imports nothing)
 from bakeoff.game.rules import Rules
 from bakeoff.report import load_meta, load_steps
-from bakeoff.session import FIRST_PRACTICE_SEED
+from bakeoff.session import FIRST_PRACTICE_SEED, RUN_ID
+
+# fly2's frozen numbers were fitted on these seeds (calibration/FLY2_REPORT.md, decision 43): a leaderboard
+# mean over them is in-sample for fly2 in a way it is not for anyone else, so `records_of` marks it.
+TUNED_ON = {"fly2": [min(PRACTICE_SEEDS), max(PRACTICE_SEEDS)]}
+
+
+def _run_key(name: str) -> tuple[str, int]:
+    """(the timestamp, the counter or 0), so `-10` sorts after `-9` (ten runs started in one second, the
+    tenth naming itself last)."""
+    match = RUN_ID.fullmatch(name)
+    suffix = match.group(1) or "" if match else ""
+    return (name[: len(name) - len(suffix)] if suffix else name, int(suffix[1:]) if suffix else 0)
 
 
 def _run_dirs(out_root: Path) -> list[Path]:
-    """Every run directory, newest first (run ids are timestamps)."""
-    return sorted((d for d in out_root.iterdir() if d.is_dir() and (d / "meta.json").is_file()),
-                  key=lambda d: d.name, reverse=True)
+    """Every run directory, newest first: only a name shaped like a run id (`session.RUN_ID`) holding a
+    meta.json is one; a renamed directory is not a run this page can offer to watch."""
+    return sorted((d for d in out_root.iterdir() if d.is_dir() and RUN_ID.fullmatch(d.name) and (d / "meta.json").is_file()),
+                  key=lambda d: _run_key(d.name), reverse=True)
 
 
 def _same_game(meta: dict, rules: Rules) -> bool:
@@ -36,23 +50,27 @@ def pick(out_root: Path | str, rules: Rules) -> tuple[list[Source], int, list[st
     taken: set[tuple[str, int]] = set()
     sources, left_out, unreadable = [], 0, []
     for run_dir in _run_dirs(Path(out_root)):
-        meta = load_meta(run_dir) or {}
+        meta = load_meta(run_dir)
+        if meta is None:
+            unreadable.append(run_dir.name)  # meta.json exists (_run_dirs required it) but cannot be read
+            continue
         if not _same_game(meta, rules):
             continue
         try:
             steps = load_steps(run_dir)
-        except (OSError, ValueError):
+            last: dict[tuple[str, int], dict] = {}
+            for s in steps:
+                key = (s["player"], s["seed"])
+                if s["seed"] >= FIRST_PRACTICE_SEED and (key not in last or s["row"] > last[key]["row"]):
+                    last[key] = s
+            complete = [(key, step) for key, step in last.items() if step["finished"] or not step["alive"]]
+        except Exception:
+            # a record that parses but is not one of ours (a missing key, a value of the wrong shape): this
+            # run cannot be scored, but it must not take the others down with it (nothing is committed yet)
             unreadable.append(run_dir.name)
             continue
-        last: dict[tuple[str, int], dict] = {}
-        for s in steps:
-            key = (s["player"], s["seed"])
-            if s["seed"] >= FIRST_PRACTICE_SEED and (key not in last or s["row"] > last[key]["row"]):
-                last[key] = s
         mine = set()
-        for key, step in last.items():
-            if not (step["finished"] or not step["alive"]):
-                continue  # stopped part way: not a result, and a newer or older complete one may stand in
+        for key, _ in complete:
             if key in taken:
                 left_out += 1
             else:
@@ -69,20 +87,23 @@ def past_runs(out_root: Path | str, current: str | None = None) -> list[dict]:
     runs = []
     for run_dir in _run_dirs(Path(out_root)):
         meta = load_meta(run_dir) or {}
+        game, players, seeds = meta.get("game"), meta.get("players"), meta.get("seeds")
         runs.append({"run_id": run_dir.name, "status": meta.get("status"), "started_at": meta.get("started_at"),
-                     "finished_at": meta.get("finished_at"), "seeds": meta.get("seeds") or [],
-                     "players": meta.get("players") or [], "game": (meta.get("game") or {}).get("version"),
+                     "finished_at": meta.get("finished_at"), "seeds": seeds if isinstance(seeds, list) else [],
+                     "players": players if isinstance(players, list) else [],
+                     "game": game.get("version") if isinstance(game, dict) else None,
                      "current": run_dir.name == current})
     return runs
 
 
 def records_of(out_root: Path | str, rules: Rules, current: str | None = None) -> dict:
-    """{game, max_rows, bench (bench.benchmark's numbers, or None), why, left_out, unreadable, runs}. Like
-    `benchmark_of`, it answers with a reason instead of failing."""
+    """{game, max_rows, bench (bench.benchmark's numbers, or None), why, left_out, unreadable, runs, tuned_on}.
+    Like `benchmark_of`, it answers with a reason instead of failing. `tuned_on` names the seeds any frozen
+    player's numbers were fitted on, so a leaderboard can mark them in-sample for that player."""
     out_root = Path(out_root)
     if not out_root.is_dir():
         return {"game": rules.version, "max_rows": rules.max_rows, "bench": None, "why": "no run has been recorded yet.",
-                "left_out": 0, "unreadable": [], "runs": []}
+                "left_out": 0, "unreadable": [], "runs": [], "tuned_on": TUNED_ON}
     sources, left_out, unreadable = pick(out_root, rules)
     numbers, why = None, None
     if not sources:
@@ -93,4 +114,4 @@ def records_of(out_root: Path | str, rules: Rules, current: str | None = None) -
         except (OSError, ValueError) as e:
             why = f"the records could not be scored: {e}"
     return {"game": rules.version, "max_rows": rules.max_rows, "bench": numbers, "why": why, "left_out": left_out,
-            "unreadable": unreadable, "runs": past_runs(out_root, current)}
+            "unreadable": unreadable, "runs": past_runs(out_root, current), "tuned_on": TUNED_ON}

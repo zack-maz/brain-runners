@@ -28,10 +28,17 @@
   const SLIT = 5;
 
   // Which of the visor's five cells are lit, left to right: round(5 * p) of them, where p is the
-  // probability Jev gave that the move it made does not land on a gap. Unknown p: none.
+  // probability Jev gave that the move it made does not land on a gap. Unknown p: none (used only
+  // when p is known at all; `pixels` gives an unknown p its own look instead, no gauge).
   function visorCells(p) {
-    const lit = typeof p === "number" && isFinite(p) ? Math.round(SLIT * Math.max(0, Math.min(1, p))) : 0;
+    const lit = visorKnown(p) ? Math.round(SLIT * Math.max(0, Math.min(1, p))) : 0;
     return Array.from({ length: SLIT }, (_, i) => i < lit);
+  }
+
+  // Whether p is a real number Jev gave, as opposed to a skin that asks no such question at all
+  // (Plain, Guided, Map): those pass p as null or undefined, never a number.
+  function visorKnown(p) {
+    return typeof p === "number" && isFinite(p);
   }
 
   // The sprite as a list of {x, y, ink}, (0, 0) being the top left pixel. options: {p} for the visor's
@@ -40,16 +47,27 @@
     const opts = options || {};
     const drawn = name === "fly" && opts.open ? "fly_open" : GRIDS[name] ? name : "block";
     const grid = GRIDS[drawn];
-    const cells = name === "visor" ? visorCells(opts.p) : [];
+    const known = name === "visor" && visorKnown(opts.p);
+    const cells = known ? visorCells(opts.p) : [];
     const own = Object.assign({}, opts.inks || {});
     if (opts.color) own[BODY[drawn]] = opts.color;
+    // no number at all (Plain, Guided, Map without a gauge question): the slit shows no gauge, drawn
+    // fully in the skin's own ink for it (V) if it set one, otherwise the visor's body colour
+    const noGauge = name === "visor" && !known ? own.V || own[BODY[drawn]] || INKS[BODY[drawn]] : null;
     let slit = 0;
     const out = [];
     grid.forEach((line, y) => {
       for (let x = 0; x < line.length; x++) {
         let ink = line[x];
         if (ink === ".") continue;
-        if (ink === "V" || ink === "v") ink = cells[slit++] ? "V" : "v";
+        if (ink === "V" || ink === "v") {
+          if (noGauge !== null) {
+            slit++;
+            out.push({ x, y, ink: noGauge });
+            continue;
+          }
+          ink = cells[slit++] ? "V" : "v";
+        }
         out.push({ x, y, ink: own[ink] || INKS[ink] });
       }
     });
@@ -66,7 +84,8 @@
   const bitmaps = {};
   function bitmap(name, px, options) {
     const opts = options || {};
-    const key = [name, px, !!opts.open, name === "visor" ? visorCells(opts.p).filter(Boolean).length : 0,
+    const key = [name, px, !!opts.open,
+      name === "visor" ? (visorKnown(opts.p) ? "p" + visorCells(opts.p).filter(Boolean).length : "u") : "",
       opts.color || "", JSON.stringify(opts.inks || {})].join(" ");
     if (!bitmaps[key]) {
       const { width, height } = sizeOf(name);

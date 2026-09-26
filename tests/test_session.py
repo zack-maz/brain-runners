@@ -273,6 +273,25 @@ def test_the_state_carries_every_track_a_player_has_played_and_the_real_track_fo
     assert lobby.state()["track"] is None and lobby.state(seed=-1)["track"] is None
 
 
+def test_seeds_played_only_lists_the_track_selects_practice_range(tmp_path):
+    """spec B: 'the practice seeds 1000-1019 it has a recorded run of' (M1), not every seed ever played."""
+    lobby = session(tmp_path)
+    play(lobby, seed=7, players=["solver"])  # a tournament seed: never offered by the track select
+    play(lobby, seed=1001, players=["solver"])  # a track-select practice seed
+    play(lobby, seed=1150, players=["solver"])  # a bulk-run practice seed, past the track select's 20
+    by_name = {p["name"]: p for p in lobby.state()["players"]}
+    assert by_name["solver"]["seeds_played"] == [1001]
+
+
+def test_state_previews_no_track_for_a_tournament_seed_unless_the_session_is_one(tmp_path):
+    """spec: tournament seeds must not shape prompts before the tournament (M2), so the preview track for
+    one is withheld from a session not started with --tournament."""
+    from bakeoff.game.track import generate_track
+
+    assert session(tmp_path).state(seed=7)["track"] is None
+    assert session(tmp_path, tournament=True).state(seed=7)["track"] == generate_track(7, RULES).to_json()
+
+
 def test_only_a_recorded_run_directory_can_be_named(tmp_path):
     lobby = session(tmp_path)
     run_id = play(lobby, players=["solver"]).run.run_id

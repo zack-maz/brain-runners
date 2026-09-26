@@ -9,6 +9,7 @@ from bakeoff.players import make_player
 from bakeoff.players.base import Decision
 from bakeoff.results import results_of
 from bakeoff.session import PRICE_USD
+from tests.test_replay import record
 
 
 class Scripted:
@@ -67,6 +68,22 @@ def test_a_stopped_run_keeps_its_players_rows_and_is_not_a_death(tmp_path):
     assert out["status"] == "interrupted"
     (solver,) = out["players"]
     assert solver["tracks"] == [] and solver["runs"] == 0 and solver["s_per_row"] is None
+
+
+def test_cost_estimate_uses_what_meta_json_says_was_spent_over_what_was_answered(tmp_path):
+    """M4: a `ProviderError` step spends a request but logs no latency, so `requests` (steps actually
+    answered) undercounts what the budget really spent. meta.json's own `requests[player].used`, when
+    present, is the one that must be billed."""
+    run_dir = tmp_path / "spent"
+    run_dir.mkdir()
+    step = record(player="haiku_step1", seed=1000, row=0, finished=True, latency_ms=120.0, cache_hit=False)
+    (run_dir / "haiku_step1.jsonl").write_text(json.dumps(step) + "\n")
+    (run_dir / "meta.json").write_text(json.dumps({"run_id": "spent", "status": "completed",
+                                                    "players": ["haiku_step1"], "seeds": [1000],
+                                                    "requests": {"haiku_step1": {"used": 5}}}))
+    (haiku,) = results_of(run_dir)["players"]
+    assert haiku["requests"] == 1 and haiku["spent"] == 5  # one step answered; five were really spent
+    assert haiku["cost_estimate_usd"] == 5 * PRICE_USD["haiku_step1"]
 
 
 def test_a_death_where_every_move_falls_is_trapped(tmp_path):
