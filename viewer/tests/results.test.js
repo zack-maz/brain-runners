@@ -110,7 +110,7 @@ test("a run of several tracks shows means and deaths counted by cause", () => {
   assert.equal(card.rows, "71.3");
   assert.equal(card.rowsWord, "rows a track");
   assert.equal(card.death, "2 jumped into a gap, 1 dodged into a gap");
-  assert.deepEqual(Results.header(many), { left: "Run ended · 1 fighter", right: "Tracks 1000–1002 (3) · game v2 · 150 rows" });
+  assert.deepEqual(Results.header(many), { left: "Run ended · 1 runner", right: "Tracks 1000–1002 (3) · game v2 · 150 rows" });
 });
 
 test("several tracks: a fighter that finished every track is not drawn as a death, one that fell on some is", () => {
@@ -128,8 +128,8 @@ test("several tracks: a fighter that finished every track is not drawn as a deat
 });
 
 test("the header and the markup, every text escaped", () => {
-  assert.deepEqual(Results.header(RESULTS), { left: "Run ended · 3 fighters", right: "Track 1000 · game v2 · 150 rows" });
-  assert.equal(Results.header({ ...RESULTS, status: "interrupted" }).left, "Run interrupted · 3 fighters");
+  assert.deepEqual(Results.header(RESULTS), { left: "Run ended · 3 runners", right: "Track 1000 · game v2 · 150 rows" });
+  assert.equal(Results.header({ ...RESULTS, status: "interrupted" }).left, "Run interrupted · 3 runners");
   const evil = { ...RESULTS, players: [entry("<b>x</b>", track(3))] };
   const html = Results.cardsHtml(Results.cards(evil, ROSTER), false) + Results.tableHtml(Results.table(evil, ROSTER)) +
     Results.barsHtml(Results.bars(evil, ROSTER), () => "#5FA35A");

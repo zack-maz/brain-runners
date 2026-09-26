@@ -106,5 +106,5 @@ test("the markup: portraits with tokens, slots with dots, taken dots disabled, e
   assert.match(info, /Fly · Sideways · fly2/);
   assert.match(info, /Sideways does &#60;this&#62;\./);
   assert.match(info, /not &#60;now&#62;/);
-  assert.match(Select.infoHtml(empty(), ROSTER, []), /Click a fighter/);
+  assert.match(Select.infoHtml(empty(), ROSTER, []), /Click a runner/);
 });

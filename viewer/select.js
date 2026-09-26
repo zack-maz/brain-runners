@@ -164,7 +164,7 @@
   function infoHtml(sel, roster, entries) {
     const slot = sel.slots[sel.focus];
     if (!slot) {
-      return '<span class="hint">Click a fighter to put it in the next free slot. Up to eight; one character can come in several skins.</span>';
+      return '<span class="hint">Click a runner to put it in the next free slot. Up to eight; one character can come in several skins.</span>';
     }
     const character = roster[slot.c];
     const skin = character.skins[slot.s];

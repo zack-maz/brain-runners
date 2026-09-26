@@ -14,16 +14,16 @@
   <p class="label" id="mode"></p>
 </header>
 
-<!-- Brain Battle, the front of `bakeoff live` (front.js): one screen at a time, the run screen being #app.
+<!-- Brain Run, the front of `bakeoff live` (front.js): one screen at a time, the run screen being #app.
      A replay file never shows it. -->
 <div id="front" hidden>
-<section id="screen-home" class="screen home" aria-label="Brain Battle">
+<section id="screen-home" class="screen home" aria-label="Brain Run">
   <div class="rings" aria-hidden="true"><span></span><span></span><span></span><span class="slash"></span></div>
   <div class="home-top label"><span>Bakeoff live</span><span id="home-where"></span></div>
   <div class="home-middle">
     <div class="logo">
       <canvas id="brain" class="brain" aria-hidden="true"></canvas>
-      <h1 class="shout"><span>BRAIN</span><span class="outline">BATTLE</span></h1>
+      <h1 class="shout"><span>BRAIN</span><span class="outline">RUN</span></h1>
     </div>
     <div id="home-fighters" class="home-fighters"></div>
     <div class="menu">
@@ -36,21 +36,21 @@
     <span class="label" id="home-game"></span></div>
 </section>
 
-<section id="screen-select" class="screen select" hidden aria-label="Choose your fighters">
+<section id="screen-select" class="screen select" hidden aria-label="Choose your runners">
   <div class="screen-head"><button type="button" class="back label" data-back>&lsaquo; Home</button>
-    <h2 class="shout">CHOOSE YOUR FIGHTERS</h2><span class="label bright" id="select-count"></span></div>
+    <h2 class="shout">CHOOSE YOUR RUNNERS</h2><span class="label bright" id="select-count"></span></div>
   <div id="portraits" class="portraits"></div>
   <div id="select-info" class="info"></div>
   <div class="banner-row">
-    <button type="button" id="fight" class="banner" hidden><span class="shout">READY TO FIGHT</span><span class="label blink">Press enter</span></button>
-    <div id="not-ready" class="banner-empty label">Pick at least one fighter</div>
+    <button type="button" id="fight" class="banner" hidden><span class="shout">READY TO RUN</span><span class="label blink">Press enter</span></button>
+    <div id="not-ready" class="banner-empty label">Pick at least one runner</div>
   </div>
   <div id="slots" class="slots"></div>
-  <div class="keys label"><span>Click &middot; add fighter</span><span>Dot or X / Y &middot; change skin</span><span>&larr; &rarr; &middot; move cursor</span><span>Enter &middot; fight</span></div>
+  <div class="keys label"><span>Click &middot; add runner</span><span>Dot or X / Y &middot; change skin</span><span>&larr; &rarr; &middot; move cursor</span><span>Enter &middot; run</span></div>
 </section>
 
 <section id="screen-track" class="screen track" hidden aria-label="Choose your track">
-  <div class="screen-head"><button type="button" class="back label" data-back>&lsaquo; Fighters</button>
+  <div class="screen-head"><button type="button" class="back label" data-back>&lsaquo; Runners</button>
     <h2 class="shout">CHOOSE YOUR TRACK</h2><span class="label bright" id="track-game"></span></div>
   <div class="track-body">
     <div class="track-main">
@@ -99,7 +99,7 @@
   <div class="results-actions">
     <button type="button" id="again" class="launch small-launch"><span aria-hidden="true">&#9654;</span>Run again</button>
     <button type="button" id="new-track" class="plain">New track</button>
-    <button type="button" id="to-fighters" class="plain">Fighters</button>
+    <button type="button" id="to-fighters" class="plain">Runners</button>
     <button type="button" id="watch-replay" class="plain">Watch the replay</button>
     <button type="button" id="results-records" class="plain">Records</button>
     <button type="button" id="results-home" class="plain">Home</button>
