@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Callable
 
+from bakeoff.clients.core import RequestBudget, UncappedBudget
 from bakeoff.players.always_jump import AlwaysJumpPlayer
 from bakeoff.players.base import Player
 from bakeoff.players.fly import FlyPlayer
@@ -22,6 +23,14 @@ REGISTRY: dict[str, Callable[..., Player]] = {
     **{player.name: player for player in SET_PLAYERS}}
 # these take cache= and budget=; without a budget they can only replay the cache
 PAID = ("jev_plain", "jev_step1", "haiku_plain", "glm_plain", *(player.name for player in SET_PLAYERS))
+# the paid players that play without a cap: Jev's requests cost the user nothing (decision 50). They are still
+# counted and priced, and still kept off the tournament seeds
+UNCAPPED = tuple(name for name in PAID if name.startswith("jev_"))
+
+
+def budget_of(name: str, max_requests: int) -> RequestBudget:
+    """A paid player's budget: the command's cap, or none for Jev (decision 50)."""
+    return UncappedBudget() if name in UNCAPPED else RequestBudget(max_requests)
 
 
 def make_player(name: str, **options) -> Player:

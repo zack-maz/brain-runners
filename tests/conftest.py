@@ -4,6 +4,21 @@ from bakeoff.game.rules import V2
 from bakeoff.game.track import Track
 
 
+PROVIDER_KEYS = ("ANTHROPIC_API_KEY", "ZHIPU_API_KEY", "TYPESAFE_API_KEY")
+
+
+@pytest.fixture(autouse=True)
+def no_provider_keys(request, monkeypatch, tmp_path_factory):
+    """No test but a `live` one can find a provider key, so none can reach a provider. A cap of 0 used to be
+    enough; Jev plays without a cap (decision 50), so a test that built a real Jev client would otherwise go live
+    with the key in .env."""
+    if "live" in request.keywords:
+        return
+    monkeypatch.setattr("bakeoff.clients.keys.ENV_FILE", tmp_path_factory.mktemp("nokeys") / ".env")
+    for name in PROVIDER_KEYS:
+        monkeypatch.delenv(name, raising=False)
+
+
 @pytest.fixture
 def make_track():
     """Hand-made track: make_track({1: [6], 3: [5, 6, 7]}) puts gaps in those lanes of rows 1 and 3."""

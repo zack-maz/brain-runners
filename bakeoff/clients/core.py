@@ -74,15 +74,36 @@ class RequestBudget:
         self.used += 1
 
 
+class UncappedBudget(RequestBudget):
+    """Counts live requests but never stops one: for a paid player whose requests cost the user nothing (Jev,
+    decision 50). Its requests are still recorded and priced, so what it would cost stays visible."""
+
+    def __init__(self):
+        self.max_requests = None
+        self.used = 0
+
+    @property
+    def remaining(self) -> None:
+        return None
+
+    def spend(self) -> None:
+        self.used += 1
+
+
 class SharedBudget(RequestBudget):
     """One run's view of a budget that outlives it (a `bakeoff live` session may play several runs).
     It spends from the shared budget, so the ceiling the command set can never be raised, but counts
     its own requests: the run's `meta.json` then records what that run spent, not the session's total.
-    Its own cap is what was left when the run began."""
+    Its own cap is what was left when the run began (None when the shared budget has no cap)."""
 
     def __init__(self, shared: RequestBudget):
-        super().__init__(shared.remaining)
+        self.max_requests = shared.remaining
+        self.used = 0
         self.shared = shared
+
+    @property
+    def remaining(self) -> int | None:
+        return self.shared.remaining
 
     def spend(self) -> None:
         self.shared.spend()  # raises BudgetExhausted when the session's cap is reached
@@ -127,7 +148,8 @@ class PaidClient:
         self._owns_sdk = sdk is None
 
     def preflight(self) -> None:
-        if self._owns_sdk and self.budget.max_requests > 0:
+        # with no cap (None, Jev) the key is asked for at the first live request, so a replay of the cache needs none
+        if self._owns_sdk and (self.budget.max_requests or 0) > 0:
             require_key(self.key_name)
 
     # what the client itself puts in the request besides the questions (a provider's own knobs). It is part of the

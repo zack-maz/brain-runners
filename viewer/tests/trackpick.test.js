@@ -74,8 +74,8 @@ test("RUN cannot be pressed while a run is going or a fighter is refused, and sa
 
 test("the cap line comes from the state", () => {
   assert.match(TrackPick.capText(state(), LINEUP), /until its cap of 200 runs out/);
-  assert.match(TrackPick.capText(state({ max_requests: 0 }), LINEUP), /no cap: the paid fighters replay/);
-  assert.equal(TrackPick.capText(state(), ["fly2"]), "No paid fighter: this run spends nothing.");
+  assert.match(TrackPick.capText(state({ max_requests: 0 }), LINEUP), /no cap: the paid runners replay/);
+  assert.equal(TrackPick.capText(state(), ["fly2"]), "No paid runner: this run spends nothing.");
 });
 
 test("the preview draws the real track: one dark cell per gap on its rows", () => {
@@ -95,4 +95,14 @@ test("the keys: arrows step the track, R picks one, Enter runs, Escape goes back
   assert.equal(TrackPick.onKey(1001, state(), "Enter").go, "run");
   assert.equal(TrackPick.onKey(1001, state(), "Escape").go, "back");
   assert.equal(TrackPick.onKey(1001, state(), "q"), null);
+});
+
+test("with no cap, the line says Jev still plays and what the other paid runners do", () => {
+  const jev = { name: "jev_step1", paid: true, price_usd: 0.00003, requests_left: null, capped: false,
+                played_before: false, seeds_played: [], why_not: null };
+  const s = state({ max_requests: 0, players: [...state().players, jev] });
+  assert.equal(TrackPick.capText(s, ["jev_step1"]),
+    "Jev plays without a cap: every row may cost it a request, counted and priced here. Cached answers are free.");
+  assert.match(TrackPick.capText(s, ["jev_step1", "haiku_guided"]),
+    /^Jev plays without a cap: .* The other paid runners replay answers already cached and stop at their first uncached question\.$/);
 });

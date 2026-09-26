@@ -340,6 +340,18 @@
     is not built and stays off the page and out of the tournament. The one lever left untested is a stronger input
     (gains above 4000; about 1.5 h, judged against the same no-brain bar of 112.5), only if the user asks for it.
 
+50. **Jev plays without a cap** (the user, 2026-09-26: "Jev right now is free for me. Still monitor cost, but allow
+    it to play even with budget caps"). Every `jev_*` player (`bakeoff.players.UNCAPPED`) gets an `UncappedBudget`:
+    its live requests are counted, recorded in `meta.json` (`"max": null`) and priced as before, but never stopped,
+    in `run` and in `live`, whatever `--max-requests` says. Claude Haiku and GLM Flash keep their hard cap. Jev is
+    still kept off the tournament seeds (below 1000) without `--tournament`: that rule keeps those seeds unseen, it
+    is not about money. The track select still shows Jev's worst case (the whole track × its price) but does not ask
+    to confirm a lineup whose only spending is Jev's. The fast tests hide every provider key (`tests/conftest.py`),
+    since a cap of 0 no longer keeps a test from going live.
+51. **Brain Battle is renamed Brain Run** (the user, 2026-09-26): the logo reads BRAIN RUN, the fighters are
+    runners ("Choose your runners", "Ready to run"), and the home brain's glow pulses visibly. On screen only:
+    code names, ids and the record of decisions 45–46 keep the old name.
+
 Where we are and what comes next: `docs/NEXT.md`.
 
 ## Prior art to reuse

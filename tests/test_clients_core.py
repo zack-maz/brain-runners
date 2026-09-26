@@ -2,7 +2,8 @@ import json
 
 import pytest
 
-from bakeoff.clients.core import (DiskCache, PaidClient, ProviderError, Reply, RequestBudget, cache_key,
+from bakeoff.clients.core import (DiskCache, PaidClient, ProviderError, Reply, RequestBudget, SharedBudget,
+                                  UncappedBudget, cache_key,
                                   cached_request)
 from bakeoff.errors import BudgetExhausted
 
@@ -115,3 +116,24 @@ def test_paid_client_preflight_wants_the_key_only_when_it_may_go_live_with_its_o
         Echo(DiskCache(tmp_path), RequestBudget(3)).preflight()
     monkeypatch.setenv("ECHO_KEY", "k")
     Echo(DiskCache(tmp_path), RequestBudget(3)).preflight()
+
+
+def test_an_uncapped_budget_counts_every_live_request_but_never_stops_one():
+    budget = UncappedBudget()  # Jev: its requests cost the user nothing (decision 50), but they are still counted
+    for _ in range(1000):
+        budget.spend()
+    assert (budget.used, budget.max_requests, budget.remaining) == (1000, None, None)
+
+
+def test_a_run_s_view_of_an_uncapped_budget_never_stops_and_counts_on_both():
+    shared = UncappedBudget()
+    run = SharedBudget(shared)
+    for _ in range(5):
+        run.spend()
+    assert (run.used, shared.used, run.max_requests, run.remaining) == (5, 5, None, None)
+
+
+def test_an_uncapped_client_asks_for_its_key_only_when_it_goes_live(tmp_path, monkeypatch):
+    monkeypatch.setattr("bakeoff.clients.keys.ENV_FILE", tmp_path / "absent")
+    monkeypatch.delenv("ECHO_KEY", raising=False)
+    Echo(DiskCache(tmp_path), UncappedBudget()).preflight()  # a replay of the cache needs no key
