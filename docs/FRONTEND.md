@@ -111,3 +111,11 @@ scoreboard, what is ours, the benchmark) go in the new flow.
   the whole track (the mock-up's is made up, the page draws the real one); practice tracks 1000–1019 marked with how
   many of this lineup played each before; tournament seeds locked without `--tournament`; the lineup with each
   fighter's worst-case cost and the total; the button says RUN.
+- **Results** (https://claude.ai/artifact/J8cjnoH9ca4L3RCPrsgaih), in place of the Analysis tab; Records on the home
+  page opens the same numbers for past runs. A card per fighter ranked by rows survived (place, sprite in its skin,
+  rows, how it died, time per row, requests, cost), a bar per fighter against the solver's 150, the warning that one
+  track is not a result, and Run again, New track, Fighters, Watch the replay, Records, Home. No "winner" banner.
+  **More numbers** opens a table (the cards shrink): rows, death, share of jumps, **wrong moves** (rows where the
+  move was worse than the best one, and which was fatal; it replaces "agreed with the solver", which is 97–100% for
+  every recorded player and so says nothing), **asked live** and **from cache** as two rows, time per row, tokens,
+  cost. Failed or unreadable answers are not a row: a warning line appears only when there were any.
