@@ -92,6 +92,22 @@ scoreboard, what is ours, the benchmark) go in the new flow.
 - **Character select** (https://claude.ai/artifact/LsnzaCSjnujcVmFjVWSixP). Five portraits (Fly, Jev, Haiku, GLM
   Flash, and Bot as a sandbag), eight slots, a "Ready to fight" banner from one fighter on, and a line about the
   skin in focus: what it does, its player name, its price.
-  Skin colours (never blue): each character's own colour is its first skin (fly grey, Jev pale, Haiku orange, GLM
-  violet); every question set has the same colour on every model (step1 teal, guided amber, step2 tan, map
-  green), so twins read as twins; fly2 is teal; the Bot is white (solver), grey (random), tan (always jump).
+  Skin colours, as the user settled them (GLM Flash was the source of truth for red and black, Haiku for green):
+
+  | skin | Jev | Haiku | GLM Flash |
+  |---|---|---|---|
+  | plain | pale `#B9BEC4` | orange `#D97757` | grey `#9AA0A6` (the ox is greyscale) |
+  | guided | green `#5FA35A` | the same | the same |
+  | step1 | yellow `#E6B422` | the same | the same |
+  | step2 | red `#B8404F` | the same | the same |
+  | map | black `#1E2227`, visor lit Zima blue `#7AA2F7` | black, blue eyes | black, blue eyes |
+
+  Fly: Looming is the normal fly (grey wings, red eyes); Sideways (`fly2`) swaps them (red wings, grey eyes).
+  Bot, a simple boxy robot (no antenna, no mouth), grey on the select screen: Random greys (its first skin), Solver
+  Zima blue `#7AA2F7`, Always jump white. Blue and red are used by skins at the user's call, besides the cursor and
+  `--bad`.
+- **Track select** (https://claude.ai/artifact/FiSSi5jRBeFZNWe5ic3LTJ). There is no stage select: Run is the only
+  game, so the character select leads straight here. The track number with previous, next and Random; a preview of
+  the whole track (the mock-up's is made up, the page draws the real one); practice tracks 1000–1019 marked with how
+  many of this lineup played each before; tournament seeds locked without `--tournament`; the lineup with each
+  fighter's worst-case cost and the total; the button says RUN.
