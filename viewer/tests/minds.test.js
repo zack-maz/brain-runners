@@ -189,6 +189,27 @@ test("tags are short and uppercase, and an unknown player still gets one", () =>
   assert.equal(Minds.tagOf("my_bot"), "MY_BOT");
 });
 
+test("with the roster, a tag is the select screen's label after a swatch of the skin's colour", () => {
+  const Roster = require("../roster.js");
+  Minds.useRoster(Roster.make([{ id: "jev", name: "Jev", sprite: "visor", skins: [
+    { player: "jev_step1", name: "Step 1", about: "", color: "#E6B422", inks: {} },
+    { player: "jev_map", name: "Map", about: "", color: "#1E2227", inks: { V: "#7AA2F7" } },
+    { player: "jev_x", name: "<b>", about: "", color: "#E6B422\"><script>", inks: {} }] }]));
+  try {
+    assert.equal(Minds.tagOf("jev_step1"), "Jev \u00b7 Step 1");
+    assert.equal(Minds.tagHtml("jev_step1"), '<span class="label tag" style="color:#E6B422"><span class="swatch" ' +
+      'style="background:#E6B422" aria-hidden="true"></span>Jev \u00b7 Step 1</span>');
+    // black does not read on the dark page: the label keeps the page's ink, the swatch still shows the skin
+    assert.equal(Minds.tagHtml("jev_map"), '<span class="label tag"><span class="swatch" style="background:#1E2227" ' +
+      'aria-hidden="true"></span>Jev \u00b7 Map</span>');
+    assert.equal(Minds.tagHtml("solver"), '<span class="label tag">SOLVER</span>'); // not on this roster
+    assert.equal(Minds.tagHtml("jev_x").includes("<script>") || Minds.tagHtml("jev_x").includes("<b>"), false);
+  } finally {
+    Minds.useRoster(null);
+  }
+  assert.equal(Minds.tagOf("jev_step1"), "JEV STEP 1");
+});
+
 test("the two plain chat models get the same panel", () => {
   const answered = frame({ answers: { text: '{"action": "jump"}', stop_reason: "end_turn" }, chosen_action: "jump" });
   const haiku = Minds.mind({ player: "haiku_plain", questions: [] }, answered, context());

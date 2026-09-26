@@ -7,7 +7,7 @@
   const FLY_GROUPS = [
     ["DNa01", "steering"], ["DNb01", "steering"], ["DNp01", "Giant Fiber, escape jump"], ["DNa02", "logged only"],
   ];
-  // the short uppercase tag a runner carries in the tunnel and on its panel
+  // the short uppercase tag a runner carries when the page has no roster (a page built before Brain Battle)
   const TAGS = { fly: "FLY", fly2: "FLY2", solver: "SOLVER", random: "RANDOM", always_jump: "JUMPER",
     jev_plain: "JEV PLAIN", jev_guided: "JEV GUIDED", jev_step1: "JEV STEP 1", jev_step2: "JEV STEP 2", jev_map: "JEV MAP",
     haiku_plain: "HAIKU PLAIN", haiku_guided: "HAIKU GUIDED", haiku_step1: "HAIKU STEP 1", haiku_step2: "HAIKU STEP 2",
@@ -16,7 +16,19 @@
   // players that ask a question set (bakeoff/players/question_sets.py): Jev, Claude Haiku or GLM, and the set's name
   const SET_PLAYER = /^(jev|haiku|glm)_(step1|guided|step2|map)$/;
   const isSetPlayer = (player) => SET_PLAYER.test(player) && player !== "jev_step1";
-  const tagOf = (player) => TAGS[player] || String(player).toUpperCase();
+  // With the roster (roster.js, set once by app.js) a runner is labelled as on the select screen, "Jev · Step 1".
+  let roster = null;
+  const useRoster = (made) => { roster = made || null; };
+  const tagOf = (player) => (roster && roster.has(player) ? roster.label(player) : TAGS[player] || String(player).toUpperCase());
+  // The tag as markup: the label, in its skin's colour where that reads on the dark page, after a swatch of the
+  // skin's colour. A player not on the roster gets the plain tag. Every value is escaped.
+  const tagHtml = (player) => {
+    const colour = roster && roster.has(player) ? roster.colour(player) : null;
+    const ink = colour ? roster.ink(player) : null;
+    return '<span class="label tag"' + (ink ? ' style="color:' + esc(ink) + '"' : "") + ">" +
+      (colour ? '<span class="swatch" style="background:' + esc(colour) + '" aria-hidden="true"></span>' : "") +
+      esc(tagOf(player)) + "</span>";
+  };
   const DEATHS = {
     ran_into_gap: "ran straight into a gap",
     jumped_into_gap: "jumped into a gap",
@@ -340,7 +352,7 @@
     return "row " + Math.floor(state.row) + ", lane " + (((Math.round(state.lane) % lanes) + lanes) % lanes);
   }
 
-  const api = { esc, cell, bar, tagOf, sensesGrid, verdict, spikeRaster, flyMind, fly2Mind, oursFly2, jevMind, jevStep1Mind, visorP, chatMind, cost, asked,
+  const api = { esc, cell, bar, tagOf, tagHtml, useRoster, sensesGrid, verdict, spikeRaster, flyMind, fly2Mind, oursFly2, jevMind, jevStep1Mind, visorP, chatMind, cost, asked,
                 ours, mind, statusLine, isSetPlayer, readGrid, setMind };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Minds = api;

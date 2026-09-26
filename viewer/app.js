@@ -17,7 +17,9 @@
   const esc = Minds.esc;
   const cell = Minds.cell;
   const DEMO = ["fly", "jev_step1", "haiku_plain"]; // the default view; an older replay has only jev_plain
-  const SPRITE = { fly: "fly", fly2: "fly", jev_step1: "visor", haiku_plain: "chat" }; // everyone else is a plain grey block
+  const rosterSlot = document.getElementById("roster-data");
+  const roster = Roster.make(rosterSlot ? JSON.parse(rosterSlot.textContent) : null); // each runner's character and skin
+  Minds.useRoster(roster);
   const ABOUT = {
     fly: "Fruit fly connectome, untrained",
     fly2: "The same fly, a richer input and read-out (ours)",
@@ -209,7 +211,7 @@
       const panel = document.createElement("article");
       panel.className = "mind";
       panel.dataset.player = episode.player;
-      panel.innerHTML = '<header><span class="label tag">' + esc(Minds.tagOf(episode.player)) + '</span><span class="about">' +
+      panel.innerHTML = "<header>" + Minds.tagHtml(episode.player) + '<span class="about">' +
         esc(ABOUT[episode.player] || "") + (model ? " · " + esc(model) : "") + '</span></header><div class="body"><p class="status"></p>' +
         '<div class="decision"></div><details class="log"><summary class="label">Its log</summary><ol class="log-lines"></ol></details></div>';
       strip.appendChild(panel);
@@ -368,7 +370,8 @@
     drawn.sort((a, b) => (a.s.id === view.focus) - (b.s.id === view.focus)); // the mind in focus is painted last
     view.hit = [];
     for (const { s, at } of drawn) {
-      const name = SPRITE[s.id] || "block";
+      const look = roster.look(s.id);
+      const name = look.sprite;
       const px = Math.max(2, Math.round(size * 0.008 * at.scale));
       const sprite = Sprites.sizeOf(name);
       const o = overlap[s.id];
@@ -378,8 +381,8 @@
       ctx.globalAlpha = o.alpha * (1 - at.fall);
       const fan = o.fan * sprite.width * px * 0.62;
       ctx.translate(fan, -at.lift + at.fall * size * 0.12);
-      Sprites.drawSprite(ctx, name, px, { p: Minds.visorP(s.frame), open: s.air > 0.15 });
-      // the tag, upright whatever wall the runner stands on; blue only for the mind in focus. Runners that
+      Sprites.drawSprite(ctx, name, px, { p: Minds.visorP(s.frame), open: s.air > 0.15, color: look.color, inks: look.inks });
+      // the tag, upright whatever wall the runner stands on, in its skin's colour; blue brackets for the mind in focus. Runners that
       // overlap share one column of tags over the middle of the group, so the tags never overprint.
       const inFocus = s.id === view.focus;
       const text = inFocus ? "[ " + Minds.tagOf(s.id) + " ]" : Minds.tagOf(s.id);
@@ -394,7 +397,7 @@
       ctx.lineWidth = 3;
       ctx.strokeStyle = "#0A0A0A";
       ctx.strokeText(text, 0, 0);
-      ctx.fillStyle = inFocus ? INK.accent : INK.muted;
+      ctx.fillStyle = inFocus ? INK.accent : roster.ink(s.id) || INK.muted;
       ctx.fillText(text, 0, 0);
       ctx.restore();
       view.hit.push({ id: s.id, x: at.x, y: at.y, r: sprite.height * px });

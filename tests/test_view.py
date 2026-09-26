@@ -51,7 +51,8 @@ def test_the_page_says_what_is_ours_about_jev_and_the_figures():
     assert "looks one step ahead only" in page
     assert "landed on a gap about as often as always staying would have" in page
     assert "our own drawing and nobody's official artwork" in page
-    assert "The blue marks the mind in focus and the tiles it was shown, nothing else." in page
+    assert ("The blue marks the mind in focus and the tiles it was shown; elsewhere it is a skin's own colour "
+            "(Bot · Solver, the Map skins' eyes).") in page
 
 
 def test_the_page_keeps_every_caveat_about_the_fly_and_about_jevs_questions():
@@ -72,7 +73,7 @@ def test_the_page_carries_the_chart_rules_the_analysis_tab_draws_with():
 
 def test_every_script_the_page_names_exists_and_app_comes_last():
     names = re.findall(r'<script src="([^"]+)"></script>', (VIEWER_DIR / "index.html").read_text())
-    assert names == ["timeline.js", "tunnel.js", "sprites.js", "stage.js", "minds.js", "log.js", "picker.js", "tabs.js",
+    assert names == ["timeline.js", "tunnel.js", "sprites.js", "roster.js", "stage.js", "minds.js", "log.js", "picker.js", "tabs.js",
                      "feed.js", "lobby.js", "bench.js", "bench_view.js", "app.js"]
     assert all((VIEWER_DIR / name).is_file() for name in names)
 

@@ -60,7 +60,9 @@ section > h2.label { margin-bottom: 20px; }
 .mind { min-width: 0; padding: 0 16px 20px; background: var(--panel); border-right: 1px solid var(--hairline);
   border-top: 2px solid transparent; font-size: var(--size-small); cursor: pointer; transition: opacity var(--fast) var(--ease); }
 .mind[aria-current="true"] { border-top-color: var(--accent); cursor: default; }
-.mind[aria-current="true"] .tag { color: var(--accent); }
+.mind header .tag { flex: none; white-space: nowrap; }
+.tag .swatch { display: inline-block; width: 0.75em; height: 0.75em; margin-right: 0.45em; vertical-align: -0.05em;
+  border: 1px solid var(--line-strong); }
 .mind.fallen .decision { opacity: 0.45; }
 .mind header { display: flex; align-items: baseline; gap: 12px; padding: 14px 0 10px; min-height: 44px; }
 .mind header .about { color: var(--muted); font-size: var(--size-small); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
