@@ -39,9 +39,9 @@ Added the same day, while it was being recorded:
   players and the track, then starts the run. The command sets the port and the ceiling; the page drives the rest
   through `/state`, `/run`, `/cancel`, `/events?run=` behind a token (design
   `docs/superpowers/specs/2026-09-22-page-control-design.md`).
-- The roster (`bakeoff/replay.py` `CONTESTANTS`, `bakeoff/players/__init__.py`): flies `fly`, `fly2`; Jev `jev`,
-  `jev_composed`, `jev_choice`, `jev_two_step`, `jev_reader`; Claude Haiku `haiku` and the same four sets; GLM Flash
-  `glm` and the same four sets; the free yardsticks `solver`, `random`, `always_jump`.
+- The roster (`bakeoff/replay.py` `CONTESTANTS`, `bakeoff/players/__init__.py`): flies `fly`, `fly2`; Jev `jev_plain`,
+  `jev_step1`, `jev_guided`, `jev_step2`, `jev_map`; Claude Haiku `haiku_plain` and the same four sets; GLM Flash
+  `glm_plain` and the same four sets; the free yardsticks `solver`, `random`, `always_jump`.
 - The sprites (`viewer/sprites.js`) are our own character grids: the fly, the chat critter, Jev's visor, a grey block.
 - The page is the user's brand (dark, one blue for the cursor, `--bad` for deaths), plain JavaScript, no build step,
   nothing loaded from the network.
@@ -51,8 +51,8 @@ Added the same day, while it was being recorded:
 
 ## Questions to settle
 
-- The roster: the request says four variants of Jev, Haiku and GLM Flash, and there are five of each (the one-shot
-  and four question sets). Which four, or five skins? Are the yardsticks on the select screen?
+- The roster: the request says four variants of Jev, Haiku and GLM Flash, and there are five of each (the plain set
+  and four more question sets). Which four, or five skins? Are the yardsticks on the select screen?
 - One character several times: can two slots pick the same character in different skins (as in Smash), and the
   same skin twice (the same player cannot run twice on one track today)?
 - "The same as Smash": a cursor (hand) and tokens dropped on portraits, with player slots below; mouse only or also
@@ -68,8 +68,9 @@ scoreboard, what is ours, the benchmark) go in the new flow.
 
 ## Answers so far (2026-09-25)
 
-- **Skins:** all five variants of each model are skins; the one-shot (`jev`, `haiku`, `glm`) is the default skin,
-  the four question sets are the others. The Fly has two skins, `fly` and `fly2`.
+- **Skins:** all five variants of each model are skins; the plain set (`jev_plain`, `haiku_plain`, `glm_plain`, the
+  one broad question) is the default skin, the four other question sets are the others. The sets are named for this
+  screen (decision 44): Plain, Guided, Step 1, Step 2 and Map. The Fly has two skins, `fly` and `fly2`.
 - **Yardsticks:** a fifth character, "Bot", whose skins are `solver`, `random` and `always_jump`.
 - **Duplicates:** one character can fill several slots in different skins; the same skin twice is refused (one
   player cannot run twice on one track).
@@ -92,5 +93,5 @@ scoreboard, what is ours, the benchmark) go in the new flow.
   Flash, and Bot as a sandbag), eight slots, a "Ready to fight" banner from one fighter on, and a line about the
   skin in focus: what it does, its player name, its price.
   Skin colours (never blue): each character's own colour is its first skin (fly grey, Jev pale, Haiku orange, GLM
-  violet); every question set has the same colour on every model (composed teal, choice amber, two-step tan, reader
+  violet); every question set has the same colour on every model (step1 teal, guided amber, step2 tan, map
   green), so twins read as twins; fly2 is teal; the Bot is white (solver), grey (random), tan (always jump).

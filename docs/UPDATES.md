@@ -8,7 +8,7 @@ Branch: `phase6-updates`.
 
 1. **A trained fly, and a better fly.** What about a trained fly? And the current fly logic: is there a way to
    improve it or ideate on it?
-2. **Two more Jev variants.** We have `jev` and `jev_composed`. Ideate on and test two other versions to find the
+2. **Two more Jev variants.** We have `jev_plain` and `jev_step1`. Ideate on and test two other versions to find the
    best cost/performance approach. Feed the LLM run the same signals.
 3. **Six rows of vision.** Is six a good number? Think it through.
 4. **Live logs, one tab per mind.** A real-time running log of Jev, Haiku and the fly brain's processing, each
@@ -30,10 +30,10 @@ Branch: `phase6-updates`.
 - Items 3 and 6: game v2 (decisions 21–24 in `DECISIONS.md`; spec `docs/superpowers/specs/2026-09-21-game-v2-design.md`,
   plan `docs/superpowers/plans/2026-09-21-update1-game-v2.md`). Vision stays 6 rows × 3 lanes and is now a setting;
   v2 is 150 rows at full difficulty by row 100; v1 stays playable.
-- Item 2 (update 2a): `jev_choice`, `jev_two_step`, `jev_reader` and an LLM twin for every question set (decisions
+- Item 2 (update 2a): `jev_guided`, `jev_step2`, `jev_map` and an LLM twin for every question set (decisions
   25–27; spec `docs/superpowers/specs/2026-09-21-jev-family-design.md`). Code built and reviewed; paid runs done
   (`docs/COSTS.md`). Item 1 (the fly) is update 2b: the trained fly dropped for now, `fly_rich` stopped at its probe (decisions 29–30).
-- Item 10, the GLM Flash twins (decisions 33–34): `glm_composed`, `glm_choice`, `glm_two_step` and `glm_reader` on
+- Item 10, the GLM Flash twins (decisions 33–34): `glm_step1`, `glm_guided`, `glm_step2` and `glm_map` on
   `glm-4.5-flash`, the same questions and rules as their Jev and Haiku twins. Built; track 1000 recorded, the rest
   parked while the free tier throttles (`docs/COSTS.md`).
 - Items 4, 5, 8, 9, the page: approved design (decision 35,
@@ -55,10 +55,10 @@ Branch: `phase6-updates`.
    practice seeds and its own on-screen label saying what is ours. "Trained" also needs defining: plasticity inside
    the connectome model, or a learned readout on top of fixed wiring (the second is much cheaper to honestly
    label). Background: `docs/RESEARCH.md`, spike `spike/fly-steering`.
-2. Today: `jev` (one-shot Choice, dies early; spike 02) and `jev_composed` (four pointed Nouls, code picks the
+2. Today: `jev_plain` (one broad Choice, dies early; spike 02) and `jev_step1` (four pointed Nouls, code picks the
    action least likely to land on a gap). Candidates to brainstorm: fewer questions per row, looking two steps
    ahead, asking only when the row ahead is not trivially safe. "Same signals" means the LLM would get the same
-   per-action questions or the same composed view, so the comparison is about the model, not the prompt. Testing
+   per-action questions or the same step1 view, so the comparison is about the model, not the prompt. Testing
    any paid variant needs a budget go-ahead (Jev about 0.00003 USD a request, the LLM about 0.0006; `COSTS.md`).
 3. `LOOKAHEAD = 6` in `bakeoff/game/track.py` (now the `lookahead` field of `Rules` in `bakeoff/game/rules.py`); the gap width is at most 3 and a jump covers 2 rows, so the
    question is how far ahead a player needs to see to always have an escape, and what a shorter or longer view

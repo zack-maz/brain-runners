@@ -273,6 +273,22 @@
     - **The held-out seeds were not wholly unseen:** they had been used by the research that chose the three
       candidates.
 
+44. **The question sets are renamed plain, guided, step1, step2 and map** (the user, 2026-09-25).
+
+    | old player | new player |
+    |---|---|
+    | `jev`, `haiku`, `glm` (the one-shot) | `jev_plain`, `haiku_plain`, `glm_plain` |
+    | `jev_choice`, `haiku_choice`, `glm_choice` | `jev_guided`, `haiku_guided`, `glm_guided` |
+    | `jev_composed`, `haiku_composed`, `glm_composed` | `jev_step1`, `haiku_step1`, `glm_step1` |
+    | `jev_two_step`, `haiku_two_step`, `glm_two_step` | `jev_step2`, `haiku_step2`, `glm_step2` |
+    | `jev_reader`, `haiku_reader`, `glm_reader` | `jev_map`, `haiku_map`, `glm_map` |
+
+    Nothing recorded changes: the response cache is keyed by provider, model, senses and questions, not by a name,
+    so every answer already paid for still replays; the run directories keep their old file names and are read
+    through `canonical()` in `bakeoff/players/names.py`, which maps every old name, the `llm*` ones of decision 39
+    included, straight to its new one. The new names were chosen for the Brain Battle character select
+    (`docs/FRONTEND.md`), where each set is a skin.
+
 Where we are and what comes next: `docs/NEXT.md`.
 
 ## Prior art to reuse

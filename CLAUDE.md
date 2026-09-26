@@ -12,7 +12,7 @@ tournament. Read these before doing anything:
    `docs/superpowers/specs/2026-09-20-demo-player-design.md` (the demo player; also binding).
 3. `docs/RESEARCH.md` — fly-brain resources. Spike results: branch `spike/fly-steering`,
    `spikes/01-fly-steering/REPORT.md` (throwaway code; port ideas, do not merge it). Also spike 02, branch
-   `spike/jev-questions`, `spikes/02-jev-questions/REPORT.md` (why Jev's one-shot Choice fails), and spike 03,
+   `spike/jev-questions`, `spikes/02-jev-questions/REPORT.md` (why Jev's one-shot Choice, now `jev_plain`, fails), and spike 03,
    branch `spike/fly-bands`, `spikes/03-fly-bands/REPORT.md` (update 2b's probe result).
 
 ## Status
@@ -22,12 +22,12 @@ built (plan: `docs/superpowers/plans/2026-09-19-phase2-fly-player.md`): fly play
 Brian2 model, looming weighting and two thresholds fixed on practice seeds 1000–1199 and frozen
 (`calibration/REPORT.md`; never retune, never let seeds below 1000 influence them). First
 scoreboard in `calibration/RESULTS.md`. Phase 3 built (plan:
-`docs/superpowers/plans/2026-09-20-phase3-paid-players.md`): `jev` and `haiku` players behind
+`docs/superpowers/plans/2026-09-20-phase3-paid-players.md`): `jev_plain` and `haiku_plain` players (then `jev` and `haiku`) behind
 `bakeoff/clients/core.py` (disk cache, hard cap per paid player, no SDK retries). First costs in
 `docs/COSTS.md`. Phase 4 built (plan: `docs/superpowers/plans/2026-09-20-phase4-replay-viewer.md`):
 `bakeoff/replay.py` merges run directories into one replay object (`docs/REPLAY_DATA.md`) and
 `python -m bakeoff view` embeds it with `viewer/` in one offline HTML file (PR #3, merged). Phase 5a built
-(plan: `docs/superpowers/plans/2026-09-21-phase5a-jev-composed.md`): the `jev_composed` player (four pointed
+(plan: `docs/superpowers/plans/2026-09-21-phase5a-jev-composed.md`): the `jev_step1` player (four pointed
 Nouls, code picks the action least likely to land on a gap; the wording and the rule are ours), 247 rows on
 practice track 1000 (`docs/COSTS.md`). Phase 5b built (plan: `...-phase5b-demo-player.md`): the replay page is the
 demo player, the project's main tool (design: `docs/superpowers/specs/2026-09-20-demo-player-design.md`): one tunnel,
@@ -39,9 +39,11 @@ updates (`docs/UPDATES.md`, decision 20), on branch `phase6-updates`. Update 1, 
 `...-update1-game-v2.md`): named game versions in `bakeoff/game/rules.py`; `v2` (default) is 150 rows at full
 difficulty by row 100, `v1` is the old 300-row game, pinned tile for tile; runs record their game and `view` never
 mixes two; everything recorded so far is v1 (`--game v1` replays it). Update 2a, the Jev family, is built (plan
-`...-update2a-jev-family.md`): `bakeoff/players/question_sets.py` (composed, choice, two_step, reader: questions and a
-rule, ours) played by `jev_<set>` and by Claude Haiku twins `haiku_<set>` (`set_players.py`; they were
-`llm_<set>` until decision 39, and `bakeoff/players/names.py` still reads the old name everywhere); the report's `brier_all`;
+`...-update2a-jev-family.md`): `bakeoff/players/question_sets.py` (step1, guided, step2, map: questions and a
+rule, ours; the one-shot players are the plain set) played by `jev_<set>` and by Claude Haiku twins `haiku_<set>`
+(`set_players.py`). The sets were renamed by decision 44 (composed → step1, choice → guided, two_step → step2,
+reader → map, the one-shot `jev`/`haiku`/`glm` → `*_plain`) and Haiku's players were `llm_<set>` until decision 39;
+`bakeoff/players/names.py` still reads every old name everywhere, so old runs and commands keep working; the report's `brier_all`;
 its paid runs are done (five v2 practice tracks, `docs/COSTS.md`). Update 2b, the fly, stopped at its probe (spike 03, decision 30). Item 7, the benchmark, is built:
 `python -m bakeoff bench` (`bakeoff/bench.py`, page `viewer/bench.html`), decision 31. Item 10, the GLM Flash twins, is
 built and parked after one track (decisions 33–34). The page (items 4, 5, 8 and 9; decision 35, design

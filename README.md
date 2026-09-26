@@ -39,7 +39,7 @@ are in `docs/COSTS.md`.
     uv run python -m bakeoff bench runs/<run_id>[:player,...] [...]          # writes bench.html and bench.json
 
     uv run python -m bakeoff live --port 8765             # the lobby: the browser picks the track and the players
-    uv run python -m bakeoff live --start --seed 1001 --players fly,jev_composed,haiku --max-requests 150
+    uv run python -m bakeoff live --start --seed 1001 --players fly,jev_step1,haiku_plain --max-requests 150
     uv run python -m bakeoff live --game v1 --seed 1001 --start   # free: replays that run's answers from the cache
 
 `bench` scores recorded runs and spends nothing. It merges run directories like `view` (one game; each player and
@@ -62,27 +62,32 @@ Ctrl-C (`--no-wait` does neither). The cap is the session's, per paid player, de
 run of a track whose answers are already cached; a live paid run on a seed below 1000 is refused without `--tournament`. `live`
 builds one fly brain; do not start a second fly process next to it. Afterwards `view` replays the directory.
 
-Paid players (`jev`, `jev_composed`, `haiku` and the question-set players below) need `TYPESAFE_API_KEY` / `ANTHROPIC_API_KEY` in a git-ignored `.env`
+Paid players (`jev_plain`, `jev_step1`, `haiku_plain` and the question-set players below) need `TYPESAFE_API_KEY` / `ANTHROPIC_API_KEY` in a git-ignored `.env`
 file at the repo root (template: `.env.example`). They spend nothing unless told to:
 
-    uv run python -m bakeoff run --players jev --seeds 1 --seed-start 1000 --max-requests 300 --game v1
+    uv run python -m bakeoff run --players jev_plain --seeds 1 --seed-start 1000 --max-requests 300 --game v1
 
-`jev_composed` is the Jev of the demo: instead of one broad question it asks Jev four pointed yes/no
+`jev_step1` is the Jev of the demo: instead of one broad question it asks Jev four pointed yes/no
 questions in one request ("would `left` land on a gap, that is, does `ahead[0].gaps_relative` contain
 -1?") and code picks the action least likely to land on a gap, ties in the order stay, left, right,
 jump. The wording and that rule are ours, not TypeSafe's, and it looks one step ahead only. The
-one-shot `jev` stays for comparison: on the dangerous states of practice track 1000 its single Choice
+one-shot `jev_plain` (the plain set) stays for comparison: on the dangerous states of practice track 1000 its single Choice
 landed on a gap about as often as always staying (`docs/DECISIONS.md`, decisions 14 and 15).
 
-Three more ways to ask Jev, and an LLM twin for each way (decisions 25 and 26): `jev_choice` asks one Choice whose
-options name each move's landing tile, `jev_two_step` asks eight yes/no questions (each move's landing, and whether it
-leaves a way on), `jev_reader` asks about every visible tile and code plans over its answers like the solver.
-`haiku_composed`, `haiku_choice`, `haiku_two_step` and `haiku_reader` ask Claude Haiku exactly the same questions and use the
-same rule, and `glm_composed`, `glm_choice`, `glm_two_step` and `glm_reader` ask GLM Flash (Zhipu's free tier,
+Three more ways to ask Jev, and an LLM twin for each way (decisions 25 and 26): `jev_guided` asks one Choice whose
+options name each move's landing tile, `jev_step2` asks eight yes/no questions (each move's landing, and whether it
+leaves a way on), `jev_map` asks about every visible tile and code plans over its answers like the solver.
+`haiku_step1`, `haiku_guided`, `haiku_step2` and `haiku_map` ask Claude Haiku exactly the same questions and use the
+same rule, and `glm_step1`, `glm_guided`, `glm_step2` and `glm_map` ask GLM Flash (Zhipu's free tier,
 `ZHIPU_API_KEY`) the same again. Three things still differ: the LLM is also given the briefing of the rules (for three of the four sets
 Jev's yes/no questions carry only the question), Jev answers its questions in parallel while the LLM writes them in
 one reply, and the LLM's probabilities are numbers it writes down. The questions and the rules are ours
 (`bakeoff/players/question_sets.py`).
+
+The five ways are named `plain`, `guided`, `step1`, `step2` and `map` (decision 44, for the Brain Battle character
+select). Before that they were the one-shot `jev`/`haiku`/`glm`, `choice`, `composed`, `two_step` and `reader`, and
+Claude Haiku's players were `llm*` before decision 39. Old names still work wherever a player is named, and runs
+recorded under them (with their cached answers) are read as the new ones.
 
 `--max-requests` is a hard cap on live requests for **each** paid player in the run; the default 0
 only replays `.cache/responses`. Every answer is cached, so a repeated run of the same game and track
@@ -94,10 +99,10 @@ ends there, so later players in the list do not play: put free players first, or
 alone.
 
 `view` writes one self-contained HTML file (no server, no network, fonts embedded): the demo player. The
-fly, the composed Jev and the LLM run one tunnel together as pixel figures (fixed camera, everyone on the
+fly, `jev_step1` and `haiku_plain` run one tunnel together as pixel figures (fixed camera, everyone on the
 same row at the same time), with a strip of panels underneath showing what each had in mind (the fly's
 spikes and read-out signals, Jev's four answers, the LLM's answer). Any other players in the merged run
-directories (the question-set players, `jev` one-shot) join the same tunnel with their own tags. Blue is
+directories (the other question-set players, `jev_plain`) join the same tunnel with their own tags. Blue is
 the cursor: it marks the mind in focus and the tiles that mind was shown, and with auto on it cuts to
 whoever faces a gap (a click chooses by hand, or keys 1 to 9 pick the runner in that position; space
 plays, the arrows step a row). The page has two tabs. **Run** holds the tunnel, the

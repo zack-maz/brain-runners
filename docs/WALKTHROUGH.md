@@ -24,9 +24,9 @@ For the paid players, put keys in a git-ignored `.env` at the repo root (templat
 
 | Key | For |
 | --- | --- |
-| `TYPESAFE_API_KEY` | the Jev players (`jev`, `jev_composed`, `jev_choice`, `jev_two_step`, `jev_reader`) |
-| `ANTHROPIC_API_KEY` | the Claude Haiku players (`haiku`, `haiku_composed`, `haiku_choice`, `haiku_two_step`, `haiku_reader`) |
-| `ZHIPU_API_KEY` | the GLM Flash players (`glm_composed`, `glm_choice`, `glm_two_step`, `glm_reader`) |
+| `TYPESAFE_API_KEY` | the Jev players (`jev_plain`, `jev_step1`, `jev_guided`, `jev_step2`, `jev_map`) |
+| `ANTHROPIC_API_KEY` | the Claude Haiku players (`haiku_plain`, `haiku_step1`, `haiku_guided`, `haiku_step2`, `haiku_map`) |
+| `ZHIPU_API_KEY` | the GLM Flash players (`glm_step1`, `glm_guided`, `glm_step2`, `glm_map`) |
 | `GLM_BASE_URL` | only for a mainland Zhipu account |
 
 Programs read `.env` themselves. Never type `.env` into a shell command here: a guard blocks any command
@@ -44,19 +44,19 @@ containing that text, so the keys cannot be echoed by accident.
 | `random`, `always_jump` | the floors | free |
 | `fly` | the fruit fly connectome, untrained | free, ~0.7 s a row, ~1 GB of RAM |
 | `fly2` | a second pure fly, same connectome, a richer input of ours, a sideways channel (M3) (decision 43) | free, ~0.5 s a row, shares `fly`'s brain when run together |
-| `jev`, `haiku`, `glm` | the one-shot trio: one broad question, one move | paid / free tier |
-| `jev_composed`, `haiku_composed`, `glm_composed` | "would each move land on a gap?" (4 questions) | paid / free tier |
-| `jev_choice`, `haiku_choice`, `glm_choice` | one Choice over the four moves | paid / free tier |
-| `jev_two_step`, `haiku_two_step`, `glm_two_step` | landing *and* whether it leaves a way on (8 questions) | paid / free tier |
-| `jev_reader`, `haiku_reader`, `glm_reader` | every visible tile (42 questions), then plan | paid / free tier |
+| `jev_plain`, `haiku_plain`, `glm_plain` | the plain set: one broad question, one move | paid / free tier |
+| `jev_step1`, `haiku_step1`, `glm_step1` | "would each move land on a gap?" (4 questions) | paid / free tier |
+| `jev_guided`, `haiku_guided`, `glm_guided` | one Choice over the four moves | paid / free tier |
+| `jev_step2`, `haiku_step2`, `glm_step2` | landing *and* whether it leaves a way on (8 questions) | paid / free tier |
+| `jev_map`, `haiku_map`, `glm_map` | every visible tile (42 questions), then plan | paid / free tier |
 
 Worst-case price per request, as the page quotes it (measured in `docs/COSTS.md`, rounded up):
-`haiku_reader` 0.0065 USD · `haiku_two_step` 0.0016 · `haiku_composed` 0.0010 · `haiku_choice` 0.0009 · `haiku` 0.0006 ·
+`haiku_map` 0.0065 USD · `haiku_step2` 0.0016 · `haiku_step1` 0.0010 · `haiku_guided` 0.0009 · `haiku_plain` 0.0006 ·
 the Jev players 0.00003–0.00012 (estimates) · the GLM players 0 while the free tier lasts. One request per row, so
 a 150-row track costs at worst 150 × that.
 
 **A note on names.** Claude Haiku's players were called `llm*` until 2026-09-24 (decision 39); they are `haiku*`
-now, so that `haiku_composed` and `glm_composed` read as the pair they are. The old names still work everywhere a
+now, so that `haiku_step1` and `glm_step1` read as the pair they are. The old names still work everywhere a
 name is typed, and runs recorded under them are read back under the new ones, so old and new runs merge as one
 player. Nothing on disk was rewritten and no cached answer was lost.
 
@@ -116,7 +116,7 @@ it to someone and it works.
 ### `bench` — how sure are we?
 
 ```bash
-uv run python -m bakeoff bench runs/<id> "runs/<other>:jev_composed,jev_two_step" --output bench.html
+uv run python -m bakeoff bench runs/<id> "runs/<other>:jev_step1,jev_step2" --output bench.html
 ```
 
 Scores runs that already exist, so it spends nothing. `DIR:player,player` takes only those players from a
@@ -173,7 +173,7 @@ The same page serves a saved replay and a live run; a replay simply has no lobby
 - **Players**, two labelled rows of one control:
   - *Who runs next* — the ticks that choose who plays the next run, laid out as the bakeoff really is: a row per
     **question set** (what a player is asked, and the rule its answers go through) crossed with a column per
-    **model** (who is asked), so `jev_composed`, `haiku_composed` and `glm_composed` sit side by side and an empty
+    **model** (who is asked), so `jev_step1`, `haiku_step1` and `glm_step1` sit side by side and an empty
     crossing shows as `—`. Each row says what that set asks; each column says what that model is and how it
     answers. Below the grid are the players that are apart: the fly, which is asked nothing, and the yardsticks.
     Every cell carries its price, what is left of the cap, and whether that track was played before (so some
@@ -261,9 +261,12 @@ uv run python -m bakeoff view runs/20260921-165433 --output /tmp/replay.html   #
 **See the whole update-2a scoreboard with intervals and pairs**
 ```bash
 uv run python -m bakeoff bench runs/20260921-165433 \
-  "runs/20260921-171044:jev_composed,jev_choice,jev_two_step,jev_reader" \
+  "runs/20260921-171044:jev_step1,jev_guided,jev_step2,jev_map" \
   runs/20260921-185546 runs/20260921-191326 runs/20260921-192037
 ```
+These runs were recorded under the players' old names (`jev_composed.jsonl`, `llm_reader.jsonl` and the like, before
+decisions 39 and 44); they keep those files, and `view`, `bench` and `report` read them as the names above. An old
+name still works wherever a player is named, so a saved command keeps working.
 
 **A live run that spends nothing**
 ```bash
@@ -283,7 +286,7 @@ uv run python -m bakeoff run --players solver,random,always_jump --seeds 20 --se
 
 **Spend money on purpose, one track, one player**
 ```bash
-uv run python -m bakeoff run --players jev_composed --seeds 1 --seed-start 1000 --max-requests 150
+uv run python -m bakeoff run --players jev_step1 --seeds 1 --seed-start 1000 --max-requests 150
 ```
 
 ---
