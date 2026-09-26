@@ -117,7 +117,9 @@ phase gets its own plan. Resume from `docs/NEXT.md`.
   `bakeoff/records.py` the leaderboard, pairs and past runs (each player and track from the newest run that completed
   it, practice seeds only); the report has `wrong_moves` and `fatal_wrong_moves`. Three read-only routes sit behind
   the token: `GET /results?run=`, `GET /records`, `GET /replay?run=`; `run=` must be a run id naming a directory
-  under the session's `--out` with a `meta.json`, or it is a 404. Plan b, the screens, is next.
+  under the session's `--out` with a `meta.json`, or it is a 404. Plan b, the screens
+  (`docs/superpowers/plans/2026-09-25-brain-battle-b.md`, decision 46), is written and next: it replaces the lobby
+  with the front (home, character select, track select with the money, results, records) in `viewer/front.js`.
 - Paid players spend nothing without `--max-requests` (default 0 replays `.cache/responses`). Never
   raise a cap, rerun a paid command or run `pytest -m live` without the user's go-ahead. No paid
   request on a seed below 1000 before the tournament; the CLI refuses a live paid run on seeds
