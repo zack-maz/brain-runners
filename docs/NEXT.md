@@ -105,8 +105,8 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
   (Records ranks on tracks 1000–1019, fly2 marked "tuned on these tracks"). Plan a, the server and the numbers, is
   built and reviewed there (`f158a70`). Plan b, the screens (`docs/superpowers/plans/2026-09-25-brain-battle-b.md`),
   is built (`912ef4d..c7fa9d8`, 9 Haiku tasks byte-identical to the prototype `proto/bb-b`, 580 fast tests) and
-  looked at in a browser with free players. **Next:** the one fly smoke for both plans (once no other session runs
-  a fly), then the PR with the user (plan b's design review and its fixes are done). Resume from `docs/FRONTEND.md`,
+  looked at in a browser with free players. Plan b's design review, its fixes and the one fly smoke for both plans
+  are done. **Next:** the PR with the user. Resume from `docs/FRONTEND.md`,
   "Where this stands". The Writeup page comes last.
 0. **`fly2`, the second pure fly, is built, calibrated, played and merged** (decisions 41–43, spec
    `docs/superpowers/specs/2026-09-24-fly2-design.md`, plan `docs/superpowers/plans/2026-09-24-fly2.md`, generated

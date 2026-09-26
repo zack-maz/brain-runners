@@ -166,10 +166,13 @@ we found in my own words, as well as my opinions and thoughts. That can wait to 
   the track select, a free Bot run to results that open by themselves, More numbers, Records with the pair chips
   and "What is ours", phone width; no console errors. Not looked at in the browser: the paid confirmation (it needs
   a cap above 0; `trackpick.test.js` pins it, and it was seen on the prototype).
-- **Next, in order:**
-  1. The one fly smoke for plans a and b, only once `pgrep -fl bakeoff` shows no other session's fly: Fly · Looming
-     and Bot · Solver on track 1001, through to results.
-  2. Finishing the branch (PR) with the user.
+- **The fly smoke for plans a and b passed** (2026-09-25): driven through the page in a headless browser against
+  `bakeoff live` on a copy of `runs/`, Fly · Looming and Bot · Solver on v2 track 1001. One brain (peak 797 MB); the
+  results opened by themselves (Solver 150 rows, Fly 29, jumped into a gap on row 29); the fly's 28 decisions are
+  identical to its recorded run of the same track (`runs/20260925-101614`); no console errors. A worktree has no
+  `data/` (git-ignored): link the main checkout's `data/Drosophila_brain_model` and `data/neuron_annotations.tsv`
+  into a `data/` folder there before a fly can play. Without them the track select shows the refusal and its reason.
+- **Next:** finishing the branch (PR) with the user.
 - **Plan b's design review is done** (Opus, "ready with fixes": 1 Critical, 4 Important, 8 Minor). Fixed in `70f9de4`
   and `a57ae43`, re-reviewed by Opus, checked in a headless browser:
   - a held Enter could walk through RUN's confirmation; it now never confirms;
