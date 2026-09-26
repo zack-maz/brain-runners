@@ -38,7 +38,7 @@ are in `docs/COSTS.md`.
     uv run python -m bakeoff view runs/<run_id> [runs/<other_run_id> ...]   # writes replay.html
     uv run python -m bakeoff bench runs/<run_id>[:player,...] [...]          # writes bench.html and bench.json
 
-    uv run python -m bakeoff live --port 8765             # the lobby: the browser picks the track and the players
+    uv run python -m bakeoff live --port 8765             # Brain Battle: the browser picks the players and the track
     uv run python -m bakeoff live --start --seed 1001 --players fly,jev_step1,haiku_plain --max-requests 150
     uv run python -m bakeoff live --game v1 --seed 1001 --start   # free: replays that run's answers from the cache
 
@@ -55,10 +55,16 @@ come by chance; the page counts the pairs and says so. The page is one offline f
 `live` plays one track in real time: every mind decides the same row before anyone moves on (a jumper skips
 the next row; the slowest mind sets the pace, about a row a second with the fly), each decision goes into a
 normal run directory and, through a server on `127.0.0.1` only, into the same page as it happens. The command
-binds the port and sets the ceiling; the page does the rest (updates 3a and 3b): the lobby picks the track and the
-players, shows the worst case before it spends anything, starts and cancels the run, and sets up another when one
-ends. `--start` plays the command line's own run at once instead, waiting for a browser first and serving until
-Ctrl-C (`--no-wait` does neither). The cap is the session's, per paid player, default 0, which makes a free live
+binds the port and sets the ceiling; the page does the rest, through Brain Battle's screens (decision 45, spec
+`docs/superpowers/specs/2026-09-25-brain-battle-design.md`): home, the character select (up to eight fighters,
+each a character in one of its skins), the track select (the track, its preview, and each fighter's worst case;
+a run that can spend asks for a second press, `RUN` then `CONFIRM` with "spend at most …"), the run screen (with
+Cancel), and the results, which open by themselves when the run ends and lead to another run without restarting
+the command. Records holds the leaderboard of the practice tracks, head to head for two players, and the past runs
+to watch again or see the results of. The page reads these through three routes that only read files and spend
+nothing, behind the same token as the rest: `GET /results?run=`, `GET /records` and `GET /replay?run=`. `--seed`
+and `--players` fill the character select and the track select; `--start` plays the command line's own run at
+once instead, waiting for a browser first and serving until Ctrl-C (`--no-wait` does neither). The cap is the session's, per paid player, default 0, which makes a free live
 run of a track whose answers are already cached; a live paid run on a seed below 1000 is refused without `--tournament`. `live`
 builds one fly brain; do not start a second fly process next to it. Afterwards `view` replays the directory.
 
@@ -105,11 +111,12 @@ spikes and read-out signals, Jev's four answers, the LLM's answer). Any other pl
 directories (the other question-set players, `jev_plain`) join the same tunnel with their own tags. Blue is
 the cursor: it marks the mind in focus and the tiles that mind was shown, and with auto on it cuts to
 whoever faces a gap (a click chooses by hand, or keys 1 to 9 pick the runner in that position; space
-plays, the arrows step a row). The page has two tabs. **Run** holds the tunnel, the
-mind panels (each with a running log, one line per row, that follows the row on screen), the lobby when there is
-one, and **Players**: who runs next, and who is in the tunnel. **Analysis** holds the level table (rows survived
-per track; it picks the track), the scoreboard, what in the set-up is ours rather than the fly's or TypeSafe's,
-and the benchmark, drawn by the same code as `bench.html`. The look is the user's
+plays, the arrows step a row). The replay page has two tabs. **Run** holds the tunnel, the
+mind panels (each with a running log, one line per row, that follows the row on screen), and **Who is in the
+tunnel**, which shows and hides runners. **Analysis** holds the level table (rows survived per track; it picks the
+track), the scoreboard, what in the set-up is ours rather than the fly's or TypeSafe's, and the benchmark, drawn
+by the same code as `bench.html`. A live page has no tabs: its run screen is the Run tab, who runs next is picked
+on the character select, and the numbers and "what is ours" are on the results and Records screens. The look is the user's
 brand (`~/Documents/PROJECTS/BRAND/brand.css`). Several run directories are merged, since the fly and
 the paid players usually run separately; one (player, seed) may appear only once. Viewing costs
 nothing: it reads logs only. The viewer's JavaScript has its own tests, which `uv run pytest` runs
