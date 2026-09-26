@@ -55,6 +55,29 @@ def test_a_tied_best_choice_counts_as_agreement_even_if_it_is_not_the_solvers_pi
     assert row["solver_agreement"] == pytest.approx(1 / 3)  # left ties stay; jump is worse; teleport is no key
 
 
+def test_a_wrong_move_is_a_move_made_that_reaches_less_far_than_the_best():
+    best_left = {"stay": 2, "left": 6, "right": 0, "jump": 6}
+    steps = [step(chosen="left", depths=best_left),  # the best: not wrong
+             step(row=1, chosen="jump", depths=best_left),  # ties the best: not wrong
+             step(row=2, chosen="stay", depths=best_left),  # survives two rows only: wrong, not fatal
+             step(row=3, chosen="jump", executed="stay", gated=True, depths=best_left)]  # a fallback counts too
+    (row,) = summarize(steps)
+    assert row["wrong_moves"] == 2 and row["fatal_wrong_moves"] == 0
+    assert COLUMNS[COLUMNS.index("solver_agreement") + 1:][:2] == ("wrong_moves", "fatal_wrong_moves")
+
+
+def test_a_death_on_a_wrong_move_is_fatal_and_a_trapped_death_is_not():
+    fatal = {"stay": 0, "left": 6, "right": 0, "jump": 0}
+    trapped = {"stay": 0, "left": 0, "right": 0, "jump": 0}
+    steps = [step(seed=0, row=0), step(seed=0, row=1, chosen="stay", depths=fatal, alive=False,
+                                        death_cause="ran_into_gap", rows_survived=1),
+             step(seed=1, row=0), step(seed=1, row=1, chosen="stay", depths=trapped, alive=False,
+                                        death_cause="ran_into_gap", rows_survived=1)]
+    (row,) = summarize(steps)
+    assert row["fatal_wrong_moves"] == 1
+    assert row["wrong_moves"] == 1  # nothing was better on the trapped row, so it is not a wrong move
+
+
 def test_jump_share_is_the_share_of_executed_jumps():
     steps = [step(chosen="jump"), step(row=2, chosen="jump", executed="stay", gated=True),
              step(row=3, chosen="left"), step(row=4, chosen="jump", alive=False, death_cause="jumped_into_gap")]
