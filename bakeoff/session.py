@@ -9,6 +9,7 @@ at a time. The page asks it what can be run (`state`), starts a run (`start`) an
 from __future__ import annotations
 
 import json
+import re
 import secrets
 import threading
 import time
@@ -17,27 +18,34 @@ from pathlib import Path
 
 from bakeoff.clients.core import DiskCache, RequestBudget, SharedBudget
 from bakeoff.game.rules import Rules
+from bakeoff.game.track import generate_track
 from bakeoff.live import LiveRun
 from bakeoff.players import PAID, REGISTRY, fly2, make_player
-from bakeoff.players.names import RENAMED, canonical
+from bakeoff.players.names import canonical
 from bakeoff.replay import CONTESTANTS
 
 # tournament seeds are below this and must not be paid for, or shape prompts, before the tournament
 FIRST_PRACTICE_SEED = 1000
+# the practice tracks the track select offers, 1000 to 1019, and the ones Records ranks on (decision 46)
+PRACTICE_TRACKS = 20
 
 # USD per live request, measured in docs/COSTS.md (update 2a) and rounded up, because this number is what
 # the page asks the user to agree to: it must never be lower than what a request really costs. A price per
 # player, not per provider: the same model costs what its question set makes it read and write, and the
-# reader's set is about eleven times the one-shot's. The budget, not this table, enforces the ceiling.
+# map set is about eleven times the plain one's. The budget, not this table, enforces the ceiling.
 # Jev's prices are estimates (its provider does not bill per request; COSTS.md explains the token basis).
 # GLM Flash is free while its free tier lasts.
-PRICE_USD = {"haiku": 0.0006, "haiku_composed": 0.0010, "haiku_choice": 0.0009, "haiku_two_step": 0.0016,
-             "haiku_reader": 0.0065, "jev": 0.00004, "jev_composed": 0.00003, "jev_choice": 0.00004,
-             "jev_two_step": 0.00003, "jev_reader": 0.00012,
-             "glm": 0.0, "glm_composed": 0.0, "glm_choice": 0.0, "glm_two_step": 0.0, "glm_reader": 0.0}
+PRICE_USD = {"haiku_plain": 0.0006, "haiku_step1": 0.0010, "haiku_guided": 0.0009, "haiku_step2": 0.0016,
+             "haiku_map": 0.0065, "jev_plain": 0.00004, "jev_step1": 0.00003, "jev_guided": 0.00004,
+             "jev_step2": 0.00003, "jev_map": 0.00012,
+             "glm_plain": 0.0, "glm_step1": 0.0, "glm_guided": 0.0, "glm_step2": 0.0, "glm_map": 0.0}
 
 # every player here asks its provider once a row, so a track of N rows costs at worst N requests
 REQUESTS_PER_ROW = 1
+
+# what a run id looks like (a timestamp, and a counter when two runs start in one second): anything else the page
+# sends as `run=` names no run, and no path is ever built from it
+RUN_ID = re.compile(r"[0-9]{8}-[0-9]{6}(-[0-9]+)?")
 
 
 def model_of(name: str) -> str | None:
@@ -45,10 +53,6 @@ def model_of(name: str) -> str | None:
     model, so this is what a run really uses, and the page says it rather than a name typed by hand."""
     client = getattr(REGISTRY.get(name), "client_class", None)
     return getattr(client, "default_model", None)
-
-
-# the names a player's records may be filed under: its own, and the one it was renamed from (decision 39)
-_WAS = {new: old for old, new in RENAMED.items()}
 
 
 def _first_model(path: Path) -> str | None:
@@ -125,8 +129,8 @@ def played_before(out_root: Path | str, game_version: str) -> dict[str, list[int
             continue  # a half-written or unreadable directory tells us nothing
         if (meta.get("game") or {}).get("version") != game_version:
             continue  # another game is another set of questions, so another set of cached answers
-        for player in meta.get("players") or []:
-            played.setdefault(player, set()).update(meta.get("seeds") or [])
+        for player in meta.get("players") or []:  # an old name (decisions 39 and 44) counts as the new one
+            played.setdefault(canonical(player), set()).update(meta.get("seeds") or [])
     return {player: sorted(seeds) for player, seeds in played.items()}
 
 
@@ -179,6 +183,10 @@ class LiveSession:
                 "model_answered": answered.get(name) if paid else None,
                 "requests_left": self.budgets[name].remaining if paid else None,
                 "played_before": seed is not None and seed in played.get(name, []),
+                # the track select's own practice tracks it has a recorded run of, for its marks: a
+                # tournament seed or a bulk-run seed past the track select's own tracks is not offered there
+                "seeds_played": [s for s in played.get(name, [])
+                                 if FIRST_PRACTICE_SEED <= s < FIRST_PRACTICE_SEED + PRACTICE_TRACKS],
                 # why this player cannot play this track, so the page can say so before anything is asked
                 "why_not": None if seed is None else self.why_not(name, seed),
             })
@@ -188,8 +196,12 @@ class LiveSession:
             "game": self.rules.to_json(), "max_rows": self.rules.max_rows,
             "requests_per_row": REQUESTS_PER_ROW,
             "max_requests": self.max_requests, "tournament": self.tournament,
-            "first_practice_seed": FIRST_PRACTICE_SEED,
+            "first_practice_seed": FIRST_PRACTICE_SEED, "practice_tracks": PRACTICE_TRACKS,
             "seed": seed,
+            # the real track, for the track select's preview: the rules stay in Python. A tournament seed
+            # is locked until the session is one, same as `why_not` locks paid players off it
+            "track": None if seed is None or (seed < FIRST_PRACTICE_SEED and not self.tournament)
+                     else generate_track(seed, self.rules).to_json(),
             "ready": {"seed": self.ready_seed, "players": list(self.ready_players)},
             "players": players,
             # `replay` is the empty replay of this run: the page resets itself to it and fills it from
@@ -292,6 +304,37 @@ class LiveSession:
             else:
                 players.append(make_player(name))
         return players
+
+    # ---- what was recorded -----------------------------------------------------------------------
+    def run_dir_of(self, run_id: str | None) -> Path | None:
+        """The directory of a recorded run, or None. Only a run id of the usual shape that names a directory
+        directly under `out_root` holding a meta.json: nothing the page sends becomes any other path."""
+        if not run_id or not RUN_ID.fullmatch(run_id):
+            return None
+        run_dir = self.out_root / run_id
+        return run_dir if (run_dir / "meta.json").is_file() else None
+
+    def results(self, run_id: str | None) -> dict | None:
+        """The results screen's numbers for a recorded run (bakeoff/results.py), or None for no such run."""
+        from bakeoff.results import results_of  # numpy: only when asked
+
+        run_dir = self.run_dir_of(run_id)
+        return None if run_dir is None else results_of(run_dir)
+
+    def replay(self, run_id: str | None) -> dict | None:
+        """The replay of a recorded run, for Records' Watch, or None for no such run."""
+        from bakeoff.replay import build_replay
+
+        run_dir = self.run_dir_of(run_id)
+        return None if run_dir is None else build_replay([run_dir])
+
+    def records(self) -> dict:
+        """The records screen's numbers (bakeoff/records.py). Reads every run directory, so it is worked out when
+        the page asks, never on a timer."""
+        from bakeoff.records import records_of
+
+        current = self.run.run_id if self.run is not None and self.status == "running" else None
+        return records_of(self.out_root, self.rules, current=current)
 
     def find(self, run_id: str | None) -> LiveRun | None:
         """The run with this id, whether it is still going or already closed; without an id, the

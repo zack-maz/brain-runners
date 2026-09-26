@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brain Battle home</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,400;0,600;0,800;0,900;1,800;1,900&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap">
+<style>
+body{margin:0;background:#0A0A0A;font-family:"Hanken Grotesk","Helvetica Neue",sans-serif;color:#C9CDD2}
+a{color:#7AA2F7}a:hover{color:#E8EBED}
+@keyframes bb-blink{0%,55%{opacity:1}56%,100%{opacity:0}}
+@keyframes bb-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.bb-blink{animation:bb-blink 1.1s steps(1) infinite}
+.bb-bob{animation:bb-bob 1.6s ease-in-out infinite}
+@keyframes bb-pulse{0%,100%{filter:drop-shadow(0 0 6px rgba(122,162,247,.35))}50%{filter:drop-shadow(0 0 28px rgba(122,162,247,.9)) drop-shadow(0 0 60px rgba(122,162,247,.45))}}
+.bb-glow{animation:bb-pulse 2.4s ease-in-out infinite}
+.bb-menu:focus-visible{outline:2px solid #7AA2F7;outline-offset:3px}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; position: relative; overflow: hidden; background: #0A0A0A; display: flex; flex-direction: column;">
+
+<div style="position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; pointer-events: none;">
+<div style="width: 1600px; height: 1600px; border-radius: 50%; border: 1px solid #1E2227; position: absolute;"></div>
+<div style="width: 1100px; height: 1100px; border-radius: 50%; border: 1px solid #1E2227; position: absolute;"></div>
+<div style="width: 640px; height: 640px; border-radius: 50%; border: 1px solid #1E2227; position: absolute;"></div>
+<div style="width: 2px; height: 1600px; background: #1E2227; position: absolute; transform: rotate(-14deg);"></div>
+</div>
+
+<div style="position: relative; display: flex; justify-content: space-between; align-items: center; padding: 24px 40px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #7C848D;">
+<span>Bakeoff live</span>
+<span>127.0.0.1:8765 · ceiling [N] requests</span>
+</div>
+
+<div style="position: relative; flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px;">
+
+<div style="position: relative; display: flex; justify-content: center; align-items: center; width: 700px; height: 390px;">
+<div class="bb-glow" style="position: absolute; left: 80px; top: 30px; display: grid; grid-template-columns: repeat(30, 18px); opacity: {{brainOpacity}};">
+<sc-for list="{{brain}}" as="c" hint-placeholder-count="600">
+<div style="width: 18px; height: 18px; background: {{c}};"></div>
+</sc-for>
+</div>
+<div style="position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; transform: skewX(-9deg); line-height: 0.82;">
+<div style="font-weight: 900; font-style: italic; font-size: 156px; letter-spacing: -0.04em; color: #E8EBED;">BRAIN</div>
+<div style="font-weight: 900; font-style: italic; font-size: 156px; letter-spacing: -0.04em; color: {{battleFill}}; -webkit-text-stroke: 3px #E8EBED; margin-top: -6px;">BATTLE</div>
+</div>
+</div>
+
+<div style="display: flex; align-items: flex-end; gap: 56px;">
+<sc-for list="{{fighters}}" as="f" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+<div class="bb-bob" style="display: grid; grid-template-columns: {{f.cols}}; width: {{f.width}}; animation-delay: {{f.delay}};">
+<sc-for list="{{f.cells}}" as="c" hint-placeholder-count="81">
+<div style="aspect-ratio: 1; background: {{c}};"></div>
+</sc-for>
+</div>
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #7C848D;">{{f.name}}</div>
+</div>
+</sc-for>
+</div>
+
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+<button class="bb-menu" type="button" style="display: flex; align-items: center; gap: 14px; min-width: 280px; justify-content: center; padding: 14px 28px; background: transparent; border: 2px solid #7AA2F7; color: #E8EBED; font-family: 'Hanken Grotesk', sans-serif; font-weight: 800; font-style: italic; font-size: 28px; letter-spacing: 0.02em; cursor: pointer;">
+<span style="color: #7AA2F7; font-style: normal; font-size: 18px;">▶</span>LAUNCH</button>
+<button class="bb-menu" type="button" style="min-width: 280px; padding: 10px 28px; background: transparent; border: 1px solid #1E2227; color: #7C848D; font-family: 'Hanken Grotesk', sans-serif; font-weight: 600; font-size: 18px; cursor: pointer;">Records</button>
+<div class="bb-blink" style="margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #C9CDD2;">Press enter</div>
+</div>
+
+</div>
+
+<div style="position: relative; display: flex; justify-content: space-between; padding: 20px 40px; border-top: 1px solid #1E2227; font-size: 14px; color: #7C848D;">
+<span>An untrained fruit-fly connectome, Jev and two chat models run the same seeded tunnels.</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;">Game v2 · 150 rows</span>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"battle":{"editor":"enum","options":["outline","solid"],"default":"outline"},"brainOpacity":{"editor":"range","min":0.1,"max":0.8,"step":0.05,"default":0.7},"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() {
+const INK = { w: "#AEB4BA", b: "#3A4046", e: "#F7768E", o: "#D97757", k: "#1A0E0A", j: "#B9BEC4", V: "#FFFFFF", v: "#15181C", t: "#9AA0A6", y: "#D5D9DD" };
+const GRIDS = [
+["Fly", ["..ee.ee..", "w..bbb..w", "ww.bbb.ww", "wwwbbbwww", "ww.bbb.ww", "w..bbb..w", "...bbb...", "...b.b...", "..b...b.."]],
+["Jev", [".jjjjj.", "jjjjjjj", "jVVVvvj", "jjjjjjj", ".jjjjj.", "..jjj..", ".jjjjj.", ".jjjjj.", ".j...j.", ".j...j."]],
+["Haiku", [".ooooooo.", ".ooooooo.", ".okoookoo", "ooooooooo", ".ooooooo.", ".ooooooo.", ".o.o.o.o.", ".o.o.o.o."]],
+["GLM Flash", ["y.........y", "yy.......yy", ".yttttttty.", "..ttttttt..", "..tktttkt..", "..ttttttt..", "...nnnnn...", "...nknkn...", "....y.y....", ".....y....."]]
+];
+INK.n = "#5C636B";
+const BRAIN = ["..........BBBBBBBBB...........", "......BBBBBBBBBBBBBBBBB.......", "....BBBBBBBBBBBBBBBBBBBBB.....", "...BBBBBBBBBBBBBBBBBBBBBBBB...", "..BBBBBBBBBBBBBBBBBBBBBBBBBB..", ".BBBBBBBBBBBBBBBBBBBBBBBBBBBB.", ".BBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", ".BBBBBBBBBBBBBBBBBBBBBBBBBBBB.", ".BBBBBBBBBBBBBBBBBBBBBBBBBBBB.", "..BBBBBBBBBBBBBBBBBBBBBBBBBB..", "...BBBBBBBBBBBBBBBBBBBBBBBB..", ".....BBBBBBBBBBBBBBBBBBBBBB...", ".................BBBBBBBBBBB..", "..................BBBBBBBBB...", "....................BBB.......", "....................BBB......."];
+const brain = [];
+BRAIN.forEach((row) => { for (const ch of row) brain.push(ch === "." ? "transparent" : "#7AA2F7"); });
+const px = 8;
+const fighters = GRIDS.map(([name, g], i) => {
+const w = g[0].length;
+const cells = [];
+g.forEach((row) => { for (const ch of row) cells.push(ch === "." ? "transparent" : INK[ch]); });
+return { name, cells, cols: "repeat(" + w + ", " + px + "px)", width: (w * px) + "px", delay: (i * 0.2) + "s" };
+});
+return { fighters, brain, brainOpacity: this.props.brainOpacity ?? 0.7, battleFill: (this.props.battle ?? "outline") === "solid" ? "#E8EBED" : "transparent" };
+}
+}
+</script>
+</body>
+</html>

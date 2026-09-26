@@ -72,8 +72,23 @@ def test_the_stream_is_the_replay_in_the_replays_own_shapes(tmp_path):
     assert name == "end"
     # the benchmark of the run just played rides along (decision 36); the rest is the replay's own shapes
     assert end.pop("bench")["runs"] == replay["runs"][0]["run_id"].split()  # one run, scored where it was recorded
+    # and so do its results, for the results screen (Brain Battle, section E)
+    assert [p["player"] for p in end.pop("results")["players"]] == ["solver", "stayer"]
     assert end == {"status": "completed", "runs": replay["runs"], "scoreboard": replay["scoreboard"]}
     json.dumps(events)
+
+
+def test_results_that_cannot_be_worked_out_never_cost_the_end_event(tmp_path, monkeypatch):
+    import bakeoff.results
+
+    def broken(run_dir):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(bakeoff.results, "results_of", broken)
+    live, events = run_live(tmp_path, [make_player("solver")])
+    name, end = events[-1]
+    assert name == "end" and end["status"] == "completed"
+    assert end["results"] == {"why": "the results could not be worked out: RuntimeError('boom')"}
 
 
 def test_the_directory_is_a_normal_completed_run(tmp_path):

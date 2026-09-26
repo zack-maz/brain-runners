@@ -287,3 +287,11 @@ def test_new_meta_is_what_run_writes_first(tmp_path):
     assert meta["status"] == "running" and meta["finished_at"] is None
     for key in ("run_id", "schema_version", "players", "seeds", "game", "fly", "models", "args", "versions"):
         assert written[key] == meta[key]
+
+
+def test_what_is_ours_is_the_same_blocks_a_run_records():
+    from bakeoff.runner import new_meta, ours_meta
+
+    rules = V2.variant(max_rows=40)
+    meta = new_meta("r", [make_player("solver")], [5], rules, None)
+    assert ours_meta(rules) == {key: meta[key] for key in ("game", "fly", "fly2")}

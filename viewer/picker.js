@@ -1,12 +1,11 @@
-// Who is in the tunnel. One control governs both: in a replay it shows and hides the runners, and in
-// a live command, while nothing is running, the lobby's own list (lobby.js) chooses who runs instead.
+// Who is in the tunnel: it shows and hides the runners, live or replay. Who runs is chosen on the Brain
+// Battle character select (select.js).
 // Pure and tested under node; app.js does the DOM. Every player name goes through esc().
 (function (root) {
   "use strict";
 
   const Mind = typeof module !== "undefined" && module.exports ? require("./minds.js") : root.Minds;
   const esc = Mind.esc;
-  const tagOf = Mind.tagOf;
 
   // One button per player of the replay, pressed when its runner is shown. A player that did not run
   // the track in view cannot be shown, so its button is disabled and says so.
@@ -20,7 +19,7 @@
       return '<button type="button" class="pick-player" data-player="' + esc(player) + '"' +
         ' aria-pressed="' + on + '"' + (present.has(player) ? "" : " disabled") +
         (title ? ' title="' + esc(title) + '"' : "") + ">" +
-        '<span class="label tag">' + esc(tagOf(player)) + "</span>" +
+        Mind.tagHtml(player) +
         (present.has(player) ? "" : '<span class="note">not on this track</span>') + "</button>";
     }).join("");
   }

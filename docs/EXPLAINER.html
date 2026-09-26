@@ -200,17 +200,17 @@ gap in row 1 and lands safely on row 2.</figcaption>
     <h3>Claude Haiku 4.5</h3>
     <p>A regular chatbot-style model. It gets the rules and a description of the rows ahead, and answers with
     one move.</p>
-    <p>The one-shot LLM (<code>haiku</code>) is told exactly the same rules, in the same words, as the one-shot Jev.
-    Its question-set twins (<code>haiku_composed</code> and so on) ask the same questions as their Jev, under the
+    <p>The plain LLM (<code>haiku_plain</code>, the one broad question) is told exactly the same rules, in the same words, as <code>jev_plain</code>.
+    Its question-set twins (<code>haiku_step1</code> and so on) ask the same questions as their Jev, under the
     same rule, but three things still differ between the two models &mdash; see below. A third model, Zhipu's
-    <strong>GLM Flash</strong>, plays the same four sets on a free tier (<code>glm_composed</code> and so on).</p>
+    <strong>GLM Flash</strong>, plays the same four sets on a free tier (<code>glm_step1</code> and so on).</p>
   </div>
 </div>
 
 <p>What became clear in phase 5 is that <em>how you ask</em> matters as much as <em>who you ask</em>. So the
-project is now a grid: <strong>four question sets</strong> (composed, choice, two-step, reader) &times;
+project is now a grid: <strong>four question sets</strong> (step1, guided, step2, map; plus plain, the one broad question) &times;
 <strong>three models</strong> (Jev, Claude Haiku, GLM Flash), each set worded once and played by every model
-under the same rule &mdash; <code>jev_composed</code> and <code>haiku_composed</code> and <code>glm_composed</code>
+under the same rule &mdash; <code>jev_step1</code> and <code>haiku_step1</code> and <code>glm_step1</code>
 are the same questions asked of three different minds. Section 10 has the detail. Every question and every rule
 is ours, not the models'.</p>
 
@@ -231,31 +231,31 @@ an impression, not a result.</p>
   <thead><tr><th>Player</th><th>Tracks</th><th>Mean rows</th><th>Finished</th><th>How it dies</th></tr></thead>
   <tbody>
     <tr><td>solver <span style="color:var(--muted)">(the ceiling)</span></td><td class="n">20</td><td class="n">150</td><td>always</td><td>&ndash;</td></tr>
-    <tr><td><code>haiku_reader</code></td><td class="n">2</td><td class="n">150.0</td><td>2 of 2</td><td>didn't, on its two tracks</td></tr>
-    <tr><td><strong><code>jev_two_step</code></strong></td><td class="n">5</td><td class="n">144.6</td><td>4 of 5</td><td>one jump into a gap</td></tr>
-    <tr><td><code>haiku_composed</code></td><td class="n">5</td><td class="n">132.2</td><td>1 of 5</td><td>runs into the gap ahead</td></tr>
-    <tr><td><code>jev_composed</code></td><td class="n">5</td><td class="n">124.2</td><td>2 of 5</td><td>jumps into a gap</td></tr>
-    <tr><td><code>haiku_two_step</code></td><td class="n">5</td><td class="n">109.6</td><td>1 of 5</td><td>dodges into a gap</td></tr>
-    <tr><td><code>jev_choice</code></td><td class="n">5</td><td class="n">78.2</td><td>0 of 5</td><td>jumps into a gap</td></tr>
-    <tr><td><code>haiku_choice</code></td><td class="n">5</td><td class="n">72.6</td><td>0 of 5</td><td>dodges into a gap</td></tr>
+    <tr><td><code>haiku_map</code></td><td class="n">2</td><td class="n">150.0</td><td>2 of 2</td><td>didn't, on its two tracks</td></tr>
+    <tr><td><strong><code>jev_step2</code></strong></td><td class="n">5</td><td class="n">144.6</td><td>4 of 5</td><td>one jump into a gap</td></tr>
+    <tr><td><code>haiku_step1</code></td><td class="n">5</td><td class="n">132.2</td><td>1 of 5</td><td>runs into the gap ahead</td></tr>
+    <tr><td><code>jev_step1</code></td><td class="n">5</td><td class="n">124.2</td><td>2 of 5</td><td>jumps into a gap</td></tr>
+    <tr><td><code>haiku_step2</code></td><td class="n">5</td><td class="n">109.6</td><td>1 of 5</td><td>dodges into a gap</td></tr>
+    <tr><td><code>jev_guided</code></td><td class="n">5</td><td class="n">78.2</td><td>0 of 5</td><td>jumps into a gap</td></tr>
+    <tr><td><code>haiku_guided</code></td><td class="n">5</td><td class="n">72.6</td><td>0 of 5</td><td>dodges into a gap</td></tr>
     <tr><td><strong><code>fly</code></strong></td><td class="n">5</td><td class="n">68.0</td><td>0 of 5</td><td>jumps into a gap, every time</td></tr>
-    <tr><td><code>haiku</code> <span style="color:var(--muted)">(one-shot)</span></td><td class="n">5</td><td class="n">56.6</td><td>0 of 5</td><td>dodges into a gap</td></tr>
-    <tr><td><code>jev_reader</code></td><td class="n">5</td><td class="n">49.6</td><td>0 of 5</td><td>runs into the gap ahead, every time</td></tr>
+    <tr><td><code>haiku_plain</code> <span style="color:var(--muted)">(one broad question)</span></td><td class="n">5</td><td class="n">56.6</td><td>0 of 5</td><td>dodges into a gap</td></tr>
+    <tr><td><code>jev_map</code></td><td class="n">5</td><td class="n">49.6</td><td>0 of 5</td><td>runs into the gap ahead, every time</td></tr>
     <tr><td>always_jump</td><td class="n">20</td><td class="n">39</td><td>0</td><td>&ndash;</td></tr>
     <tr><td>random <span style="color:var(--muted)">(the floor)</span></td><td class="n">20</td><td class="n">24</td><td>0</td><td>&ndash;</td></tr>
   </tbody>
 </table>
 </div>
 <p style="font-size:14px;color:var(--muted)">Full detail, run by run, in <code>docs/COSTS.md</code>.
-<code>haiku_reader</code> played two tracks because it is by far the priciest player. GLM Flash played one track
-before its free tier began refusing (<code>glm_composed</code> 109 rows, <code>glm_two_step</code> 74,
-<code>glm_choice</code> 73, <code>glm_reader</code> 38); it is parked until the quota recovers.</p>
+<code>haiku_map</code> played two tracks because it is by far the priciest player. GLM Flash played one track
+before its free tier began refusing (<code>glm_step1</code> 109 rows, <code>glm_step2</code> 74,
+<code>glm_guided</code> 73, <code>glm_map</code> 38); it is parked until the quota recovers.</p>
 
 <p><strong>How sure are we?</strong> The project now has a benchmark (<code>bakeoff bench</code>) that puts a 95%
 interval around each average and compares every pair of players on the tracks both played. Over these five tracks
-it separates <code>jev_two_step</code> from its Haiku twin (+35 rows, interval 2 to 68) and from the fly (+77, 38
-to 116), and it <em>cannot</em> separate most of the rest &mdash; telling <code>jev_composed</code> from
-<code>haiku_composed</code> would take about 150 tracks at this gap. It also counts its own luck: 36 pairs at 95%
+it separates <code>jev_step2</code> from its Haiku twin (+35 rows, interval 2 to 68) and from the fly (+77, 38
+to 116), and it <em>cannot</em> separate most of the rest &mdash; telling <code>jev_step1</code> from
+<code>haiku_step1</code> would take about 150 tracks at this gap. It also counts its own luck: 36 pairs at 95%
 each means about 2 verdicts would appear by chance alone. That is the honest state of it.</p>
 
 <p>What we learned along the way:</p>
@@ -267,14 +267,14 @@ each means about 2 verdicts would appear by chance alone. That is the honest sta
   <li><strong>How you ask matters as much as who you ask.</strong> Asked one broad question ("which move?"), Jev
   died after 23 rows. Asked four narrow yes/no questions, it read the track almost perfectly and finished. Asked
   to look two moves ahead, it became the best player in the bakeoff.</li>
-  <li><strong>Sharp answers are what make the extra step pay.</strong> <code>haiku_two_step</code> gets exactly the
-  same questions and the same rule as <code>jev_two_step</code>, and scores worse than its own one-step twin: its
+  <li><strong>Sharp answers are what make the extra step pay.</strong> <code>haiku_step2</code> gets exactly the
+  same questions and the same rule as <code>jev_step2</code>, and scores worse than its own one-step twin: its
   probabilities are nearly three times less accurate (Brier 0.020 against 0.007).</li>
-  <li><strong>A wording can fail on one tile.</strong> <code>jev_reader</code> dies on every track for one reason:
-  it reads the tile straight ahead as floor when it is a gap (44% of them), while the composed wording for the
+  <li><strong>A wording can fail on one tile.</strong> <code>jev_map</code> dies on every track for one reason:
+  it reads the tile straight ahead as floor when it is a gap (44% of them), while the step1 wording for the
   same tile never missed once. That is our wording failing, not Jev failing to read the track.</li>
   <li><strong>Cost is small but not equal.</strong> Per row: the Jev players about 0.2 s (price not published),
-  the Haiku twins 0.7&ndash;1.1 s and 0.0008&ndash;0.0016 USD, <code>haiku_reader</code> 2.9 s and 0.0064 USD &mdash;
+  the Haiku twins 0.7&ndash;1.1 s and 0.0008&ndash;0.0016 USD, <code>haiku_map</code> 2.9 s and 0.0064 USD &mdash;
   eight times the other twins. The fly is free and takes about 0.7 s a row on the laptop.</li>
 </ul>
 
@@ -353,12 +353,12 @@ no interval below five tracks, and says how many of its verdicts chance alone wo
   <li><span class="label">Phase 4 · replay viewer</span>Turn logs into one offline HTML page.</li>
   <li><span class="label">Spike 02 · why Jev fell</span>Jev's single broad question was the weak link;
   narrow per-move questions are nearly perfect.</li>
-  <li><span class="label">Phase 5 · the demo</span>5a the composed Jev; 5b the demo player in your brand's
+  <li><span class="label">Phase 5 · the demo</span>5a <code>jev_step1</code>; 5b the demo player in your brand's
   look; 5c going live. Merged 2026-09-21.</li>
   <li><span class="label">Update 1 · game v2</span>Named game versions; v2 is 150 rows and gets hard by row 100.
   First of ten updates that come before the tournament (<code>docs/UPDATES.md</code>).</li>
-  <li><span class="label">Update 2a · the Jev family</span>Three more ways to ask Jev (<code>jev_choice</code>,
-  <code>jev_two_step</code>, <code>jev_reader</code>) and a Claude Haiku twin for each. Built, reviewed, and its
+  <li><span class="label">Update 2a · the Jev family</span>Three more ways to ask Jev (<code>jev_guided</code>,
+  <code>jev_step2</code>, <code>jev_map</code>) and a Claude Haiku twin for each. Built, reviewed, and its
   paid runs are done.</li>
   <li><span class="label">Update 2b · the fly</span>A trained fly was dropped; a richer-input fly
   (<code>fly_rich</code>) stopped at its probe: the wiring carries "where" only as strength, and it played worse.
@@ -407,8 +407,8 @@ scoreboard and a write-up with the honest caveats.</p>
   <li><strong>Which seeds.</strong> Reuse seeds 0–19 (the fly already played them once, untuned; its
   results there exist and would repeat exactly) or take fresh seeds below 1000.</li>
   <li><strong>A budget go-ahead.</strong> Worst case for 20 tracks of 150 rows (game v2), at the prices measured
-  in update 2a: about 0.16 USD for the one-shot LLM, 0.25 to 0.50 USD for each of the cheaper Haiku twins, and
-  about 19 USD for <code>haiku_reader</code> alone, which is why it may not be in the tournament at full length. The
+  in update 2a: about 0.16 USD for <code>haiku_plain</code>, 0.25 to 0.50 USD for each of the cheaper Haiku twins, and
+  about 19 USD for <code>haiku_map</code> alone, which is why it may not be in the tournament at full length. The
   Jev players are a few pennies each (their price is an estimate, not published), GLM Flash is free, and the fly is
   free but takes about two minutes a track and must run on its own.</li>
 </ol>
@@ -439,7 +439,7 @@ one way:</p>
     <text x="342" y="40">game/engine.py</text><text x="342" y="56" fill="#7C848D" font-size="10">step(action), death</text>
     <text x="502" y="40">senses.py</text><text x="502" y="56" fill="#7C848D" font-size="10">JSON view · eye rates (Hz)</text>
     <text x="502" y="130">players/</text>
-    <text x="502" y="148" fill="#7C848D" font-size="10">fly · jev_composed · haiku</text>
+    <text x="502" y="148" fill="#7C848D" font-size="10">fly · jev_step1 · haiku</text>
     <text x="502" y="164" fill="#7C848D" font-size="10">jev · random · always_jump</text>
     <text x="502" y="180" fill="#7C848D" font-size="10">solver   → Decision</text>
     <text x="502" y="196" fill="#7C848D" font-size="10">+ 4 question sets &#215; 3 models</text>
@@ -500,7 +500,7 @@ uv run python -m bakeoff report runs/&lt;id&gt;
 uv run python -m bakeoff view   runs/&lt;id&gt; [runs/&lt;id&gt; ...]          # one offline HTML page
 uv run python -m bakeoff bench  runs/&lt;id&gt;[:player,...] [...]        # intervals, pairs, cost and time
 uv run python -m bakeoff live   --port 8765                         # the lobby: the browser picks and starts
-uv run python -m bakeoff live   --start --seed 1001 --players fly,fly2,jev_composed,haiku [--max-requests N]</code></pre>
+uv run python -m bakeoff live   --start --seed 1001 --players fly,fly2,jev_step1,haiku_plain [--max-requests N]</code></pre>
 
 <!-- ============================================================ -->
 <hr>
@@ -603,7 +603,7 @@ seeds).</p>
 
 <h2 id="paid">10. The question sets, in detail</h2>
 
-<p>The one-shot pair, Jev and the LLM, are both told the same rules in the same words
+<p>The plain pair, <code>jev_plain</code> and <code>haiku_plain</code>, are both told the same rules in the same words
 (<code>bakeoff/players/briefing.py</code>, written before any paid request) and receive the same JSON view:</p>
 
 <pre><code>{
@@ -617,12 +617,12 @@ seeds).</p>
               "jump": "clear the next row, land on the one after", "stay": "run straight"}
 }</code></pre>
 
-<h3>The LLM (<code>haiku</code>)</h3>
+<h3>The LLM (<code>haiku_plain</code>)</h3>
 <p>Claude Haiku 4.5, one request per row, system prompt = the rules, user message = the JSON, answer forced to
 <code>{"action": "left" | "right" | "jump" | "stay"}</code> by structured output. Anything else is logged as
 <code>invalid</code>.</p>
 
-<h3>Composed Jev (<code>jev_composed</code>, the one in the demo)</h3>
+<h3><code>jev_step1</code> (the one in the demo)</h3>
 <p>One request per row with four Nouls (a Noul is Jev's yes/no-as-probability question type):</p>
 <pre><code>gap_left : Would the action `left` land the runner on a gap, that is,
            does `ahead[0].gaps_relative` contain -1?
@@ -638,7 +638,7 @@ order stay, left, right, jump. If any answer is missing, the move is invalid. Th
 wanders: on safe rows answers like 0.03 and 0.04 rarely tie, so the "safest" move is often a sideways step.</p>
 </div>
 
-<h3>One-shot Jev (<code>jev</code>, kept for comparison)</h3>
+<h3>Plain Jev (<code>jev_plain</code>, kept for comparison)</h3>
 <p>One Choice over the four actions plus two logging Nouls. Spike 02 showed why it failed: on the 55 dangerous
 states of track 1000 its Choice landed on a gap 29% of the time, about the same as always staying (33%). Jev's
 questions in one request run in parallel and can't see each other's answers, so the Nouls couldn't help the
@@ -651,23 +651,28 @@ written once and given to every model unchanged (<code>bakeoff/players/question_
 <table>
   <thead><tr><th>Set</th><th>What it asks each row</th><th>The rule</th></tr></thead>
   <tbody>
-    <tr><td><code>composed</code></td><td>4 questions: would each move land on a gap?</td><td>take the least likely</td></tr>
-    <tr><td><code>choice</code></td><td>1 question: which move?</td><td>take the favourite</td></tr>
-    <tr><td><code>two_step</code></td><td>8 questions: land on a gap, and be trapped after it?</td><td>take the lowest combined risk</td></tr>
-    <tr><td><code>reader</code></td><td>42 questions: is each visible tile a gap?</td><td>plan a path through what it read</td></tr>
+    <tr><td><code>step1</code></td><td>4 questions: would each move land on a gap?</td><td>take the least likely</td></tr>
+    <tr><td><code>guided</code></td><td>1 question: which move?</td><td>take the favourite</td></tr>
+    <tr><td><code>step2</code></td><td>8 questions: land on a gap, and be trapped after it?</td><td>take the lowest combined risk</td></tr>
+    <tr><td><code>map</code></td><td>42 questions: is each visible tile a gap?</td><td>plan a path through what it read</td></tr>
   </tbody>
 </table>
 </div>
+<p>The names are the Brain Battle character select's skins (decision 44). Until 2026-09-25 the sets were
+<code>composed</code>, <code>choice</code>, <code>two_step</code> and <code>reader</code>, and the plain players were
+<code>jev</code>, <code>haiku</code> and <code>glm</code>: every run recorded so far is filed under those names (and
+Claude Haiku's under <code>llm*</code>, before decision 39). The tool reads them, and their cached answers, as the
+new names, and an old name still works in a command.</p>
 <p>Each set is played by Jev (<code>jev_*</code>), by Claude Haiku (<code>haiku_*</code>) and by GLM Flash
 (<code>glm_*</code>), so the model is what differs &mdash; almost. Three things still differ besides the model, and
 the write-up must carry all three: the chat models are also given the briefing of the rules (Jev's yes/no questions
-carry only the question, except in the choice set); Jev's answers in one request are made in parallel and cannot
+carry only the question, except in the guided set); Jev's answers in one request are made in parallel and cannot
 see each other, while a chat model writes them all in one reply, each able to see the ones before it; and a chat
 model's probability is a number it states, while Jev's is Jev's own probability. Paid runs are done for practice
 seeds 1000&ndash;1004 (<code>docs/COSTS.md</code>).</p>
 <p>One measurement to read carefully: the <strong>Brier score</strong> beside each player says how well calibrated
 its probabilities were. It compares two models <em>within</em> one set, never one set against another &mdash; about
-90% of the reader's tiles are floor, so a player can score well there while dying on every track.</p>
+90% of the map set's tiles are floor, so a player can score well there while dying on every track.</p>
 
 <h3>Money safety</h3>
 <p>Every paid request goes through <code>bakeoff/clients/core.py</code>: first a <strong>disk cache</strong>

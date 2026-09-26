@@ -30,10 +30,10 @@ def test_decision_defaults_and_fallback_rule():
 
 
 def test_factory_knows_the_baselines_and_rejects_unknown_names():
-    sets = {"jev_choice", "jev_two_step", "jev_reader", "haiku_composed", "haiku_choice", "haiku_two_step", "haiku_reader",
-            "glm_composed", "glm_choice", "glm_two_step", "glm_reader"}
-    assert set(REGISTRY) == {"random", "always_jump", "solver", "fly", "fly2", "jev", "jev_composed", "haiku", "glm", *sets}
-    assert set(PAID) == {"jev", "jev_composed", "haiku", "glm", *sets}
+    sets = {"jev_guided", "jev_step2", "jev_map", "haiku_step1", "haiku_guided", "haiku_step2", "haiku_map",
+            "glm_step1", "glm_guided", "glm_step2", "glm_map"}
+    assert set(REGISTRY) == {"random", "always_jump", "solver", "fly", "fly2", "jev_plain", "jev_step1", "haiku_plain", "glm_plain", *sets}
+    assert set(PAID) == {"jev_plain", "jev_step1", "haiku_plain", "glm_plain", *sets}
     assert all(make_player(name).name == name for name in REGISTRY)  # a paid player without a budget only replays
     with pytest.raises(KeyError, match="unknown player 'nope'"):
         make_player("nope")

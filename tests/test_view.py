@@ -4,6 +4,7 @@ import re
 import pytest
 
 from bakeoff.__main__ import main
+from bakeoff.roster import roster_json
 from bakeoff.view import DATA_SLOT, VIEWER_DIR, embed_json, render_html
 
 DATA = re.compile(r'<script type="application/json" id="replay-data">(.*?)</script>', re.S)
@@ -29,6 +30,12 @@ def test_render_inlines_every_file_and_the_data():
     assert DATA_SLOT not in page
 
 
+def test_every_page_carries_the_roster_live_or_replay():
+    for page in (render_html({"episodes": []}), render_html({"episodes": []}, live="/events", token="t")):
+        (data,) = re.findall(r'<script type="application/json" id="roster-data">(.*?)</script>', page, re.S)
+        assert json.loads(data) == roster_json()
+
+
 def test_the_page_makes_no_network_request():
     page = render_html({"episodes": []})
     assert not re.search(r"""(src|href)=["']?(https?:)?//""", page)
@@ -44,7 +51,10 @@ def test_the_page_says_what_is_ours_about_jev_and_the_figures():
     assert "looks one step ahead only" in page
     assert "landed on a gap about as often as always staying would have" in page
     assert "our own drawing and nobody's official artwork" in page
-    assert "The blue marks the mind in focus and the tiles it was shown, nothing else." in page
+    assert ("The blue marks the mind in focus and the tiles it was shown; elsewhere it is a skin's own colour, "
+            "where the user chose blue.") in page
+    assert ("a skin that gives no such number shows no gauge (its slit is the visor's own colour, "
+            "or the Map skin's blue)") in page
 
 
 def test_the_page_keeps_every_caveat_about_the_fly_and_about_jevs_questions():
@@ -63,11 +73,24 @@ def test_the_page_carries_the_chart_rules_the_analysis_tab_draws_with():
     assert ".chart .line" in page and '[data-bench="players"] th' in page
 
 
+def test_the_page_keeps_the_rules_for_the_tabs_and_who_is_in_the_tunnel():
+    """Without them the selected tab and a shown runner look like the rest: nothing in the tests sees colour."""
+    page = render_html({"episodes": []})
+    assert '.tabs button[aria-selected="true"]' in page and '.pick-player[aria-pressed="true"]' in page
+
+
 def test_every_script_the_page_names_exists_and_app_comes_last():
     names = re.findall(r'<script src="([^"]+)"></script>', (VIEWER_DIR / "index.html").read_text())
-    assert names == ["timeline.js", "tunnel.js", "sprites.js", "stage.js", "minds.js", "log.js", "picker.js", "tabs.js",
-                     "feed.js", "lobby.js", "bench.js", "bench_view.js", "app.js"]
+    assert names == ["timeline.js", "tunnel.js", "sprites.js", "roster.js", "stage.js", "minds.js", "log.js", "picker.js", "tabs.js",
+                     "feed.js", "lobby.js", "bench.js", "bench_view.js", "screens.js", "select.js", "trackpick.js", "results.js", "records.js", "front.js", "app.js"]
     assert all((VIEWER_DIR / name).is_file() for name in names)
+
+
+def test_every_id_on_the_page_is_unique():
+    """The Brain Battle screens share one page with the replay's own sections: two elements with one id would
+    let a screen write into another's (getElementById answers the first)."""
+    ids = re.findall(r'\bid="([^"]+)"', (VIEWER_DIR / "index.html").read_text())
+    assert len(ids) == len(set(ids)), sorted({i for i in ids if ids.count(i) > 1})
 
 
 def test_the_two_brand_fonts_are_embedded_not_fetched():

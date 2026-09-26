@@ -16,25 +16,27 @@
   const $ = (id) => document.getElementById(id);
   const esc = Minds.esc;
   const cell = Minds.cell;
-  const DEMO = ["fly", "jev_composed", "haiku"]; // the default view; an older replay has only the one-shot jev
-  const SPRITE = { fly: "fly", fly2: "fly", jev_composed: "visor", haiku: "chat" }; // everyone else is a plain grey block
+  const DEMO = ["fly", "jev_step1", "haiku_plain"]; // the default view; an older replay has only jev_plain
+  const rosterSlot = document.getElementById("roster-data");
+  const roster = Roster.make(rosterSlot ? JSON.parse(rosterSlot.textContent) : null); // each runner's character and skin
+  Minds.useRoster(roster);
   const ABOUT = {
     fly: "Fruit fly connectome, untrained",
     fly2: "The same fly, a richer input and read-out (ours)",
-    jev_composed: "Jev, four yes/no questions a row",
-    jev: "Jev, one broad question a row",
-    haiku: "Claude Haiku 4.5",
-    jev_choice: "Jev, one question a row, landings named",
-    jev_two_step: "Jev, eight yes/no questions a row, looks two moves on",
-    jev_reader: "Jev reads every visible tile, code plans",
-    haiku_composed: "Claude Haiku, asked the composed Jev's four questions",
-    haiku_choice: "Claude Haiku, asked jev_choice's question",
-    haiku_two_step: "Claude Haiku, asked jev_two_step's eight questions",
-    haiku_reader: "Claude Haiku reads every visible tile, code plans",
-    glm_composed: "GLM Flash, asked the composed Jev's four questions",
-    glm_choice: "GLM Flash, asked jev_choice's question",
-    glm_two_step: "GLM Flash, asked jev_two_step's eight questions",
-    glm_reader: "GLM Flash reads every visible tile, code plans",
+    jev_step1: "Jev, four yes/no questions a row",
+    jev_plain: "Jev, one broad question a row",
+    haiku_plain: "Claude Haiku 4.5",
+    jev_guided: "Jev, one question a row, landings named",
+    jev_step2: "Jev, eight yes/no questions a row, looks two moves on",
+    jev_map: "Jev reads every visible tile, code plans",
+    haiku_step1: "Claude Haiku, asked jev_step1's four questions",
+    haiku_guided: "Claude Haiku, asked jev_guided's question",
+    haiku_step2: "Claude Haiku, asked jev_step2's eight questions",
+    haiku_map: "Claude Haiku reads every visible tile, code plans",
+    glm_step1: "GLM Flash, asked jev_step1's four questions",
+    glm_guided: "GLM Flash, asked jev_guided's question",
+    glm_step2: "GLM Flash, asked jev_step2's eight questions",
+    glm_map: "GLM Flash reads every visible tile, code plans",
     random: "Random moves, the floor",
     always_jump: "Always jumps, the second floor",
     solver: "Scripted solver, the reference (not a contestant)",
@@ -88,7 +90,7 @@
       if (end.bench) benchData = end.bench; // the numbers for the run that just ended, scored by the server
       notice(end.status === "completed" ? null : "The run ended: " + end.status, false);
       renderAll();
-      if (liveUrl) refreshState(); // the run is over: the lobby comes back, with the run still on screen
+      if (window.Front) Front.ended(end); // the run is over: the front says what happened
     },
     onError(message) {
       if (store.ended) return;
@@ -110,7 +112,7 @@
     if (view.seed == null) return;
     const here = store.players.filter((p) => episodeOf(p, view.seed));
     let shown = here.filter((p) => DEMO.includes(p));
-    if (!shown.includes("jev_composed") && here.includes("jev")) shown.push("jev");
+    if (!shown.includes("jev_step1") && here.includes("jev_plain")) shown.push("jev_plain");
     view.shown = new Set(shown.length ? shown : here);
   }
 
@@ -209,7 +211,7 @@
       const panel = document.createElement("article");
       panel.className = "mind";
       panel.dataset.player = episode.player;
-      panel.innerHTML = '<header><span class="label tag">' + esc(Minds.tagOf(episode.player)) + '</span><span class="about">' +
+      panel.innerHTML = "<header>" + Minds.tagHtml(episode.player) + '<span class="about">' +
         esc(ABOUT[episode.player] || "") + (model ? " · " + esc(model) : "") + '</span></header><div class="body"><p class="status"></p>' +
         '<div class="decision"></div><details class="log"><summary class="label">Its log</summary><ol class="log-lines"></ol></details></div>';
       strip.appendChild(panel);
@@ -368,7 +370,8 @@
     drawn.sort((a, b) => (a.s.id === view.focus) - (b.s.id === view.focus)); // the mind in focus is painted last
     view.hit = [];
     for (const { s, at } of drawn) {
-      const name = SPRITE[s.id] || "block";
+      const look = roster.look(s.id);
+      const name = look.sprite;
       const px = Math.max(2, Math.round(size * 0.008 * at.scale));
       const sprite = Sprites.sizeOf(name);
       const o = overlap[s.id];
@@ -378,8 +381,8 @@
       ctx.globalAlpha = o.alpha * (1 - at.fall);
       const fan = o.fan * sprite.width * px * 0.62;
       ctx.translate(fan, -at.lift + at.fall * size * 0.12);
-      Sprites.drawSprite(ctx, name, px, { p: Minds.visorP(s.frame), open: s.air > 0.15 });
-      // the tag, upright whatever wall the runner stands on; blue only for the mind in focus. Runners that
+      Sprites.drawSprite(ctx, name, px, { p: Minds.visorP(s.frame), open: s.air > 0.15, color: look.color, inks: look.inks });
+      // the tag, upright whatever wall the runner stands on, in its skin's colour; blue brackets for the mind in focus. Runners that
       // overlap share one column of tags over the middle of the group, so the tags never overprint.
       const inFocus = s.id === view.focus;
       const text = inFocus ? "[ " + Minds.tagOf(s.id) + " ]" : Minds.tagOf(s.id);
@@ -394,7 +397,7 @@
       ctx.lineWidth = 3;
       ctx.strokeStyle = "#0A0A0A";
       ctx.strokeText(text, 0, 0);
-      ctx.fillStyle = inFocus ? INK.accent : INK.muted;
+      ctx.fillStyle = inFocus ? INK.accent : roster.ink(s.id) || INK.muted;
       ctx.fillText(text, 0, 0);
       ctx.restore();
       view.hit.push({ id: s.id, x: at.x, y: at.y, r: sprite.height * px });
@@ -417,8 +420,10 @@
     view.t = Math.min(end, view.t + ((now - lastTick) / 1000) * view.speed);
     lastTick = now;
     draw();
-    if (view.t >= end && store.ended) setPlaying(false);
-    else requestAnimationFrame(tick);
+    if (view.t >= end && store.ended) {
+      setPlaying(false);
+      if (window.Front) Front.reachedEnd(); // the tunnel on screen has shown the last row
+    } else requestAnimationFrame(tick);
   }
 
   function setPlaying(on) {
@@ -487,47 +492,16 @@
     if (nth) focusOn(nth.episode.player, true);
   });
 
-  // ---- the lobby: the page starts the runs ----------------------------------------------------
-  const lobby = { state: null, chosen: [], armed: false, refusal: null, watching: null, source: null, timer: null };
-
-  async function control(path, options) {
-    const settings = options || {};
-    try {
-      const response = await fetch(path, { ...settings, headers: { "X-Bakeoff-Token": token, ...(settings.headers || {}) } });
-      const body = await response.json().catch(() => ({ error: "the server answered something that is not JSON" }));
-      return { ok: response.ok, body };
-    } catch (e) { // the command was stopped, or the machine went to sleep
-      return { ok: false, body: { error: "no answer from the run: is `bakeoff live` still going?" } };
-    }
-  }
-
-  // an empty box is no track at all, not track 0: Number("") is 0 and would silently start a run
-  const chosenSeed = () => ($("seed").value.trim() === "" ? NaN : Math.round(Number($("seed").value)));
-
-  async function refreshState() {
-    const { ok, body } = await control("/state?seed=" + encodeURIComponent(chosenSeed()));
-    if (ok) applyState(body);
-    else { lobby.refusal = body.error; renderLobby(); }
-  }
-
-  function applyState(state) {
-    if (lobby.state == null) { // the first answer: the lobby opens with what the command line offered
-      lobby.chosen = (state.ready || {}).players || [];
-      if ((state.ready || {}).seed != null) $("seed").value = state.ready.seed;
-    }
-    lobby.state = state;
-    const run = state.run;
-    if (run && run.replay && lobby.watching !== run.run_id) watch(run);
-    renderLobby();
-  }
+  // ---- a live run: the front starts it (front.js), this page watches it ------------------------------
+  const race = { watching: null, source: null };
 
   function watch(run) { // one stream per run, so a stream never runs on into the next one
-    lobby.watching = run.run_id;
-    if (lobby.source) lobby.source.close();
+    race.watching = run.run_id;
+    if (race.source) race.source.close();
     resetTo(run.replay);
     notice("Waiting for the first decision…", false);
-    lobby.source = Feed.fromStream(liveUrl + "?run=" + encodeURIComponent(run.run_id) +
-                                   "&token=" + encodeURIComponent(token), handlers);
+    race.source = Feed.fromStream(liveUrl + "?run=" + encodeURIComponent(run.run_id) +
+                                  "&token=" + encodeURIComponent(token), handlers);
   }
 
   function resetTo(replay) { // a new run: the page starts again from that run's empty replay
@@ -540,67 +514,6 @@
     renderAll();
   }
 
-  function renderLobby() {
-    const state = lobby.state;
-    if (!state) return;
-    const running = state.status === "running";
-    $("picks").innerHTML = Lobby.playerList(state, lobby.chosen);
-    $("estimate").textContent = Lobby.estimateText(state, lobby.chosen);
-    $("ceiling").textContent = Lobby.ceilingText(state);
-    const why = lobby.refusal || Lobby.whyNot(state, lobby.chosen, chosenSeed());
-    $("lobby-why").hidden = !why;
-    $("lobby-why").textContent = why || "";
-    const cost = Lobby.estimate(state, lobby.chosen);
-    $("start").disabled = !!why;
-    $("start").textContent = !lobby.armed ? "Start"
-      : "Confirm: start and spend at most " + Lobby.usd(cost.total_usd);
-    $("start").dataset.armed = String(lobby.armed);
-    $("cancel").hidden = !running;
-    $("seed").disabled = running;
-  }
-
-  function pressedStart() {
-    const state = lobby.state;
-    if (!state || Lobby.whyNot(state, lobby.chosen, chosenSeed())) return;
-    // a run that can really spend is confirmed once, with its worst case on the button
-    if (Lobby.spends(state, lobby.chosen) && !lobby.armed) {
-      lobby.armed = true;
-      return renderLobby();
-    }
-    startRun();
-  }
-
-  async function startRun() {
-    lobby.armed = false;
-    lobby.refusal = null;
-    const { ok, body } = await control("/run", { method: "POST", headers: { "Content-Type": "application/json" },
-                                                 body: JSON.stringify({ seed: chosenSeed(), players: lobby.chosen }) });
-    if (!ok) lobby.refusal = body.error || "the run was refused";
-    if (ok && body.state) applyState(body.state);
-    else renderLobby();
-  }
-
-  $("lobby-form").addEventListener("submit", (event) => { event.preventDefault(); pressedStart(); });
-  $("picks").addEventListener("change", () => {
-    lobby.chosen = [...$("picks").querySelectorAll("input[name=player]:checked")].map((input) => input.value);
-    lobby.armed = false;
-    lobby.refusal = null;
-    renderLobby();
-  });
-  $("seed").addEventListener("input", () => { // another track: another set of prices and refusals
-    lobby.armed = false;
-    lobby.refusal = null;
-    renderLobby();
-    clearTimeout(lobby.timer);
-    lobby.timer = setTimeout(refreshState, 300);
-  });
-  $("cancel").addEventListener("click", async () => {
-    const { ok, body } = await control("/cancel", { method: "POST" });
-    if (!ok) lobby.refusal = body.error || "the run could not be stopped";
-    if (ok && body.state) applyState(body.state);
-    else renderLobby();
-  });
-
   // ---- the sections underneath --------------------------------------------------------------
   function renderBelow() {
     const board = store.scoreboard || { columns: [], rows: [], same_seeds: true };
@@ -609,11 +522,13 @@
         (c === "player" ? "<th>" + cell(row[c]) + "</th>" : "<td>" + cell(row[c]) + "</td>")).join("") + "</tr>").join("") + "</tbody>";
     $("fairness").hidden = board.same_seeds;
     $("board").hidden = !board.rows.length; // a live run has no scoreboard until it ends
-    const flyRun = store.runs.find((run) => run.fly && (run.players || []).includes("fly")) || store.runs.find((run) => run.fly);
-    $("ours").innerHTML = Minds.ours(flyRun);
-    const fly2Run = store.runs.find((run) => run.fly2 && (run.players || []).includes("fly2"));
-    $("ours-fly2").innerHTML = Minds.oursFly2(fly2Run);
-    $("honesty-fly2").hidden = !fly2Run;
+    if (!liveUrl) { // live, the front writes these from the records' numbers, on the records screen
+      const flyRun = store.runs.find((run) => run.fly && (run.players || []).includes("fly")) || store.runs.find((run) => run.fly);
+      $("ours").innerHTML = Minds.ours(flyRun);
+      const fly2Run = store.runs.find((run) => run.fly2 && (run.players || []).includes("fly2"));
+      $("ours-fly2").innerHTML = Minds.oursFly2(fly2Run);
+      $("honesty-fly2").hidden = !fly2Run;
+    }
     $("runs").innerHTML = store.runs.map((run) => {
       const sha = run.git_sha ? run.git_sha.slice(0, 7) + (run.git_dirty ? ", uncommitted changes" : "") : "unknown commit";
       const status = run.status === "completed" ? "completed" : '<span class="warn">' + esc(run.status || "status unknown") + "</span>";
@@ -649,6 +564,38 @@
     if (!why) BenchView.mount($("bench"), benchData);
   }
 
+  // ---- the race, as the front drives it (front.js, live only) -----------------------------------
+  // The front owns the screens; the run screen is this page. It is shown and hidden through setShown, so
+  // the transport and its keys work only while the race is on screen.
+  window.Race = {
+    setShown(on) {
+      if (on) return showTab("run");
+      view.tab = "off";
+      $("transport").hidden = true;
+      setPlaying(false);
+    },
+    watch,
+    watching: () => race.watching,
+    // a recorded run, from the start (Records' Watch): no stream, nothing more will arrive
+    load(replay) {
+      if (race.source) race.source.close();
+      race.source = null;
+      race.watching = null;
+      resetTo(replay);
+      store.ended = true;
+      setFollowingOff();
+      notice(null);
+      renderAll();
+    },
+    rewind() { // Watch the replay: the run just played, from row 0
+      setPlaying(false);
+      if (liveUrl) setFollowingOff();
+      view.t = 0;
+      draw();
+    },
+    atEnd: () => store.ended && view.t >= horizon(),
+  };
+
   // ---- start --------------------------------------------------------------------------------
   let ready = false;
   Feed.fromEmbedded(embedded, handlers);
@@ -666,7 +613,11 @@
     const clear = handlers.onFrame;
     // a frame means the stream is alive: the waiting or the lost-connection notice goes, a real error stays
     handlers.onFrame = (...args) => { if (store.error == null) notice(null); clear(...args); };
-    $("lobby").hidden = false; // the page runs the show; a replay file has no server and no controls
-    refreshState();
+    // the page runs the show through the Brain Battle front (front.js); a replay file has no server and no
+    // front, and keeps the two tabs
+    document.querySelector(".tabs").hidden = true;
+    document.querySelector(".top").hidden = true;
+    document.title = "Brain Battle";
+    Front.start();
   }
 })();

@@ -152,16 +152,22 @@ class LiveRun:
     def _end_event(self, replay: dict) -> dict:
         """The last event of a run: what the page needs to settle. It carries the benchmark of the run
         that just played, scored here rather than in the browser, so the Analysis tab fills in without
-        a reload. One track is rarely enough for an interval, and the numbers say so themselves."""
+        a reload, and its results (bakeoff/results.py) for the results screen. One track is rarely
+        enough for an interval, and the numbers say so themselves."""
         from bakeoff.bench import benchmark_of  # numpy: only when a run ends
+        from bakeoff.results import results_of
 
         try:
             numbers, why = benchmark_of([self.run_dir])
         except Exception as e:  # the run's end is what the page waits for: never lose it to the extra
             numbers, why = None, f"the benchmark could not be scored: {e!r}"
+        try:
+            results = results_of(self.run_dir)
+        except Exception as e:  # the same: the page says why instead of waiting for ever
+            results = {"why": f"the results could not be worked out: {e!r}"}
 
         return {"status": self.status, "runs": replay["runs"], "scoreboard": replay["scoreboard"],
-                "bench": numbers if numbers else {"why": why}}
+                "bench": numbers if numbers else {"why": why}, "results": results}
 
     def _write_meta(self) -> None:
         (self.run_dir / "meta.json").write_text(json.dumps(self.meta, indent=2))

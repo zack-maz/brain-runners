@@ -18,13 +18,15 @@ from bakeoff.report import PRICES_USD_PER_MTOK, load_meta, load_steps
 
 @dataclass(frozen=True)
 class Source:
-    """A run directory and the players to take from it (None: all of them)."""
+    """A run directory and the players to take from it (None: all of them). `episodes`, when given, narrows it to
+    those (player, seed) pairs: Records takes each pair from the newest run that completed it (bakeoff/records.py)."""
     run_dir: Path
     players: tuple[str, ...] | None = None
+    episodes: frozenset[tuple[str, int]] | None = None
 
 
 def parse_source(arg: str) -> Source:
-    """`runs/X` or `runs/X:haiku,jev_composed`. The last `:` separates the players, unless what follows it is a path."""
+    """`runs/X` or `runs/X:haiku_plain,jev_step1`. The last `:` separates the players, unless what follows it is a path."""
     path, sep, names = arg.rpartition(":")
     if not sep or "/" in names:
         return Source(Path(arg), None)
@@ -91,6 +93,8 @@ def load(sources: list[Source]) -> Loaded:
             if missing:
                 raise ValueError(f"{source.run_dir} has no {', '.join(missing)}; it has {', '.join(sorted(present))}")
             steps = [s for s in steps if s["player"] in source.players]
+        if source.episodes is not None:
+            steps = [s for s in steps if (s["player"], s["seed"]) in source.episodes]
         run_ids.append(run_id)
         grouped: dict[tuple[str, int], list[dict]] = {}
         for s in steps:

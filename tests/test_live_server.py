@@ -93,8 +93,16 @@ def test_state_says_what_can_be_run(server):
     status, state = payload(httpd, "GET", "/state?seed=1001")
     assert status == 200 and state["status"] == "lobby" and state["seed"] == 1001
     assert state["game"]["version"] == "v2" and state["max_rows"] == 12
-    assert {p["name"] for p in state["players"]} >= {"solver", "fly", "haiku", "jev_composed"}
-    assert [p["requests_left"] for p in state["players"] if p["name"] == "haiku"] == [0]
+    assert {p["name"] for p in state["players"]} >= {"solver", "fly", "haiku_plain", "jev_step1"}
+    assert [p["requests_left"] for p in state["players"] if p["name"] == "haiku_plain"] == [0]
+
+
+def test_an_oversized_seed_answers_200_with_no_seed_not_a_crash(server):
+    """str.isdigit() is true of a seed `int()` refuses (M2): a 4,300+ digit string is "digits" but
+    int() raises past Python's conversion limit, uncaught before this fix. The regex caps it at 9 digits."""
+    httpd, _ = server
+    status, state = payload(httpd, "GET", f"/state?seed={'9' * 5000}")
+    assert status == 200 and state["seed"] is None
 
 
 def test_a_run_started_from_the_page_streams_its_frames_and_ends_in_the_lobby(server):
@@ -121,7 +129,7 @@ def test_a_run_started_from_the_page_streams_its_frames_and_ends_in_the_lobby(se
 
 def test_a_refusal_names_its_reason_and_starts_nothing(server):
     httpd, session = server
-    status, refused = payload(httpd, "POST", "/run", {"seed": 7, "players": ["solver", "haiku"]})
+    status, refused = payload(httpd, "POST", "/run", {"seed": 7, "players": ["solver", "haiku_plain"]})
     assert status == 409 and refused["ok"] is False
     assert "seeds below 1000" in refused["error"] and session.run is None
     status, refused = payload(httpd, "POST", "/run", {"seed": 1001, "players": ["nobody"]})
@@ -221,3 +229,48 @@ def test_the_end_of_a_live_run_carries_the_benchmark_of_what_was_just_played(ser
     assert {p["player"] for p in end["bench"]["players"]} == {"solver", "random"}
     assert end["bench"]["players"][0]["seeds"] == 1  # one track: enough to score, never enough to rank
     assert all(p["ranked"] is False for p in end["bench"]["players"])
+
+
+def test_what_was_recorded_is_served_behind_the_token(server):
+    httpd, session = server
+    started = payload(httpd, "POST", "/run", {"seed": 1001, "players": ["solver", "random"]})[1]
+    session.wait(30)
+    run_id = started["run_id"]
+    status, results = payload(httpd, "GET", f"/results?run={run_id}")
+    assert status == 200 and [p["player"] for p in results["players"]] == ["solver", "random"]
+    status, replay = payload(httpd, "GET", f"/replay?run={run_id}")
+    assert status == 200 and replay["runs"][0]["run_id"] == run_id
+    status, records = payload(httpd, "GET", "/records")
+    assert status == 200 and [r["run_id"] for r in records["runs"]] == [run_id]
+    for path in (f"/results?run={run_id}", f"/replay?run={run_id}", "/records"):
+        assert get(httpd, path, token=None)[0].status == 403
+        assert get(httpd, path, token="wrong")[0].status == 403
+
+
+def test_a_run_that_is_not_a_recorded_run_directory_is_not_found(server):
+    httpd, _ = server
+    for path in ("/results", "/results?run=", "/results?run=..%2F..%2Fpyproject.toml", "/replay?run=../cache",
+                 "/replay?run=20990101-000000"):
+        assert get(httpd, path)[0].status == 404, path
+
+
+def test_a_run_directory_that_cannot_be_read_is_an_error_that_says_why(server):
+    httpd, session = server
+    started = payload(httpd, "POST", "/run", {"seed": 1001, "players": ["solver"]})[1]
+    session.wait(30)
+    log = session.run_dir_of(started["run_id"]) / "solver.jsonl"
+    log.write_text("not json\n" + log.read_text())  # broken before its last line: not a truncated tail
+    status, body = payload(httpd, "GET", f"/results?run={started['run_id']}")
+    assert status == 500 and body["ok"] is False and "cannot read that run" in body["error"]
+
+
+def test_a_keyless_record_answers_with_a_500_and_a_reason_not_a_dropped_connection(server):
+    """A record that parses but is not one of ours raises something other than OSError or ValueError deep
+    inside results_of (I3): the page must still get a reasoned 500, never a closed socket."""
+    httpd, session = server
+    started = payload(httpd, "POST", "/run", {"seed": 1001, "players": ["solver"]})[1]
+    session.wait(30)
+    log = session.run_dir_of(started["run_id"]) / "solver.jsonl"
+    log.write_text(json.dumps({"player": "solver", "seed": 1001}) + "\n")  # parses; no "row"
+    status, body = payload(httpd, "GET", f"/results?run={started['run_id']}")
+    assert status == 500 and body["ok"] is False and "cannot read that run" in body["error"]

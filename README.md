@@ -38,8 +38,8 @@ are in `docs/COSTS.md`.
     uv run python -m bakeoff view runs/<run_id> [runs/<other_run_id> ...]   # writes replay.html
     uv run python -m bakeoff bench runs/<run_id>[:player,...] [...]          # writes bench.html and bench.json
 
-    uv run python -m bakeoff live --port 8765             # the lobby: the browser picks the track and the players
-    uv run python -m bakeoff live --start --seed 1001 --players fly,jev_composed,haiku --max-requests 150
+    uv run python -m bakeoff live --port 8765             # Brain Battle: the browser picks the players and the track
+    uv run python -m bakeoff live --start --seed 1001 --players fly,jev_step1,haiku_plain --max-requests 150
     uv run python -m bakeoff live --game v1 --seed 1001 --start   # free: replays that run's answers from the cache
 
 `bench` scores recorded runs and spends nothing. It merges run directories like `view` (one game; each player and
@@ -55,34 +55,45 @@ come by chance; the page counts the pairs and says so. The page is one offline f
 `live` plays one track in real time: every mind decides the same row before anyone moves on (a jumper skips
 the next row; the slowest mind sets the pace, about a row a second with the fly), each decision goes into a
 normal run directory and, through a server on `127.0.0.1` only, into the same page as it happens. The command
-binds the port and sets the ceiling; the page does the rest (updates 3a and 3b): the lobby picks the track and the
-players, shows the worst case before it spends anything, starts and cancels the run, and sets up another when one
-ends. `--start` plays the command line's own run at once instead, waiting for a browser first and serving until
-Ctrl-C (`--no-wait` does neither). The cap is the session's, per paid player, default 0, which makes a free live
+binds the port and sets the ceiling; the page does the rest, through Brain Battle's screens (decision 45, spec
+`docs/superpowers/specs/2026-09-25-brain-battle-design.md`): home, the character select (up to eight fighters,
+each a character in one of its skins), the track select (the track, its preview, and each fighter's worst case;
+a run that can spend asks for a second press, `RUN` then `CONFIRM` with "spend at most …"), the run screen (with
+Cancel), and the results, which open by themselves when the run ends and lead to another run without restarting
+the command. Records holds the leaderboard of the practice tracks, head to head for two players, and the past runs
+to watch again or see the results of. The page reads these through three routes that only read files and spend
+nothing, behind the same token as the rest: `GET /results?run=`, `GET /records` and `GET /replay?run=`. `--seed`
+and `--players` fill the character select and the track select; `--start` plays the command line's own run at
+once instead, waiting for a browser first and serving until Ctrl-C (`--no-wait` does neither). The cap is the session's, per paid player, default 0, which makes a free live
 run of a track whose answers are already cached; a live paid run on a seed below 1000 is refused without `--tournament`. `live`
 builds one fly brain; do not start a second fly process next to it. Afterwards `view` replays the directory.
 
-Paid players (`jev`, `jev_composed`, `haiku` and the question-set players below) need `TYPESAFE_API_KEY` / `ANTHROPIC_API_KEY` in a git-ignored `.env`
+Paid players (`jev_plain`, `jev_step1`, `haiku_plain` and the question-set players below) need `TYPESAFE_API_KEY` / `ANTHROPIC_API_KEY` in a git-ignored `.env`
 file at the repo root (template: `.env.example`). They spend nothing unless told to:
 
-    uv run python -m bakeoff run --players jev --seeds 1 --seed-start 1000 --max-requests 300 --game v1
+    uv run python -m bakeoff run --players jev_plain --seeds 1 --seed-start 1000 --max-requests 300 --game v1
 
-`jev_composed` is the Jev of the demo: instead of one broad question it asks Jev four pointed yes/no
+`jev_step1` is the Jev of the demo: instead of one broad question it asks Jev four pointed yes/no
 questions in one request ("would `left` land on a gap, that is, does `ahead[0].gaps_relative` contain
 -1?") and code picks the action least likely to land on a gap, ties in the order stay, left, right,
 jump. The wording and that rule are ours, not TypeSafe's, and it looks one step ahead only. The
-one-shot `jev` stays for comparison: on the dangerous states of practice track 1000 its single Choice
+one-shot `jev_plain` (the plain set) stays for comparison: on the dangerous states of practice track 1000 its single Choice
 landed on a gap about as often as always staying (`docs/DECISIONS.md`, decisions 14 and 15).
 
-Three more ways to ask Jev, and an LLM twin for each way (decisions 25 and 26): `jev_choice` asks one Choice whose
-options name each move's landing tile, `jev_two_step` asks eight yes/no questions (each move's landing, and whether it
-leaves a way on), `jev_reader` asks about every visible tile and code plans over its answers like the solver.
-`haiku_composed`, `haiku_choice`, `haiku_two_step` and `haiku_reader` ask Claude Haiku exactly the same questions and use the
-same rule, and `glm_composed`, `glm_choice`, `glm_two_step` and `glm_reader` ask GLM Flash (Zhipu's free tier,
+Three more ways to ask Jev, and an LLM twin for each way (decisions 25 and 26): `jev_guided` asks one Choice whose
+options name each move's landing tile, `jev_step2` asks eight yes/no questions (each move's landing, and whether it
+leaves a way on), `jev_map` asks about every visible tile and code plans over its answers like the solver.
+`haiku_step1`, `haiku_guided`, `haiku_step2` and `haiku_map` ask Claude Haiku exactly the same questions and use the
+same rule, and `glm_step1`, `glm_guided`, `glm_step2` and `glm_map` ask GLM Flash (Zhipu's free tier,
 `ZHIPU_API_KEY`) the same again. Three things still differ: the LLM is also given the briefing of the rules (for three of the four sets
 Jev's yes/no questions carry only the question), Jev answers its questions in parallel while the LLM writes them in
 one reply, and the LLM's probabilities are numbers it writes down. The questions and the rules are ours
 (`bakeoff/players/question_sets.py`).
+
+The five ways are named `plain`, `guided`, `step1`, `step2` and `map` (decision 44, for the Brain Battle character
+select). Before that they were the one-shot `jev`/`haiku`/`glm`, `choice`, `composed`, `two_step` and `reader`, and
+Claude Haiku's players were `llm*` before decision 39. Old names still work wherever a player is named, and runs
+recorded under them (with their cached answers) are read as the new ones.
 
 `--max-requests` is a hard cap on live requests for **each** paid player in the run; the default 0
 only replays `.cache/responses`. Every answer is cached, so a repeated run of the same game and track
@@ -94,17 +105,18 @@ ends there, so later players in the list do not play: put free players first, or
 alone.
 
 `view` writes one self-contained HTML file (no server, no network, fonts embedded): the demo player. The
-fly, the composed Jev and the LLM run one tunnel together as pixel figures (fixed camera, everyone on the
+fly, `jev_step1` and `haiku_plain` run one tunnel together as pixel figures (fixed camera, everyone on the
 same row at the same time), with a strip of panels underneath showing what each had in mind (the fly's
 spikes and read-out signals, Jev's four answers, the LLM's answer). Any other players in the merged run
-directories (the question-set players, `jev` one-shot) join the same tunnel with their own tags. Blue is
+directories (the other question-set players, `jev_plain`) join the same tunnel with their own tags. Blue is
 the cursor: it marks the mind in focus and the tiles that mind was shown, and with auto on it cuts to
 whoever faces a gap (a click chooses by hand, or keys 1 to 9 pick the runner in that position; space
-plays, the arrows step a row). The page has two tabs. **Run** holds the tunnel, the
-mind panels (each with a running log, one line per row, that follows the row on screen), the lobby when there is
-one, and **Players**: who runs next, and who is in the tunnel. **Analysis** holds the level table (rows survived
-per track; it picks the track), the scoreboard, what in the set-up is ours rather than the fly's or TypeSafe's,
-and the benchmark, drawn by the same code as `bench.html`. The look is the user's
+plays, the arrows step a row). The replay page has two tabs. **Run** holds the tunnel, the
+mind panels (each with a running log, one line per row, that follows the row on screen), and **Who is in the
+tunnel**, which shows and hides runners. **Analysis** holds the level table (rows survived per track; it picks the
+track), the scoreboard, what in the set-up is ours rather than the fly's or TypeSafe's, and the benchmark, drawn
+by the same code as `bench.html`. A live page has no tabs: its run screen is the Run tab, who runs next is picked
+on the character select, and the numbers and "what is ours" are on the results and Records screens. The look is the user's
 brand (`~/Documents/PROJECTS/BRAND/brand.css`). Several run directories are merged, since the fly and
 the paid players usually run separately; one (player, seed) may appear only once. Viewing costs
 nothing: it reads logs only. The viewer's JavaScript has its own tests, which `uv run pytest` runs

@@ -273,6 +273,47 @@
     - **The held-out seeds were not wholly unseen:** they had been used by the research that chose the three
       candidates.
 
+44. **The question sets are renamed plain, guided, step1, step2 and map** (the user, 2026-09-25).
+
+    | old player | new player |
+    |---|---|
+    | `jev`, `haiku`, `glm` (the one-shot) | `jev_plain`, `haiku_plain`, `glm_plain` |
+    | `jev_choice`, `haiku_choice`, `glm_choice` | `jev_guided`, `haiku_guided`, `glm_guided` |
+    | `jev_composed`, `haiku_composed`, `glm_composed` | `jev_step1`, `haiku_step1`, `glm_step1` |
+    | `jev_two_step`, `haiku_two_step`, `glm_two_step` | `jev_step2`, `haiku_step2`, `glm_step2` |
+    | `jev_reader`, `haiku_reader`, `glm_reader` | `jev_map`, `haiku_map`, `glm_map` |
+
+    Nothing recorded changes: the response cache is keyed by provider, model, senses and questions, not by a name,
+    so every answer already paid for still replays; the run directories keep their old file names and are read
+    through `canonical()` in `bakeoff/players/names.py`, which maps every old name, the `llm*` ones of decision 39
+    included, straight to its new one. The new names were chosen for the Brain Battle character select
+    (`docs/FRONTEND.md`), where each set is a skin.
+
+45. **Brain Battle is the front of `bakeoff live`** (the user, 2026-09-25; spec
+    `docs/superpowers/specs/2026-09-25-brain-battle-design.md`, mock-ups and answers in `docs/FRONTEND.md`). Home,
+    character select (skins are the players), track select, the race, results, and Records. The user approved the
+    spec's seven open calls:
+    - **Wrong moves** count the executed move, a fallback included; a death with no surviving move is "trapped".
+    - **Records** keeps the newest complete episode of each (player, track), notes how many older ones it left out,
+      and leaves tournament seeds out until phase 6.
+    - **Results** open by themselves when the tunnel reaches its last row; a viewer scrubbing back gets a button.
+    - **"What is ours"** keeps the whole current section under the mock-up's three paragraphs.
+    - **The live page drops the lobby's grid and "Who runs next"** (amends decision 38 for the live page; "Who is in
+      the tunnel" stays).
+    - **Skin colours and tags** ("Jev · Step 1") reach `bakeoff view` too; its layout is otherwise unchanged.
+    - **A results card's cost** is live requests × the page's price per request, labelled an estimate.
+
+46. **Records after Brain Battle plan a** (the user, 2026-09-25, on the plan's final review):
+    - **The leaderboard ranks on practice tracks 1000–1019 only**, the tracks the track select offers, so the flies'
+      calibration and settle runs (1000–1199) do not swamp the question sets' five tracks. Each row keeps its track
+      count; head to head still compares a pair on the tracks both played.
+    - **fly2's rows are marked "tuned on these tracks"**, not removed: its thresholds were fixed on 1000–1199
+      (`records_of` returns `tuned_on`). A clean test of fly2 uses tracks 1200 and up.
+    - **The skins' `about` lines say what is ours** as reworded at the review: each question set ends "The question
+      is ours." or "The questions and the rule (the planner) are ours.", and the flies name their input, read-out,
+      rule and thresholds.
+    - **One fly smoke covers plans a and b**, run once no other session holds a fly brain.
+
 Where we are and what comes next: `docs/NEXT.md`.
 
 ## Prior art to reuse

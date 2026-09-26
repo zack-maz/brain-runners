@@ -31,21 +31,22 @@ def test_a_fresh_session_is_in_the_lobby_and_lists_every_player_with_its_price(t
     state = session(tmp_path).state(seed=1001)
     assert state["status"] == "lobby" and state["run"] is None
     assert state["game"]["version"] == "v2" and state["max_rows"] == 12 and state["requests_per_row"] == 1
+    assert state["first_practice_seed"] == 1000 and state["practice_tracks"] == 20  # the track select's 1000 to 1019
     by_name = {p["name"]: p for p in state["players"]}
     assert by_name["solver"]["paid"] is False and by_name["solver"]["requests_left"] is None
-    assert by_name["haiku"]["paid"] is True and by_name["haiku"]["price_usd"] == 0.0006
-    assert by_name["glm_composed"]["price_usd"] == 0.0  # the free tier costs nothing while it lasts
-    assert by_name["haiku"]["requests_left"] == 0  # the default cap spends nothing
+    assert by_name["haiku_plain"]["paid"] is True and by_name["haiku_plain"]["price_usd"] == 0.0006
+    assert by_name["glm_step1"]["price_usd"] == 0.0  # the free tier costs nothing while it lasts
+    assert by_name["haiku_plain"]["requests_left"] == 0  # the default cap spends nothing
 
 
 def test_every_paid_player_says_which_model_it_asks(tmp_path):
     """The page prints this in its column headers, so it must be what a run really asks for, not a
     name typed by hand. No command overrides a model, so the client's default is the whole truth."""
     by_name = {p["name"]: p for p in session(tmp_path).state()["players"]}
-    assert by_name["haiku"]["model"] == "claude-haiku-4-5-20251001"
-    assert by_name["haiku_reader"]["model"] == "claude-haiku-4-5-20251001"
-    assert by_name["glm"]["model"] == "glm-4.5-flash" and by_name["glm_composed"]["model"] == "glm-4.5-flash"
-    assert by_name["jev"]["model"] == "jev-latest" and by_name["jev_composed"]["model"] == "jev-latest"
+    assert by_name["haiku_plain"]["model"] == "claude-haiku-4-5-20251001"
+    assert by_name["haiku_map"]["model"] == "claude-haiku-4-5-20251001"
+    assert by_name["glm_plain"]["model"] == "glm-4.5-flash" and by_name["glm_step1"]["model"] == "glm-4.5-flash"
+    assert by_name["jev_plain"]["model"] == "jev-latest" and by_name["jev_step1"]["model"] == "jev-latest"
     assert by_name["fly"]["model"] is None and by_name["solver"]["model"] is None  # nothing is asked
     assert all(p["model"] == model_of(p["name"]) for p in session(tmp_path).state()["players"] if p["paid"])
     assert all(p["model_answered"] is None for p in session(tmp_path).state()["players"])  # nothing recorded yet
@@ -61,17 +62,17 @@ def test_a_player_also_says_which_version_it_last_answered_as(tmp_path):
         (out / run).mkdir(parents=True, exist_ok=True)
         (out / run / name).write_text(json.dumps({"player": name[:-6], "info": {"model": model}}) + "\n")
     models = answered_models(out)
-    assert models["jev"] == "jev-1.13.0"                       # the newest run wins
-    assert models["haiku"] == "claude-haiku-4-5-20251001"      # recorded before the rename, as llm.jsonl
-    assert "glm" not in models                                 # never played
+    assert models["jev_plain"] == "jev-1.13.0"                       # the newest run wins
+    assert models["haiku_plain"] == "claude-haiku-4-5-20251001"      # recorded before the rename, as llm.jsonl
+    assert "glm_plain" not in models                                 # never played
     by_name = {p["name"]: p for p in session(tmp_path).state()["players"]}
-    assert by_name["jev"]["model_answered"] == "jev-1.13.0" and by_name["jev"]["model"] == "jev-latest"
+    assert by_name["jev_plain"]["model_answered"] == "jev-1.13.0" and by_name["jev_plain"]["model"] == "jev-latest"
     assert by_name["solver"]["model_answered"] is None
 
 
 def test_the_contestants_come_first_in_the_pages_own_order_and_the_yardsticks_last(tmp_path):
     names = [p["name"] for p in session(tmp_path).state()["players"]]
-    assert names[:5] == ["fly", "jev_composed", "haiku", "jev", "glm"]  # the demo's three, then the other one-shots
+    assert names[:5] == ["fly", "jev_step1", "haiku_plain", "jev_plain", "glm_plain"]  # the demo's three, then the other plain players
     assert names[-3:] == ["always_jump", "random", "solver"]  # the free yardsticks
     assert set(names) == set(REGISTRY)
 
@@ -81,9 +82,9 @@ def test_every_paid_player_has_its_own_measured_price_and_none_of_them_is_unders
     The prices are the measured ones in docs/COSTS.md (update 2a), rounded up; a question set that
     reads more costs more, so a price belongs to a player, not to a provider."""
     assert set(PRICE_USD) == set(PAID)
-    assert PRICE_USD["haiku_reader"] > PRICE_USD["haiku"] * 10  # 0.970 USD over 150 requests, COSTS.md
-    assert PRICE_USD["haiku_two_step"] > PRICE_USD["haiku_composed"] > PRICE_USD["haiku"]
-    assert PRICE_USD["jev_reader"] > PRICE_USD["jev_composed"]
+    assert PRICE_USD["haiku_map"] > PRICE_USD["haiku_plain"] * 10  # 0.970 USD over 150 requests, COSTS.md
+    assert PRICE_USD["haiku_step2"] > PRICE_USD["haiku_step1"] > PRICE_USD["haiku_plain"]
+    assert PRICE_USD["jev_map"] > PRICE_USD["jev_step1"]
     assert all(PRICE_USD[name] > 0 for name in PAID if not name.startswith("glm"))
     assert all(PRICE_USD[name] == 0.0 for name in PAID if name.startswith("glm"))  # the free tier
 
@@ -148,7 +149,7 @@ def test_a_track_that_was_played_before_is_marked_so_the_page_knows_it_replays_f
     (1001, [], "choose at least one player"),
     (-3, ["solver"], "must not be negative"),
     ("1001", ["solver"], "must be a whole number"),
-    (7, ["solver", "haiku"], "paid players may not play seeds below 1000"),
+    (7, ["solver", "haiku_plain"], "paid players may not play seeds below 1000"),
 ])
 def test_every_refusal_names_its_reason(tmp_path, seed, players, reason):
     with pytest.raises(LobbyError, match=reason):
@@ -157,18 +158,18 @@ def test_every_refusal_names_its_reason(tmp_path, seed, players, reason):
 
 def test_a_free_player_may_play_a_tournament_seed_and_a_paid_one_may_with_the_flag(tmp_path):
     session(tmp_path).check(7, ["solver"])  # nothing is spent, so nothing is at stake
-    session(tmp_path, tournament=True).check(7, ["solver", "haiku"])
+    session(tmp_path, tournament=True).check(7, ["solver", "haiku_plain"])
 
 
 def test_a_paid_player_with_no_request_left_of_the_session_cap_is_refused(tmp_path):
     lobby = session(tmp_path, max_requests=2)
-    lobby.budgets["haiku"].spend()
-    lobby.check(1001, ["haiku"])  # one left
-    lobby.budgets["haiku"].spend()
-    with pytest.raises(LobbyError, match="haiku has no requests left of this session's cap of 2"):
-        lobby.check(1001, ["haiku"])
-    lobby.check(1001, ["jev"])  # the other paid players keep their own budget
-    session(tmp_path).check(1001, ["haiku"])  # a cap of 0 still replays the cache, as the command does
+    lobby.budgets["haiku_plain"].spend()
+    lobby.check(1001, ["haiku_plain"])  # one left
+    lobby.budgets["haiku_plain"].spend()
+    with pytest.raises(LobbyError, match="haiku_plain has no requests left of this session's cap of 2"):
+        lobby.check(1001, ["haiku_plain"])
+    lobby.check(1001, ["jev_plain"])  # the other paid players keep their own budget
+    session(tmp_path).check(1001, ["haiku_plain"])  # a cap of 0 still replays the cache, as the command does
 
 
 def test_only_one_run_at_a_time(tmp_path):
@@ -209,8 +210,8 @@ def test_cancelling_closes_the_run_as_a_normal_interrupted_directory(tmp_path, m
 def test_a_question_set_that_needs_more_vision_than_the_game_gives_is_refused_before_anything_exists(tmp_path):
     narrow = LiveSession(rules_for("v2").variant(lookahead=2), out_root=tmp_path / "runs",
                          cache_dir=tmp_path / "cache")
-    with pytest.raises(LobbyError, match="jev_two_step"):
-        narrow.start(1001, ["jev_two_step"])
+    with pytest.raises(LobbyError, match="jev_step2"):
+        narrow.start(1001, ["jev_step2"])
     assert not (tmp_path / "runs").exists()
 
 
@@ -252,8 +253,75 @@ def test_each_fly_says_what_it_is_and_nobody_else_needs_to(tmp_path, monkeypatch
     by_name = {p["name"]: p for p in session(tmp_path).state()["players"]}
     assert by_name["fly"]["about"] == "looming → escape reflex (phase 2)"
     assert by_name["fly2"]["about"] == "not calibrated yet: its input, read-out and numbers are fixed by calibration/FLY2_REPORT.md"
-    assert by_name["haiku"]["about"] is None and by_name["solver"]["about"] is None
+    assert by_name["haiku_plain"]["about"] is None and by_name["solver"]["about"] is None
 
     monkeypatch.setattr(fly2, "CALIBRATED", True)
     by_name = {p["name"]: p for p in session(tmp_path).state()["players"]}
     assert by_name["fly2"]["about"] == MAPPINGS[fly2.MAPPING].summary + ", walking-steering neurons, dodge before jump"
+
+
+def test_the_state_carries_every_track_a_player_has_played_and_the_real_track_for_the_preview(tmp_path):
+    from bakeoff.game.track import generate_track
+
+    lobby = session(tmp_path)
+    play(lobby, seed=1001, players=["solver"])
+    play(lobby, seed=1003, players=["solver", "random"])
+    state = lobby.state(seed=1002)
+    by_name = {p["name"]: p for p in state["players"]}
+    assert by_name["solver"]["seeds_played"] == [1001, 1003] and by_name["random"]["seeds_played"] == [1003]
+    assert by_name["fly"]["seeds_played"] == []
+    assert state["track"] == generate_track(1002, RULES).to_json()
+    assert lobby.state()["track"] is None and lobby.state(seed=-1)["track"] is None
+
+
+def test_seeds_played_only_lists_the_track_selects_practice_range(tmp_path):
+    """spec B: 'the practice seeds 1000-1019 it has a recorded run of' (M1), not every seed ever played."""
+    lobby = session(tmp_path)
+    play(lobby, seed=7, players=["solver"])  # a tournament seed: never offered by the track select
+    play(lobby, seed=1001, players=["solver"])  # a track-select practice seed
+    play(lobby, seed=1150, players=["solver"])  # a bulk-run practice seed, past the track select's 20
+    by_name = {p["name"]: p for p in lobby.state()["players"]}
+    assert by_name["solver"]["seeds_played"] == [1001]
+
+
+def test_state_previews_no_track_for_a_tournament_seed_unless_the_session_is_one(tmp_path):
+    """spec: tournament seeds must not shape prompts before the tournament (M2), so the preview track for
+    one is withheld from a session not started with --tournament."""
+    from bakeoff.game.track import generate_track
+
+    assert session(tmp_path).state(seed=7)["track"] is None
+    assert session(tmp_path, tournament=True).state(seed=7)["track"] == generate_track(7, RULES).to_json()
+
+
+def test_only_a_recorded_run_directory_can_be_named(tmp_path):
+    lobby = session(tmp_path)
+    run_id = play(lobby, players=["solver"]).run.run_id
+    assert lobby.run_dir_of(run_id) == tmp_path / "runs" / run_id
+    (tmp_path / "runs" / "20260101-000000").mkdir()  # a directory with no meta.json is not a run
+    for wanted in (None, "", "../cache", "/etc", run_id + "/meta.json", "20260101-000000", "20990101-000000", "x"):
+        assert lobby.run_dir_of(wanted) is None, wanted
+    assert lobby.results("../cache") is None and lobby.replay("../cache") is None
+
+
+def test_results_replay_and_records_of_what_this_session_recorded(tmp_path):
+    lobby = session(tmp_path)
+    run_id = play(lobby, players=["solver", "random"]).run.run_id
+    results = lobby.results(run_id)
+    assert results["run_id"] == run_id and [p["player"] for p in results["players"]] == ["solver", "random"]
+    assert lobby.replay(run_id)["runs"][0]["run_id"] == run_id
+    records = lobby.records()
+    assert [r["run_id"] for r in records["runs"]] == [run_id]
+    assert records["runs"][0]["current"] is False  # it is over: it can be watched, not watched live
+    assert {p["player"] for p in records["bench"]["players"]} == {"solver", "random"}
+
+
+def test_the_run_playing_now_is_the_one_past_run_that_can_be_watched_live(tmp_path, monkeypatch):
+    lobby = session(tmp_path)
+    started = lobby.start(1001, [slow_player(monkeypatch)])
+    try:
+        (run,) = lobby.records()["runs"]
+        assert run["run_id"] == started.run.run_id and run["current"] is True and run["status"] == "running"
+    finally:
+        lobby.cancel()
+        lobby.wait(30)
+    assert lobby.records()["runs"][0]["current"] is False

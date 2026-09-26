@@ -1,6 +1,7 @@
-// The lobby: who may run, what a run would cost at worst, and the list the page shows. Pure and
-// tested under node; app.js does the fetching and the DOM. Everything that comes from the server
-// goes through esc(): a player name or a refusal is text, never markup.
+// What a run may cost and whether it may start: the rules the old lobby had, kept for the Brain Battle
+// track select (trackpick.js), which shows the worst case and confirms it (spec section G). The lobby's own
+// player grid is gone: the character select replaced it. Pure and tested under node. What it writes is plain
+// text, for textContent: a player name or a refusal from the server is never markup.
 //
 // `state` is what GET /state answers (bakeoff/session.py): {status, game, max_rows, requests_per_row,
 // max_requests, tournament, first_practice_seed, seed, players: [{name, paid, price_usd,
@@ -9,7 +10,6 @@
   "use strict";
 
   const Minds_ = typeof require !== "undefined" ? require("./minds.js") : root.Minds;
-  const esc = Minds_.esc;
   const tagOf = Minds_.tagOf;
 
   // USD, as the page writes it: 0 is free, and a price far below a cent keeps enough digits to be read
@@ -67,128 +67,7 @@
     return null;
   }
 
-  // ---- who the players are ---------------------------------------------------------------------
-  // The bakeoff is a grid: a question set (what a player is asked, and the rule its answers go
-  // through) crossed with a model (who is asked). Both are ours except the models themselves, and
-  // this is the one place the page says what each row and column means.
-  const SETS = [
-    { key: "composed", title: "Four yes/no questions", says: "Would each move land on a gap? Code picks the move least likely to. One step ahead." },
-    { key: "choice", title: "One choice", says: "One question over the four moves, naming the tile each would land on. Code takes its favourite." },
-    { key: "two_step", title: "Eight questions, two moves ahead", says: "Each move's landing, and whether it leaves a way on. Code takes the lowest combined risk." },
-    { key: "reader", title: "Reads every tile", says: "One question per visible tile (42 of them), then code plans a path through what it read, like the solver." },
-    { key: "", title: "One broad question", says: "\u201cWhich move?\u201d, asked once, with no pointed question under it. Kept because it is how this started." },
-  ];
-  const MODELS = [
-    { key: "jev", title: "Jev", says: "TypeSafe\u2019s System One model: answers are probabilities, made in parallel, each blind to the others." },
-    { key: "haiku", title: "Claude Haiku 4.5", says: "A chat model: it also gets the briefing of the rules, writes every answer in one reply, and states its probabilities as numbers." },
-    { key: "glm", title: "GLM-4.5 Flash", says: "Sent exactly what Claude Haiku is sent, on Zhipu\u2019s free tier, so the model is what differs." },
-  ];
-  // the players that are not in the grid, and why they are here at all
-  const APART = [
-    { key: "asked", title: "Asked nothing", says: "The flies are not asked anything: gaps ahead become input to their eyes and their own neurons steer. How gaps become input is ours.",
-      players: ["fly", "fly2"] },
-    { key: "yardsticks", title: "Yardsticks, not contestants", says: "What good and bad look like on the same track: a perfect search, a coin, and one that always jumps.",
-      players: ["solver", "random", "always_jump"] },
-  ];
-
-  // The model the column really uses, as the server reports it (bakeoff/session.py): `model` is what the
-  // client asks for and `model_answered` is what the newest recorded run came back as. Jev is asked for by a
-  // moving name (`jev-latest`), so the version is only knowable from an answer; the page shows that version
-  // and says what was asked for. Nothing here is typed by hand, so no header can claim a version a run
-  // would not really use.
-  function modelOf(byName, model) {
-    for (const set of SETS) {
-      const player = byName.get(playerAt(set.key, model.key));
-      if (!player) continue;
-      const asked = player.model || null;
-      const answered = player.model_answered || null;
-      if (asked || answered) return { asked, answered };
-    }
-    return null;
-  }
-
-  // one short mono line: the version, and the name it is asked for when that name is not the version
-  function modelLine(model) {
-    if (!model) return "";
-    const shown = model.answered || model.asked;
-    const asked = model.answered && model.asked && model.answered !== model.asked ? model.asked : null;
-    return '<span class="note mono">' + esc(shown) +
-      (asked ? '<span class="muted"> asked as ' + esc(asked) + "</span>" : "") + "</span>";
-  }
-
-  // the name of the player at (set, model), or null where there is none
-  function playerAt(set, model) {
-    if (set === "") return model;                                    // jev, haiku, glm
-    if (set === "composed" && model === "jev") return "jev_composed"; // its own class, same questions
-    return model + "_" + set;
-  }
-
-  // What a cell says under its tick: what it costs, what is left, whether this track was played.
-  function notesFor(player) {
-    const notes = [];
-    if (player.paid) {
-      notes.push(player.price_usd > 0 ? usd(player.price_usd) + " a request" : "free tier");
-      notes.push((player.requests_left || 0) + " left of the cap");
-    } else {
-      notes.push("free");
-    }
-    if (player.played_before) notes.push("played before");  // this track, this game: some answers may be cached
-    return notes.join(" \u00b7 ");
-  }
-
-  // A cell names the player as the command line does (`jev_composed`), because the row and the column
-  // already say what it is asked and who is asked; its tag would only repeat them, and disagree.
-  function cell(player, chosen) {
-    if (!player) return '<td class="none" aria-label="no such player">\u2014</td>';
-    const on = chosen.includes(player.name);
-    return '<td><label class="pick' + (player.why_not ? " blocked" : "") + '">' +
-      '<input type="checkbox" name="player" value="' + esc(player.name) + '"' + (on ? " checked" : "") +
-      (player.why_not ? " disabled" : "") + ">" +
-      '<span class="pick-name">' + esc(player.name) + "</span>" +
-      (player.about ? '<span class="note">' + esc(player.about) + "</span>" : "") +
-      '<span class="note">' + esc(notesFor(player)) + "</span>" +
-      (player.why_not ? '<span class="note warn">' + esc(player.why_not) + "</span>" : "") +
-      "</label></td>";
-  }
-
-  // The grid: one row per question set, one column per model, plus the players that are apart.
-  // Every player the server offered appears exactly once; anything unexpected joins the yardsticks,
-  // so a new player can never be invisible here.
-  function playerList(state, chosen) {
-    const byName = new Map((state.players || []).map((p) => [p.name, p]));
-    const placed = new Set();
-    const models = MODELS.filter((m) => SETS.some((s) => byName.has(playerAt(s.key, m.key))));
-    let html = '<table class="players"><thead><tr><th class="what"><span class="label">What it is asked</span></th>' +
-      models.map((m) => {
-        return '<th><span class="label">' + esc(m.title) + "</span>" +
-          modelLine(modelOf(byName, m)) +
-          '<span class="note">' + esc(m.says) + "</span></th>";
-      }).join("") + "</tr></thead><tbody>";
-    for (const set of SETS) {
-      const cells = models.map((m) => byName.get(playerAt(set.key, m.key)) || null);
-      if (!cells.some(Boolean)) continue;
-      for (const c of cells) if (c) placed.add(c.name);
-      html += '<tr><th class="what"><span class="label">' + esc(set.title) + "</span>" +
-        '<span class="note">' + esc(set.says) + "</span></th>" +
-        cells.map((c) => cell(c, chosen)).join("") + "</tr>";
-    }
-    html += "</tbody></table>";
-
-    const groups = APART.map((group) => ({ ...group, found: group.players.map((n) => byName.get(n)).filter(Boolean) }));
-    const left = (state.players || []).filter((p) => !placed.has(p.name) &&
-      !groups.some((g) => g.found.some((f) => f.name === p.name)));
-    if (left.length) groups[groups.length - 1].found = groups[groups.length - 1].found.concat(left);
-    for (const group of groups) {
-      if (!group.found.length) continue;
-      for (const p of group.found) placed.add(p.name);
-      html += '<div class="apart"><h4 class="label row-label">' + esc(group.title) + "</h4>" +
-        '<p class="note">' + esc(group.says) + "</p><div class=\"picks-row\">" +
-        group.found.map((p) => cell(p, chosen).replace(/^<td[^>]*>/, "").replace(/<\/td>$/, "")).join("") + "</div></div>";
-    }
-    return html;
-  }
-
-  // The line under the lobby: the ceiling the command set, and the seed rule.
+  // The ceiling the command set, and the seed rule: the line under the track select.
   function ceilingText(state) {
     const cap = state.max_requests === 0
       ? "This command was started without a cap, so paid players only replay answers that are already cached."
@@ -203,7 +82,7 @@
   // left of the cap spends nothing whatever it asks for.
   const spends = (state, chosen) => estimate(state, chosen).lines.some((line) => line.requests > 0);
 
-  const api = { usd, estimate, estimateText, whyNot, playerList, playerAt, modelOf, modelLine, SETS, MODELS, APART, ceilingText, spends };
+  const api = { usd, estimate, estimateText, whyNot, ceilingText, spends };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Lobby = api;
 })(typeof window !== "undefined" ? window : globalThis);

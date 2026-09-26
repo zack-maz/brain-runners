@@ -14,7 +14,7 @@ const count = (html, needle) => html.split(needle).length - 1;
 test("text from a log is escaped, never markup", () => {
   assert.equal(Minds.esc('<img src=x onerror="alert(1)">&\''), "&#60;img src=x onerror=&#34;alert(1)&#34;&#62;&#38;&#39;");
   const evil = "</pre><script>alert(1)</script>";
-  const html = Minds.mind({ player: "haiku", questions: [{ system: evil }] },
+  const html = Minds.mind({ player: "haiku_plain", questions: [{ system: evil }] },
     frame({ answers: { text: evil, stop_reason: evil }, chosen_action: evil, error: evil, q: 0 }), context());
   assert.equal(html.includes("<script>"), false);
   assert.equal(count(html, "&#60;script&#62;"), 5); // the move, the error, the answer, the stop reason, the question
@@ -158,18 +158,18 @@ test("Minds.ours says the fly was calibrated on v1 and not retuned for any other
   assert.match(Minds.ours(game("<b>")), /This run is game &#60;b&#62;;/); // escaped like every log value
 });
 
-test("composed Jev shows its four answers with the chosen action marked, and says what is ours", () => {
+test("jev_step1 shows its four answers with the chosen action marked, and says what is ours", () => {
   const answers = { gap_left: { noul: 0.97 }, gap_stay: { noul: 0.02 }, gap_right: { noul: 0.5 }, gap_jump: { noul: 0.01 } };
   const info = { model: "jev-latest", rule: "lowest_gap_probability", order: ["stay", "left", "right", "<b>jump</b>"] };
-  const html = Minds.mind({ player: "jev_composed", questions: [] }, frame({ answers, info, chosen_action: "jump", executed_action: "jump" }), context());
+  const html = Minds.mind({ player: "jev_step1", questions: [] }, frame({ answers, info, chosen_action: "jump", executed_action: "jump" }), context());
   assert.match(html, /Lands on a gap\?/);
   assert.match(html, /<tr class="picked"><th>jump<\/th>/);
   assert.equal(count(html, 'class="picked"'), 1);
   assert.match(html, /<th>left<\/th><td>.*?<\/td><td>97%<\/td>/);
   assert.match(html, /ties in the order stay, left, right, &#60;b&#62;jump&#60;\/b&#62;/); // from the log, so escaped
   assert.match(html, /The wording and that rule are ours\. It looks one step ahead only\./);
-  assert.equal(Minds.jevComposedMind(frame()), ""); // after a provider error there are no answers
-  const partial = Minds.jevComposedMind(frame({ answers: { gap_left: { noul: 0.4 } }, chosen_action: null }));
+  assert.equal(Minds.jevStep1Mind(frame()), ""); // after a provider error there are no answers
+  const partial = Minds.jevStep1Mind(frame({ answers: { gap_left: { noul: 0.4 } }, chosen_action: null }));
   assert.equal(count(partial, "–"), 3); // an answer that did not arrive is a dash, never 0%
   assert.equal(count(partial, 'class="picked"'), 0);
 });
@@ -184,15 +184,36 @@ test("the visor shows how sure Jev was that the move it chose is safe", () => {
 });
 
 test("tags are short and uppercase, and an unknown player still gets one", () => {
-  assert.deepEqual(["fly", "jev_composed", "haiku", "jev", "glm"].map(Minds.tagOf),
-    ["FLY", "JEV", "HAIKU", "JEV ONE-SHOT", "GLM ONE-SHOT"]);
+  assert.deepEqual(["fly", "jev_step1", "haiku_plain", "jev_plain", "glm_plain"].map(Minds.tagOf),
+    ["FLY", "JEV STEP 1", "HAIKU PLAIN", "JEV PLAIN", "GLM PLAIN"]);
   assert.equal(Minds.tagOf("my_bot"), "MY_BOT");
 });
 
-test("the two one-shot chat models get the same panel", () => {
+test("with the roster, a tag is the select screen's label after a swatch of the skin's colour", () => {
+  const Roster = require("../roster.js");
+  Minds.useRoster(Roster.make([{ id: "jev", name: "Jev", sprite: "visor", skins: [
+    { player: "jev_step1", name: "Step 1", about: "", color: "#E6B422", inks: {} },
+    { player: "jev_map", name: "Map", about: "", color: "#1E2227", inks: { V: "#7AA2F7" } },
+    { player: "jev_x", name: "<b>", about: "", color: "#E6B422\"><script>", inks: {} }] }]));
+  try {
+    assert.equal(Minds.tagOf("jev_step1"), "Jev \u00b7 Step 1");
+    assert.equal(Minds.tagHtml("jev_step1"), '<span class="label tag" style="color:#E6B422"><span class="swatch" ' +
+      'style="background:#E6B422" aria-hidden="true"></span>Jev \u00b7 Step 1</span>');
+    // black does not read on the dark page: the label keeps the page's ink, the swatch still shows the skin
+    assert.equal(Minds.tagHtml("jev_map"), '<span class="label tag"><span class="swatch" style="background:#1E2227" ' +
+      'aria-hidden="true"></span>Jev \u00b7 Map</span>');
+    assert.equal(Minds.tagHtml("solver"), '<span class="label tag">SOLVER</span>'); // not on this roster
+    assert.equal(Minds.tagHtml("jev_x").includes("<script>") || Minds.tagHtml("jev_x").includes("<b>"), false);
+  } finally {
+    Minds.useRoster(null);
+  }
+  assert.equal(Minds.tagOf("jev_step1"), "JEV STEP 1");
+});
+
+test("the two plain chat models get the same panel", () => {
   const answered = frame({ answers: { text: '{"action": "jump"}', stop_reason: "end_turn" }, chosen_action: "jump" });
-  const haiku = Minds.mind({ player: "haiku", questions: [] }, answered, context());
-  const glm = Minds.mind({ player: "glm", questions: [] }, answered, context());
+  const haiku = Minds.mind({ player: "haiku_plain", questions: [] }, answered, context());
+  const glm = Minds.mind({ player: "glm_plain", questions: [] }, answered, context());
   assert.match(glm, /<pre class="answer">/);
   assert.equal(glm, haiku);
 });
@@ -233,15 +254,15 @@ test("the status line says how an episode ended", () => {
   for (const status of ["dead", "cut", "finished"]) assert.doesNotMatch(Minds.statusLine(hostile, { status }, 12), /<script>/);
 });
 
-test("question-set players get the set panel; the composed Jev and the one-shots keep theirs", () => {
-  assert.deepEqual(["jev_choice", "jev_two_step", "jev_reader", "haiku_composed", "haiku_choice", "haiku_two_step", "haiku_reader"]
+test("question-set players get the set panel; jev_step1 and the plain players keep theirs", () => {
+  assert.deepEqual(["jev_guided", "jev_step2", "jev_map", "haiku_step1", "haiku_guided", "haiku_step2", "haiku_map"]
     .map(Minds.isSetPlayer), [true, true, true, true, true, true, true]);
-  assert.deepEqual(["jev_composed", "jev", "haiku", "fly", "jev_other"].map(Minds.isSetPlayer), [false, false, false, false, false]);
-  assert.equal(Minds.tagOf("jev_two_step"), "JEV 2-STEP");
-  assert.equal(Minds.tagOf("haiku_reader"), "HAIKU READER");
+  assert.deepEqual(["jev_step1", "jev_plain", "haiku_plain", "fly", "jev_other"].map(Minds.isSetPlayer), [false, false, false, false, false]);
+  assert.equal(Minds.tagOf("jev_step2"), "JEV STEP 2");
+  assert.equal(Minds.tagOf("haiku_map"), "HAIKU MAP");
 });
 
-test("the two-step panel shows both answers per move, marks the move made and names the rule as ours", () => {
+test("the step2 panel shows both answers per move, marks the move made and names the rule as ours", () => {
   const answers = {};
   for (const a of ["left", "stay", "right", "jump"]) { answers["gap_" + a] = { noul: 0.1 }; answers["trapped_" + a] = { noul: 0.2 }; }
   const html = Minds.setMind(frame({ answers, chosen_action: "left", info: { rule: "lowest_two_step_risk" } }));

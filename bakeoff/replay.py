@@ -13,12 +13,12 @@ from bakeoff.report import COLUMNS, load_meta, load_steps, summarize
 
 REPLAY_VERSION = 1
 SCHEMA_VERSION = 1  # the step record this module reads; the runner writes it (a test keeps the two equal)
-# shown first, in this order: the demo's three (the composed Jev is its Jev), then the one-shot pair's rest,
+# shown first, in this order: the demo's three (jev_step1 is its Jev), then the plain pair's rest,
 # the second fly;
 # everyone else in order of appearance
-CONTESTANTS = ("fly", "jev_composed", "haiku", "jev", "glm", "fly2", "jev_choice", "haiku_choice", "haiku_composed",
-               "jev_two_step", "haiku_two_step", "jev_reader", "haiku_reader",
-               "glm_composed", "glm_choice", "glm_two_step", "glm_reader")
+CONTESTANTS = ("fly", "jev_step1", "haiku_plain", "jev_plain", "glm_plain", "fly2", "jev_guided", "haiku_guided", "haiku_step1",
+               "jev_step2", "haiku_step2", "jev_map", "haiku_map",
+               "glm_step1", "glm_guided", "glm_step2", "glm_map")
 # what a frame leaves out of its step record: the first three name the episode, the others are
 # replaced by `ahead`, `q` and the replay's `tracks`
 DROPPED = ("run_id", "player", "seed", "senses", "questions", "track")

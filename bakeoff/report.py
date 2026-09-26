@@ -12,6 +12,7 @@ from bakeoff.senses import truth_of
 
 COLUMNS = ("player", "runs", "incomplete", "missing", "mean_rows", "median_rows", "finished",
            "ran_into_gap", "jumped_into_gap", "dodged_into_gap", "jump_share", "solver_agreement",
+           "wrong_moves", "fatal_wrong_moves",
            "fallback_rate", "invalid_rate", "error_rate",
            "requests", "spent", "cache_hits", "mean_latency_ms", "input_tokens", "output_tokens", "cost_usd",
            "brier_gap_ahead", "brier_left_safe",
@@ -75,6 +76,13 @@ def _agrees(step: dict) -> bool:
     return step["chosen_action"] in depths and depths[step["chosen_action"]] == max(depths.values())
 
 
+def _is_wrong(step: dict) -> bool:
+    """The move made (`executed_action`, a fallback included) reaches less far than the best move. What was done
+    on the track counts, not only what was chosen: a fallback `stay` into a gap is a wrong move too."""
+    depths = step["solver_depths"]
+    return step["executed_action"] in depths and depths[step["executed_action"]] < max(depths.values())
+
+
 def _is_fallback(step: dict) -> bool:
     """A gated `stay` is a fallback even though executed equals chosen."""
     return bool(step["gated"] or step["invalid"] or step["error"] is not None or step["chosen_action"] is None)
@@ -88,7 +96,7 @@ def _cost_usd(model: str | None, input_tokens: int, output_tokens: int) -> float
 
 
 def _truth(step: dict, noul: str) -> bool | None:
-    """The logged `ground_truth` for the one-shot Jev's two Nouls. The question sets' Nouls (`gap_<action>`,
+    """The logged `ground_truth` for jev_plain's two Nouls. The question sets' Nouls (`gap_<action>`,
     `trapped_<action>`, `tile_r<row>_<side>`) ask what the senses show, so their truth is read from the
     record's senses (bakeoff.senses.truth_of)."""
     truth = (step.get("ground_truth") or {}).get(noul)
@@ -138,6 +146,10 @@ def _summarize_player(player: str, steps: list[dict], model: str | None = None) 
            for cause in ("ran_into_gap", "jumped_into_gap", "dodged_into_gap")},
         "jump_share": _ratio(sum(s["executed_action"] == "jump" for s in steps), len(steps)),
         "solver_agreement": _ratio(sum(_agrees(s) for s in comparable), len(comparable)),
+        "wrong_moves": sum(_is_wrong(s) for s in steps),
+        # died on a row where some other move survived; a death where every move falls is "trapped", and the
+        # wrong move came earlier
+        "fatal_wrong_moves": sum(not f["alive"] and _is_wrong(f) for f in complete),
         "fallback_rate": _ratio(sum(_is_fallback(s) for s in steps), len(steps)),
         "invalid_rate": _ratio(sum(s["invalid"] for s in steps), len(steps)),
         "error_rate": _ratio(sum(s["error"] is not None for s in steps), len(steps)),

@@ -7,9 +7,12 @@ import json
 import re
 from pathlib import Path
 
+from bakeoff.roster import roster_json
+
 VIEWER_DIR = Path(__file__).resolve().parent.parent / "viewer"
 DATA_SLOT = '<script type="application/json" id="replay-data">null</script>'
 BENCH_SLOT = '<script type="application/json" id="bench-data">null</script>'
+ROSTER_SLOT = '<script type="application/json" id="roster-data">null</script>'
 _STYLESHEET = re.compile(r'<link rel="stylesheet" href="([^"]+)">')
 _SCRIPT = re.compile(r'<script src="([^"]+)"></script>')
 _CSS_URL = re.compile(r"url\(([^)]*)\)", re.IGNORECASE)  # CSS function names are case-insensitive
@@ -48,7 +51,8 @@ def render_html(replay: dict, viewer_dir: Path | str = VIEWER_DIR, live: str | N
     for a server. `token`: the session's token, which every request of the page carries. `page_name`:
     the viewer page to fill, `index.html` (the replay) or `bench.html` (the benchmark); both carry the
     same data slot. `bench`: the benchmark's numbers for the same runs, for the page's Analysis tab;
-    a page with no benchmark slot must not be given any."""
+    a page with no benchmark slot must not be given any. A page with a roster slot always gets the roster
+    (`bakeoff/roster.py`), live or replay, so a runner is drawn in its skin in both."""
     viewer_dir = Path(viewer_dir)
     page = (viewer_dir / page_name).read_text(encoding="utf-8")
     if page.count(DATA_SLOT) != 1:
@@ -69,6 +73,10 @@ def render_html(replay: dict, viewer_dir: Path | str = VIEWER_DIR, live: str | N
     # lambdas, so that a backslash in a file is never read as a regex group reference
     page = _STYLESHEET.sub(lambda m: "<style>\n" + _stylesheet(viewer_dir / m.group(1)) + "</style>", page)
     page = _SCRIPT.sub(lambda m: "<script>\n" + (viewer_dir / m.group(1)).read_text(encoding="utf-8") + "</script>", page)
+    if page.count(ROSTER_SLOT) > 1:
+        raise ValueError(f"{viewer_dir / page_name} must contain the roster slot at most once")
+    page = page.replace(ROSTER_SLOT, '<script type="application/json" id="roster-data">' + embed_json(roster_json())
+                        + "</script>")
     if bench is not None:
         page = page.replace(BENCH_SLOT, '<script type="application/json" id="bench-data">' + embed_json(bench) + "</script>")
     return page.replace(DATA_SLOT, '<script type="application/json" id="replay-data">' + embed_json(replay) + "</script>")

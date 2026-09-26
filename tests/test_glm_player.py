@@ -1,4 +1,4 @@
-"""`glm`, the one-shot twin of `haiku`: the same briefing, the same one-action schema, GLM Flash instead of
+"""`glm_plain`, the plain twin of `haiku_plain`: the same briefing, the same one-action schema, GLM Flash instead of
 Claude Haiku. No test touches the network."""
 
 import json
@@ -26,7 +26,7 @@ def player(tmp_path, reply, cap=10):
 
 
 def test_it_is_sent_exactly_what_claude_haiku_is_sent():
-    assert GlmPlayer.questions is QUESTIONS and GlmPlayer.name == "glm"
+    assert GlmPlayer.questions is QUESTIONS and GlmPlayer.name == "glm_plain"
 
 
 def test_the_request_carries_the_briefing_the_senses_and_the_action_schema(tmp_path):
@@ -109,5 +109,5 @@ def test_preflight_names_the_zhipu_key(tmp_path, monkeypatch):
 
 
 def test_the_factory_makes_it_and_it_spends_nothing_without_a_budget():
-    made = make_player("glm")
-    assert made.name == "glm" and made.budget.remaining == 0
+    made = make_player("glm_plain")
+    assert made.name == "glm_plain" and made.budget.remaining == 0

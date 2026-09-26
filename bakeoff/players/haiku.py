@@ -19,7 +19,7 @@ QUESTIONS = {
 
 
 class HaikuPlayer(PaidPlayer):
-    name = "haiku"
+    name = "haiku_plain"
     client_class = LlmClient
     questions = QUESTIONS
 

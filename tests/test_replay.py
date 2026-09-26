@@ -97,30 +97,30 @@ def test_a_run_cut_off_midway_is_incomplete_not_a_death(tmp_path):
 
 
 def test_runs_are_merged_with_the_contestants_first(tmp_path):
-    a = write_run(tmp_path, "a", [record("solver", track=TRACK, **DIED), record("haiku", track=TRACK, **DIED)],
-                  meta={"status": "completed", "players": ["solver", "haiku"], "seeds": [0],
-                        "models": {"haiku": "claude-haiku-4-5-20251001"}})
+    a = write_run(tmp_path, "a", [record("solver", track=TRACK, **DIED), record("haiku_plain", track=TRACK, **DIED)],
+                  meta={"status": "completed", "players": ["solver", "haiku_plain"], "seeds": [0],
+                        "models": {"haiku_plain": "claude-haiku-4-5-20251001"}})
     b = write_run(tmp_path, "b", [record("fly", seed=0, track=TRACK, **DIED),
                                   record("fly", seed=1, track=TRACK, **DIED)],
                   meta={"status": "interrupted", "players": ["fly"], "seeds": [0, 1],
                         "fly": {"turn_threshold_hz": 0.0, "jump_threshold_hz": 200.0}})
     replay = build_replay([a, b])
     assert replay["replay_version"] == 1
-    assert replay["players"] == ["fly", "haiku", "solver"] and replay["seeds"] == [0, 1]
-    assert [(e["seed"], e["player"]) for e in replay["episodes"]] == [(0, "fly"), (0, "haiku"), (0, "solver"), (1, "fly")]
+    assert replay["players"] == ["fly", "haiku_plain", "solver"] and replay["seeds"] == [0, 1]
+    assert [(e["seed"], e["player"]) for e in replay["episodes"]] == [(0, "fly"), (0, "haiku_plain"), (0, "solver"), (1, "fly")]
     assert [r["run_id"] for r in replay["runs"]] == ["a", "b"]
     assert replay["runs"][1]["status"] == "interrupted" and replay["runs"][1]["fly"]["jump_threshold_hz"] == 200.0
     assert replay["runs"][0]["fly"] is None  # a run from before phase 2 has no fly block
     board = replay["scoreboard"]
     assert board["columns"] == ["run_id", *COLUMNS]
-    assert [(r["player"], r["run_id"]) for r in board["rows"]] == [("fly", "b"), ("haiku", "a"), ("solver", "a")]
+    assert [(r["player"], r["run_id"]) for r in board["rows"]] == [("fly", "b"), ("haiku_plain", "a"), ("solver", "a")]
     assert board["same_seeds"] is False  # the fly played a seed the others did not
 
 
 def test_the_demos_three_come_first_then_the_one_shot_jev(tmp_path):
-    run_dir = write_run(tmp_path, "a", [record(p, track=TRACK) for p in ("jev", "haiku", "solver", "jev_composed", "fly")],
-                        meta={"players": ["jev", "haiku", "solver", "jev_composed", "fly"], "seeds": [0]})
-    assert build_replay([run_dir])["players"] == ["fly", "jev_composed", "haiku", "jev", "solver"]
+    run_dir = write_run(tmp_path, "a", [record(p, track=TRACK) for p in ("jev_plain", "haiku_plain", "solver", "jev_step1", "fly")],
+                        meta={"players": ["jev_plain", "haiku_plain", "solver", "jev_step1", "fly"], "seeds": [0]})
+    assert build_replay([run_dir])["players"] == ["fly", "jev_step1", "haiku_plain", "jev_plain", "solver"]
 
 
 def test_other_players_keep_the_order_the_run_planned(tmp_path):
@@ -131,15 +131,15 @@ def test_other_players_keep_the_order_the_run_planned(tmp_path):
 
 
 def test_same_seeds_is_true_when_everyone_played_the_same_tracks(tmp_path):
-    run_dir = write_run(tmp_path, "a", [record("fly", track=TRACK, **DIED), record("haiku", track=TRACK, **DIED)])
+    run_dir = write_run(tmp_path, "a", [record("fly", track=TRACK, **DIED), record("haiku_plain", track=TRACK, **DIED)])
     assert build_replay([run_dir])["scoreboard"]["same_seeds"] is True
 
 
 def test_same_seeds_is_false_when_one_player_is_split_across_runs(tmp_path):
     a = write_run(tmp_path, "a", [record("fly", seed=0, track=TRACK, **DIED)])
     b = write_run(tmp_path, "b", [record("fly", seed=1, track=TRACK, **DIED)])
-    c = write_run(tmp_path, "c", [record("jev", seed=0, track=TRACK, **DIED),
-                                  record("jev", seed=1, track=TRACK, **DIED)])
+    c = write_run(tmp_path, "c", [record("jev_plain", seed=0, track=TRACK, **DIED),
+                                  record("jev_plain", seed=1, track=TRACK, **DIED)])
     assert build_replay([a, b, c])["scoreboard"]["same_seeds"] is False
 
 
@@ -147,17 +147,17 @@ def test_same_seeds_counts_only_the_episodes_behind_the_means(tmp_path):
     # the report's means are over complete episodes; the haiku was cut off on seed 1 (a budget stop)
     run_dir = write_run(tmp_path, "a", [record("fly", seed=0, track=TRACK, **DIED),
                                         record("fly", seed=1, track=TRACK, **DIED),
-                                        record("haiku", seed=0, track=TRACK, **DIED), record("haiku", seed=1, track=TRACK)],
-                        meta={"players": ["fly", "haiku"], "seeds": [0, 1], "status": "budget_exhausted"})
+                                        record("haiku_plain", seed=0, track=TRACK, **DIED), record("haiku_plain", seed=1, track=TRACK)],
+                        meta={"players": ["fly", "haiku_plain"], "seeds": [0, 1], "status": "budget_exhausted"})
     replay = build_replay([run_dir])
     rows = replay["scoreboard"]["rows"]
-    assert [(r["player"], r["runs"], r["incomplete"]) for r in rows] == [("fly", 2, 0), ("haiku", 1, 1)]
+    assert [(r["player"], r["runs"], r["incomplete"]) for r in rows] == [("fly", 2, 0), ("haiku_plain", 1, 1)]
     assert replay["scoreboard"]["same_seeds"] is False
 
 
 def test_same_seeds_is_false_when_a_scoreboard_row_has_no_complete_episode(tmp_path):
-    run_dir = write_run(tmp_path, "a", [record("fly", track=TRACK, **DIED), record("haiku", track=TRACK)],
-                        meta={"players": ["fly", "haiku", "jev"], "seeds": [0]})
+    run_dir = write_run(tmp_path, "a", [record("fly", track=TRACK, **DIED), record("haiku_plain", track=TRACK)],
+                        meta={"players": ["fly", "haiku_plain", "jev_plain"], "seeds": [0]})
     assert build_replay([run_dir])["scoreboard"]["same_seeds"] is False
 
 
@@ -175,9 +175,9 @@ def test_a_run_with_another_schema_version_is_an_error(tmp_path):
 
 
 def test_the_same_episode_in_two_runs_is_an_error(tmp_path):
-    a = write_run(tmp_path, "a", [record("jev", track=TRACK)])
-    b = write_run(tmp_path, "b", [record("jev", track=TRACK)])
-    with pytest.raises(ValueError, match="jev on seed 0 is in both a and b"):
+    a = write_run(tmp_path, "a", [record("jev_plain", track=TRACK)])
+    b = write_run(tmp_path, "b", [record("jev_plain", track=TRACK)])
+    with pytest.raises(ValueError, match="jev_plain on seed 0 is in both a and b"):
         build_replay([a, b])
 
 
@@ -190,7 +190,7 @@ def test_the_same_row_twice_in_one_run_is_an_error(tmp_path):
 def test_the_longest_track_of_a_seed_is_kept(tmp_path):
     short = {**TRACK, "max_rows": 4, "gaps": [[] for _ in range(12)]}
     a = write_run(tmp_path, "a", [record("fly", track=short)])
-    b = write_run(tmp_path, "b", [record("haiku", track=TRACK)])
+    b = write_run(tmp_path, "b", [record("haiku_plain", track=TRACK)])
     replay = build_replay([a, b])
     assert len(replay["tracks"]["0"]["gaps"]) == 18
     assert [e["max_rows"] for e in replay["episodes"]] == [4, 10]
@@ -200,8 +200,8 @@ def test_a_replay_shows_one_game(tmp_path):
     from bakeoff.game.rules import V1, V2
 
     a = write_run(tmp_path, "a", [record("fly", track=TRACK)], meta={"game": V2.to_json()})
-    b = write_run(tmp_path, "b", [record("haiku", track=TRACK)], meta={"game": {**V2.to_json(), "max_rows": 40}})
-    c = write_run(tmp_path, "c", [record("jev", track=TRACK)], meta={"game": V1.to_json()})
+    b = write_run(tmp_path, "b", [record("haiku_plain", track=TRACK)], meta={"game": {**V2.to_json(), "max_rows": 40}})
+    c = write_run(tmp_path, "c", [record("jev_plain", track=TRACK)], meta={"game": V1.to_json()})
     d = write_run(tmp_path, "d", [record("solver", track=TRACK)])  # no meta: nothing to compare
     assert build_replay([a, b, d])["game"] == V2.to_json()  # a shorter run of the same game is a prefix
     with pytest.raises(ValueError, match="a is game v2 but c is game v1; a replay shows one game"):
@@ -213,7 +213,7 @@ def test_a_run_from_before_game_versions_is_v1(tmp_path):
 
     old = {"lanes": 12, "max_rows": 300, "lookahead": 6, "window": 3, "looming": {"gain_hz": 250.0}}
     a = write_run(tmp_path, "a", [record("fly", track=TRACK)], meta={"game": old})
-    b = write_run(tmp_path, "b", [record("haiku", track=TRACK)], meta={"game": V1.to_json()})
+    b = write_run(tmp_path, "b", [record("haiku_plain", track=TRACK)], meta={"game": V1.to_json()})
     assert build_replay([a, b])["game"] == V1.to_json()
     assert build_replay([write_run(tmp_path, "c", [record(track=TRACK)])])["game"] is None
 

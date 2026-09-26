@@ -24,9 +24,9 @@ For the paid players, put keys in a git-ignored `.env` at the repo root (templat
 
 | Key | For |
 | --- | --- |
-| `TYPESAFE_API_KEY` | the Jev players (`jev`, `jev_composed`, `jev_choice`, `jev_two_step`, `jev_reader`) |
-| `ANTHROPIC_API_KEY` | the Claude Haiku players (`haiku`, `haiku_composed`, `haiku_choice`, `haiku_two_step`, `haiku_reader`) |
-| `ZHIPU_API_KEY` | the GLM Flash players (`glm_composed`, `glm_choice`, `glm_two_step`, `glm_reader`) |
+| `TYPESAFE_API_KEY` | the Jev players (`jev_plain`, `jev_step1`, `jev_guided`, `jev_step2`, `jev_map`) |
+| `ANTHROPIC_API_KEY` | the Claude Haiku players (`haiku_plain`, `haiku_step1`, `haiku_guided`, `haiku_step2`, `haiku_map`) |
+| `ZHIPU_API_KEY` | the GLM Flash players (`glm_step1`, `glm_guided`, `glm_step2`, `glm_map`) |
 | `GLM_BASE_URL` | only for a mainland Zhipu account |
 
 Programs read `.env` themselves. Never type `.env` into a shell command here: a guard blocks any command
@@ -44,19 +44,19 @@ containing that text, so the keys cannot be echoed by accident.
 | `random`, `always_jump` | the floors | free |
 | `fly` | the fruit fly connectome, untrained | free, ~0.7 s a row, ~1 GB of RAM |
 | `fly2` | a second pure fly, same connectome, a richer input of ours, a sideways channel (M3) (decision 43) | free, ~0.5 s a row, shares `fly`'s brain when run together |
-| `jev`, `haiku`, `glm` | the one-shot trio: one broad question, one move | paid / free tier |
-| `jev_composed`, `haiku_composed`, `glm_composed` | "would each move land on a gap?" (4 questions) | paid / free tier |
-| `jev_choice`, `haiku_choice`, `glm_choice` | one Choice over the four moves | paid / free tier |
-| `jev_two_step`, `haiku_two_step`, `glm_two_step` | landing *and* whether it leaves a way on (8 questions) | paid / free tier |
-| `jev_reader`, `haiku_reader`, `glm_reader` | every visible tile (42 questions), then plan | paid / free tier |
+| `jev_plain`, `haiku_plain`, `glm_plain` | the plain set: one broad question, one move | paid / free tier |
+| `jev_step1`, `haiku_step1`, `glm_step1` | "would each move land on a gap?" (4 questions) | paid / free tier |
+| `jev_guided`, `haiku_guided`, `glm_guided` | one Choice over the four moves | paid / free tier |
+| `jev_step2`, `haiku_step2`, `glm_step2` | landing *and* whether it leaves a way on (8 questions) | paid / free tier |
+| `jev_map`, `haiku_map`, `glm_map` | every visible tile (42 questions), then plan | paid / free tier |
 
 Worst-case price per request, as the page quotes it (measured in `docs/COSTS.md`, rounded up):
-`haiku_reader` 0.0065 USD · `haiku_two_step` 0.0016 · `haiku_composed` 0.0010 · `haiku_choice` 0.0009 · `haiku` 0.0006 ·
+`haiku_map` 0.0065 USD · `haiku_step2` 0.0016 · `haiku_step1` 0.0010 · `haiku_guided` 0.0009 · `haiku_plain` 0.0006 ·
 the Jev players 0.00003–0.00012 (estimates) · the GLM players 0 while the free tier lasts. One request per row, so
 a 150-row track costs at worst 150 × that.
 
 **A note on names.** Claude Haiku's players were called `llm*` until 2026-09-24 (decision 39); they are `haiku*`
-now, so that `haiku_composed` and `glm_composed` read as the pair they are. The old names still work everywhere a
+now, so that `haiku_step1` and `glm_step1` read as the pair they are. The old names still work everywhere a
 name is typed, and runs recorded under them are read back under the new ones, so old and new runs merge as one
 player. Nothing on disk was rewritten and no cached answer was lost.
 
@@ -116,7 +116,7 @@ it to someone and it works.
 ### `bench` — how sure are we?
 
 ```bash
-uv run python -m bakeoff bench runs/<id> "runs/<other>:jev_composed,jev_two_step" --output bench.html
+uv run python -m bakeoff bench runs/<id> "runs/<other>:jev_step1,jev_step2" --output bench.html
 ```
 
 Scores runs that already exist, so it spends nothing. `DIR:player,player` takes only those players from a
@@ -137,15 +137,17 @@ some verdicts arrive by chance, and the notes count how many.
 uv run python -m bakeoff live --port 8765
 ```
 
-This opens the **lobby**: the command binds the port and sets the money ceiling, the browser does the rest. Open
-the address it prints, pick the track, tick who plays, press Start. When the run ends the lobby comes back, so you
-can play another track without restarting the command. Ctrl-C stops serving.
+This opens **Brain Battle**, the front of the live page: the command binds the port and sets the money ceiling, the
+browser does the rest. Open the address it prints: the home screen leads to the character select (who plays), the
+track select (which track, and what it can cost at worst), the run, and the results, which open by themselves when
+the run ends. From the results you can run again, pick a new track or other fighters, so you can play another track
+without restarting the command. Records holds everything played before. Ctrl-C stops serving.
 
 | Flag | What it does |
 | --- | --- |
 | `--port N` | serve on `127.0.0.1:N` only (default 8000) |
-| `--start` | play the command line's own run at once, the old behaviour, instead of waiting in the lobby |
-| `--seed N`, `--players a,b` | what the lobby offers first (and what `--start` plays) |
+| `--start` | play the command line's own run at once: the page opens on the run screen, and the first decision waits for a browser |
+| `--seed N`, `--players a,b` | the fighters the character select opens with and the track the track select opens on (and what `--start` plays); without them, the demo's three (`fly,jev_step1,haiku_plain`) on track 1001 |
 | `--max-requests N` | the ceiling for the **whole session**, per paid player — the page can never raise it |
 | `--max-rows`, `--game`, `--lookahead`, `--window`, `--cache`, `--out`, `--tournament` | as in `run` |
 | `--no-wait` | do not wait for a browser and do not keep serving afterwards (needs `--start`) |
@@ -158,7 +160,9 @@ directory, so `view` replays it afterwards.
 
 ## 4. The page, part by part
 
-The same page serves a saved replay and a live run; a replay simply has no lobby and no server.
+The same page serves a saved replay and a live run. A replay file has no server and no front: it opens on the two
+tabs below. A live run opens on Brain Battle's screens instead (see "Starting a run" below); its run screen is the
+Run tab without the tabs, and what the Analysis tab shows moves to the results and Records screens.
 
 ### The Run tab
 
@@ -170,16 +174,8 @@ The same page serves a saved replay and a live run; a replay simply has no lobby
   answered, how long it took (or `cached`), and any error in red. It follows the row on screen, so it never gives
   a replay's ending away; scrub back and the later lines come off. One log is open at a time, and it keeps your
   place while new rows arrive.
-- **Players**, two labelled rows of one control:
-  - *Who runs next* — the ticks that choose who plays the next run, laid out as the bakeoff really is: a row per
-    **question set** (what a player is asked, and the rule its answers go through) crossed with a column per
-    **model** (who is asked), so `jev_composed`, `haiku_composed` and `glm_composed` sit side by side and an empty
-    crossing shows as `—`. Each row says what that set asks; each column says what that model is and how it
-    answers. Below the grid are the players that are apart: the fly, which is asked nothing, and the yardsticks.
-    Every cell carries its price, what is left of the cap, and whether that track was played before (so some
-    answers may be cached). Live only.
-  - *Who is in the tunnel* — shows and hides runners in what is on screen. A player that never ran the track in
-    view cannot be turned on, and says so.
+- **Who is in the tunnel** — shows and hides runners in what is on screen. A player that never ran the track in
+  view cannot be turned on, and says so. (Who runs next is picked on the character select, live only.)
 - **The transport** at the bottom: play, step, speed, and `LIVE`/`AUTO`. Keys: space plays, ← → step a row,
   `a` toggles auto-focus, `1`–`9` put that runner's mind in focus. The transport and its keys are the Run tab's
   alone.
@@ -191,19 +187,44 @@ The same page serves a saved replay and a live run; a replay simply has no lobby
 - **Scoreboard**, with a warning when its rows do not all average the same tracks.
 - **What is ours** — the notes saying which parts of the set-up are our mapping rather than the fly's biology or
   the model's own words. They are part of the honesty rule, not decoration.
-- **Benchmark** — the same charts and tables as `bench.html`, drawn by the same code. After a live run it fills in
-  by itself with the numbers for the run that just ended. A benchmark of one track says above its own table that
-  it is what happened, not a result.
+- **Benchmark** — the same charts and tables as `bench.html`, drawn by the same code. A benchmark of one track says
+  above its own table that it is what happened, not a result.
 
-### Starting a run from the lobby
+### Starting a run: select, track, RUN/CONFIRM
 
-1. Type a track. A paid player on a seed below 1000 is greyed out, with the reason.
-2. Tick who plays. The estimate line shows the **worst case**: rows × requests per row × price, capped by what is
-   left of the session's budget. It assumes nothing is cached.
-3. If any paid player is in the run, Start arms once — it becomes `Confirm: start and spend at most …`. Changing
-   the track or the players disarms it.
-4. While it runs, Cancel stops it between decisions: a decision already in flight is finished and recorded, and
-   the run closes as a normal directory with status `interrupted`.
+1. **Home.** LAUNCH (or Enter) opens the character select; Records opens the records. The corner line shows the
+   address and the session's ceiling, the footer the game version and its rows.
+2. **Character select.** Five characters (Fly, Jev, Haiku, GLM Flash, Bot), up to eight slots. A click on a
+   portrait, or Space on the one under the cursor (← →), drops the next fighter in that character's first skin not
+   already taken; a slot's dots, or X and Y, change its skin, and the same skin can never be chosen twice.
+   Backspace or a slot's ✕ removes it. The line under the portraits describes the focused slot: who it is, what it
+   does, its price, and why it may not play if it may not (a tournament seed, no cap left). With one fighter or
+   more, READY TO FIGHT (or Enter) goes on.
+3. **Track select.** ‹ › or ← → step the track, Random (or R) picks a practice track, and the tiles offer the
+   practice tracks 1000–1019, each marked with how many of this lineup played it before. Seeds below 1000 are
+   locked unless the command was started with `--tournament`. The preview draws the real track. Each fighter's
+   line says whether it played this track before and its **worst case**: rows × requests per row × price, capped
+   by what is left of the session's budget, assuming nothing is cached; the total is under it. ‹ Fighters goes
+   back with the lineup kept.
+4. **RUN.** A lineup that spends nothing starts at once. If the run can spend, the first press of RUN (or Enter)
+   turns it into `CONFIRM` with `spend at most …` underneath, and a second, separate press starts the run; a press
+   within half a second of the first, or a held Enter, does not count. Changing the track or the lineup disarms
+   it. If the run is refused, the reason shows above the button.
+5. **The run screen.** While it runs, Cancel stops it between decisions: a decision already in flight is finished
+   and recorded, and the run closes as a normal directory with status `interrupted`. ‹ Home (or Escape) asks
+   first while a run is going, because going home does not cancel it.
+6. **Results** open by themselves once the tunnel on screen reaches the last row; if you scrubbed back, a Results
+   button waits instead. One card per fighter, ranked by rows survived, with a bar against the track's length and
+   the warning that one track is not a result. More numbers opens the table (wrong moves, asked live and from
+   cache, time per row, tokens, cost). Run again goes through the same confirmation; New track, Fighters, Watch
+   the replay, Records and Home do what they say.
+7. **Records** — the leaderboard of the practice tracks with 95% intervals, head to head for any two players, the
+   past runs, newest first (Watch and Results; this session's run, while it plays, offers Watch live only), and
+   "What is ours".
+
+Besides `/state`, `/run`, `/cancel` and `/events`, the page reads three routes that only read files and spend
+nothing: `GET /results?run=` (one recorded run's results), `GET /records` (the leaderboard, the pairs and the past
+runs) and `GET /replay?run=` (a recorded run to watch). `run=` must name a run directory under `--out`.
 
 The page's requests carry a token minted at startup and embedded in the page, so no other page in your browser can
 drive the run. It is not a defence against another program on this machine: whatever can fetch the page can read
@@ -261,9 +282,12 @@ uv run python -m bakeoff view runs/20260921-165433 --output /tmp/replay.html   #
 **See the whole update-2a scoreboard with intervals and pairs**
 ```bash
 uv run python -m bakeoff bench runs/20260921-165433 \
-  "runs/20260921-171044:jev_composed,jev_choice,jev_two_step,jev_reader" \
+  "runs/20260921-171044:jev_step1,jev_guided,jev_step2,jev_map" \
   runs/20260921-185546 runs/20260921-191326 runs/20260921-192037
 ```
+These runs were recorded under the players' old names (`jev_composed.jsonl`, `llm_reader.jsonl` and the like, before
+decisions 39 and 44); they keep those files, and `view`, `bench` and `report` read them as the names above. An old
+name still works wherever a player is named, so a saved command keeps working.
 
 **A live run that spends nothing**
 ```bash
@@ -283,7 +307,7 @@ uv run python -m bakeoff run --players solver,random,always_jump --seeds 20 --se
 
 **Spend money on purpose, one track, one player**
 ```bash
-uv run python -m bakeoff run --players jev_composed --seeds 1 --seed-start 1000 --max-requests 150
+uv run python -m bakeoff run --players jev_step1 --seeds 1 --seed-start 1000 --max-requests 150
 ```
 
 ---
@@ -297,7 +321,8 @@ uv run pytest -m live    # one real request per provider — spends money, opt i
 ```
 
 No fast test touches the network. The viewer's pure modules (`log.js`, `tabs.js`, `picker.js`, `lobby.js`,
-`timeline.js`, `tunnel.js`, `sprites.js`, `stage.js`, `minds.js`, `feed.js`, `bench.js`, `bench_view.js`) have
+`timeline.js`, `tunnel.js`, `sprites.js`, `roster.js`, `stage.js`, `minds.js`, `feed.js`, `bench.js`, `bench_view.js`,
+and Brain Battle's `screens.js`, `select.js`, `trackpick.js`, `results.js`, `records.js`) have
 their own tests, skipped when node is not installed.
 
 ---
@@ -313,7 +338,7 @@ their own tests, skipped when node is not installed.
 | `view` refuses two directories | they are different game versions, or the same (player, seed) appears twice |
 | `bench` refuses | runs of different track lengths, or fewer than five tracks for an interval |
 | "No completed run to score" on the Analysis tab | nothing in view has ended yet |
-| A greyed-out player in the lobby | the reason is written next to it: a tournament seed, or no cap left |
+| A fighter that may not play | the reason is on the character select's line for that slot and on its track select line, and RUN stays off: a tournament seed, or no cap left |
 | The fly is slow or the machine swaps | two fly processes are running; there must only ever be one |
 
 ---
