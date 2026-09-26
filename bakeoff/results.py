@@ -17,13 +17,19 @@ from bakeoff.session import PRICE_USD
 
 def _ending(steps: list[dict]) -> dict:
     """How one track ended for one player, from its last record. `trapped`: it died on a row where every move
-    fell, so no move there was wrong (the wrong move came earlier)."""
+    fell, so no move there was wrong (the wrong move came earlier). `fatal`: a death on a wrong move, named: the
+    row, the move made, and the moves that reached furthest from there (the report's `fatal_wrong_moves`)."""
     last = max(steps, key=lambda s: s["row"])
     complete = bool(last["finished"] or not last["alive"])
     depths = last.get("solver_depths") or {}
+    best = max(depths.values()) if depths else 0
+    fatal = None
+    if not last["alive"] and best > 0 and depths.get(last["executed_action"], best) < best:
+        fatal = {"row": last["row"], "move": last["executed_action"],
+                 "safe": [action for action, depth in depths.items() if depth == best]}
     return {"seed": last["seed"], "rows": last["rows_survived"], "complete": complete, "finished": bool(last["finished"]),
-            "death_cause": last["death_cause"],
-            "trapped": bool(not last["alive"] and depths and max(depths.values()) == 0)}
+            "death_cause": last["death_cause"], "trapped": bool(not last["alive"] and depths and best == 0),
+            "fatal": fatal}
 
 
 def results_of(run_dir: Path | str) -> dict:

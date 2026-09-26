@@ -31,6 +31,7 @@ def test_a_fresh_session_is_in_the_lobby_and_lists_every_player_with_its_price(t
     state = session(tmp_path).state(seed=1001)
     assert state["status"] == "lobby" and state["run"] is None
     assert state["game"]["version"] == "v2" and state["max_rows"] == 12 and state["requests_per_row"] == 1
+    assert state["first_practice_seed"] == 1000 and state["practice_tracks"] == 20  # the track select's 1000 to 1019
     by_name = {p["name"]: p for p in state["players"]}
     assert by_name["solver"]["paid"] is False and by_name["solver"]["requests_left"] is None
     assert by_name["haiku_plain"]["paid"] is True and by_name["haiku_plain"]["price_usd"] == 0.0006

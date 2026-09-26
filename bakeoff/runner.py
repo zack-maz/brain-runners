@@ -132,12 +132,11 @@ def fly2_meta() -> dict:
             "controls": fly2.CONTROLS}
 
 
-def new_meta(run_id: str, players: list[Player], seeds: Sequence[int], rules: Rules, args: dict | None) -> dict:
-    """meta.json as a run starts: status `running`, no finish time yet."""
+def ours_meta(rules: Rules) -> dict:
+    """The game with the looming constants, and both flies' frozen numbers: the blocks of meta.json that say
+    what is ours. The page's "what is ours" lists are written from them (Minds.ours, Minds.oursFly2), from a
+    run's meta.json or, on the records screen, from this."""
     return {
-        "run_id": run_id, "schema_version": SCHEMA_VERSION, "git_sha": _git_sha(), "git_dirty": _git_dirty(),
-        "started_at": _now(), "finished_at": None, "status": "running",
-        "players": [p.name for p in players], "seeds": list(seeds),
         "game": {**rules.to_json(),
                  "looming": {"gain_hz": LOOMING_GAIN_HZ, "falloff": LOOMING_FALLOFF, "step_hz": LOOMING_STEP_HZ,
                              "max_hz": MAX_HZ, "provisional": not fly.CALIBRATED}},
@@ -145,6 +144,16 @@ def new_meta(run_id: str, players: list[Player], seeds: Sequence[int], rules: Ru
                 "window_ms": WINDOW_MS, "provisional": not fly.CALIBRATED,
                 "model_commit": fly_data.MODEL_REPO_COMMIT, "annotations_commit": fly_data.ANNOTATIONS_COMMIT},
         "fly2": fly2_meta(),
+    }
+
+
+def new_meta(run_id: str, players: list[Player], seeds: Sequence[int], rules: Rules, args: dict | None) -> dict:
+    """meta.json as a run starts: status `running`, no finish time yet."""
+    return {
+        "run_id": run_id, "schema_version": SCHEMA_VERSION, "git_sha": _git_sha(), "git_dirty": _git_dirty(),
+        "started_at": _now(), "finished_at": None, "status": "running",
+        "players": [p.name for p in players], "seeds": list(seeds),
+        **ours_meta(rules),
         "models": {p.name: p.model for p in players if getattr(p, "model", None)},
         "requests": _requests(players),
         "args": args or {}, "python": platform.python_version(),

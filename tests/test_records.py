@@ -47,7 +47,8 @@ def test_records_say_why_instead_of_failing(tmp_path):
     assert records_of(tmp_path / "missing", V2)["why"] == "no run has been recorded yet."
     write_run(tmp_path, "20260921-090010", episode("fly", 999, 3), {"game": V2_BLOCK})
     out = records_of(tmp_path, V2)
-    assert out["bench"] is None and out["why"] == "no completed practice track of game v2 has been recorded yet."
+    assert out["bench"] is None
+    assert out["why"] == "no completed practice track (1000 to 1019) of game v2 has been recorded yet."
     bad = write_run(tmp_path, "20260921-090011", episode("fly", 1000, 3), {"game": V2_BLOCK})
     (bad / "fly.jsonl").write_text("not json\n{}\n")  # broken before its last line
     assert records_of(tmp_path, V2)["unreadable"] == ["20260921-090011"]
@@ -91,3 +92,21 @@ def test_records_marks_the_seeds_fly2_was_tuned_on(tmp_path):
     assert records_of(tmp_path / "missing", V2)["tuned_on"] == tuned
     write_run(tmp_path, "20260921-090024", episode("fly", 1000, 3), {"game": V2_BLOCK})
     assert records_of(tmp_path, V2)["tuned_on"] == tuned
+
+
+def test_the_leaderboard_ranks_on_the_track_selects_practice_tracks_only(tmp_path):
+    """Decision 46: the flies' calibration and settle runs cover 1000 to 1199; Records ranks on 1000 to 1019."""
+    write_run(tmp_path, "20260921-090030", episode("fly", 1019, 4) + episode("fly", 1020, 9) + episode("fly", 1199, 9),
+              {"game": V2_BLOCK})
+    out = records_of(tmp_path, V2)
+    assert out["tracks"] == [1000, 1019]
+    (fly,) = out["bench"]["players"]
+    assert fly["seeds"] == 1 and fly["mean_rows"] == 4
+
+
+def test_records_carry_what_the_what_is_ours_panel_is_written_from(tmp_path):
+    from bakeoff.runner import ours_meta
+
+    for out in (records_of(tmp_path / "missing", V2), records_of(tmp_path, V2)):
+        assert out["ours"] == ours_meta(V2)
+        assert set(out["ours"]) == {"game", "fly", "fly2"} and out["ours"]["game"]["looming"]["falloff"] is not None

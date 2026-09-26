@@ -26,6 +26,8 @@ from bakeoff.replay import CONTESTANTS
 
 # tournament seeds are below this and must not be paid for, or shape prompts, before the tournament
 FIRST_PRACTICE_SEED = 1000
+# the practice tracks the track select offers, 1000 to 1019, and the ones Records ranks on (decision 46)
+PRACTICE_TRACKS = 20
 
 # USD per live request, measured in docs/COSTS.md (update 2a) and rounded up, because this number is what
 # the page asks the user to agree to: it must never be lower than what a request really costs. A price per
@@ -182,9 +184,9 @@ class LiveSession:
                 "requests_left": self.budgets[name].remaining if paid else None,
                 "played_before": seed is not None and seed in played.get(name, []),
                 # the track select's own practice tracks it has a recorded run of, for its marks: a
-                # tournament seed or a bulk-run seed past the track select's own 20 is not offered there
+                # tournament seed or a bulk-run seed past the track select's own tracks is not offered there
                 "seeds_played": [s for s in played.get(name, [])
-                                 if FIRST_PRACTICE_SEED <= s < FIRST_PRACTICE_SEED + 20],
+                                 if FIRST_PRACTICE_SEED <= s < FIRST_PRACTICE_SEED + PRACTICE_TRACKS],
                 # why this player cannot play this track, so the page can say so before anything is asked
                 "why_not": None if seed is None else self.why_not(name, seed),
             })
@@ -194,7 +196,7 @@ class LiveSession:
             "game": self.rules.to_json(), "max_rows": self.rules.max_rows,
             "requests_per_row": REQUESTS_PER_ROW,
             "max_requests": self.max_requests, "tournament": self.tournament,
-            "first_practice_seed": FIRST_PRACTICE_SEED,
+            "first_practice_seed": FIRST_PRACTICE_SEED, "practice_tracks": PRACTICE_TRACKS,
             "seed": seed,
             # the real track, for the track select's preview: the rules stay in Python. A tournament seed
             # is locked until the session is one, same as `why_not` locks paid players off it

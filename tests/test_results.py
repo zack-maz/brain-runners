@@ -41,9 +41,12 @@ def test_one_entry_per_player_in_the_runs_order_with_how_its_track_ended(tmp_pat
     solver, stayer = out["players"]
     assert (solver["player"], stayer["player"]) == ("solver", "stayer")
     assert solver["tracks"] == [{"seed": 1001, "rows": 40, "complete": True, "finished": True, "death_cause": None,
-                                 "trapped": False}]
+                                 "trapped": False, "fatal": None}]
     (track,) = stayer["tracks"]
     assert track["complete"] and not track["finished"] and track["death_cause"] == "ran_into_gap"
+    # the fatal move, named: the row it died on, what it did, and what would have gone furthest instead
+    assert track["fatal"]["row"] == track["rows"] and track["fatal"]["move"] == "stay"
+    assert track["fatal"]["safe"] and "stay" not in track["fatal"]["safe"]
     assert track["rows"] == stayer["mean_rows"] < 40
     assert stayer["fatal_wrong_moves"] == 1 and stayer["wrong_moves"] >= 1  # the solver would have lived
     assert solver["wrong_moves"] == 0
@@ -98,5 +101,5 @@ def test_a_death_where_every_move_falls_is_trapped(tmp_path):
               "solver_depths": {"stay": 0, "left": 0, "right": 0, "jump": 0}}]
     (run_dir / "p.jsonl").write_text("".join(json.dumps(s) + "\n" for s in steps))
     (player,) = results_of(run_dir)["players"]
-    assert player["tracks"][0]["trapped"] is True
+    assert player["tracks"][0]["trapped"] is True and player["tracks"][0]["fatal"] is None
     assert player["fatal_wrong_moves"] == 0 and player["wrong_moves"] == 1  # the wrong move was row 0's stay
