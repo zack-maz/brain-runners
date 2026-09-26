@@ -26,7 +26,7 @@
 
   const front = {
     screen: "home", from: "home", state: null, sel: Select.make(roster, []), seed: null, armed: false, refusal: null,
-    timer: null, leaving: false, starting: false, cancelError: null, notice: null,
+    timer: null, leaving: false, starting: false, cancelError: null, notice: null, armedAt: 0,
     results: null, more: false, autoResults: false, // the results on screen, and whether the run's end opens them
     records: null, pair: [], allRuns: false, // the records on screen, and the two players compared
   };
@@ -186,6 +186,7 @@
     front.timer = setTimeout(refreshState, 250);
   }
 
+  const CONFIRM_AFTER_MS = 500;
   // RUN: a lineup that can spend is confirmed once, with its worst case on the button; then it starts.
   function pressedRun() {
     const state = front.state;
@@ -193,8 +194,12 @@
     if (!state || state.seed !== front.seed || Lobby.whyNot(state, players(), front.seed)) return;
     if (Lobby.spends(state, players()) && !front.armed) {
       front.armed = true;
+      front.armedAt = Date.now();
       return renderTrack();
     }
+    // a confirmation is a second, separate press: one that follows the arming this closely is the same press
+    // repeating (a held key on a focused button, a double click), so it does not spend
+    if (front.armed && Date.now() - front.armedAt < CONFIRM_AFTER_MS) return;
     startRun();
   }
 
@@ -416,8 +421,11 @@
     if (event.target.closest("[data-back]")) show(Screens.back(front.screen, front.from));
   });
   document.addEventListener("keydown", (event) => {
-    // a held key is one press: its repeats would walk through RUN's confirmation (select → track → arm → post)
-    if (event.repeat || event.metaKey || event.ctrlKey || event.altKey) return;
+    // a held Enter is one press: its repeats would walk through RUN's confirmation (select → track → arm → post),
+    // and on a focused button the browser would click it once per repeat, so that default is stopped too.
+    // Held arrows keep stepping seeds and portraits.
+    if (event.repeat && event.key === "Enter") { event.preventDefault(); return; }
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
     if (front.screen === "run") { // the race has its own keys (app.js); Escape is ‹ Home
       if (event.key === "Escape") { event.preventDefault(); goHome(); }
       return;
@@ -483,7 +491,7 @@
   function ended(end) {
     front.leaving = false;
     // the results belong to the run whose stream ended, the one watched
-    front.results = end.results || { why: "the run ended without results", run_id: Race.watching() };
+    front.results = { run_id: Race.watching(), ...(end.results || { why: "the run ended without results" }) };
     front.more = false;
     front.autoResults = true;
     refreshState();
