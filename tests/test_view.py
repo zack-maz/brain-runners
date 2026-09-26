@@ -4,6 +4,7 @@ import re
 import pytest
 
 from bakeoff.__main__ import main
+from bakeoff.roster import roster_json
 from bakeoff.view import DATA_SLOT, VIEWER_DIR, embed_json, render_html
 
 DATA = re.compile(r'<script type="application/json" id="replay-data">(.*?)</script>', re.S)
@@ -27,6 +28,12 @@ def test_render_inlines_every_file_and_the_data():
     (data,) = DATA.findall(page)
     assert json.loads(data) == replay
     assert DATA_SLOT not in page
+
+
+def test_every_page_carries_the_roster_live_or_replay():
+    for page in (render_html({"episodes": []}), render_html({"episodes": []}, live="/events", token="t")):
+        (data,) = re.findall(r'<script type="application/json" id="roster-data">(.*?)</script>', page, re.S)
+        assert json.loads(data) == roster_json()
 
 
 def test_the_page_makes_no_network_request():
