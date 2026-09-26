@@ -77,7 +77,7 @@ phase gets its own plan. Resume from `docs/NEXT.md`.
 - `uv run pytest` runs the fast tests only. `uv run pytest -m slow` builds the real fly brain (about 1 GB,
   one minute); never run two fly processes at once.
 - The viewer is plain JavaScript with no build step and no npm packages. Rules of the game stay in
-  Python (`bakeoff/replay.py`); the pure JavaScript (`timeline.js`, `tunnel.js`, `sprites.js`, `stage.js`, `minds.js`,
+  Python (`bakeoff/replay.py`); the pure JavaScript (`timeline.js`, `tunnel.js`, `sprites.js`, `roster.js`, `stage.js`, `minds.js`,
   `log.js`, `picker.js`, `tabs.js`, `feed.js`, `lobby.js`, `bench_view.js`) is tested by
   `viewer/tests/*.test.js`, which `uv run pytest` runs through `node --test`. Text from a log is always
   escaped (`Minds.esc`) and the page must never load anything from the network (the two brand fonts in
@@ -110,6 +110,14 @@ phase gets its own plan. Resume from `docs/NEXT.md`.
   paid player for the whole session (`SharedBudget` gives each run its own record of what it spent), runs one
   `LiveRun` at a time and keeps serving so another track can be played without restarting. `--start` plays the
   command line's own run at once, as before, and holds its first decision until a browser is listening.
+- Brain Battle (decision 45, spec `docs/superpowers/specs/2026-09-25-brain-battle-design.md`) is being built on branch
+  `brain-battle` in two plans. Plan a is built: `bakeoff/roster.py` is the one list of characters and skins (a test
+  keeps it equal to the registry), embedded in every page, so runners wear their skin's colours and are labelled
+  "Jev · Step 1" (`viewer/roster.js`); `bakeoff/results.py` gives a run's numbers (also on the `end` event),
+  `bakeoff/records.py` the leaderboard, pairs and past runs (each player and track from the newest run that completed
+  it, practice seeds only); the report has `wrong_moves` and `fatal_wrong_moves`. Three read-only routes sit behind
+  the token: `GET /results?run=`, `GET /records`, `GET /replay?run=`; `run=` must be a run id naming a directory
+  under the session's `--out` with a `meta.json`, or it is a 404. Plan b, the screens, is next.
 - Paid players spend nothing without `--max-requests` (default 0 replays `.cache/responses`). Never
   raise a cap, rerun a paid command or run `pytest -m live` without the user's go-ahead. No paid
   request on a seed below 1000 before the tournament; the CLI refuses a live paid run on seeds

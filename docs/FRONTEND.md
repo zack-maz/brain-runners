@@ -149,21 +149,17 @@ we found in my own words, as well as my opinions and thoughts. That can wait to 
   character select, track select, results with More numbers, records); decision 44, the rename to plain, guided,
   step1, step2 and map, is built and verified on this branch (`610291e`, `373affa`; 540 fast tests; the cache
   replays under old and new names spend nothing).
-- **Next: the spec.** `docs/superpowers/specs/2026-09-25-brain-battle-design.md`, written from this file and the
-  mock-ups, reviewed by the user, then a plan (`superpowers:writing-plans`), then the build. Points the spec must
-  settle:
-  - The flow: home → character select → track select → the Run screen (as today, runners in their skin colours) →
-    results; Records from home and results. `bakeoff live` only; `bakeoff view` opens on the replay as before.
-  - What the server gives the page instead of the page typing it in: the characters and their skins (from the
-    registry and `names.py`), prices (`session.PRICE_USD`), played-before seeds (`session.played_before`), the real
-    track for the preview (the rules stay in Python), a run's results (the report's numbers) and the records
-    (`bakeoff.bench.benchmark_of` over the recorded runs, and the runs' `meta.json`).
-  - The worst-case cost moves from the lobby to the track select; the ceiling, the token and one run at a time stay
-    as update 3a built them.
-  - Wrong moves (rows where the chosen move was worse than the best, which was fatal) is a new number for the
-    report and the results; failures appear only when there are any.
-  - Plain JavaScript, no build step, nothing from the network, pure modules tested under `node --test`, text from
-    logs escaped; a live smoke with a fly after any change to the run path.
+- **The spec is approved** (decision 45): `docs/superpowers/specs/2026-09-25-brain-battle-design.md`, all seven of
+  its open calls accepted by the user.
+- **Plan a, the server and the numbers, is built** (`docs/superpowers/plans/2026-09-25-brain-battle-a.md`, prototype
+  `proto/bb-a`, 7 tasks, 565 fast tests): the roster, runners in their skins on the Run screen (in `bakeoff view` too),
+  `results.py`, `records.py`, the wrong-move columns, and the `/results`, `/records` and `/replay` routes. A live smoke
+  with free players passed; the smoke with a fly waits until no other session is running one.
+- **Next:** plan a's whole-branch design review, then plan b, the screens (spec section C) and the money's new home
+  (section G), prototyped first like plan a.
+- **For the user, from plan a:** the leaderboard mixes track counts (the flies have 107–120 practice tracks from their
+  calibration and settle runs, most question sets 5, GLM Flash 1). Plan b's Records could limit it to tracks
+  1000–1019 or mark the flies' counts.
 - **Open, for the user:**
   - Settled 2026-09-25: the mind panels' tags stay "JEV STEP 1", "HAIKU PLAIN" until Brain Battle, which labels each
     fighter as on the character select, character and skin ("Jev · Step 1") in the skin's colour. The spec says so.
