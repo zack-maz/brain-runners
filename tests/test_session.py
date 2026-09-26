@@ -257,3 +257,51 @@ def test_each_fly_says_what_it_is_and_nobody_else_needs_to(tmp_path, monkeypatch
     monkeypatch.setattr(fly2, "CALIBRATED", True)
     by_name = {p["name"]: p for p in session(tmp_path).state()["players"]}
     assert by_name["fly2"]["about"] == MAPPINGS[fly2.MAPPING].summary + ", walking-steering neurons, dodge before jump"
+
+
+def test_the_state_carries_every_track_a_player_has_played_and_the_real_track_for_the_preview(tmp_path):
+    from bakeoff.game.track import generate_track
+
+    lobby = session(tmp_path)
+    play(lobby, seed=1001, players=["solver"])
+    play(lobby, seed=1003, players=["solver", "random"])
+    state = lobby.state(seed=1002)
+    by_name = {p["name"]: p for p in state["players"]}
+    assert by_name["solver"]["seeds_played"] == [1001, 1003] and by_name["random"]["seeds_played"] == [1003]
+    assert by_name["fly"]["seeds_played"] == []
+    assert state["track"] == generate_track(1002, RULES).to_json()
+    assert lobby.state()["track"] is None and lobby.state(seed=-1)["track"] is None
+
+
+def test_only_a_recorded_run_directory_can_be_named(tmp_path):
+    lobby = session(tmp_path)
+    run_id = play(lobby, players=["solver"]).run.run_id
+    assert lobby.run_dir_of(run_id) == tmp_path / "runs" / run_id
+    (tmp_path / "runs" / "20260101-000000").mkdir()  # a directory with no meta.json is not a run
+    for wanted in (None, "", "../cache", "/etc", run_id + "/meta.json", "20260101-000000", "20990101-000000", "x"):
+        assert lobby.run_dir_of(wanted) is None, wanted
+    assert lobby.results("../cache") is None and lobby.replay("../cache") is None
+
+
+def test_results_replay_and_records_of_what_this_session_recorded(tmp_path):
+    lobby = session(tmp_path)
+    run_id = play(lobby, players=["solver", "random"]).run.run_id
+    results = lobby.results(run_id)
+    assert results["run_id"] == run_id and [p["player"] for p in results["players"]] == ["solver", "random"]
+    assert lobby.replay(run_id)["runs"][0]["run_id"] == run_id
+    records = lobby.records()
+    assert [r["run_id"] for r in records["runs"]] == [run_id]
+    assert records["runs"][0]["current"] is False  # it is over: it can be watched, not watched live
+    assert {p["player"] for p in records["bench"]["players"]} == {"solver", "random"}
+
+
+def test_the_run_playing_now_is_the_one_past_run_that_can_be_watched_live(tmp_path, monkeypatch):
+    lobby = session(tmp_path)
+    started = lobby.start(1001, [slow_player(monkeypatch)])
+    try:
+        (run,) = lobby.records()["runs"]
+        assert run["run_id"] == started.run.run_id and run["current"] is True and run["status"] == "running"
+    finally:
+        lobby.cancel()
+        lobby.wait(30)
+    assert lobby.records()["runs"][0]["current"] is False

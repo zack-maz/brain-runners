@@ -9,6 +9,7 @@ at a time. The page asks it what can be run (`state`), starts a run (`start`) an
 from __future__ import annotations
 
 import json
+import re
 import secrets
 import threading
 import time
@@ -17,6 +18,7 @@ from pathlib import Path
 
 from bakeoff.clients.core import DiskCache, RequestBudget, SharedBudget
 from bakeoff.game.rules import Rules
+from bakeoff.game.track import generate_track
 from bakeoff.live import LiveRun
 from bakeoff.players import PAID, REGISTRY, fly2, make_player
 from bakeoff.players.names import canonical
@@ -38,6 +40,10 @@ PRICE_USD = {"haiku_plain": 0.0006, "haiku_step1": 0.0010, "haiku_guided": 0.000
 
 # every player here asks its provider once a row, so a track of N rows costs at worst N requests
 REQUESTS_PER_ROW = 1
+
+# what a run id looks like (a timestamp, and a counter when two runs start in one second): anything else the page
+# sends as `run=` names no run, and no path is ever built from it
+RUN_ID = re.compile(r"[0-9]{8}-[0-9]{6}(-[0-9]+)?")
 
 
 def model_of(name: str) -> str | None:
@@ -175,6 +181,8 @@ class LiveSession:
                 "model_answered": answered.get(name) if paid else None,
                 "requests_left": self.budgets[name].remaining if paid else None,
                 "played_before": seed is not None and seed in played.get(name, []),
+                # every track it has a recorded run of, for the track select's marks
+                "seeds_played": played.get(name, []),
                 # why this player cannot play this track, so the page can say so before anything is asked
                 "why_not": None if seed is None else self.why_not(name, seed),
             })
@@ -186,6 +194,8 @@ class LiveSession:
             "max_requests": self.max_requests, "tournament": self.tournament,
             "first_practice_seed": FIRST_PRACTICE_SEED,
             "seed": seed,
+            # the real track, for the track select's preview: the rules stay in Python
+            "track": None if seed is None or seed < 0 else generate_track(seed, self.rules).to_json(),
             "ready": {"seed": self.ready_seed, "players": list(self.ready_players)},
             "players": players,
             # `replay` is the empty replay of this run: the page resets itself to it and fills it from
@@ -288,6 +298,37 @@ class LiveSession:
             else:
                 players.append(make_player(name))
         return players
+
+    # ---- what was recorded -----------------------------------------------------------------------
+    def run_dir_of(self, run_id: str | None) -> Path | None:
+        """The directory of a recorded run, or None. Only a run id of the usual shape that names a directory
+        directly under `out_root` holding a meta.json: nothing the page sends becomes any other path."""
+        if not run_id or not RUN_ID.fullmatch(run_id):
+            return None
+        run_dir = self.out_root / run_id
+        return run_dir if (run_dir / "meta.json").is_file() else None
+
+    def results(self, run_id: str | None) -> dict | None:
+        """The results screen's numbers for a recorded run (bakeoff/results.py), or None for no such run."""
+        from bakeoff.results import results_of  # numpy: only when asked
+
+        run_dir = self.run_dir_of(run_id)
+        return None if run_dir is None else results_of(run_dir)
+
+    def replay(self, run_id: str | None) -> dict | None:
+        """The replay of a recorded run, for Records' Watch, or None for no such run."""
+        from bakeoff.replay import build_replay
+
+        run_dir = self.run_dir_of(run_id)
+        return None if run_dir is None else build_replay([run_dir])
+
+    def records(self) -> dict:
+        """The records screen's numbers (bakeoff/records.py). Reads every run directory, so it is worked out when
+        the page asks, never on a timer."""
+        from bakeoff.records import records_of
+
+        current = self.run.run_id if self.run is not None and self.status == "running" else None
+        return records_of(self.out_root, self.rules, current=current)
 
     def find(self, run_id: str | None) -> LiveRun | None:
         """The run with this id, whether it is still going or already closed; without an id, the
