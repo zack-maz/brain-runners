@@ -98,6 +98,8 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 
 ## Where to resume (in this order)
 
+**Next: phase 6** (item 3 below), which waits for the user's budget go-ahead. Everything above it is done or parked.
+
 - **Brain Battle, the new front of the live page** (branch `brain-battle`, a worktree at `../brain-battle` beside the
   main checkout; started 2026-09-25): the request, every answer, the five approved mock-ups and where to resume are
   in `docs/FRONTEND.md`. Decision 44 (the sets are plain, guided, step1, step2 and map) is built on that branch.
@@ -126,7 +128,7 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
    Recorded as decision 47. **fly3, the trained fly** (track 2 of decision 41; decision 48, spec
    `docs/superpowers/specs/2026-09-25-fly3-design.md`), **stopped at its probe** (decision 49): spike 05 (branch
    `spike/fly3-probe`, local; `spikes/05-fly3-probe/REPORT.md`) passed parts A (a place on the eye for the looming
-   cells) and B (the descending neurons name a gap's lane 79% of the time), and ended "stop C": on seeds 1300–1309
+   cells) and B (the descending neurons name a gap's lane 80% of the time), and ended "stop C": on seeds 1300–1309
    fly3 scored 86.5 rows, the same learner with no brain 112.5, a blind brain 19.6. fly3 is not built. The only
    untested lever is a stronger input (about 1.5 h), if ever wanted. No fast engine is needed. Phase 6 waits.
 1. **Parked**: GLM Flash's tracks 1001–1004 (decision 34), while Zhipu's free tier throttles. To pick it up, check

@@ -332,9 +332,9 @@
       user asked to be investigated: the "any safe move" target, weighting the rows where a wrong move kills, the
       input strength against how many DNs fire, early/late timing within the window, and noise averaging.
 49. **fly3 stops at its probe** (the user accepted it on 2026-09-26; spike 05, branch `spike/fly3-probe`, local,
-    `spikes/05-fly3-probe/REPORT.md`, DONE `stop C`). Part A passed (every LPLC2/LC4 cell gets a place on the eye from
-    its lobula-plate layers, by a published rule) and part B passed (the DNs name a single gap's lane 79% of the time
-    at the strongest gain). Part C, the play test on seeds 1300–1309: fly3 86.5 rows, the same learner on the input
+    `spikes/05-fly3-probe/REPORT.md`, DONE `stop C`). Part A passed (every looming cell gets a place on the eye: LPLC2
+    from its lobula-plate layers by a published rule, LC4 through a map fitted on LPLC2) and part B passed (the DNs
+    name a single gap's lane 80% of the time at the strongest gain). Part C, the play test on seeds 1300–1309: fly3 86.5 rows, the same learner on the input
     with no brain 112.5, the same readout on a blind brain 19.6. With the same learner the frozen wiring is a worse
     layer of features than the input it is given, so the answer to decision 48's question for this game is no. fly3
     is not built and stays off the page and out of the tournament. The one lever left untested is a stronger input
