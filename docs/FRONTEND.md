@@ -172,7 +172,8 @@ we found in my own words, as well as my opinions and thoughts. That can wait to 
   identical to its recorded run of the same track (`runs/20260925-101614`); no console errors. A worktree has no
   `data/` (git-ignored): link the main checkout's `data/Drosophila_brain_model` and `data/neuron_annotations.tsv`
   into a `data/` folder there before a fly can play. Without them the track select shows the refusal and its reason.
-- **Next:** finishing the branch (PR) with the user.
+- **PR #9 is open** (2026-09-26, `brain-battle` into `main`). Next: the user's review and merge. PR #8 (`fly2-settle`)
+  also edits `docs/NEXT.md`: whichever merges second resolves it by hand.
 - **Plan b's design review is done** (Opus, "ready with fixes": 1 Critical, 4 Important, 8 Minor). Fixed in `70f9de4`
   and `a57ae43`, re-reviewed by Opus, checked in a headless browser:
   - a held Enter could walk through RUN's confirmation; it now never confirms;
