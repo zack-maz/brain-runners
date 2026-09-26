@@ -98,6 +98,8 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 
 ## Where to resume (in this order)
 
+**Next: phase 6** (item 3 below), which waits for the user's budget go-ahead. Everything above it is done or parked.
+
 - **Brain Battle, the new front of the live page** (branch `brain-battle`, a worktree at `../brain-battle` beside the
   main checkout; started 2026-09-25): the request, every answer, the five approved mock-ups and where to resume are
   in `docs/FRONTEND.md`. Decision 44 (the sets are plain, guided, step1, step2 and map) is built on that branch.
@@ -106,8 +108,9 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
   built and reviewed there (`f158a70`). Plan b, the screens (`docs/superpowers/plans/2026-09-25-brain-battle-b.md`),
   is built (`912ef4d..c7fa9d8`, 9 Haiku tasks byte-identical to the prototype `proto/bb-b`, 580 fast tests) and
   looked at in a browser with free players. Plan b's design review, its fixes and the one fly smoke for both plans
-  are done. **PR #9 is open**; next the user's review and merge. Resume from `docs/FRONTEND.md`,
-  "Where this stands". The Writeup page comes last.
+  are done. **Merged to `main` as PR #9 on 2026-09-26**, after a whole-branch review ("ready with fixes": README and
+  WALKTHROUGH rewritten for the new flow, no Results button for a run still playing, `live --help`). Its state is in
+  `docs/FRONTEND.md`, "Where this stands". The Writeup page comes last.
 0. **`fly2`, the second pure fly, is built, calibrated, played and merged** (decisions 41–43, spec
    `docs/superpowers/specs/2026-09-24-fly2-design.md`, plan `docs/superpowers/plans/2026-09-24-fly2.md`, generated
    from the prototype `proto/fly2`, 9 tasks, branch `fly2`). Spike 04, the probe, passed on 2026-09-24
@@ -122,9 +125,12 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
    fixes", 0 Critical, 3 Important, 10 Minor, all fixed and re-reviewed). Merged to `main` as PR #7 on 2026-09-25. **Settled on 2026-09-25**: on 100 fresh v2 seeds 1400–1499
    (`runs/20260925-163957`) fly2 scored 79.45 rows against fly's 66.02, +13.4 (95% interval 5.3 to 21.6), bench
    verdict "fly2 ahead" (`docs/COSTS.md`).
-   What is left: fly3, the trained fly (track 2 of decision 41), and a fast engine, each with its own spec. fly3's
-   brainstorm has begun (the user: science first, then the page; per-cell input) and is paused on how to pay for the
-   brain time. Phase 6 waits.
+   Recorded as decision 47. **fly3, the trained fly** (track 2 of decision 41; decision 48, spec
+   `docs/superpowers/specs/2026-09-25-fly3-design.md`), **stopped at its probe** (decision 49): spike 05 (branch
+   `spike/fly3-probe`, local; `spikes/05-fly3-probe/REPORT.md`) passed parts A (a place on the eye for the looming
+   cells) and B (the descending neurons name a gap's lane 80% of the time), and ended "stop C": on seeds 1300–1309
+   fly3 scored 86.5 rows, the same learner with no brain 112.5, a blind brain 19.6. fly3 is not built. The only
+   untested lever is a stronger input (about 1.5 h), if ever wanted. No fast engine is needed. Phase 6 waits.
 1. **Parked**: GLM Flash's tracks 1001–1004 (decision 34), while Zhipu's free tier throttles. To pick it up, check
    it answers (a few requests through `bakeoff.clients.glm.HttpTransport`), then
    `uv run python -m bakeoff run --players glm_step1,glm_guided,glm_step2 --seeds 5 --seed-start 1000 --max-requests 700`
