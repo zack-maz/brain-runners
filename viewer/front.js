@@ -26,6 +26,7 @@
 
   const front = {
     screen: "home", from: "home", state: null, sel: Select.make(roster, []), seed: null, armed: false, refusal: null,
+    timer: null, leaving: false,
   };
 
   async function control(path, options) {
@@ -70,6 +71,8 @@
   function render() {
     if (front.screen === "home") renderHome();
     if (front.screen === "select") renderSelect();
+    if (front.screen === "track") renderTrack();
+    renderRunBar();
   }
 
   // ---- home ------------------------------------------------------------------------------------------
@@ -128,6 +131,98 @@
   });
   $("fight").addEventListener("click", () => { if (Select.ready(front.sel)) show("track"); });
 
+  // ---- the track select ------------------------------------------------------------------------------
+  const players = () => Select.players(front.sel, roster);
+
+  function renderTrack() {
+    const state = front.state;
+    if (!state) return;
+    const seed = front.seed;
+    const fresh = state.seed === seed; // the state answers for the track on screen, not the one before
+    $("track-game").textContent = "Run · game " + state.game.version + " · " + state.max_rows + " rows";
+    $("seed-rule").textContent = state.tournament ? "Tournament seeds are open (--tournament)"
+      : "Practice seeds are " + state.first_practice_seed + " and up";
+    $("seed-shown").textContent = seed;
+    $("preview-what").textContent = "The track, row 0 to " + state.max_rows;
+    $("preview").innerHTML = fresh ? TrackPick.previewSvg(state.track, state.game) : "";
+    $("preview-gaps").textContent = fresh && state.track ? TrackPick.gapTiles(state.track) + " gap tiles" : "";
+    $("tiles").innerHTML = TrackPick.tilesHtml(TrackPick.tiles(state, players(), seed));
+    $("ceiling").textContent = Lobby.ceilingText(state);
+    $("lineup").innerHTML = TrackPick.lineupHtml(TrackPick.lineup(state, roster, players()));
+    paintSprites($("lineup"));
+    $("total").textContent = Lobby.usd(Lobby.estimate(state, players()).total_usd);
+    $("cap").textContent = TrackPick.capText(state, players());
+    const button = TrackPick.runButton(state, players(), seed, front.armed);
+    const why = front.refusal || button.why || (fresh ? null : "Looking up track " + seed + "…");
+    $("run-why").hidden = !why;
+    $("run-why").textContent = why || "";
+    $("run").disabled = !!why;
+    $("run").dataset.armed = String(button.armed);
+    $("run-label").textContent = button.label;
+    $("run-sub").textContent = button.sub;
+  }
+
+  function setSeed(seed) {
+    if (!front.state) return;
+    front.seed = TrackPick.clampSeed(seed, front.state);
+    front.armed = false; // another track: another worst case to confirm
+    front.refusal = null;
+    renderTrack();
+    clearTimeout(front.timer);
+    front.timer = setTimeout(refreshState, 250);
+  }
+
+  // RUN: a lineup that can spend is confirmed once, with its worst case on the button; then it starts.
+  function pressedRun() {
+    const state = front.state;
+    if (!state || state.seed !== front.seed || Lobby.whyNot(state, players(), front.seed)) return;
+    if (Lobby.spends(state, players()) && !front.armed) {
+      front.armed = true;
+      return renderTrack();
+    }
+    startRun();
+  }
+
+  async function startRun() {
+    front.armed = false;
+    front.refusal = null;
+    const { ok, body } = await control("/run", { method: "POST", headers: { "Content-Type": "application/json" },
+                                                 body: JSON.stringify({ seed: front.seed, players: players() }) });
+    if (!ok) { front.refusal = body.error || "the run was refused"; return render(); }
+    applyState(body.state, body.run_id);
+  }
+
+  $("seed-prev").addEventListener("click", () => setSeed(front.seed - 1));
+  $("seed-next").addEventListener("click", () => setSeed(front.seed + 1));
+  $("seed-random").addEventListener("click", () => setSeed(TrackPick.randomSeed(front.state, Math.random)));
+  $("tiles").addEventListener("click", (event) => {
+    const tile = event.target.closest("button[data-seed]");
+    if (tile) setSeed(Number(tile.dataset.seed));
+  });
+  $("run").addEventListener("click", pressedRun);
+
+  // ---- the run screen's bar ------------------------------------------------------------------------
+  const running = () => !!front.state && front.state.status === "running";
+
+  function renderRunBar() {
+    const run = front.state && front.state.run;
+    $("run-bar").hidden = false;
+    $("run-what").textContent = run ? "Track " + run.seed + (running() ? " · live" : " · " + run.status) : "";
+    $("run-cancel").hidden = !running();
+    $("run-home").textContent = front.leaving ? "Home? The run keeps going" : "‹ Home";
+  }
+
+  // Going home does not cancel the run, so while one is going the first press says so and the second goes.
+  $("run-home").addEventListener("click", () => {
+    if (running() && !front.leaving) { front.leaving = true; return renderRunBar(); }
+    front.leaving = false;
+    show("home");
+  });
+  $("run-cancel").addEventListener("click", async () => {
+    const { ok, body } = await control("/cancel", { method: "POST" });
+    if (ok && body.state) applyState(body.state);
+  });
+
   // ---- keys and Back -------------------------------------------------------------------------------
   document.addEventListener("click", (event) => {
     if (event.target.closest("[data-back]")) show(Screens.back(front.screen, front.from));
@@ -143,6 +238,10 @@
     } else if (front.screen === "select") {
       out = Select.onKey(front.sel, roster, event.key);
       if (out && out.sel !== front.sel) setSel(out.sel);
+    } else if (front.screen === "track" && front.state) {
+      out = TrackPick.onKey(front.seed, front.state, event.key, Math.random);
+      if (out && out.seed !== front.seed) setSeed(out.seed);
+      if (out && out.go === "run") { pressedRun(); out = { go: null }; }
     } else if (event.key === "Escape") {
       out = { go: "back" };
     }
@@ -160,13 +259,31 @@
     applyState(body);
   }
 
-  function applyState(state) {
-    if (front.state == null) { // the first answer: the select opens with what the command line offered
+  // `started`: the run this page just started, watched even when it is already over (free players can finish
+  // a track before the answer to POST /run arrives).
+  function applyState(state, started) {
+    const first = front.state == null;
+    if (first) { // the first answer: the select opens with what the command line offered
       front.sel = Select.make(roster, (state.ready || {}).players || []);
       front.seed = (state.ready || {}).seed != null ? state.ready.seed : state.first_practice_seed;
     }
     front.state = state;
+    const run = state.run;
+    // a run that is going and not watched yet: this page started it, or the command line did (--start), or
+    // the page was reloaded while it ran. Watch it, on the run screen.
+    if (run && run.replay && (state.status === "running" || run.run_id === started) && Race.watching() !== run.run_id) {
+      Race.watch(run);
+      front.leaving = false;
+      return show("run");
+    }
+    if (first && front.seed !== state.seed) return refreshState(); // the state for the track on screen
     render();
+  }
+
+  // app.js calls this when a run has ended: the state says so, and the bar stops offering Cancel.
+  function ended() {
+    front.leaving = false;
+    refreshState();
   }
 
   // app.js calls this once the run screen is ready (live only).
@@ -176,5 +293,5 @@
     refreshState();
   }
 
-  root.Front = { start };
+  root.Front = { start, ended };
 })(typeof window !== "undefined" ? window : globalThis);

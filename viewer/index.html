@@ -48,6 +48,41 @@
   <div id="slots" class="slots"></div>
   <div class="keys label"><span>Click &middot; add fighter</span><span>Dot or X / Y &middot; change skin</span><span>&larr; &rarr; &middot; move cursor</span><span>Enter &middot; fight</span></div>
 </section>
+
+<section id="screen-track" class="screen track" hidden aria-label="Choose your track">
+  <div class="screen-head"><button type="button" class="back label" data-back>&lsaquo; Fighters</button>
+    <h2 class="shout">CHOOSE YOUR TRACK</h2><span class="label bright" id="track-game"></span></div>
+  <div class="track-body">
+    <div class="track-main">
+      <div class="panel seed-row">
+        <div class="seed-what"><span class="label">Track</span><span class="muted small" id="seed-rule"></span></div>
+        <button type="button" class="step" id="seed-prev" aria-label="Previous track">&lsaquo;</button>
+        <output id="seed-shown" class="seed"></output>
+        <button type="button" class="step" id="seed-next" aria-label="Next track">&rsaquo;</button>
+        <button type="button" class="random" id="seed-random">Random</button>
+      </div>
+      <div class="panel preview-box">
+        <div class="label row"><span id="preview-what"></span><span id="preview-gaps"></span></div>
+        <div id="preview"></div>
+      </div>
+      <div class="practice">
+        <div class="label row"><span>Practice tracks</span><span>Mark &middot; this lineup played it before</span></div>
+        <div id="tiles" class="tiles"></div>
+        <p class="muted small" id="ceiling"></p>
+      </div>
+    </div>
+    <div class="track-side">
+      <div class="panel lineup">
+        <span class="label">The lineup</span>
+        <div id="lineup"></div>
+        <div class="total"><div class="row"><span class="label">At worst</span><span id="total" class="usd"></span></div>
+          <p class="muted small" id="cap"></p></div>
+      </div>
+      <p class="warn small" id="run-why" hidden></p>
+      <button type="button" id="run" class="banner run"><span class="shout" id="run-label">RUN</span><span class="label blink" id="run-sub">Enter</span></button>
+    </div>
+  </div>
+</section>
 </div>
 
 <main id="app" hidden>
@@ -57,6 +92,12 @@
 </div>
 
 <div id="panel-run" role="tabpanel" aria-labelledby="tab-run">
+  <div id="run-bar" class="run-bar" hidden>
+    <button type="button" id="run-home" class="label">&lsaquo; Home</button>
+    <span class="label" id="run-what"></span>
+    <button type="button" id="run-cancel" class="label" hidden>Cancel the run</button>
+    <button type="button" id="run-results" class="label" hidden>Results &#9654;</button>
+  </div>
   <section id="player" aria-label="The run">
     <div id="tunnel">
       <canvas id="canvas" aria-label="Three runners in one tunnel. The same information is in the panels below."></canvas>
@@ -71,22 +112,6 @@
 
   <section id="players" aria-label="Players">
     <h2 class="label">Players</h2>
-
-    <div id="lobby" hidden>
-      <form id="lobby-form">
-        <div class="lobby-top">
-          <label class="label" for="seed">Track</label>
-          <input id="seed" type="number" min="0" step="1" value="1001" inputmode="numeric">
-          <button id="start" type="submit" class="label">Start</button>
-          <button id="cancel" type="button" class="label" hidden>Cancel the run</button>
-        </div>
-        <h3 class="label row-label" id="runs-next">Who runs next</h3>
-        <div id="picks" role="group" aria-labelledby="runs-next"></div>
-        <p class="note" id="estimate"></p>
-        <p class="note warn" id="lobby-why" hidden></p>
-        <p class="note" id="ceiling"></p>
-      </form>
-    </div>
 
     <div id="picker">
       <h3 class="label row-label" id="in-tunnel">Who is in the tunnel</h3>
@@ -214,6 +239,7 @@
 <script src="bench_view.js"></script>
 <script src="screens.js"></script>
 <script src="select.js"></script>
+<script src="trackpick.js"></script>
 <script src="front.js"></script>
 <script src="app.js"></script>
 </body>

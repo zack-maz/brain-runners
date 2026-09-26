@@ -1,5 +1,5 @@
-// Who is in the tunnel. One control governs both: in a replay it shows and hides the runners, and in
-// a live command, while nothing is running, the lobby's own list (lobby.js) chooses who runs instead.
+// Who is in the tunnel: it shows and hides the runners, live or replay. Who runs is chosen on the Brain
+// Battle character select (select.js).
 // Pure and tested under node; app.js does the DOM. Every player name goes through esc().
 (function (root) {
   "use strict";

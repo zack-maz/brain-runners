@@ -73,8 +73,9 @@ test("RUN cannot be pressed while a run is going or a fighter is refused, and sa
 });
 
 test("the cap line comes from the state", () => {
-  assert.match(TrackPick.capText(state()), /until its cap of 200 runs out/);
-  assert.match(TrackPick.capText(state({ max_requests: 0 })), /spends nothing/);
+  assert.match(TrackPick.capText(state(), LINEUP), /until its cap of 200 runs out/);
+  assert.match(TrackPick.capText(state({ max_requests: 0 }), LINEUP), /no cap: the paid fighters replay/);
+  assert.equal(TrackPick.capText(state(), ["fly2"]), "No paid fighter: this run spends nothing.");
 });
 
 test("the preview draws the real track: one dark cell per gap on its rows", () => {

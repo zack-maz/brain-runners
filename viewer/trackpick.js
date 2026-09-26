@@ -96,7 +96,8 @@
   }
 
   // The line under the total: the cap and what a row costs, from /state, never typed in.
-  function capText(state) {
+  function capText(state, players) {
+    if (!Lobby_.estimate(state, players).lines.length) return "No paid fighter: this run spends nothing.";
     if (!state.max_requests) {
       return "This command has no cap: the paid fighters replay answers already cached and stop at their first " +
         "uncached question, so this run spends nothing.";
