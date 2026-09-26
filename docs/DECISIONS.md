@@ -289,6 +289,20 @@
     included, straight to its new one. The new names were chosen for the Brain Battle character select
     (`docs/FRONTEND.md`), where each set is a skin.
 
+45. **Brain Battle is the front of `bakeoff live`** (the user, 2026-09-25; spec
+    `docs/superpowers/specs/2026-09-25-brain-battle-design.md`, mock-ups and answers in `docs/FRONTEND.md`). Home,
+    character select (skins are the players), track select, the race, results, and Records. The user approved the
+    spec's seven open calls:
+    - **Wrong moves** count the executed move, a fallback included; a death with no surviving move is "trapped".
+    - **Records** keeps the newest complete episode of each (player, track), notes how many older ones it left out,
+      and leaves tournament seeds out until phase 6.
+    - **Results** open by themselves when the tunnel reaches its last row; a viewer scrubbing back gets a button.
+    - **"What is ours"** keeps the whole current section under the mock-up's three paragraphs.
+    - **The live page drops the lobby's grid and "Who runs next"** (amends decision 38 for the live page; "Who is in
+      the tunnel" stays).
+    - **Skin colours and tags** ("Jev · Step 1") reach `bakeoff view` too; its layout is otherwise unchanged.
+    - **A results card's cost** is live requests × the page's price per request, labelled an estimate.
+
 Where we are and what comes next: `docs/NEXT.md`.
 
 ## Prior art to reuse

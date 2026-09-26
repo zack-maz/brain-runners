@@ -1,6 +1,6 @@
 # Brain Battle: the front of `bakeoff live`: design
 
-Date: 2026-09-25 · Status: **draft for the user's review** · Request, answers and mock-ups: `docs/FRONTEND.md` ·
+Date: 2026-09-25 · Status: approved by the user in chat, with all seven calls below (decision 45) · Request, answers and mock-ups: `docs/FRONTEND.md` ·
 Mock-up sources: `docs/mockups/brain-battle/` (the approved look) · Names: decision 44 · Builds on the page control
 (`docs/superpowers/specs/2026-09-22-page-control-design.md`, binding) and the demo player
 (`docs/superpowers/specs/2026-09-20-demo-player-design.md`, binding)
@@ -279,9 +279,9 @@ Two plans, each prototyped first as the project does:
 - New statistics beyond the two wrong-move columns.
 - Remote access.
 
-## For the user's review
+## Settled at review (decision 45)
 
-Calls this spec makes that the mock-ups and answers did not settle:
+Calls this spec made that the mock-ups and answers had not settled; the user approved all seven:
 
 1. **Wrong moves count what was done**: the executed move, a fallback `stay` included, not only the model's
    choice. A death with no surviving move is "trapped", not a fatal wrong move.
