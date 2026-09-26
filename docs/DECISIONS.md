@@ -303,6 +303,17 @@
     - **Skin colours and tags** ("Jev · Step 1") reach `bakeoff view` too; its layout is otherwise unchanged.
     - **A results card's cost** is live requests × the page's price per request, labelled an estimate.
 
+46. **Records after Brain Battle plan a** (the user, 2026-09-25, on the plan's final review):
+    - **The leaderboard ranks on practice tracks 1000–1019 only**, the tracks the track select offers, so the flies'
+      calibration and settle runs (1000–1199) do not swamp the question sets' five tracks. Each row keeps its track
+      count; head to head still compares a pair on the tracks both played.
+    - **fly2's rows are marked "tuned on these tracks"**, not removed: its thresholds were fixed on 1000–1199
+      (`records_of` returns `tuned_on`). A clean test of fly2 uses tracks 1200 and up.
+    - **The skins' `about` lines say what is ours** as reworded at the review: each question set ends "The question
+      is ours." or "The questions and the rule (the planner) are ours.", and the flies name their input, read-out,
+      rule and thresholds.
+    - **One fly smoke covers plans a and b**, run once no other session holds a fly brain.
+
 Where we are and what comes next: `docs/NEXT.md`.
 
 ## Prior art to reuse
