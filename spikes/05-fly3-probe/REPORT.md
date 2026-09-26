@@ -179,3 +179,102 @@ change these rules; a rule that proves unworkable is reported as such and that p
   add none.** For row, the DNs (0.73) are a little better than the input spikes (0.68). The DNs are a lossless-ish,
   not a richer, recoding of the input here. Only 144 of 1,299 DNs fire at all even at the highest gain, and 15 fire
   in at least half the windows.
+
+### Part C (`play_c.py`, `partC.json`): stops
+
+Gain 4000, the whole window, one window per decision (as part B chose). 0.52 s per decision on this Mac, the window
+being nearly all of it (0.521 of 0.522 s). Part C used 126 minutes of brain time (136 minutes wall clock, fits
+included); part B 14. Round 2 fitted under the 3-hour rule, so both later rounds ran.
+
+**Round 0's six variants** (fitted on the solver's path over 1000–1019, 2,923 rows; each played 1300–1309 until its
+first death):
+
+| variant | penalty λ1 / λ2 | CV score | DNs with weight | mean rows | rows per track | moves stay / left / right / jump |
+| --- | --- | --- | --- | --- | --- | --- |
+| set, w 1 | 0.01 / 0.01 | 0.962 | 35 | 82.7 | 87 60 83 100 76 114 84 54 58 111 | 0 / 214 / 569 / 27 |
+| single, w 1 | 0.001 / 0.001 | 0.907 | 149 | 36.7 | 29 49 36 49 33 32 43 48 12 36 | 366 / 8 / 3 / 0 |
+| **set, w 3** | 0.01 / 0.1 | 0.943 | 78 | **87.2** | 87 110 83 100 91 114 84 103 58 42 | 0 / 259 / 575 / 24 |
+| single, w 3 | 0.001 / 0.001 | 0.855 | 160 | 49.0 | 29 44 64 33 25 38 43 99 79 36 | 467 / 22 / 11 / 0 |
+| set, w 10 | 0.01 / 0.01 | 0.934 | 51 | 82.8 | 31 84 68 100 91 114 84 133 75 48 | 0 / 468 / 320 / 25 |
+| single, w 10 | 0.001 / 0.001 | 0.825 | 162 | 50.5 | 56 84 36 33 33 70 43 35 79 36 | 478 / 25 / 10 / 1 |
+
+**Winner: set target, w 3** (87.2; 4.5 rows ahead of the simpler set, w 1, more than the 1-row tie margin). The
+single-move target is far worse at every weight. It learns "stay" (the solver's first choice in a tie) and dodges
+too rarely. The set target never punishes a safe alternative and learns to dodge.
+
+**DAgger** (rows until the first rescue on 1000–1019; the readout plays on after each rescue):
+
+| round | fly3 mean | fly3 rescues | fly3 penalty λ1 / λ2, DNs with weight | no brain mean | no brain rescues | no-brain penalty |
+| --- | --- | --- | --- | --- | --- | --- |
+| 0 (solver's path) | — | — | 0.01 / 0.1, 78 | — | — | 0 / 0.001 |
+| 1 | 75.3 | 57 | 0.01 / 0.01, 35 | 110.7 | 24 | 0 / 0.001 |
+| 2 | 92.8 | 50 | 0.01 / 0.001, 23 | 129.7 | 14 | 0 / 0.001 |
+
+**Final plays on 1300–1309** (until the first death):
+
+| player | rows per track | mean | moves stay / left / right / jump |
+| --- | --- | --- | --- |
+| fly3 (DNs, after round 2) | 87 110 69 101 91 114 84 103 58 48 | **86.5** | 0 / 210 / 607 / 29 |
+| no brain (input rates, same learner and rounds) | 87 123 105 101 102 150 83 150 74 150 | **112.5** | 271 / 231 / 343 / 144 |
+| blind brain (fly3's readout, input off) | 31 8 20 6 9 21 42 35 12 12 | **19.6** | 0 / 0 / 206 / 0 |
+
+- **C11: fly3 fails the gate.** It is 26.0 rows behind no brain (SE 10.0 over the paired tracks; behind on 7 of 10
+  tracks, level on 2, ahead on 1 by one row). The blind half of the gate holds: blind is 66.9 rows below fly3, far
+  past the 15.5 needed (2 × SE 7.7).
+- **Not a clock.** The blind brain's DNs are silent (no DN fires without input, as in part B), so its readout
+  answers every row the same, "right", and dies in 6 to 42 rows. fly3's moves follow what it sees. But the same fact
+  shows a flaw: a row whose gaps are too far or too few to make any DN fire looks exactly like no input, and fly3
+  then goes right. fly3 never chose "stay" in any play. No brain stays 271 times.
+- DAgger helped fly3 (75.3 → 92.8 rows before a rescue on the training tracks) but its final play on 1300–1309
+  (86.5) is within a row of round 0's winner (87.2). No brain gained more from the same rounds (110.7 → 129.7).
+- **The readout's largest weights** (sum of |W| over the four moves, standardised features), 23 DNs with any
+  weight: DNpe025 right 0.90, DNp71 left 0.65, DNp13 left 0.56, DNge054 right 0.37, **DNa01 left 0.32 (rank 5)**,
+  DNp31 right 0.30, DNa05 left 0.27, DNbe006 right 0.23, DNge124 right 0.15, DNa05 right 0.15, DNa13 right 0.14,
+  DNp57 left 0.14, DNb09 left 0.12, then DNge124 left, DNp02 left, DNp55 left, DNpe040 left, DNb09 right, DNae007
+  left, DNpe040 right. **DNa02, DNg13 and DNp01 (the Giant Fiber) get no weight.** The readout found its own
+  steering and looming DNs (DNp02, DNp71, DNa05, DNb09, DNa13), not the hand-picked ones of fly and fly2. The one
+  overlap is DNa01.
+
+## Findings
+
+1. **The eye map is the fly's, not ours (part A).** LPLC2's layered lobula-plate inputs fix which way is forward and
+   up in both eyes, cross-checked by FAFB's dorsal axis and by the eyes' mirror symmetry. Every one of the 314 cells
+   has a centre with about 3° of uncertainty. What stays ours is the scale in degrees, the field widths and the
+   retina.
+2. **The DNs do carry "where" (part B)**, unlike fly's and fly2's summed readouts (spike 03). At the highest gain a
+   linear readout names a single gap's lane 80% of the time and its row 73% (chances 14% and 17%). But they carry
+   **no more than the input's own spikes do** (81% and 68%). Only 144 of 1,299 DNs fire even at the strongest input,
+   and none fire at weak inputs or with nothing in view.
+3. **As a layer of features for a learner, the brain is worse than no brain (part C):** 86.5 against 112.5 mean rows,
+   with the same learner, the same imitation and the same rounds. It is not a clock (blind brain 19.6), so the brain
+   passes what it sees. But it passes less of it than the input holds: faint, far and sparse gaps make no DN spike,
+   and a row with nothing firing is read as a blind one.
+4. Of the numbers the probe fixed, the "any safe move" target matters most (the single-move target halves the rows).
+   The critical-row weight matters little. Halves and averaging were not worth their cost. The gain was the top of
+   its grid and was still helping.
+
+## What is ours
+
+The degree scale of the eye (A4), the field shapes and widths, the whole retina (tile placement, looming, gain,
+the 500 Hz cap), the readout, its penalties and features, the imitation of the solver with DAgger and rescues, and
+every threshold in the rules above. The fly's: the wiring and the model, the cells that receive input, the DNs that
+are read, and each cell's place on the eye with its orientation.
+
+## Recommendation
+
+**Stop fly3** (DONE `stop C`). With the same learner, the untrained wiring is a worse layer of features than the
+input it is given. That is the honest answer to decision 45's question ("does the fly's wiring help a learner
+play?") for this game at these settings: no. The write-up can say so with controls: fly3 86.5, no brain 112.5, blind
+brain 19.6, all on 1300–1309. fly3 stays off the page, as the spec already requires when it does not beat no brain.
+
+If the user wants one more look before closing it, the one lever the rules left untested is a stronger input. DN lane
+accuracy climbed 0.24 → 0.36 → 0.52 → 0.80 over the gain grid, and the missing-DN-spikes problem is a weak-input
+problem. A second probe could extend the gain grid (8000, 16000, with the cap raised) and replay only part C's final
+three plays. That is about 30 minutes of brain time plus retraining (about 1.5 hours). It should be judged against
+the same no-brain bar (112.5), which does not move. The shuffled-wiring control was never reached. It matters only if
+fly3 ever beats no brain.
+
+**The engine question.** Measured: 0.52 s per decision, nearly all of it in the 100 ms Brian2 window. The full
+build (five rounds of 20 tracks for fly3 and for the shuffled control, three evaluations of 100 tracks) is about
+15,000 + 15,000 + 3 × 12,000 decisions, about 66,000 × 0.52 s ≈ 9.5 hours. That is an overnight run on Brian2,
+acceptable, and needs no fast engine. The spec's estimate (about 8 hours at 0.5 s) holds. It is moot while fly3 stops.
