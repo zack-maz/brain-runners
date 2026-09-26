@@ -105,9 +105,9 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
    fixes", 0 Critical, 3 Important, 10 Minor, all fixed and re-reviewed). Merged to `main` as PR #7 on 2026-09-25. **Settled on 2026-09-25**: on 100 fresh v2 seeds 1400–1499
    (`runs/20260925-163957`) fly2 scored 79.45 rows against fly's 66.02, +13.4 (95% interval 5.3 to 21.6), bench
    verdict "fly2 ahead" (`docs/COSTS.md`).
-   What is left: fly3, the trained fly (track 2 of decision 41), and a fast engine, each with its own spec. fly3's
-   brainstorm has begun (the user: science first, then the page; per-cell input) and is paused on how to pay for the
-   brain time. Phase 6 waits.
+   What is left: fly3, the trained fly (track 2 of decision 41). Its design is written (decision 45, spec
+   `docs/superpowers/specs/2026-09-25-fly3-design.md`, branch `fly3`) and awaits the user's review; next come the
+   probe (spike 05) and, if it passes, a plan. Phase 6 waits.
 1. **Parked**: GLM Flash's tracks 1001–1004 (decision 34), while Zhipu's free tier throttles. To pick it up, check
    it answers (a few requests through `bakeoff.clients.glm.HttpTransport`), then
    `uv run python -m bakeoff run --players glm_composed,glm_choice,glm_two_step --seeds 5 --seed-start 1000 --max-requests 700`
