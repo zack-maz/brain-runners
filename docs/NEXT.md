@@ -103,10 +103,11 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
   in `docs/FRONTEND.md`. Decision 44 (the sets are plain, guided, step1, step2 and map) is built on that branch.
   The spec is approved (decision 45, `docs/superpowers/specs/2026-09-25-brain-battle-design.md`), with decision 46
   (Records ranks on tracks 1000–1019, fly2 marked "tuned on these tracks"). Plan a, the server and the numbers, is
-  built and reviewed there (`f158a70`). **Next: build plan b, the screens**
-  (`docs/superpowers/plans/2026-09-25-brain-battle-b.md`, 9 tasks, written from the prototype `proto/bb-b`),
-  subagent-driven as plan a was; then the one fly smoke for both plans, docs, and a design review. Resume from
-  `docs/FRONTEND.md`, "Where this stands". The Writeup page comes last.
+  built and reviewed there (`f158a70`). Plan b, the screens (`docs/superpowers/plans/2026-09-25-brain-battle-b.md`),
+  is built (`912ef4d..c7fa9d8`, 9 Haiku tasks byte-identical to the prototype `proto/bb-b`, 580 fast tests) and
+  looked at in a browser with free players. **Next:** the one fly smoke for both plans (once no other session runs
+  a fly), the whole-branch design review of plan b, then the PR with the user. Resume from `docs/FRONTEND.md`,
+  "Where this stands". The Writeup page comes last.
 0. **`fly2`, the second pure fly, is built, calibrated, played and merged** (decisions 41–43, spec
    `docs/superpowers/specs/2026-09-24-fly2-design.md`, plan `docs/superpowers/plans/2026-09-24-fly2.md`, generated
    from the prototype `proto/fly2`, 9 tasks, branch `fly2`). Spike 04, the probe, passed on 2026-09-24

@@ -159,19 +159,18 @@ we found in my own words, as well as my opinions and thoughts. That can wait to 
   fly2 is in-sample on 1000–1199); one fix wave, re-reviewed clean. A live smoke with free players passed.
 - **Decision 46** (the user, on that review): Records ranks on tracks 1000–1019 only; fly2's rows are marked "tuned
   on these tracks"; the reworded `about` lines stand; one fly smoke covers plans a and b.
-- **Plan b, the screens, is written** (`docs/superpowers/plans/2026-09-25-brain-battle-b.md`, `ea21fce`, 9 tasks,
-  prototype `proto/bb-b`, 580 fast tests). Every screen was looked at in a headless browser against `bakeoff live`
-  on a copy of `runs/`. The plan lists what it decides beyond the spec (portraits light Jev's slit, money written by
-  `Lobby.usd`, any two leaderboard rows make a pair, the track select's footnote is `Lobby.ceilingText`); the user
-  approved it on 2026-09-25.
+- **Plan b, the screens, is built** (`docs/superpowers/plans/2026-09-25-brain-battle-b.md`, prototype `proto/bb-b`;
+  commits `912ef4d..c7fa9d8`, 580 fast tests). Nine Haiku tasks, every file byte-identical to the prototype; task 8
+  left the old lobby block in `index.html` with every test green, and the byte-compare caught it (the prototype's
+  file restored). Looked at in a headless browser against `bakeoff live` on a copy of `runs/`: home, the select,
+  the track select, a free Bot run to results that open by themselves, More numbers, Records with the pair chips
+  and "What is ours", phone width; no console errors. Not looked at in the browser: the paid confirmation (it needs
+  a cap above 0; `trackpick.test.js` pins it, and it was seen on the prototype).
 - **Next, in order:**
-  1. Build plan b subagent-driven, as plan a: `mkbriefs.py` briefs (check its trailer), Haiku implementers,
-     `compare.sh` against `proto/bb-b`, restore the prototype's file on any DIFFERS. Plan a's ledger and tools are in
-     the git-ignored `.superpowers/sdd/2026-09-25-brain-battle-a/` (copy `mkbriefs.py` and `compare.sh` from there).
-  2. Look at every screen against a live server (it renders the page once: restart it after a change).
-  3. The one fly smoke for plans a and b, only once `pgrep -fl bakeoff` shows no other session's fly.
-  4. Docs (CLAUDE.md's viewer list and page-control paragraph, NEXT.md, this section), then one whole-branch design
-     review of plan b, then finishing the branch (PR) with the user.
+  1. The one fly smoke for plans a and b, only once `pgrep -fl bakeoff` shows no other session's fly: Fly · Looming
+     and Bot · Solver on track 1001, through to results.
+  2. One whole-branch design review of plan b (the most capable model), then its one fix wave.
+  3. Finishing the branch (PR) with the user.
 - **Open, for the user:**
   - Settled 2026-09-25: the mind panels' tags stay "JEV STEP 1", "HAIKU PLAIN" until Brain Battle, which labels each
     fighter as on the character select, character and skin ("Jev · Step 1") in the skin's colour. The spec says so.

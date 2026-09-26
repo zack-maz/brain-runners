@@ -78,18 +78,21 @@ phase gets its own plan. Resume from `docs/NEXT.md`.
   one minute); never run two fly processes at once.
 - The viewer is plain JavaScript with no build step and no npm packages. Rules of the game stay in
   Python (`bakeoff/replay.py`); the pure JavaScript (`timeline.js`, `tunnel.js`, `sprites.js`, `roster.js`, `stage.js`, `minds.js`,
-  `log.js`, `picker.js`, `tabs.js`, `feed.js`, `lobby.js`, `bench_view.js`) is tested by
+  `log.js`, `picker.js`, `tabs.js`, `feed.js`, `lobby.js`, `bench_view.js`, and Brain Battle's `screens.js`, `select.js`,
+  `trackpick.js`, `results.js`, `records.js`) is tested by
   `viewer/tests/*.test.js`, which `uv run pytest` runs through `node --test`. Text from a log is always
   escaped (`Minds.esc`) and the page must never load anything from the network (the two brand fonts in
   `viewer/fonts/` are embedded as base64 by `bakeoff/view.py`). The page is the user's brand: tokens from
   `~/Documents/PROJECTS/BRAND/brand.css`, blue only for the cursor (the mind in focus and its tiles), mono for short
   labels only, deaths and errors `--bad`, warnings `--warn`. Frames reach `app.js` through `Feed` alone.
-- The page has two tabs (update 3b): Run holds the tunnel, the mind strip, the lobby and the transport; Analysis
+  `viewer/front.js` is the DOM glue of the live front (it fetches and shows the screens; in a replay file it returns
+  at once), and `app.js` exposes the run screen to it as `window.Race`.
+- The page has two tabs (update 3b): Run holds the tunnel, the mind strip and the transport; Analysis
   holds the levels, the scoreboard, what is ours and the benchmark. Every mind panel carries a running log, one line
   per row up to the row on screen and one log open at a time, appended as the frames arrive so it keeps its scroll
   and never runs ahead of the tunnel. One section, "Players", holds both lists as
-  labelled rows (decision 38): who runs next (the lobby's ticks, live only) and who is in the tunnel (shows and
-  hides the runners on screen, live or replay). The level table only picks the track, and a player that did not run
+  labelled rows (decision 38); since Brain Battle only one is left: who is in the tunnel (shows and hides the
+  runners on screen, live or replay), while who runs next is picked on the character select. The level table only picks the track, and a player that did not run
   the track in view can never be turned on. `viewer/bench_view.js` is the one drawing code for the benchmark, mounted by both
   `bench.html` and the Analysis tab, and `viewer/bench.css` styles it on both pages (keyed to its `data-bench`
   names, not to ids); `bakeoff.bench.benchmark_of` scores runs for a page and answers with a reason instead of
@@ -101,8 +104,8 @@ phase gets its own plan. Resume from `docs/NEXT.md`.
   (`bakeoff/fly/shared.py`): never start it next to another fly run. Its records come from `runner.play_row` and
   its frames from `replay.frame_of`, the same functions `run` and `view` use; keep it that way.
 - The page runs the show (update 3a, design `docs/superpowers/specs/2026-09-22-page-control-design.md`): the command
-  binds the port and sets the ceiling, the lobby in the browser picks the track and the players and starts and
-  cancels the run (`GET /state`, `POST /run`, `POST /cancel`, `GET /events?run=`). Every request but the page itself
+  binds the port and sets the ceiling, the page (since Brain Battle, its front: the character select picks the
+  players, the track select the track and holds the money confirmation) starts and cancels the run (`GET /state`, `POST /run`, `POST /cancel`, `GET /events?run=`). Every request but the page itself
   carries a token minted at startup and embedded in the page (in the header; in the query for the event stream
   alone, which cannot send headers), so no other page in the browser can drive the run. It is not a defence
   against a program on this machine: whatever may fetch `/` may read the token out of the page. One
@@ -118,8 +121,11 @@ phase gets its own plan. Resume from `docs/NEXT.md`.
   it, practice seeds only); the report has `wrong_moves` and `fatal_wrong_moves`. Three read-only routes sit behind
   the token: `GET /results?run=`, `GET /records`, `GET /replay?run=`; `run=` must be a run id naming a directory
   under the session's `--out` with a `meta.json`, or it is a 404. Plan b, the screens
-  (`docs/superpowers/plans/2026-09-25-brain-battle-b.md`, decision 46), is written and next: it replaces the lobby
-  with the front (home, character select, track select with the money, results, records) in `viewer/front.js`.
+  (`docs/superpowers/plans/2026-09-25-brain-battle-b.md`, decision 46), is built: `bakeoff live` opens on the front
+  (home, character select, track select, the run screen, results that open by themselves, Records with the
+  leaderboard on practice tracks 1000–1019, head to head, past runs and the whole "what is ours" section); the
+  lobby's grid is gone (`lobby.js` keeps the money helpers). A lineup that can spend is confirmed once, with its
+  worst case on the RUN button, and Run again goes through the same confirmation. `bakeoff view` keeps its replay page.
 - Paid players spend nothing without `--max-requests` (default 0 replays `.cache/responses`). Never
   raise a cap, rerun a paid command or run `pytest -m live` without the user's go-ahead. No paid
   request on a seed below 1000 before the tournament; the CLI refuses a live paid run on seeds
