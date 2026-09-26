@@ -117,3 +117,65 @@ change these rules; a rule that proves unworkable is reported as such and that p
   the readout's largest weights by DN type (sum of |W| over the four moves per DN, top 20, and the ranks of DNa02,
   DNa01, DNg13 and DNp01 (the Giant Fiber)); how often each move is chosen in every play (a readout that plays
   "a clock" chooses the same moves whatever it sees).
+
+## What was done
+
+### Data sources
+
+- The project's fly data, unchanged (`bakeoff/fly/data.py`): FlyWire v783 model `philshiu/Drosophila_brain_model`
+  @ `91bdd1e7`, annotations `flyconnectome/flywire_annotations` @ `17fc5772` (sha256 in `data.py`).
+- Fetched: `https://github.com/flyconnectome/ol_annotations` @ `11a4c97980a08e726733e115f553faf8c7023044`
+  (2025-02-19), cloned to `data/ol_annotations/`. **It holds no column map**: its data is a cell-type matching table
+  between FlyWire and the male optic lobe (`data/olmatching.tsv`, 727 rows). Matsliah et al.'s own repository,
+  `murthylab/visual-system-parts-list` @ `0d8574d46627ce7fadd968a3c5d602e837325373`, was inspected through the GitHub
+  API (not downloaded): neuron and synapse tables, no column assignment either. Codex's download of the column
+  assignment (`codex.flywire.ai/api/download?data_product=column_assignment`) answers with a login page. So the
+  column map was not used; the orientation came from the wiring itself (A2), which is the fly's.
+- Recordings (not committed, git-ignored): `data/spike05/partB_*.npz`, `data/spike05/partC/*.npz`, logs
+  `data/spike05_partB.log`, `data/spike05_partC.log` (`data/` is the main checkout's data directory).
+
+### Part A (`fields.py`, `fields.json`): passes
+
+| eye | cells placed | layer test: posterior agree / dorsal agree / angle | LC4 map R² u / v | spread P5–P95 az / el | median SE az / el | distinguishable positions az / el | fields side by side az / el (info) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| left | 108 LPLC2 + 54 LC4 | 0.79 / 1.00 / 84° | 0.96 / 0.99 | 156° / 110° | 3.2° / 1.1° | **24 / 52** | 3.9 / 2.8 |
+| right | 102 LPLC2 + 50 LC4 | 0.94 / 1.00 / 90° | 0.95 / 0.99 | 162° / 114° | 3.5° / 1.0° | **23 / 55** | 4.1 / 2.8 |
+
+- **The orientation is the fly's, by the layer rule, in both eyes.** Every LPLC2 cell's layer-3 inputs sit dorsal
+  of its layer-4 inputs; 79% and 94% of cells put layer 1 posterior of layer 2; the two directions are 84° and 90°
+  apart. Two independent checks agree: the dorsal direction found this way points along −y (FAFB's y points
+  ventrally; −0.89 and −0.93), and the two eyes' directions mirror each other in x (posterior x +0.73 left, −0.85
+  right; y and z alike). The rule's fall-back (anterior toward −z) would have been wrong: the posterior direction has
+  z −0.54 and −0.38, so the lobula plate's map is tilted against the brain's axes.
+- LC4 is placed through its columnar inputs (T2, T2a, Tm2, Tm3, Tm4, TmY3), with a map fitted on LPLC2 cells' own
+  inputs from the same types; the map explains 95–99% of the LPLC2 coordinates.
+- About 29 (left) and 36 (right) cells lie in the frontal-lower field where the tiles are (|azimuth| < 80°,
+  elevation < 0). A row-1 gap covers some field by 0.08–0.29, a row-6 gap by 0.015–0.022 (looming), and 2 to 52
+  cells get a coverage above 0.01 per tile.
+
+### Part B (`record_b.py`, `analyze_b.py`, `partB.json`): passes
+
+1,299 of the 1,303 annotated DNs are in the model. 1,376 windows, 0.58–0.62 s each on this Mac (brain built in
+29 s). No DN fires on the blank at any gain. Accuracy is mean ± SD over the 4 folds; lane chance 0.143, row 0.167.
+
+| gain | best-placed cell (Hz) | DNs that fire at all | in half the windows | DN spikes / window | DN lane | DN lane, halves | DN row | no brain (input rates) lane / row | input cells' spikes lane / row |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 500 | 145 | 24 | 0 | 2.2 | 0.244 ± 0.030 | 0.226 ± 0.047 | 0.351 ± 0.039 | 1.000 / 1.000 | 0.622 / 0.598 |
+| 1000 | 289 | 54 | 0 | 6.9 | 0.360 ± 0.046 | 0.342 ± 0.046 | 0.527 ± 0.018 | 1.000 / 1.000 | 0.726 / 0.646 |
+| 2000 | 500 | 80 | 2 | 20.7 | 0.524 ± 0.031 | 0.485 ± 0.030 | 0.702 ± 0.010 | 1.000 / 1.000 | 0.771 / 0.667 |
+| **4000** | 500 | 144 | 15 | 52.4 | **0.795 ± 0.018** | 0.732 ± 0.044 | 0.732 ± 0.057 | 1.000 / 1.000 | 0.812 / 0.679 |
+
+- **B5, gain: 4000** (best DN lane accuracy). It is the top of the grid, and accuracy was still rising, so a higher
+  gain might do better still; the rule did not allow measuring one. At 4000, most tiles' best cells sit at the
+  500 Hz cap.
+- **B6, halves: not kept.** They are *worse* than the whole window (0.732 against 0.795; the difference, −0.06, is
+  below zero, let alone above the spread 0.044).
+- **B7, averaging: not adopted.** The mean of two windows scores 0.833 ± 0.019 against 0.795 for one: +0.039, below
+  the 0.10 threshold. One window per decision.
+- **B8, pass:** 0.795 ≥ 0.30, and 0.795 − 0.143 = 0.65 is 36 fold SDs.
+- **What this says about "the brain helps".** The noise-free input rates predict both lane and row perfectly (they
+  are a deterministic function of the tile). The fairer comparison, the input cells' own Poisson spikes in the same
+  window, gives 0.81 lane, the DNs 0.80: **the DNs keep nearly all of the "where" that the noisy input carries, and
+  add none.** For row, the DNs (0.73) are a little better than the input spikes (0.68). The DNs are a lossless-ish,
+  not a richer, recoding of the input here. Only 144 of 1,299 DNs fire at all even at the highest gain, and 15 fire
+  in at least half the windows.
