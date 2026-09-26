@@ -81,3 +81,16 @@ scoreboard, what is ours, the benchmark) go in the new flow.
 - **Input:** mouse and keyboard. A click on a portrait drops the next token there; a slot's colour dot, or X and Y,
   cycles its skin; the arrow keys move a cursor.
 - **Replays:** only `bakeoff live` gets the new front for now; `bakeoff view` still opens on the replay.
+
+## Mock-ups (artifacts, one per screen, approved before anything is built)
+
+- **Home** (https://claude.ai/artifact/SBD24j7sBu9acKV4JK4BTK). The user's changes, 2026-09-25: the logo's two
+  words are centred; no slash across them; behind them, a solid pixel brain in blue, fairly opaque (0.7), with a
+  pulsing glow, set a little below the text's centre. **This brain is the one use of blue that is not the cursor**
+  (the user's call). GLM Flash is an ox, for its preview name Ox Alpha: violet head, amber horns and nose ring.
+- **Character select** (https://claude.ai/artifact/LsnzaCSjnujcVmFjVWSixP). Five portraits (Fly, Jev, Haiku, GLM
+  Flash, and Bot as a sandbag), eight slots, a "Ready to fight" banner from one fighter on, and a line about the
+  skin in focus: what it does, its player name, its price.
+  Skin colours (never blue): each character's own colour is its first skin (fly grey, Jev pale, Haiku orange, GLM
+  violet); every question set has the same colour on every model (composed teal, choice amber, two-step tan, reader
+  green), so twins read as twins; fly2 is teal; the Bot is white (solver), grey (random), tan (always jump).
