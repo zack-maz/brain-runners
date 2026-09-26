@@ -101,6 +101,13 @@ test("past runs: only this session's run is live; another that says running is n
   assert.match(html, /data-watch="20260925-163957" data-now="true"/);
 });
 
+test("past runs: the run still playing offers Watch live but no Results until it ends", () => {
+  const html = Records.runsHtml(Records.pastRuns(RECORDS, ROSTER, true).rows);
+  assert.equal(html.includes('data-results="20260925-163957"'), false);
+  assert.match(html, /data-results="20260924-211656"/);
+  assert.match(html, /data-results="20260924-100000"/);
+});
+
 test("the first ten past runs, then all of them when asked", () => {
   const many = { ...RECORDS, runs: Array.from({ length: 12 }, (_, i) => ({ ...RECORDS.runs[1], run_id: "r" + i })) };
   assert.equal(Records.pastRuns(many, ROSTER, false).rows.length, Records.SHOWN_RUNS);

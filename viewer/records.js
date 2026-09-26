@@ -203,11 +203,16 @@
       esc(v.note) + "</span></div>";
   }
 
+  // The run this session is still playing can be watched live but has no results yet: it offers no Results.
   function runsHtml(list) {
-    return list.map((r) => '<div class="past"><span class="when">' + esc(r.when) + '</span><span>' + esc(r.tracks) + "</span>" +
-      '<span class="players">' + esc(r.players) + '</span><span class="label status ' + r.kind + '">' + esc(r.status) + "</span>" +
-      '<span class="actions"><button type="button" data-watch="' + esc(r.run_id) + '"' + (r.watch === "Watch live" ? ' data-now="true"' : "") +
-      ">" + esc(r.watch) + '</button><button type="button" data-results="' + esc(r.run_id) + '">Results</button></span></div>').join("");
+    return list.map((r) => {
+      const now = r.watch === "Watch live";
+      return '<div class="past"><span class="when">' + esc(r.when) + '</span><span>' + esc(r.tracks) + "</span>" +
+        '<span class="players">' + esc(r.players) + '</span><span class="label status ' + r.kind + '">' + esc(r.status) + "</span>" +
+        '<span class="actions"><button type="button" data-watch="' + esc(r.run_id) + '"' + (now ? ' data-now="true"' : "") +
+        ">" + esc(r.watch) + "</button>" +
+        (now ? "" : '<button type="button" data-results="' + esc(r.run_id) + '">Results</button>') + "</span></div>";
+    }).join("");
   }
 
   const api = { SHOWN_RUNS, tunedHere, board, boardNotes, pairOf, chips, pairView, when, tracksText, playersText, pastRuns,
