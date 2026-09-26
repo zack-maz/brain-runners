@@ -10,7 +10,7 @@ import pytest
 from bakeoff.clients.core import RequestBudget, SharedBudget
 from bakeoff.errors import BudgetExhausted
 from bakeoff.game.rules import rules_for
-from bakeoff.players import PAID, REGISTRY
+from bakeoff.players import PAID, REGISTRY, UNCAPPED
 from bakeoff.session import PRICE_USD, LiveSession, LobbyError, answered_models, model_of, played_before
 from tests.fakes import slow_player
 
@@ -116,7 +116,8 @@ def test_the_history_of_a_run_that_is_over_is_dropped_when_the_next_one_starts(t
 def test_the_cap_the_command_set_is_per_paid_player_for_the_whole_session(tmp_path):
     state = session(tmp_path, max_requests=40).state()
     left = {p["name"]: p["requests_left"] for p in state["players"] if p["paid"]}
-    assert set(left.values()) == {40} and state["max_requests"] == 40
+    assert {left[name] for name in PAID if name not in UNCAPPED} == {40} and state["max_requests"] == 40
+    assert {left[name] for name in UNCAPPED} == {None}  # Jev has no cap (decision 50)
 
 
 def test_a_run_from_the_lobby_is_a_normal_run_directory_and_the_session_returns_to_it(tmp_path):
@@ -325,3 +326,22 @@ def test_the_run_playing_now_is_the_one_past_run_that_can_be_watched_live(tmp_pa
         lobby.cancel()
         lobby.wait(30)
     assert lobby.records()["runs"][0]["current"] is False
+
+
+def test_jev_plays_without_a_cap_but_its_requests_are_still_counted(tmp_path):
+    lobby = session(tmp_path)  # a cap of 0: Claude Haiku may only replay the cache, Jev may still ask (decision 50)
+    assert UNCAPPED == tuple(name for name in PAID if name.startswith("jev_")) and UNCAPPED
+    for _ in range(500):
+        lobby.budgets["jev_step1"].spend()
+    assert lobby.budgets["jev_step1"].used == 500
+    lobby.check(1001, list(UNCAPPED))
+    players = {p["name"]: p for p in lobby.state(1001)["players"]}
+    assert (players["jev_step1"]["capped"], players["jev_step1"]["requests_left"]) == (False, None)
+    assert players["jev_step1"]["price_usd"] == PRICE_USD["jev_step1"]  # still priced, so its cost is shown
+    assert (players["haiku_plain"]["capped"], players["haiku_plain"]["requests_left"]) == (True, 0)
+    assert players["fly"]["capped"] is None
+
+
+def test_jev_still_keeps_off_the_tournament_seeds(tmp_path):
+    with pytest.raises(LobbyError, match="paid players may not play seeds below 1000"):
+        session(tmp_path).check(7, ["jev_step1"])

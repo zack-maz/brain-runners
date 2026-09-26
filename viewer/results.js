@@ -102,7 +102,7 @@
     const ended = results.status === "completed" ? "Run ended" : "Run " + (results.status || "ended");
     const where = seeds.length <= 1 ? "Track " + seeds[0]
       : "Tracks " + Math.min(...seeds) + "–" + Math.max(...seeds) + " (" + seeds.length + ")";
-    return { left: ended + " · " + n + (n === 1 ? " fighter" : " fighters"),
+    return { left: ended + " · " + n + (n === 1 ? " runner" : " runners"),
              right: where + " · game " + results.game.version + " · " + results.game.max_rows + " rows" };
   }
 

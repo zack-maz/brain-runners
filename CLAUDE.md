@@ -72,7 +72,9 @@ phase gets its own plan. Resume from `docs/NEXT.md`.
 - Keys live in a git-ignored `.env`. A guard blocks every shell command that mentions `.env`,
   so programs must load it themselves (python-dotenv) and never print values.
 - Budget is limited: paid players need a response cache and a hard request cap from their
-  first commit; start paid runs with one capped track. Measured: the LLM about 0.0006 USD per request, Jev about
+  first commit; start paid runs with one capped track. The one exception is Jev (decision 50): its requests cost
+  the user nothing, so `jev_*` play without a cap (`UNCAPPED`, `UncappedBudget`), still cached, counted and priced.
+  Measured: the LLM about 0.0006 USD per request, Jev about
   0.00003 USD (an estimate, `docs/COSTS.md`).
 - The fly simulation needs about 1 GB and must run one process at a time on this 8 GB Mac.
 - Honesty rule for the fly: untrained, innate wiring only; any mapping that is ours rather than
@@ -129,7 +131,8 @@ phase gets its own plan. Resume from `docs/NEXT.md`.
   leaderboard on practice tracks 1000–1019, head to head, past runs and the whole "what is ours" section); the
   lobby's grid is gone (`lobby.js` keeps the money helpers). A lineup that can spend is confirmed once, with its
   worst case on the RUN button, and Run again goes through the same confirmation. `bakeoff view` keeps its replay page.
-- Paid players spend nothing without `--max-requests` (default 0 replays `.cache/responses`). Never
-  raise a cap, rerun a paid command or run `pytest -m live` without the user's go-ahead. No paid
+- Capped paid players (Claude Haiku, GLM Flash) spend nothing without `--max-requests` (default 0 replays
+  `.cache/responses`); Jev asks whenever its answer is not cached. No fast test can reach a provider:
+  `tests/conftest.py` hides every provider key unless a test is marked `live`. Never raise a cap, rerun a paid command or run `pytest -m live` without the user's go-ahead. No paid
   request on a seed below 1000 before the tournament; the CLI refuses a live paid run on seeds
   below 1000 without `--tournament`.

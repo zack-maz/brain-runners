@@ -20,7 +20,7 @@ from bakeoff.clients.core import DiskCache, RequestBudget, SharedBudget
 from bakeoff.game.rules import Rules
 from bakeoff.game.track import generate_track
 from bakeoff.live import LiveRun
-from bakeoff.players import PAID, REGISTRY, fly2, make_player
+from bakeoff.players import PAID, REGISTRY, UNCAPPED, budget_of, fly2, make_player
 from bakeoff.players.names import canonical
 from bakeoff.replay import CONTESTANTS
 
@@ -151,7 +151,7 @@ class LiveSession:
         self.token = token or secrets.token_urlsafe(16)
         # one budget per paid player for the whole session: the command's cap is per player per session,
         # so a second run from the page spends what the first one left
-        self.budgets: dict[str, RequestBudget] = {name: RequestBudget(max_requests) for name in PAID}
+        self.budgets: dict[str, RequestBudget] = {name: budget_of(name, max_requests) for name in PAID}
         self.run: LiveRun | None = None
         self.finished: list[LiveRun] = []
         self._thread: threading.Thread | None = None
@@ -182,6 +182,8 @@ class LiveSession:
                 # what it answered as last: the asked-for name may be a moving one (`jev-latest`)
                 "model_answered": answered.get(name) if paid else None,
                 "requests_left": self.budgets[name].remaining if paid else None,
+                # False for Jev, which plays without a cap (decision 50): its worst case is the whole track
+                "capped": (name not in UNCAPPED) if paid else None,
                 "played_before": seed is not None and seed in played.get(name, []),
                 # the track select's own practice tracks it has a recorded run of, for its marks: a
                 # tournament seed or a bulk-run seed past the track select's own tracks is not offered there

@@ -81,3 +81,19 @@ test("the ceiling is written out, cap or no cap", () => {
   assert.match(Lobby.ceilingText(state({ tournament: true })), /Seeds below 1000 are allowed here/);
   assert.match(Lobby.ceilingText(state()), /Nothing on this page can raise either\./);
 });
+
+test("Jev plays without a cap: its worst case is the whole track, shown but never confirmed (decision 50)", () => {
+  const uncapped = state({ players: [
+    player("jev_step1", { paid: true, price_usd: 0.00003, requests_left: null, capped: false }),
+    player("haiku_plain", { paid: true, price_usd: 0.0006, requests_left: 0, capped: true })] });
+  const { lines, total_usd } = Lobby.estimate(uncapped, ["jev_step1"]);
+  assert.deepEqual(lines.map((l) => [l.player, l.requests, l.uncapped]), [["jev_step1", 150, true]]);
+  assert.equal(total_usd.toFixed(4), (150 * 0.00003).toFixed(4));
+  assert.equal(Lobby.spends(uncapped, ["jev_step1"]), false); // it costs the user nothing: no confirmation
+  assert.match(Lobby.estimateText(uncapped, ["jev_step1"]), /JEV STEP 1 150 requests at worst, 0\.0045 USD, no cap/);
+  assert.match(Lobby.ceilingText(uncapped), /Jev plays without a cap; its requests are still counted and priced\./);
+  // a capped player beside it still asks for confirmation when it has requests left
+  const both = state({ players: [...uncapped.players.slice(0, 1),
+    player("haiku_plain", { paid: true, price_usd: 0.0006, requests_left: 10, capped: true })] });
+  assert.equal(Lobby.spends(both, ["jev_step1", "haiku_plain"]), true);
+});

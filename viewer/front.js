@@ -116,7 +116,7 @@
   // ---- the character select ------------------------------------------------------------------------
   function renderSelect() {
     const sel = front.sel;
-    $("select-count").textContent = sel.slots.length + " / " + Select.MAX + " fighters";
+    $("select-count").textContent = sel.slots.length + " / " + Select.MAX + " runners";
     $("portraits").innerHTML = Select.portraitsHtml(sel, roster);
     $("slots").innerHTML = Select.slotsHtml(sel, roster);
     $("select-info").innerHTML = Select.infoHtml(sel, roster, front.state ? front.state.players : []);

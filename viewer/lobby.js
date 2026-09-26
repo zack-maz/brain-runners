@@ -5,7 +5,8 @@
 //
 // `state` is what GET /state answers (bakeoff/session.py): {status, game, max_rows, requests_per_row,
 // max_requests, tournament, first_practice_seed, seed, players: [{name, paid, price_usd,
-// requests_left, played_before, why_not}], run}.
+// requests_left, capped, played_before, why_not}], run}. `capped` is false for Jev, which plays without a cap
+// (decision 50): its worst case is the whole track, shown and priced, but it costs the user nothing to confirm.
 (function (root) {
   "use strict";
 
@@ -32,10 +33,12 @@
     for (const name of chosen) {
       const player = byName.get(name);
       if (!player || !player.paid) continue;
-      const requests = Math.min(rows * (state.requests_per_row || 1), player.requests_left || 0);
+      const uncapped = player.capped === false;
+      const track = rows * (state.requests_per_row || 1);
+      const requests = uncapped ? track : Math.min(track, player.requests_left || 0);
       const cost = requests * (player.price_usd || 0);
       total += cost;
-      lines.push({ player: name, requests, usd: cost, free: !(player.price_usd > 0),
+      lines.push({ player: name, requests, usd: cost, free: !(player.price_usd > 0), uncapped,
                    played_before: !!player.played_before });
     }
     return { rows, lines, total_usd: total };
@@ -47,6 +50,7 @@
     if (!lines.length) return "No paid player: this run spends nothing.";
     const each = lines.map((line) => tagOf(line.player) + " " + line.requests + " request" +
       (line.requests === 1 ? "" : "s") + " at worst, " + (line.free ? "0 USD (free tier)" : usd(line.usd)) +
+      (line.uncapped ? ", no cap" : "") +
       (line.played_before ? ", played before (some answers may be cached)" : ""));
     if (!lines.some((line) => line.requests > 0)) {
       return "No request left of this command's cap: the paid players replay what is already cached and stop " +
@@ -75,12 +79,15 @@
     const seeds = state.tournament
       ? "Seeds below " + state.first_practice_seed + " are allowed here (--tournament)."
       : "Paid players may only play seeds " + state.first_practice_seed + " and up; the tournament seeds are kept unseen.";
-    return cap + " " + seeds + " Nothing on this page can raise either.";
+    const jev = (state.players || []).some((p) => p.paid && p.capped === false)
+      ? " Jev plays without a cap; its requests are still counted and priced." : "";
+    return cap + jev + " " + seeds + " Nothing on this page can raise either.";
   }
 
   // Does starting this run need confirming? Only when it can really spend: a run that has no request
   // left of the cap spends nothing whatever it asks for.
-  const spends = (state, chosen) => estimate(state, chosen).lines.some((line) => line.requests > 0);
+  // Jev's requests cost the user nothing (decision 50), so Jev alone is never asked to be confirmed.
+  const spends = (state, chosen) => estimate(state, chosen).lines.some((line) => line.requests > 0 && !line.uncapped);
 
   const api = { usd, estimate, estimateText, whyNot, ceilingText, spends };
   if (typeof module !== "undefined" && module.exports) module.exports = api;

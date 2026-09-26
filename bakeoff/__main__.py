@@ -11,7 +11,7 @@ from pathlib import Path
 from bakeoff.clients.core import DEFAULT_CACHE_DIR, DiskCache, RequestBudget
 from bakeoff.game.rules import DEFAULT, RULES, Rules, resolve, rules_for
 from bakeoff.live_server import EVENTS_PATH, HOST, serve
-from bakeoff.players import PAID, REGISTRY, make_player
+from bakeoff.players import PAID, REGISTRY, UNCAPPED, budget_of, make_player
 from bakeoff.players.names import canonical
 from bakeoff.report import format_table, load_meta, load_steps, summarize
 from bakeoff.replay import build_replay, empty_replay
@@ -19,6 +19,9 @@ from bakeoff.runner import RunAborted, Runner
 from bakeoff.session import FIRST_PRACTICE_SEED, LiveSession, LobbyError
 from bakeoff.view import render_html
 
+CAPPED = tuple(name for name in PAID if name not in UNCAPPED)
+UNCAPPED_HELP = (f"Jev ({', '.join(UNCAPPED)}) plays without a cap: its requests cost you nothing (decision 50), "
+                 "and are still counted and priced")
 DEMO_PLAYERS = "fly,jev_step1,haiku_plain"  # the demo's three: what the character select offers first
 DEMO_SEED = 1001
 
@@ -48,8 +51,9 @@ def _parser() -> argparse.ArgumentParser:
     run.add_argument("--max-rows", type=int, help="play a prefix of each track (default: the whole track)")
     run.add_argument("--out", default="runs")
     run.add_argument("--max-requests", type=int, default=0,
-                     help=f"hard cap on live requests for EACH paid player ({', '.join(PAID)}); the default 0 only replays "
-                          "the cache. Worst case a run spends this many requests per paid player")
+                     help=f"hard cap on live requests for EACH capped paid player ({', '.join(CAPPED)}); the default 0 "
+                          "only replays the cache. Worst case a run spends this many requests per capped paid player. "
+                          f"{UNCAPPED_HELP}")
     run.add_argument("--cache", default=str(DEFAULT_CACHE_DIR), help="response cache directory")
     run.add_argument("--tournament", action="store_true",
                      help="allows live paid requests on seeds below 1000; for the phase 6 tournament only")
@@ -69,20 +73,21 @@ def _parser() -> argparse.ArgumentParser:
     live = sub.add_parser("live", help="play one track in real time and watch it in the browser (loopback only); "
                                        "the run is recorded like any other")
     live.add_argument("--players", help=f"comma-separated; available: {sorted(REGISTRY)}. Without it the page "
-                                        f"opens on the Brain Battle home with the demo's three picked ({DEMO_PLAYERS})")
+                                        f"opens on the Brain Run home with the demo's three picked ({DEMO_PLAYERS})")
     live.add_argument("--seed", type=int, help=f"the track; practice seeds are 1000 and up (default {DEMO_SEED} in "
                                                "the track select, where the page may choose another)")
     _add_game_arguments(live)
     live.add_argument("--max-rows", type=int, help="play a prefix of the track (default: the whole track)")
     live.add_argument("--out", default="runs")
     live.add_argument("--max-requests", type=int, default=0,
-                      help=f"hard cap on live requests for EACH paid player ({', '.join(PAID)}); the default 0 only "
-                           "replays the cache, which makes a free live run of a track that was already played")
+                      help=f"hard cap on live requests for EACH capped paid player ({', '.join(CAPPED)}); the default 0 "
+                           "only replays the cache, which makes a free live run of a track that was already played. "
+                           f"{UNCAPPED_HELP}")
     live.add_argument("--cache", default=str(DEFAULT_CACHE_DIR), help="response cache directory")
     live.add_argument("--tournament", action="store_true", help="allows live paid requests on seeds below 1000")
     live.add_argument("--start", action="store_true",
                       help="play at once with --players on --seed, as before; without it the page opens in the "
-                           "Brain Battle home and starts the run when you say so")
+                           "Brain Run home and starts the run when you say so")
     live.add_argument("--port", type=int, default=8000, help="the page is served on 127.0.0.1 only (default port 8000)")
     live.add_argument("--no-wait", action="store_true",
                       help="do not wait for a browser before the run, and do not keep serving after it")
@@ -90,8 +95,9 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def _players(names: str, cache: DiskCache, max_requests: int, rules: Rules) -> list:
-    # one budget per paid player: the providers bill separately, and one must not starve the other
-    players = [make_player(name, cache=cache, budget=RequestBudget(max_requests)) if name in PAID
+    # one budget per paid player: the providers bill separately, and one must not starve the other; Jev has none
+    # (decision 50), its requests are only counted
+    players = [make_player(name, cache=cache, budget=budget_of(name, max_requests)) if name in PAID
                else make_player(name) for name in (canonical(n.strip()) for n in names.split(","))]
     for p in players:  # a question set that cannot be asked on this vision is a usage error, before anyone plays
         if hasattr(p, "question_set"):
@@ -100,8 +106,8 @@ def _players(names: str, cache: DiskCache, max_requests: int, rules: Rules) -> l
 
 
 def _spends_on_tournament_seeds(players: list, max_requests: int, first_seed: int, tournament: bool) -> bool:
-    return (max_requests > 0 and any(p.name in PAID for p in players)
-            and first_seed < FIRST_PRACTICE_SEED and not tournament)
+    spends = any(p.name in UNCAPPED for p in players) or (max_requests > 0 and any(p.name in PAID for p in players))
+    return spends and first_seed < FIRST_PRACTICE_SEED and not tournament
 
 
 SEED_RULE = ("paid players may not spend requests on seeds below 1000 (tournament seeds); "
@@ -119,7 +125,7 @@ def _paid_window_mismatch(players: list, chosen_window: int, requested_window: i
 
 def _live(args) -> int:
     """The page runs the show: the command sets the ceiling, binds the loopback port and keeps serving;
-    Brain Battle in the browser picks the players and the track. `--start` plays at once, as before."""
+    Brain Run in the browser picks the players and the track. `--start` plays at once, as before."""
     try:  # the session plays every run of this command, so --max-rows belongs to its rules
         rules = resolve(_rules(args), args.max_rows)
     except (KeyError, ValueError) as e:
@@ -269,6 +275,9 @@ def _bench(args) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
+    if getattr(args, "max_requests", 0) < 0:  # checked here: a lineup of Jev alone builds no capped budget to refuse it
+        print(f"max_requests must not be negative: {args.max_requests}", file=sys.stderr)
+        return 2
     if args.command == "bench":
         return _bench(args)
     if args.command == "report":
