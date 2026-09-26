@@ -1,5 +1,7 @@
 // The runners as pixel sprites: grids of characters, one character = one pixel, `.` is empty.
-// All of them are our own drawings. The LLM's orange critter is our rendition, not anyone's artwork.
+// All of them are our own drawings. The LLM's orange critter is our rendition, not anyone's artwork, and
+// so are GLM Flash's ox and the yardsticks' boxy robot. A skin (bakeoff/roster.py) recolours a sprite:
+// `color` paints its body cells (BODY) and `inks` any other named cell.
 // `pixels` and `visorCells` are pure (tested under node); `drawSprite` paints on a canvas.
 (function (root) {
   "use strict";
@@ -12,10 +14,17 @@
     chat: [".ooooooo.", ".ooooooo.", ".okoookoo", "ooooooooo", ".ooooooo.", ".ooooooo.", ".o.o.o.o.", ".o.o.o.o."],
     // "the visor": a pale monolith with one slit of five cells, V lit and v unlit (see visorCells)
     visor: [".jjjjj.", "jjjjjjj", "jVVVvvj", "jjjjjjj", ".jjjjj.", "..jjj..", ".jjjjj.", ".jjjjj.", ".j...j.", ".j...j."],
-    // baselines and jev_plain: a plain grey block
+    // GLM Flash, an ox for its preview name Ox Alpha: horns, a greyscale head, a muzzle with a ring
+    ox: ["y.........y", "yy.......yy", ".yttttttty.", "..ttttttt..", "..tktttkt..", "..ttttttt..", "...nnnnn...", "...nknkn...", "....y.y....", ".....y....."],
+    // the yardsticks: a simple boxy robot, no antenna, no mouth
+    bot: [".zzzzz.", ".zkzkz.", ".zzzzz.", ".zzzzz.", "..zzz..", "zzzzzzz", "z.zzz.z", "..z.z..", "..z.z.."],
+    // a player that is not on the roster: a plain grey block
     block: ["ggggg", "ggggg", "ggggg", "ggggg", "ggggg", "ggggg", "ggggg"],
   };
-  const INKS = { w: "#AEB4BA", b: "#3A4046", e: "#F7768E", o: "#D97757", k: "#1A0E0A", j: "#B9BEC4", V: "#FFFFFF", v: "#15181C", g: "#7C848D" };
+  const INKS = { w: "#AEB4BA", b: "#3A4046", e: "#F7768E", o: "#D97757", k: "#1A0E0A", j: "#B9BEC4", V: "#FFFFFF", v: "#15181C", g: "#7C848D",
+    t: "#9AA0A6", y: "#D5D9DD", n: "#5C636B", z: "#8A9097" };
+  // the ink a skin's colour replaces: the fly's wings, the visor, the critter, the ox's head, the robot
+  const BODY = { fly: "w", fly_open: "w", visor: "j", chat: "o", ox: "t", bot: "z", block: "g" };
   const SLIT = 5;
 
   // Which of the visor's five cells are lit, left to right: round(5 * p) of them, where p is the
@@ -26,11 +35,14 @@
   }
 
   // The sprite as a list of {x, y, ink}, (0, 0) being the top left pixel. options: {p} for the visor's
-  // slit, {open: true} for the fly's open wings.
+  // slit, {open: true} for the fly's open wings, {color, inks} for a skin.
   function pixels(name, options) {
     const opts = options || {};
-    const grid = GRIDS[name === "fly" && opts.open ? "fly_open" : name] || GRIDS.block;
+    const drawn = name === "fly" && opts.open ? "fly_open" : GRIDS[name] ? name : "block";
+    const grid = GRIDS[drawn];
     const cells = name === "visor" ? visorCells(opts.p) : [];
+    const own = Object.assign({}, opts.inks || {});
+    if (opts.color) own[BODY[drawn]] = opts.color;
     let slit = 0;
     const out = [];
     grid.forEach((line, y) => {
@@ -38,7 +50,7 @@
         let ink = line[x];
         if (ink === ".") continue;
         if (ink === "V" || ink === "v") ink = cells[slit++] ? "V" : "v";
-        out.push({ x, y, ink: INKS[ink] });
+        out.push({ x, y, ink: own[ink] || INKS[ink] });
       }
     });
     return out;
@@ -54,7 +66,8 @@
   const bitmaps = {};
   function bitmap(name, px, options) {
     const opts = options || {};
-    const key = [name, px, !!opts.open, name === "visor" ? visorCells(opts.p).filter(Boolean).length : 0].join(" ");
+    const key = [name, px, !!opts.open, name === "visor" ? visorCells(opts.p).filter(Boolean).length : 0,
+      opts.color || "", JSON.stringify(opts.inks || {})].join(" ");
     if (!bitmaps[key]) {
       const { width, height } = sizeOf(name);
       const canvas = document.createElement("canvas");
@@ -78,7 +91,7 @@
     ctx.drawImage(image, -Math.round(image.width / 2), -image.height);
   }
 
-  const api = { GRIDS, INKS, visorCells, pixels, sizeOf, drawSprite };
+  const api = { GRIDS, INKS, BODY, visorCells, pixels, sizeOf, drawSprite };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Sprites = api;
 })(typeof window !== "undefined" ? window : globalThis);
