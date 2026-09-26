@@ -62,3 +62,22 @@ Added the same day, while it was being recorded:
 - The track (seed): where is it picked now, on the stage select or after it?
 - Replays (`bakeoff view`): do they get the same front, or only `bakeoff live`?
 - Money: the lobby shows the worst-case cost before a paid run starts; where does that confirmation live now?
+
+Added the same day: "also lets figure out where to put the analysis" — where the Analysis tab's contents (levels,
+scoreboard, what is ours, the benchmark) go in the new flow.
+
+## Answers so far (2026-09-25)
+
+- **Skins:** all five variants of each model are skins; the one-shot (`jev`, `haiku`, `glm`) is the default skin,
+  the four question sets are the others. The Fly has two skins, `fly` and `fly2`.
+- **Yardsticks:** a fifth character, "Bot", whose skins are `solver`, `random` and `always_jump`.
+- **Duplicates:** one character can fill several slots in different skins; the same skin twice is refused (one
+  player cannot run twice on one track).
+- **Analysis:** a results screen after the run (the scoreboard and the benchmark, as Smash shows after a match),
+  plus a Records entry on the home page for past runs.
+- **Look:** the user's brand everywhere: Smash's layout and energy in the dark palette and the two brand fonts,
+  blue still only the cursor.
+- **Track:** a screen of its own, after the stage select.
+- **Input:** mouse and keyboard. A click on a portrait drops the next token there; a slot's colour dot, or X and Y,
+  cycles its skin; the arrow keys move a cursor.
+- **Replays:** only `bakeoff live` gets the new front for now; `bakeoff view` still opens on the replay.
