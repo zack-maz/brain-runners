@@ -106,3 +106,12 @@ test("with no cap, the line says Jev still plays and what the other paid runners
   assert.match(TrackPick.capText(s, ["jev_step1", "haiku_guided"]),
     /^Jev plays without a cap: .* The other paid runners replay answers already cached and stop at their first uncached question\.$/);
 });
+
+test("with a cap, Jev beside a capped runner is still said to play without one", () => {
+  const jev = { name: "jev_step1", paid: true, price_usd: 0.00003, requests_left: null, capped: false,
+                played_before: false, seeds_played: [], why_not: null };
+  const s = state({ players: [...state().players, jev] });
+  assert.equal(TrackPick.capText(s, ["jev_step1", "haiku_guided"]),
+    "Jev plays without a cap: every row may cost it a request, counted and priced here. The other paid runners " +
+    "cost 1 request a row each, until their cap of 200 runs out. Cached answers are free, so the real cost is usually lower.");
+});

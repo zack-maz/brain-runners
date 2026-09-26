@@ -275,6 +275,9 @@ def _bench(args) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
+    if getattr(args, "max_requests", 0) < 0:  # checked here: a lineup of Jev alone builds no capped budget to refuse it
+        print(f"max_requests must not be negative: {args.max_requests}", file=sys.stderr)
+        return 2
     if args.command == "bench":
         return _bench(args)
     if args.command == "report":

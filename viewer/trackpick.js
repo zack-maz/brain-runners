@@ -100,10 +100,14 @@
     const lines = Lobby_.estimate(state, players).lines;
     if (!lines.length) return "No paid runner: this run spends nothing.";
     const jev = lines.some((l) => l.uncapped), others = lines.some((l) => !l.uncapped);
-    if (jev && (!state.max_requests || !others)) {
-      const said = "Jev plays without a cap: every row may cost it a request, counted and priced here.";
-      if (!others) return said + " Cached answers are free.";
+    const said = "Jev plays without a cap: every row may cost it a request, counted and priced here.";
+    if (jev && !others) return said + " Cached answers are free.";
+    if (jev && !state.max_requests) {
       return said + " The other paid runners replay answers already cached and stop at their first uncached question.";
+    }
+    if (jev) {
+      return said + " The other paid runners cost " + state.requests_per_row + " request a row each, until their cap of " +
+        state.max_requests + " runs out. Cached answers are free, so the real cost is usually lower.";
     }
     if (!state.max_requests) {
       return "This command has no cap: the paid runners replay answers already cached and stop at their first " +

@@ -192,6 +192,11 @@ def test_a_missing_key_is_a_usage_error_before_the_run_directory_exists(tmp_path
 def test_a_negative_cap_is_a_usage_error(tmp_path, capsys):
     assert main(paid_args(tmp_path, "--max-requests", "-1")) == 2
     assert "must not be negative" in capsys.readouterr().err
+    # also when only Jev plays, which has no cap to build (decision 50)
+    assert main(["run", "--players", "jev_step1", "--seeds", "1", "--seed-start", "1000", "--max-requests", "-1",
+                 "--out", str(tmp_path / "runs2"), "--cache", str(tmp_path / "cache")]) == 2
+    assert "must not be negative" in capsys.readouterr().err
+    assert not (tmp_path / "runs2").exists()
 
 
 def low_seed_paid_args(tmp_path, *extra):
