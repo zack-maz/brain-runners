@@ -169,8 +169,18 @@ we found in my own words, as well as my opinions and thoughts. That can wait to 
 - **Next, in order:**
   1. The one fly smoke for plans a and b, only once `pgrep -fl bakeoff` shows no other session's fly: Fly · Looming
      and Bot · Solver on track 1001, through to results.
-  2. One whole-branch design review of plan b (the most capable model), then its one fix wave.
-  3. Finishing the branch (PR) with the user.
+  2. Finishing the branch (PR) with the user.
+- **Plan b's design review is done** (Opus, "ready with fixes": 1 Critical, 4 Important, 8 Minor). Fixed in `70f9de4`
+  and `a57ae43`, re-reviewed by Opus, checked in a headless browser:
+  - a held Enter could walk through RUN's confirmation; it now never confirms;
+  - the tabs' and the picker's styles, deleted with the lobby, are back (in `bakeoff view` too);
+  - the select's "about" line wraps, so its "…are ours." is never cut off (a change to the approved mock-up);
+  - a finish on a result of several tracks is no longer drawn in `--bad`;
+  - the run bar and the results that open by themselves follow the run on screen, and watching a past run is
+    refused while this session's run is going.
+  Left for the user: the moved "what is ours" text says "This run is game v2" where Records has no one run; head to
+  head carries no "tuned on these tracks" note for fly2; a `why_not` line on the track select is muted, not
+  `--warn` (a colour rule). Subagents run on Opus 5.5 only (the user, 2026-09-25).
 - **Open, for the user:**
   - Settled 2026-09-25: the mind panels' tags stay "JEV STEP 1", "HAIKU PLAIN" until Brain Battle, which labels each
     fighter as on the character select, character and skin ("Jev · Step 1") in the skin's colour. The spec says so.
