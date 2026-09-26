@@ -98,6 +98,10 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 
 ## Where to resume (in this order)
 
+- **Brain Battle, the new front of the live page** (branch `brain-battle`, a worktree at `../brain-battle` beside the
+  main checkout; started 2026-09-25): the request, every answer, the five approved mock-ups and where to resume are
+  in `docs/FRONTEND.md`. Decision 44 (the sets are plain, guided, step1, step2 and map) is built on that branch.
+  Next there: the spec, `docs/superpowers/specs/2026-09-25-brain-battle-design.md`. The Writeup page comes last.
 0. **`fly2`, the second pure fly, is built, calibrated, played and merged** (decisions 41–43, spec
    `docs/superpowers/specs/2026-09-24-fly2-design.md`, plan `docs/superpowers/plans/2026-09-24-fly2.md`, generated
    from the prototype `proto/fly2`, 9 tasks, branch `fly2`). Spike 04, the probe, passed on 2026-09-24
