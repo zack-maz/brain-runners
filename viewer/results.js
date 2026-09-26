@@ -115,7 +115,8 @@
       title: labelOf(roster, r.entry.player),
       rows: single ? (r.entry.tracks[0] ? r.entry.tracks[0].rows : 0) : (r.entry.mean_rows == null ? "-" : r.entry.mean_rows.toFixed(1)),
       rowsWord: single ? "rows" : "rows a track", death: death(r.entry, single), stopped: r.stopped,
-      finished: single ? !!(r.entry.tracks[0] && r.entry.tracks[0].finished) : false,
+      // over several tracks: every complete track finished (a complete track that did not finish is a death)
+      finished: single ? !!(r.entry.tracks[0] && r.entry.tracks[0].finished) : r.entry.runs > 0 && r.entry.finished === r.entry.runs,
       perRow: perRow(r.entry.s_per_row), requests: requestsText(r.entry, roster), cost: costText(r.entry),
       paid: !!(r.entry.paid && r.entry.price_usd > 0),
     }));

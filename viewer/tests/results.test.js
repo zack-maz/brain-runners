@@ -113,6 +113,20 @@ test("a run of several tracks shows means and deaths counted by cause", () => {
   assert.deepEqual(Results.header(many), { left: "Run ended · 1 fighter", right: "Tracks 1000–1002 (3) · game v2 · 150 rows" });
 });
 
+test("several tracks: a fighter that finished every track is not drawn as a death, one that fell on some is", () => {
+  const many = { ...RESULTS, seeds: [1000, 1001, 1002], players: [
+    entry("jev_guided", null, { runs: 3, mean_rows: 150, finished: 3, incomplete: 0 }),
+    entry("haiku_guided", null, { runs: 3, mean_rows: 120, finished: 2, jumped_into_gap: 1, incomplete: 0 }),
+  ] };
+  const cards = Results.cards(many, ROSTER);
+  assert.equal(cards[0].death, "3 finished");
+  assert.equal(cards[0].finished, true);
+  assert.equal(cards[1].finished, false);
+  const html = Results.cardsHtml(cards, false);
+  assert.match(html, /<span class="death">3 finished<\/span>/); // a finish is not a death
+  assert.match(html, /<span class="death bad">2 finished · 1 jumped into a gap<\/span>/);
+});
+
 test("the header and the markup, every text escaped", () => {
   assert.deepEqual(Results.header(RESULTS), { left: "Run ended · 3 fighters", right: "Track 1000 · game v2 · 150 rows" });
   assert.equal(Results.header({ ...RESULTS, status: "interrupted" }).left, "Run interrupted · 3 fighters");

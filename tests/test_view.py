@@ -73,6 +73,12 @@ def test_the_page_carries_the_chart_rules_the_analysis_tab_draws_with():
     assert ".chart .line" in page and '[data-bench="players"] th' in page
 
 
+def test_the_page_keeps_the_rules_for_the_tabs_and_who_is_in_the_tunnel():
+    """Without them the selected tab and a shown runner look like the rest: nothing in the tests sees colour."""
+    page = render_html({"episodes": []})
+    assert '.tabs button[aria-selected="true"]' in page and '.pick-player[aria-pressed="true"]' in page
+
+
 def test_every_script_the_page_names_exists_and_app_comes_last():
     names = re.findall(r'<script src="([^"]+)"></script>', (VIEWER_DIR / "index.html").read_text())
     assert names == ["timeline.js", "tunnel.js", "sprites.js", "roster.js", "stage.js", "minds.js", "log.js", "picker.js", "tabs.js",

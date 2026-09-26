@@ -26,7 +26,7 @@
 
   const front = {
     screen: "home", from: "home", state: null, sel: Select.make(roster, []), seed: null, armed: false, refusal: null,
-    timer: null, leaving: false,
+    timer: null, leaving: false, starting: false, cancelError: null, notice: null,
     results: null, more: false, autoResults: false, // the results on screen, and whether the run's end opens them
     records: null, pair: [], allRuns: false, // the records on screen, and the two players compared
   };
@@ -56,9 +56,17 @@
   }
 
   // ---- the screens ---------------------------------------------------------------------------------
+  // Answers the lookup of the track it started, if it started one (entering the track screen with a state for
+  // another track), so a caller can wait for it.
   function show(screen) {
     const next = Screens.select(front.screen, screen);
     if (next === "records" && front.screen !== "records") front.from = front.screen;
+    if (next !== front.screen) { // a confirmation, a refusal or a message belongs to the screen it was shown on
+      front.armed = false;
+      front.refusal = null;
+      front.cancelError = null;
+      front.notice = null;
+    }
     front.screen = next;
     for (const s of Screens.stateOf(next)) {
       const el = s.name === "run" ? $("app") : $("screen-" + s.name);
@@ -68,6 +76,8 @@
     Race.setShown(next === "run");
     render();
     window.scrollTo(0, 0);
+    if (next === "track" && front.state && front.state.seed !== front.seed) return refreshState();
+    return null;
   }
 
   function render() {
@@ -179,6 +189,7 @@
   // RUN: a lineup that can spend is confirmed once, with its worst case on the button; then it starts.
   function pressedRun() {
     const state = front.state;
+    if (front.starting) return; // a POST /run is on its way: a second press neither re-arms nor posts again
     if (!state || state.seed !== front.seed || Lobby.whyNot(state, players(), front.seed)) return;
     if (Lobby.spends(state, players()) && !front.armed) {
       front.armed = true;
@@ -190,9 +201,20 @@
   async function startRun() {
     front.armed = false;
     front.refusal = null;
-    const { ok, body } = await control("/run", { method: "POST", headers: { "Content-Type": "application/json" },
-                                                 body: JSON.stringify({ seed: front.seed, players: players() }) });
-    if (!ok) { front.refusal = body.error || "the run was refused"; return render(); }
+    front.starting = true;
+    let answer;
+    try {
+      answer = await control("/run", { method: "POST", headers: { "Content-Type": "application/json" },
+                                       body: JSON.stringify({ seed: front.seed, players: players() }) });
+    } finally {
+      front.starting = false;
+    }
+    const { ok, body } = answer;
+    if (!ok) { // refused: say why, and look again (a run may be going, started from another tab)
+      front.refusal = body.error || "the run was refused";
+      render();
+      return refreshState();
+    }
     applyState(body.state, body.run_id);
   }
 
@@ -208,25 +230,35 @@
   // ---- the run screen's bar ------------------------------------------------------------------------
   const running = () => !!front.state && front.state.status === "running";
 
+  // The bar describes the run on screen: this session's run while it is watched, or a recorded run loaded
+  // from Records (Race.watching() is null then), which has no Cancel and no results of its own here.
   function renderRunBar() {
-    const run = front.state && front.state.run;
+    const watched = Race.watching();
+    const session = front.state && front.state.run;
+    const run = watched != null && session && session.run_id === watched ? session : null;
     $("run-bar").hidden = false;
-    $("run-what").textContent = run ? "Track " + run.seed + (running() ? " · live" : " · " + run.status) : "";
-    $("run-cancel").hidden = !running();
+    $("run-what").textContent = watched == null ? "Replay · a recorded run"
+      : run ? "Track " + run.seed + (running() ? " · live" : " · " + run.status) : "";
+    $("run-error").hidden = !front.cancelError;
+    $("run-error").textContent = front.cancelError || "";
+    $("run-cancel").hidden = !(run && running());
     $("run-home").textContent = front.leaving ? "Home? The run keeps going" : "‹ Home";
     // the results of the run on screen, for a viewer who scrubbed back and was not taken there
     $("run-results").hidden = !(front.results && !front.results.why && run && front.results.run_id === run.run_id && !running());
   }
 
   // Going home does not cancel the run, so while one is going the first press says so and the second goes.
-  $("run-home").addEventListener("click", () => {
+  function goHome() {
     if (running() && !front.leaving) { front.leaving = true; return renderRunBar(); }
     front.leaving = false;
     show("home");
-  });
+  }
+  $("run-home").addEventListener("click", goHome);
   $("run-cancel").addEventListener("click", async () => {
+    front.cancelError = null;
     const { ok, body } = await control("/cancel", { method: "POST" });
-    if (ok && body.state) applyState(body.state);
+    if (ok && body.state) return applyState(body.state);
+    if (!ok) { front.cancelError = "The run could not be cancelled: " + (body.error || "no reason given"); renderRunBar(); }
   });
 
   $("run-results").addEventListener("click", () => show("results"));
@@ -257,6 +289,8 @@
     $("failures").innerHTML = failures.map((line) => '<p class="warn small">' + Minds.esc(line) + "</p>").join("");
     $("results-note").hidden = !more;
     $("results-note").textContent = Results.note(results, roster);
+    $("results-refusal").hidden = !front.notice;
+    $("results-refusal").textContent = front.notice || "";
   }
 
   // The lineup and track of the results on screen, for Run again, New track and Fighters: a past run's
@@ -265,27 +299,34 @@
     const results = front.results;
     if (!results || results.why) return;
     front.sel = Select.make(roster, results.players.map((p) => p.player));
-    if ((results.seeds || []).length) front.seed = results.seeds[0];
+    if ((results.seeds || []).length) { // a past run's track, kept to the seeds this session may play
+      front.seed = front.state ? TrackPick.clampSeed(results.seeds[0], front.state) : results.seeds[0];
+    }
     front.armed = false;
     front.refusal = null;
   }
 
   async function goTrack() {
     takeLineup();
-    show("track");
-    await refreshState();
+    await (show("track") || refreshState()); // show looks the track up itself when the state is for another
   }
 
   $("more").addEventListener("click", () => { front.more = !front.more; renderResults(); });
   $("again").addEventListener("click", async () => { await goTrack(); pressedRun(); }); // straight to RUN's confirmation
   $("new-track").addEventListener("click", goTrack);
   $("to-fighters").addEventListener("click", () => { takeLineup(); show("select"); });
+  // Loading a recorded run closes this session's live stream, so while its run is going it is watched first.
+  const WATCH_LIVE_FIRST = "This session's run is still going: watch it live first (Records, playing now). " +
+    "Recorded runs can be watched once it ends.";
+
   $("watch-replay").addEventListener("click", async () => {
     const results = front.results;
     if (results && Race.watching() !== results.run_id) { // a past run's results: load that run first
+      if (running()) { front.notice = WATCH_LIVE_FIRST; return renderResults(); }
       const { ok, body } = await control("/replay?run=" + encodeURIComponent(results.run_id));
       if (!ok) { results.why = body.error || "the replay could not be read"; return renderResults(); }
       Race.load(body);
+      front.autoResults = false; // the session run's results are not this replay's
     }
     show("run");
     Race.rewind();
@@ -317,7 +358,7 @@
     if (!records) return;
     $("records-why").hidden = !records.why;
     $("records-why").textContent = records.why || "";
-    $("board-title").textContent = "Leaderboard · game " + records.game + " practice tracks" +
+    $("board-title").textContent = records.game == null ? "" : "Leaderboard · game " + records.game + " practice tracks" +
       (records.tracks ? " " + records.tracks[0] + "–" + records.tracks[1] : "");
     $("leaderboard").innerHTML = Records.boardHtml(Records.board(records, roster), front.pair);
     $("board-notes").innerHTML = Records.boardNotes(records, roster).map((n) => '<p class="warn small">' + Minds.esc(n) + "</p>").join("");
@@ -356,9 +397,11 @@
       await refreshState();
       return show("run");
     }
+    if (running()) { front.records.why = WATCH_LIVE_FIRST; return renderRecords(); }
     const { ok, body } = await control("/replay?run=" + encodeURIComponent(button.dataset.watch));
     if (!ok) { front.records.why = body.error || "the replay could not be read"; return renderRecords(); }
     Race.load(body);
+    front.autoResults = false; // the session run's results are not this replay's
     show("run");
   });
   const setOurs = (open) => {
@@ -373,7 +416,16 @@
     if (event.target.closest("[data-back]")) show(Screens.back(front.screen, front.from));
   });
   document.addEventListener("keydown", (event) => {
-    if (front.screen === "run" || event.metaKey || event.ctrlKey || event.altKey) return;
+    // a held key is one press: its repeats would walk through RUN's confirmation (select → track → arm → post)
+    if (event.repeat || event.metaKey || event.ctrlKey || event.altKey) return;
+    if (front.screen === "run") { // the race has its own keys (app.js); Escape is ‹ Home
+      if (event.key === "Escape") { event.preventDefault(); goHome(); }
+      return;
+    }
+    if (front.screen === "records" && event.key === "Escape" && !$("ours-panel").hidden) {
+      event.preventDefault();
+      return setOurs(false); // an open "What is ours" closes first
+    }
     // a focused button already answers Enter and Space with a click; typing in a field is not a command
     if (event.target instanceof Element && event.target.closest("input, select, textarea") ||
         (event.target instanceof Element && event.target.closest("button") && (event.key === "Enter" || event.key === " "))) return;
@@ -430,7 +482,8 @@
   // not pulled away: the bar offers "Results" instead.
   function ended(end) {
     front.leaving = false;
-    front.results = end.results || { why: "the run ended without results" };
+    // the results belong to the run whose stream ended, the one watched
+    front.results = end.results || { why: "the run ended without results", run_id: Race.watching() };
     front.more = false;
     front.autoResults = true;
     refreshState();
@@ -438,7 +491,8 @@
   }
 
   function reachedEnd() {
-    if (!front.autoResults || front.screen !== "run") return;
+    // only the results of the run on screen open by themselves, never over a replay of another run
+    if (!front.autoResults || front.screen !== "run" || !front.results || front.results.run_id !== Race.watching()) return;
     front.autoResults = false;
     setTimeout(() => { if (front.screen === "run") show("results"); }, 1200); // a moment on the last fall first
   }
