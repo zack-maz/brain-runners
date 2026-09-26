@@ -1,0 +1,4514 @@
+{
+ "cells": [
+  {
+   "model_index": 427,
+   "root_id": 720575940603989420,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -120.74,
+   "el_deg": 39.47,
+   "se_deg": [
+    4.99,
+    1.06
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 2816,
+   "root_id": 720575940606126438,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -141.37,
+   "el_deg": -40.5,
+   "se_deg": [
+    4.36,
+    0.87
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 5141,
+   "root_id": 720575940607845250,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -120.55,
+   "el_deg": 23.52,
+   "se_deg": [
+    4.86,
+    1.15
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 5157,
+   "root_id": 720575940607854531,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -32.12,
+   "el_deg": -36.87,
+   "se_deg": [
+    4.14,
+    1.04
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 5503,
+   "root_id": 720575940608088259,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -102.72,
+   "el_deg": -47.96,
+   "se_deg": [
+    2.53,
+    0.79
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 6545,
+   "root_id": 720575940608875531,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": 22.63,
+   "el_deg": -8.57,
+   "se_deg": [
+    6.29,
+    1.81
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 8785,
+   "root_id": 720575940610226645,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -88.6,
+   "el_deg": -44.21,
+   "se_deg": [
+    2.55,
+    0.93
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 11653,
+   "root_id": 720575940611567638,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -45.62,
+   "el_deg": -10.33,
+   "se_deg": [
+    5.35,
+    1.02
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 12326,
+   "root_id": 720575940611821334,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -158.43,
+   "el_deg": 13.36,
+   "se_deg": [
+    6.84,
+    1.31
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 13077,
+   "root_id": 720575940612096462,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -189.66,
+   "el_deg": 1.4,
+   "se_deg": [
+    5.33,
+    1.47
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 14493,
+   "root_id": 720575940612560680,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -149.19,
+   "el_deg": 16.76,
+   "se_deg": [
+    5.97,
+    1.36
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 15167,
+   "root_id": 720575940612766691,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -78.91,
+   "el_deg": 36.82,
+   "se_deg": [
+    2.95,
+    1.34
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 15527,
+   "root_id": 720575940612874536,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -9.59,
+   "el_deg": 36.24,
+   "se_deg": [
+    3.62,
+    1.5
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 16485,
+   "root_id": 720575940613145258,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": 10.19,
+   "el_deg": -1.67,
+   "se_deg": [
+    6.21,
+    1.37
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 16700,
+   "root_id": 720575940613219474,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -78.88,
+   "el_deg": -24.21,
+   "se_deg": [
+    1.81,
+    1.26
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 17467,
+   "root_id": 720575940613470947,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -44.28,
+   "el_deg": 62.2,
+   "se_deg": [
+    3.08,
+    0.84
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 18413,
+   "root_id": 720575940613763759,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -68.35,
+   "el_deg": -33.06,
+   "se_deg": [
+    2.1,
+    1.07
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 20981,
+   "root_id": 720575940614631079,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -150.3,
+   "el_deg": -33.84,
+   "se_deg": [
+    6.57,
+    1.14
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 21420,
+   "root_id": 720575940614738444,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -89.25,
+   "el_deg": 43.29,
+   "se_deg": [
+    4.78,
+    1.5
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 22464,
+   "root_id": 720575940615055989,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -110.3,
+   "el_deg": 9.24,
+   "se_deg": [
+    4.54,
+    1.3
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 23467,
+   "root_id": 720575940615332502,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -150.49,
+   "el_deg": 7.48,
+   "se_deg": [
+    6.54,
+    1.27
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 25387,
+   "root_id": 720575940615907723,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -59.86,
+   "el_deg": 30.96,
+   "se_deg": [
+    3.54,
+    1.38
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 25538,
+   "root_id": 720575940615953302,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -63.86,
+   "el_deg": -24.57,
+   "se_deg": [
+    3.8,
+    0.89
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 25758,
+   "root_id": 720575940616008854,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -3.29,
+   "el_deg": -18.61,
+   "se_deg": [
+    6.56,
+    1.38
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 26047,
+   "root_id": 720575940616083345,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -122.17,
+   "el_deg": -38.28,
+   "se_deg": [
+    2.92,
+    0.71
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 27074,
+   "root_id": 720575940616377817,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -59.22,
+   "el_deg": 1.39,
+   "se_deg": [
+    4.33,
+    1.19
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 30292,
+   "root_id": 720575940617289782,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -27.87,
+   "el_deg": 59.84,
+   "se_deg": [
+    2.36,
+    0.94
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 30313,
+   "root_id": 720575940617294219,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -4.79,
+   "el_deg": 27.54,
+   "se_deg": [
+    4.99,
+    1.26
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 31030,
+   "root_id": 720575940617480094,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": 11.63,
+   "el_deg": -33.84,
+   "se_deg": [
+    5.22,
+    1.37
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 33127,
+   "root_id": 720575940617997241,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -128.41,
+   "el_deg": -0.79,
+   "se_deg": [
+    5.14,
+    0.98
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 35831,
+   "root_id": 720575940618608177,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -106.25,
+   "el_deg": 52.64,
+   "se_deg": [
+    4.68,
+    1.1
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 37106,
+   "root_id": 720575940618927892,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -154.84,
+   "el_deg": -2.82,
+   "se_deg": [
+    8.08,
+    1.35
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 38211,
+   "root_id": 720575940619197318,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -161.17,
+   "el_deg": -15.39,
+   "se_deg": [
+    6.49,
+    1.14
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 38463,
+   "root_id": 720575940619263937,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -116.38,
+   "el_deg": -53.33,
+   "se_deg": [
+    3.19,
+    0.76
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 40277,
+   "root_id": 720575940619750822,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -91.99,
+   "el_deg": 46.31,
+   "se_deg": [
+    5.1,
+    1.21
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 40910,
+   "root_id": 720575940619900993,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -51.23,
+   "el_deg": 3.44,
+   "se_deg": [
+    4.12,
+    1.27
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 41281,
+   "root_id": 720575940619981494,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -114.82,
+   "el_deg": 6.71,
+   "se_deg": [
+    5.12,
+    1.63
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 42085,
+   "root_id": 720575940620139678,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -54.74,
+   "el_deg": -66.04,
+   "se_deg": [
+    3.2,
+    0.7
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 42850,
+   "root_id": 720575940620306904,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -26.93,
+   "el_deg": 16.63,
+   "se_deg": [
+    5.79,
+    1.37
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 52037,
+   "root_id": 720575940621914904,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -51.54,
+   "el_deg": 11.62,
+   "se_deg": [
+    4.05,
+    1.46
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 52512,
+   "root_id": 720575940622009284,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -117.74,
+   "el_deg": -59.56,
+   "se_deg": [
+    3.37,
+    0.87
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 53436,
+   "root_id": 720575940622156799,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -68.74,
+   "el_deg": 8.82,
+   "se_deg": [
+    4.75,
+    1.25
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 54345,
+   "root_id": 720575940622312072,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -26.52,
+   "el_deg": 15.08,
+   "se_deg": [
+    5.27,
+    1.55
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 54998,
+   "root_id": 720575940622425271,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -108.14,
+   "el_deg": -25.86,
+   "se_deg": [
+    2.22,
+    0.93
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 56360,
+   "root_id": 720575940622680088,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -88.1,
+   "el_deg": 60.0,
+   "se_deg": [
+    4.75,
+    1.39
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 59739,
+   "root_id": 720575940623262461,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -97.78,
+   "el_deg": -2.49,
+   "se_deg": [
+    3.44,
+    1.14
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 61444,
+   "root_id": 720575940623551684,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -125.32,
+   "el_deg": 55.64,
+   "se_deg": [
+    4.97,
+    1.14
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 61937,
+   "root_id": 720575940623652083,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -107.18,
+   "el_deg": -17.26,
+   "se_deg": [
+    2.98,
+    0.99
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 62781,
+   "root_id": 720575940623827348,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -36.57,
+   "el_deg": 37.94,
+   "se_deg": [
+    3.96,
+    1.23
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 63351,
+   "root_id": 720575940623925774,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -89.54,
+   "el_deg": -62.93,
+   "se_deg": [
+    3.17,
+    0.59
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 65063,
+   "root_id": 720575940624208824,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -21.4,
+   "el_deg": 18.4,
+   "se_deg": [
+    3.89,
+    1.38
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 65959,
+   "root_id": 720575940624359093,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -85.71,
+   "el_deg": 23.72,
+   "se_deg": [
+    3.73,
+    1.21
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 66296,
+   "root_id": 720575940624417584,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -64.5,
+   "el_deg": 22.9,
+   "se_deg": [
+    3.38,
+    1.0
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 66837,
+   "root_id": 720575940624531652,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -147.2,
+   "el_deg": 30.4,
+   "se_deg": [
+    6.01,
+    1.37
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 67955,
+   "root_id": 720575940624755504,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -59.19,
+   "el_deg": 50.04,
+   "se_deg": [
+    3.58,
+    1.25
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 70434,
+   "root_id": 720575940625216202,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -152.02,
+   "el_deg": -0.97,
+   "se_deg": [
+    7.0,
+    1.1
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 71655,
+   "root_id": 720575940625477721,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": 10.08,
+   "el_deg": 60.55,
+   "se_deg": [
+    1.74,
+    1.37
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 72725,
+   "root_id": 720575940625695269,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -151.81,
+   "el_deg": 10.54,
+   "se_deg": [
+    6.22,
+    1.28
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 72742,
+   "root_id": 720575940625697772,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -18.64,
+   "el_deg": 51.64,
+   "se_deg": [
+    3.17,
+    1.27
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 72757,
+   "root_id": 720575940625700739,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -108.09,
+   "el_deg": 17.2,
+   "se_deg": [
+    4.26,
+    1.6
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 75477,
+   "root_id": 720575940626236041,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -75.06,
+   "el_deg": -11.09,
+   "se_deg": [
+    2.82,
+    1.13
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 76164,
+   "root_id": 720575940626375172,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -140.63,
+   "el_deg": -6.04,
+   "se_deg": [
+    4.97,
+    1.05
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 76218,
+   "root_id": 720575940626384200,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -159.08,
+   "el_deg": -42.6,
+   "se_deg": [
+    5.0,
+    0.88
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 76378,
+   "root_id": 720575940626414279,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -146.2,
+   "el_deg": -28.08,
+   "se_deg": [
+    6.04,
+    1.17
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 77358,
+   "root_id": 720575940626617084,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -110.66,
+   "el_deg": -36.5,
+   "se_deg": [
+    2.84,
+    0.83
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 82056,
+   "root_id": 720575940627368254,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -82.93,
+   "el_deg": -3.3,
+   "se_deg": [
+    2.56,
+    1.15
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 83815,
+   "root_id": 720575940627685765,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -22.26,
+   "el_deg": -25.36,
+   "se_deg": [
+    5.32,
+    1.38
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 85065,
+   "root_id": 720575940627902078,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -67.77,
+   "el_deg": -13.39,
+   "se_deg": [
+    3.12,
+    1.21
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 88027,
+   "root_id": 720575940628395797,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -99.28,
+   "el_deg": 6.79,
+   "se_deg": [
+    4.18,
+    1.13
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 88882,
+   "root_id": 720575940628552247,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -62.1,
+   "el_deg": -56.7,
+   "se_deg": [
+    2.75,
+    0.74
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 90556,
+   "root_id": 720575940628847164,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -34.37,
+   "el_deg": -2.52,
+   "se_deg": [
+    5.39,
+    1.37
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 90959,
+   "root_id": 720575940628921303,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -140.07,
+   "el_deg": -17.59,
+   "se_deg": [
+    5.58,
+    1.02
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 91245,
+   "root_id": 720575940628976956,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -38.02,
+   "el_deg": 26.52,
+   "se_deg": [
+    3.67,
+    1.04
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 92830,
+   "root_id": 720575940629292785,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -132.31,
+   "el_deg": 39.76,
+   "se_deg": [
+    5.99,
+    1.45
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 93176,
+   "root_id": 720575940629368015,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -59.34,
+   "el_deg": -44.32,
+   "se_deg": [
+    3.11,
+    0.99
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 97473,
+   "root_id": 720575940630209603,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -17.82,
+   "el_deg": 37.7,
+   "se_deg": [
+    2.75,
+    0.99
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 100229,
+   "root_id": 720575940630731847,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -32.84,
+   "el_deg": -61.03,
+   "se_deg": [
+    2.26,
+    0.78
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 100807,
+   "root_id": 720575940630831185,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -13.1,
+   "el_deg": 65.33,
+   "se_deg": [
+    1.94,
+    1.05
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 103701,
+   "root_id": 720575940631380695,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -52.86,
+   "el_deg": 64.87,
+   "se_deg": [
+    3.82,
+    1.07
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 106560,
+   "root_id": 720575940632009167,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": 16.81,
+   "el_deg": 49.5,
+   "se_deg": [
+    2.73,
+    1.51
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 106877,
+   "root_id": 720575940632080146,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -74.37,
+   "el_deg": 57.18,
+   "se_deg": [
+    3.54,
+    0.9
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 107113,
+   "root_id": 720575940632129848,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -185.95,
+   "el_deg": -16.02,
+   "se_deg": [
+    5.79,
+    1.56
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 109987,
+   "root_id": 720575940632777124,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -121.23,
+   "el_deg": -6.03,
+   "se_deg": [
+    4.02,
+    0.99
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 110006,
+   "root_id": 720575940632779932,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -11.03,
+   "el_deg": -47.28,
+   "se_deg": [
+    4.19,
+    1.05
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 115843,
+   "root_id": 720575940634700980,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -57.88,
+   "el_deg": -3.0,
+   "se_deg": [
+    3.96,
+    1.49
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 116609,
+   "root_id": 720575940635004271,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -33.18,
+   "el_deg": 1.09,
+   "se_deg": [
+    5.14,
+    1.31
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 117332,
+   "root_id": 720575940635234478,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -108.36,
+   "el_deg": 33.52,
+   "se_deg": [
+    4.19,
+    1.1
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 117525,
+   "root_id": 720575940635307639,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": 0.44,
+   "el_deg": 53.73,
+   "se_deg": [
+    2.62,
+    1.17
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 118032,
+   "root_id": 720575940635516084,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -121.29,
+   "el_deg": -24.83,
+   "se_deg": [
+    3.15,
+    0.9
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 119993,
+   "root_id": 720575940636295019,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -115.3,
+   "el_deg": 27.28,
+   "se_deg": [
+    6.06,
+    1.24
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 120493,
+   "root_id": 720575940636529520,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": 6.6,
+   "el_deg": 36.36,
+   "se_deg": [
+    4.17,
+    1.21
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 125217,
+   "root_id": 720575940638626118,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -12.44,
+   "el_deg": 13.35,
+   "se_deg": [
+    6.28,
+    1.34
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 125695,
+   "root_id": 720575940638835288,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -136.5,
+   "el_deg": -36.95,
+   "se_deg": [
+    5.17,
+    1.0
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 126366,
+   "root_id": 720575940639109795,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": 0.85,
+   "el_deg": 13.93,
+   "se_deg": [
+    5.99,
+    1.74
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 128089,
+   "root_id": 720575940639878352,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -143.9,
+   "el_deg": 35.94,
+   "se_deg": [
+    8.71,
+    1.3
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 128102,
+   "root_id": 720575940639884878,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -54.71,
+   "el_deg": -6.74,
+   "se_deg": [
+    3.86,
+    1.28
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 128134,
+   "root_id": 720575940639895003,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -102.69,
+   "el_deg": 28.96,
+   "se_deg": [
+    4.35,
+    1.49
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 129051,
+   "root_id": 720575940640302389,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -164.91,
+   "el_deg": 21.22,
+   "se_deg": [
+    7.09,
+    1.52
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 130854,
+   "root_id": 720575940641552347,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -88.72,
+   "el_deg": -36.9,
+   "se_deg": [
+    2.48,
+    1.11
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 131032,
+   "root_id": 720575940641704656,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -91.03,
+   "el_deg": 12.05,
+   "se_deg": [
+    3.48,
+    1.35
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 131563,
+   "root_id": 720575940642414837,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -94.45,
+   "el_deg": -13.79,
+   "se_deg": [
+    2.07,
+    1.07
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 132516,
+   "root_id": 720575940643740964,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -137.37,
+   "el_deg": -17.92,
+   "se_deg": [
+    5.62,
+    1.31
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 134164,
+   "root_id": 720575940645328436,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -132.88,
+   "el_deg": 10.21,
+   "se_deg": [
+    4.6,
+    0.86
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 134247,
+   "root_id": 720575940645407268,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -70.15,
+   "el_deg": -42.04,
+   "se_deg": [
+    1.98,
+    0.78
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 135821,
+   "root_id": 720575940647369507,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -131.09,
+   "el_deg": -19.92,
+   "se_deg": [
+    4.18,
+    0.96
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 136325,
+   "root_id": 720575940648418425,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -48.43,
+   "el_deg": 44.25,
+   "se_deg": [
+    3.59,
+    1.17
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 137555,
+   "root_id": 720575940653666465,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -19.79,
+   "el_deg": 28.05,
+   "se_deg": [
+    3.81,
+    1.33
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 137933,
+   "root_id": 720575940655750305,
+   "type": "LPLC2",
+   "side": "left",
+   "az_deg": -126.2,
+   "el_deg": -10.91,
+   "se_deg": [
+    4.58,
+    1.18
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 1911,
+   "root_id": 720575940605598892,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -86.85,
+   "el_deg": 29.78,
+   "se_deg": [
+    2.61,
+    0.73
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 9350,
+   "root_id": 720575940610522009,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -138.18,
+   "el_deg": -0.74,
+   "se_deg": [
+    2.65,
+    0.84
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 10627,
+   "root_id": 720575940611134833,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -58.6,
+   "el_deg": -14.14,
+   "se_deg": [
+    1.83,
+    0.89
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 14345,
+   "root_id": 720575940612518055,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -160.02,
+   "el_deg": -0.99,
+   "se_deg": [
+    1.88,
+    0.96
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 14563,
+   "root_id": 720575940612580977,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -107.38,
+   "el_deg": 29.36,
+   "se_deg": [
+    2.21,
+    0.84
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 16821,
+   "root_id": 720575940613256863,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -10.29,
+   "el_deg": 36.91,
+   "se_deg": [
+    2.17,
+    0.98
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 16836,
+   "root_id": 720575940613260959,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -67.38,
+   "el_deg": -60.01,
+   "se_deg": [
+    1.6,
+    0.69
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 20770,
+   "root_id": 720575940614572742,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -4.71,
+   "el_deg": -25.66,
+   "se_deg": [
+    2.27,
+    1.46
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 22002,
+   "root_id": 720575940614914107,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -3.79,
+   "el_deg": 52.4,
+   "se_deg": [
+    2.01,
+    0.95
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 22455,
+   "root_id": 720575940615053580,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -78.11,
+   "el_deg": 10.85,
+   "se_deg": [
+    2.73,
+    1.02
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 22751,
+   "root_id": 720575940615127227,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -74.33,
+   "el_deg": -45.37,
+   "se_deg": [
+    1.4,
+    0.71
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 23927,
+   "root_id": 720575940615462587,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -102.38,
+   "el_deg": 6.6,
+   "se_deg": [
+    3.19,
+    0.79
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 24281,
+   "root_id": 720575940615575007,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -110.2,
+   "el_deg": -61.62,
+   "se_deg": [
+    1.93,
+    0.57
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 28213,
+   "root_id": 720575940616713355,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -132.84,
+   "el_deg": -25.73,
+   "se_deg": [
+    2.52,
+    0.88
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 29383,
+   "root_id": 720575940617026260,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -158.5,
+   "el_deg": -22.69,
+   "se_deg": [
+    2.21,
+    1.06
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 29887,
+   "root_id": 720575940617176321,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -142.29,
+   "el_deg": 10.06,
+   "se_deg": [
+    2.67,
+    0.82
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 30208,
+   "root_id": 720575940617266722,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -137.39,
+   "el_deg": -47.01,
+   "se_deg": [
+    1.99,
+    0.85
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 33149,
+   "root_id": 720575940618002644,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -97.8,
+   "el_deg": 41.5,
+   "se_deg": [
+    2.38,
+    0.83
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 34603,
+   "root_id": 720575940618312606,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -95.32,
+   "el_deg": -30.03,
+   "se_deg": [
+    1.91,
+    0.8
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 36093,
+   "root_id": 720575940618676440,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -126.3,
+   "el_deg": 25.07,
+   "se_deg": [
+    2.04,
+    0.93
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 36310,
+   "root_id": 720575940618723749,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -120.14,
+   "el_deg": -6.32,
+   "se_deg": [
+    3.21,
+    0.8
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 36646,
+   "root_id": 720575940618807105,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -51.9,
+   "el_deg": 2.86,
+   "se_deg": [
+    1.83,
+    0.96
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 38907,
+   "root_id": 720575940619397542,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -129.95,
+   "el_deg": -43.88,
+   "se_deg": [
+    2.02,
+    0.76
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 45558,
+   "root_id": 720575940620795728,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -45.2,
+   "el_deg": 16.51,
+   "se_deg": [
+    2.49,
+    0.92
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 46146,
+   "root_id": 720575940620903551,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -104.36,
+   "el_deg": -43.21,
+   "se_deg": [
+    1.76,
+    0.6
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 53122,
+   "root_id": 720575940622108001,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": 6.61,
+   "el_deg": 4.81,
+   "se_deg": [
+    2.33,
+    1.58
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 55583,
+   "root_id": 720575940622531767,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -93.39,
+   "el_deg": 17.79,
+   "se_deg": [
+    3.0,
+    0.93
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 57783,
+   "root_id": 720575940622939836,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -21.3,
+   "el_deg": 59.04,
+   "se_deg": [
+    1.71,
+    0.71
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 63894,
+   "root_id": 720575940624017251,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -81.85,
+   "el_deg": -4.4,
+   "se_deg": [
+    2.28,
+    0.83
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 64467,
+   "root_id": 720575940624111763,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -28.99,
+   "el_deg": 31.16,
+   "se_deg": [
+    2.26,
+    0.89
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 69551,
+   "root_id": 720575940625038090,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -44.84,
+   "el_deg": -37.44,
+   "se_deg": [
+    1.96,
+    0.75
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 73977,
+   "root_id": 720575940625934973,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -119.86,
+   "el_deg": 13.22,
+   "se_deg": [
+    2.44,
+    0.85
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 74288,
+   "root_id": 720575940625991043,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": 7.03,
+   "el_deg": 39.52,
+   "se_deg": [
+    2.24,
+    1.74
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 77298,
+   "root_id": 720575940626605200,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -55.34,
+   "el_deg": 30.39,
+   "se_deg": [
+    2.86,
+    0.9
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 77411,
+   "root_id": 720575940626626895,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -68.52,
+   "el_deg": -30.83,
+   "se_deg": [
+    1.62,
+    0.81
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 79150,
+   "root_id": 720575940626916936,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -50.91,
+   "el_deg": 55.05,
+   "se_deg": [
+    2.33,
+    0.77
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 82937,
+   "root_id": 720575940627519107,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -137.44,
+   "el_deg": 23.27,
+   "se_deg": [
+    2.43,
+    1.09
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 86033,
+   "root_id": 720575940628064260,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -97.63,
+   "el_deg": -57.66,
+   "se_deg": [
+    1.82,
+    0.53
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 86146,
+   "root_id": 720575940628081541,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -11.02,
+   "el_deg": 22.01,
+   "se_deg": [
+    2.36,
+    1.22
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 88373,
+   "root_id": 720575940628454522,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -18.84,
+   "el_deg": 6.56,
+   "se_deg": [
+    2.56,
+    1.2
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 88424,
+   "root_id": 720575940628462340,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -18.81,
+   "el_deg": -15.54,
+   "se_deg": [
+    2.33,
+    1.17
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 89699,
+   "root_id": 720575940628699560,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -140.01,
+   "el_deg": 26.5,
+   "se_deg": [
+    2.28,
+    1.11
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 95107,
+   "root_id": 720575940629753807,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -113.54,
+   "el_deg": -31.57,
+   "se_deg": [
+    2.39,
+    0.75
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 98862,
+   "root_id": 720575940630484495,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -48.88,
+   "el_deg": 59.26,
+   "se_deg": [
+    2.47,
+    0.63
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 100901,
+   "root_id": 720575940630851036,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -25.09,
+   "el_deg": 45.29,
+   "se_deg": [
+    2.04,
+    0.87
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 101707,
+   "root_id": 720575940630998339,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -85.18,
+   "el_deg": 42.78,
+   "se_deg": [
+    2.2,
+    0.99
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 103513,
+   "root_id": 720575940631338271,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -145.18,
+   "el_deg": -27.74,
+   "se_deg": [
+    2.78,
+    0.78
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 109955,
+   "root_id": 720575940632769180,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -34.04,
+   "el_deg": 51.93,
+   "se_deg": [
+    2.08,
+    0.87
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 112907,
+   "root_id": 720575940633580384,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -149.65,
+   "el_deg": -11.15,
+   "se_deg": [
+    2.32,
+    0.87
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 115387,
+   "root_id": 720575940634517856,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -66.76,
+   "el_deg": 43.43,
+   "se_deg": [
+    4.27,
+    1.2
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 124829,
+   "root_id": 720575940638456227,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -121.65,
+   "el_deg": -17.45,
+   "se_deg": [
+    2.69,
+    0.81
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 124935,
+   "root_id": 720575940638496720,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -89.49,
+   "el_deg": 50.81,
+   "se_deg": [
+    1.83,
+    0.75
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 129665,
+   "root_id": 720575940640612480,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -94.7,
+   "el_deg": 51.47,
+   "se_deg": [
+    2.43,
+    0.88
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 136520,
+   "root_id": 720575940649229433,
+   "type": "LC4",
+   "side": "left",
+   "az_deg": -35.76,
+   "el_deg": -51.4,
+   "se_deg": [
+    2.64,
+    0.94
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+  },
+  {
+   "model_index": 2306,
+   "root_id": 720575940605825666,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 1.65,
+   "el_deg": -22.26,
+   "se_deg": [
+    4.48,
+    1.81
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 2954,
+   "root_id": 720575940606217138,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 29.23,
+   "el_deg": -7.52,
+   "se_deg": [
+    4.44,
+    1.71
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 3942,
+   "root_id": 720575940606855554,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 108.66,
+   "el_deg": 19.69,
+   "se_deg": [
+    5.08,
+    1.09
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 4954,
+   "root_id": 720575940607683011,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 21.79,
+   "el_deg": 66.01,
+   "se_deg": [
+    3.11,
+    0.87
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 7703,
+   "root_id": 720575940609592674,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 64.35,
+   "el_deg": -47.07,
+   "se_deg": [
+    3.01,
+    1.07
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 8586,
+   "root_id": 720575940610116757,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 12.6,
+   "el_deg": -33.29,
+   "se_deg": [
+    4.22,
+    2.5
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 9379,
+   "root_id": 720575940610536290,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 193.24,
+   "el_deg": -7.46,
+   "se_deg": [
+    6.82,
+    1.55
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 9658,
+   "root_id": 720575940610681829,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 121.77,
+   "el_deg": -50.61,
+   "se_deg": [
+    5.61,
+    1.01
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 10209,
+   "root_id": 720575940610953651,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 48.44,
+   "el_deg": 45.78,
+   "se_deg": [
+    2.97,
+    1.0
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 11095,
+   "root_id": 720575940611352234,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": -5.21,
+   "el_deg": 67.25,
+   "se_deg": [
+    2.44,
+    0.78
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 12110,
+   "root_id": 720575940611740569,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 110.1,
+   "el_deg": 3.78,
+   "se_deg": [
+    3.86,
+    0.94
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 12934,
+   "root_id": 720575940612045352,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": -18.63,
+   "el_deg": -7.81,
+   "se_deg": [
+    4.25,
+    1.61
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 13515,
+   "root_id": 720575940612254701,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 118.55,
+   "el_deg": -31.0,
+   "se_deg": [
+    3.94,
+    0.88
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 14164,
+   "root_id": 720575940612462307,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 123.99,
+   "el_deg": 14.3,
+   "se_deg": [
+    3.98,
+    1.32
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 15796,
+   "root_id": 720575940612944382,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 122.68,
+   "el_deg": -16.59,
+   "se_deg": [
+    4.56,
+    0.9
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 16013,
+   "root_id": 720575940612994929,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 142.91,
+   "el_deg": -30.21,
+   "se_deg": [
+    5.23,
+    1.19
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 18555,
+   "root_id": 720575940613804906,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 20.65,
+   "el_deg": 58.51,
+   "se_deg": [
+    2.52,
+    0.87
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 18594,
+   "root_id": 720575940613821290,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 83.59,
+   "el_deg": -38.26,
+   "se_deg": [
+    3.37,
+    1.06
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 19222,
+   "root_id": 720575940614067167,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 92.06,
+   "el_deg": 46.69,
+   "se_deg": [
+    4.15,
+    1.03
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 20166,
+   "root_id": 720575940614373279,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 80.0,
+   "el_deg": -13.98,
+   "se_deg": [
+    2.12,
+    0.86
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 20621,
+   "root_id": 720575940614526974,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 45.33,
+   "el_deg": 67.84,
+   "se_deg": [
+    4.71,
+    0.9
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 22701,
+   "root_id": 720575940615116731,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 108.62,
+   "el_deg": -17.64,
+   "se_deg": [
+    3.89,
+    1.12
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 23330,
+   "root_id": 720575940615288203,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 130.17,
+   "el_deg": -0.23,
+   "se_deg": [
+    5.26,
+    0.95
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 25423,
+   "root_id": 720575940615920453,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 105.95,
+   "el_deg": -44.86,
+   "se_deg": [
+    4.13,
+    0.92
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 25605,
+   "root_id": 720575940615967377,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 122.14,
+   "el_deg": 39.53,
+   "se_deg": [
+    4.75,
+    1.21
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 26169,
+   "root_id": 720575940616116697,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 147.14,
+   "el_deg": 1.49,
+   "se_deg": [
+    6.62,
+    1.3
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 26360,
+   "root_id": 720575940616166685,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 62.97,
+   "el_deg": 6.29,
+   "se_deg": [
+    2.74,
+    0.97
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 27478,
+   "root_id": 720575940616491993,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 34.32,
+   "el_deg": -68.73,
+   "se_deg": [
+    3.56,
+    1.01
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 28264,
+   "root_id": 720575940616735489,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 49.01,
+   "el_deg": -42.77,
+   "se_deg": [
+    3.56,
+    1.51
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 33951,
+   "root_id": 720575940618172509,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 133.84,
+   "el_deg": 32.74,
+   "se_deg": [
+    4.66,
+    1.15
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 34579,
+   "root_id": 720575940618307046,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 144.77,
+   "el_deg": 32.97,
+   "se_deg": [
+    6.06,
+    1.51
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 35171,
+   "root_id": 720575940618450496,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 27.75,
+   "el_deg": 15.95,
+   "se_deg": [
+    3.78,
+    1.24
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 35534,
+   "root_id": 720575940618538641,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 12.07,
+   "el_deg": -45.18,
+   "se_deg": [
+    4.29,
+    2.01
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 36252,
+   "root_id": 720575940618711535,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 62.52,
+   "el_deg": -33.99,
+   "se_deg": [
+    2.0,
+    1.28
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 39722,
+   "root_id": 720575940619627934,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 167.6,
+   "el_deg": -5.49,
+   "se_deg": [
+    8.53,
+    1.12
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 39827,
+   "root_id": 720575940619654149,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 59.6,
+   "el_deg": -2.56,
+   "se_deg": [
+    2.59,
+    1.07
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 41386,
+   "root_id": 720575940620001718,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 68.59,
+   "el_deg": 31.09,
+   "se_deg": [
+    2.78,
+    0.82
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 44200,
+   "root_id": 720575940620575476,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": -12.18,
+   "el_deg": -5.9,
+   "se_deg": [
+    4.85,
+    1.79
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 45496,
+   "root_id": 720575940620783180,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 7.7,
+   "el_deg": 48.88,
+   "se_deg": [
+    2.53,
+    0.95
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 46058,
+   "root_id": 720575940620887834,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 87.08,
+   "el_deg": 1.11,
+   "se_deg": [
+    2.46,
+    1.0
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 50384,
+   "root_id": 720575940621634913,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 162.75,
+   "el_deg": -24.33,
+   "se_deg": [
+    6.42,
+    1.2
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 53517,
+   "root_id": 720575940622174463,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 69.9,
+   "el_deg": -56.97,
+   "se_deg": [
+    3.39,
+    1.01
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 56884,
+   "root_id": 720575940622769159,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 76.14,
+   "el_deg": 44.83,
+   "se_deg": [
+    3.23,
+    1.28
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 58087,
+   "root_id": 720575940622992205,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 10.21,
+   "el_deg": 15.35,
+   "se_deg": [
+    4.21,
+    1.38
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 58436,
+   "root_id": 720575940623047629,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 102.56,
+   "el_deg": 6.23,
+   "se_deg": [
+    3.31,
+    1.12
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 60151,
+   "root_id": 720575940623333770,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 159.05,
+   "el_deg": 31.78,
+   "se_deg": [
+    5.89,
+    1.83
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 62487,
+   "root_id": 720575940623769783,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 172.45,
+   "el_deg": -20.69,
+   "se_deg": [
+    7.47,
+    1.43
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 63874,
+   "root_id": 720575940624014524,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 28.68,
+   "el_deg": -30.56,
+   "se_deg": [
+    3.48,
+    1.96
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 63888,
+   "root_id": 720575940624016778,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": -7.08,
+   "el_deg": -36.6,
+   "se_deg": [
+    8.31,
+    2.22
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 65254,
+   "root_id": 720575940624244922,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 95.35,
+   "el_deg": -20.52,
+   "se_deg": [
+    2.68,
+    0.84
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 67237,
+   "root_id": 720575940624611002,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 94.57,
+   "el_deg": 30.14,
+   "se_deg": [
+    2.68,
+    1.07
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 68741,
+   "root_id": 720575940624903064,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 82.2,
+   "el_deg": 20.63,
+   "se_deg": [
+    2.56,
+    0.92
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 68836,
+   "root_id": 720575940624919077,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": -6.83,
+   "el_deg": -13.15,
+   "se_deg": [
+    5.0,
+    1.81
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 68909,
+   "root_id": 720575940624931530,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 8.69,
+   "el_deg": -59.5,
+   "se_deg": [
+    3.39,
+    1.47
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 69313,
+   "root_id": 720575940625001735,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 47.2,
+   "el_deg": -3.11,
+   "se_deg": [
+    3.0,
+    1.14
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 73464,
+   "root_id": 720575940625835278,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 106.41,
+   "el_deg": 49.12,
+   "se_deg": [
+    4.99,
+    1.01
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 75148,
+   "root_id": 720575940626161930,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 75.91,
+   "el_deg": -22.89,
+   "se_deg": [
+    2.25,
+    1.23
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 76530,
+   "root_id": 720575940626447848,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 42.79,
+   "el_deg": 17.8,
+   "se_deg": [
+    3.18,
+    1.14
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 78031,
+   "root_id": 720575940626735016,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 37.95,
+   "el_deg": -56.4,
+   "se_deg": [
+    3.79,
+    1.75
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 78101,
+   "root_id": 720575940626745392,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 157.15,
+   "el_deg": -32.17,
+   "se_deg": [
+    8.37,
+    0.96
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 78878,
+   "root_id": 720575940626873000,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 22.76,
+   "el_deg": 2.25,
+   "se_deg": [
+    4.35,
+    1.39
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 83138,
+   "root_id": 720575940627553923,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 146.89,
+   "el_deg": 10.57,
+   "se_deg": [
+    5.63,
+    1.89
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 85075,
+   "root_id": 720575940627902979,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 33.78,
+   "el_deg": 40.6,
+   "se_deg": [
+    3.46,
+    0.98
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 85903,
+   "root_id": 720575940628039034,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 134.91,
+   "el_deg": 51.35,
+   "se_deg": [
+    5.96,
+    1.49
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 86797,
+   "root_id": 720575940628197892,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 136.17,
+   "el_deg": 7.45,
+   "se_deg": [
+    5.82,
+    1.31
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 89187,
+   "root_id": 720575940628603842,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 42.31,
+   "el_deg": 57.78,
+   "se_deg": [
+    3.28,
+    0.87
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 90122,
+   "root_id": 720575940628778058,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 99.29,
+   "el_deg": -44.21,
+   "se_deg": [
+    3.09,
+    1.09
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 90573,
+   "root_id": 720575940628849668,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 159.2,
+   "el_deg": -16.42,
+   "se_deg": [
+    7.81,
+    0.94
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 91306,
+   "root_id": 720575940628990214,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 126.08,
+   "el_deg": 19.43,
+   "se_deg": [
+    5.37,
+    1.37
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 93265,
+   "root_id": 720575940629384271,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 137.44,
+   "el_deg": -0.72,
+   "se_deg": [
+    4.21,
+    0.98
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 96263,
+   "root_id": 720575940629967703,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 6.43,
+   "el_deg": 17.97,
+   "se_deg": [
+    4.77,
+    1.26
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 99745,
+   "root_id": 720575940630650936,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 52.4,
+   "el_deg": -21.06,
+   "se_deg": [
+    2.64,
+    1.35
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 100157,
+   "root_id": 720575940630719831,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 82.6,
+   "el_deg": -64.17,
+   "se_deg": [
+    5.2,
+    0.92
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 102213,
+   "root_id": 720575940631095158,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 117.63,
+   "el_deg": 31.11,
+   "se_deg": [
+    4.45,
+    1.25
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 103389,
+   "root_id": 720575940631312428,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 101.47,
+   "el_deg": 63.42,
+   "se_deg": [
+    5.6,
+    1.07
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 103783,
+   "root_id": 720575940631397549,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 77.99,
+   "el_deg": 58.43,
+   "se_deg": [
+    3.29,
+    0.9
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 104684,
+   "root_id": 720575940631582751,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 127.36,
+   "el_deg": -12.79,
+   "se_deg": [
+    6.4,
+    1.0
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 105415,
+   "root_id": 720575940631742405,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": -16.11,
+   "el_deg": 58.87,
+   "se_deg": [
+    2.3,
+    0.82
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 108811,
+   "root_id": 720575940632512226,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": -15.33,
+   "el_deg": 48.52,
+   "se_deg": [
+    3.04,
+    0.98
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 109663,
+   "root_id": 720575940632711052,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 131.12,
+   "el_deg": -22.37,
+   "se_deg": [
+    4.83,
+    0.85
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 112800,
+   "root_id": 720575940633552685,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 148.29,
+   "el_deg": -14.8,
+   "se_deg": [
+    6.68,
+    0.94
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 112936,
+   "root_id": 720575940633588320,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 106.02,
+   "el_deg": -27.23,
+   "se_deg": [
+    4.46,
+    1.04
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 114505,
+   "root_id": 720575940634146967,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 112.38,
+   "el_deg": 15.14,
+   "se_deg": [
+    3.12,
+    0.95
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 116704,
+   "root_id": 720575940635040357,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 96.16,
+   "el_deg": -9.79,
+   "se_deg": [
+    3.25,
+    1.04
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 118209,
+   "root_id": 720575940635572592,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": -3.59,
+   "el_deg": 35.15,
+   "se_deg": [
+    4.27,
+    1.17
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 120524,
+   "root_id": 720575940636539102,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 33.57,
+   "el_deg": 27.11,
+   "se_deg": [
+    3.25,
+    1.15
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 121258,
+   "root_id": 720575940636878682,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 50.45,
+   "el_deg": 20.34,
+   "se_deg": [
+    3.68,
+    1.05
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 121442,
+   "root_id": 720575940636950505,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 117.77,
+   "el_deg": 7.39,
+   "se_deg": [
+    4.0,
+    1.04
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 121544,
+   "root_id": 720575940636999401,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 152.33,
+   "el_deg": -8.4,
+   "se_deg": [
+    6.78,
+    0.97
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 121733,
+   "root_id": 720575940637088602,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 119.01,
+   "el_deg": -5.05,
+   "se_deg": [
+    4.21,
+    0.89
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 123165,
+   "root_id": 720575940637702222,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 132.96,
+   "el_deg": -42.06,
+   "se_deg": [
+    5.92,
+    1.02
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 123713,
+   "root_id": 720575940637958709,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": -3.04,
+   "el_deg": 17.0,
+   "se_deg": [
+    4.56,
+    1.55
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 125744,
+   "root_id": 720575940638857048,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 23.21,
+   "el_deg": 31.83,
+   "se_deg": [
+    3.1,
+    1.15
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 125897,
+   "root_id": 720575940638922624,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 79.06,
+   "el_deg": 8.88,
+   "se_deg": [
+    2.56,
+    1.07
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 126552,
+   "root_id": 720575940639177449,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 157.08,
+   "el_deg": -47.62,
+   "se_deg": [
+    6.67,
+    1.0
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 129480,
+   "root_id": 720575940640510427,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": -2.05,
+   "el_deg": -22.73,
+   "se_deg": [
+    5.16,
+    2.37
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 131542,
+   "root_id": 720575940642397128,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 71.91,
+   "el_deg": -69.84,
+   "se_deg": [
+    6.52,
+    0.96
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 134013,
+   "root_id": 720575940645180196,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 38.86,
+   "el_deg": -13.93,
+   "se_deg": [
+    3.8,
+    1.45
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 134553,
+   "root_id": 720575940645699124,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": -9.37,
+   "el_deg": 32.17,
+   "se_deg": [
+    4.18,
+    1.46
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 135809,
+   "root_id": 720575940647358243,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 107.63,
+   "el_deg": 29.99,
+   "se_deg": [
+    3.48,
+    1.06
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 137567,
+   "root_id": 720575940653742753,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 43.17,
+   "el_deg": 5.64,
+   "se_deg": [
+    2.67,
+    1.09
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 138623,
+   "root_id": 720575940661316993,
+   "type": "LPLC2",
+   "side": "right",
+   "az_deg": 130.38,
+   "el_deg": 6.43,
+   "se_deg": [
+    4.43,
+    1.2
+   ],
+   "sigma_deg": 20.0,
+   "source": "own-frame centre (columnar inputs), axes: layer rule (Klapoetke 2017), the fly's"
+  },
+  {
+   "model_index": 264,
+   "root_id": 720575940603637438,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 45.11,
+   "el_deg": 59.01,
+   "se_deg": [
+    2.94,
+    0.63
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 13067,
+   "root_id": 720575940612093351,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": -5.39,
+   "el_deg": 52.05,
+   "se_deg": [
+    1.77,
+    0.83
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 13728,
+   "root_id": 720575940612323025,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 31.97,
+   "el_deg": -54.66,
+   "se_deg": [
+    2.04,
+    0.72
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 13909,
+   "root_id": 720575940612380723,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 147.77,
+   "el_deg": -26.15,
+   "se_deg": [
+    2.86,
+    1.09
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 14284,
+   "root_id": 720575940612498129,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 135.86,
+   "el_deg": -1.39,
+   "se_deg": [
+    4.27,
+    0.97
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 15883,
+   "root_id": 720575940612968421,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 124.12,
+   "el_deg": 7.11,
+   "se_deg": [
+    3.84,
+    1.05
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 17935,
+   "root_id": 720575940613609484,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 112.05,
+   "el_deg": -7.39,
+   "se_deg": [
+    2.95,
+    0.77
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 18045,
+   "root_id": 720575940613638041,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 35.15,
+   "el_deg": -2.26,
+   "se_deg": [
+    3.34,
+    1.32
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 20810,
+   "root_id": 720575940614582946,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 19.15,
+   "el_deg": 57.75,
+   "se_deg": [
+    2.28,
+    0.52
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 23130,
+   "root_id": 720575940615232217,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 93.55,
+   "el_deg": 48.82,
+   "se_deg": [
+    3.42,
+    0.83
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 25985,
+   "root_id": 720575940616066705,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 59.33,
+   "el_deg": -61.74,
+   "se_deg": [
+    3.06,
+    0.6
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 30533,
+   "root_id": 720575940617348379,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 114.4,
+   "el_deg": 37.77,
+   "se_deg": [
+    3.96,
+    0.89
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 34245,
+   "root_id": 720575940618234704,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 99.94,
+   "el_deg": 38.76,
+   "se_deg": [
+    2.93,
+    0.8
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 34246,
+   "root_id": 720575940618234715,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 7.71,
+   "el_deg": -1.13,
+   "se_deg": [
+    3.27,
+    1.7
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 34402,
+   "root_id": 720575940618266459,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 18.81,
+   "el_deg": 19.66,
+   "se_deg": [
+    2.84,
+    1.41
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 34409,
+   "root_id": 720575940618267227,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 74.96,
+   "el_deg": -9.15,
+   "se_deg": [
+    2.76,
+    0.94
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 34445,
+   "root_id": 720575940618275520,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 76.79,
+   "el_deg": -29.23,
+   "se_deg": [
+    2.35,
+    0.82
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 36239,
+   "root_id": 720575940618709158,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 134.01,
+   "el_deg": -14.41,
+   "se_deg": [
+    3.46,
+    0.84
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 42880,
+   "root_id": 720575940620314221,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 137.57,
+   "el_deg": 11.97,
+   "se_deg": [
+    4.28,
+    1.56
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 42886,
+   "root_id": 720575940620314612,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 131.53,
+   "el_deg": -35.55,
+   "se_deg": [
+    3.45,
+    0.89
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 45196,
+   "root_id": 720575940620731380,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 145.75,
+   "el_deg": -10.83,
+   "se_deg": [
+    3.79,
+    0.89
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 47583,
+   "root_id": 720575940621145821,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 72.42,
+   "el_deg": -45.45,
+   "se_deg": [
+    2.44,
+    0.85
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 49698,
+   "root_id": 720575940621522458,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 78.03,
+   "el_deg": 37.97,
+   "se_deg": [
+    2.9,
+    0.93
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 51100,
+   "root_id": 720575940621753579,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 56.87,
+   "el_deg": 26.77,
+   "se_deg": [
+    2.93,
+    1.24
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 54455,
+   "root_id": 720575940622330582,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 71.06,
+   "el_deg": -57.03,
+   "se_deg": [
+    2.44,
+    0.61
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 68119,
+   "root_id": 720575940624790781,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 58.86,
+   "el_deg": 50.72,
+   "se_deg": [
+    2.82,
+    0.67
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 68461,
+   "root_id": 720575940624856762,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 52.34,
+   "el_deg": 46.14,
+   "se_deg": [
+    2.67,
+    0.73
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 73496,
+   "root_id": 720575940625841351,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": -4.2,
+   "el_deg": 31.39,
+   "se_deg": [
+    2.18,
+    1.58
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 73522,
+   "root_id": 720575940625845447,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 96.09,
+   "el_deg": 26.68,
+   "se_deg": [
+    3.63,
+    1.14
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 73846,
+   "root_id": 720575940625906702,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 105.78,
+   "el_deg": -52.03,
+   "se_deg": [
+    3.05,
+    0.82
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 73964,
+   "root_id": 720575940625932421,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 98.8,
+   "el_deg": -35.83,
+   "se_deg": [
+    2.87,
+    0.83
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 77031,
+   "root_id": 720575940626553596,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 124.94,
+   "el_deg": -32.8,
+   "se_deg": [
+    3.34,
+    0.81
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 88184,
+   "root_id": 720575940628419527,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 19.3,
+   "el_deg": -30.54,
+   "se_deg": [
+    2.88,
+    1.29
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 88693,
+   "root_id": 720575940628518400,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 137.3,
+   "el_deg": 26.64,
+   "se_deg": [
+    3.8,
+    1.53
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 89165,
+   "root_id": 720575940628599895,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 83.72,
+   "el_deg": 15.84,
+   "se_deg": [
+    3.24,
+    1.03
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 89200,
+   "root_id": 720575940628606713,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 47.36,
+   "el_deg": -22.96,
+   "se_deg": [
+    2.82,
+    1.0
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 90786,
+   "root_id": 720575940628891863,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 104.01,
+   "el_deg": -48.91,
+   "se_deg": [
+    3.18,
+    0.65
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 96243,
+   "root_id": 720575940629964591,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 85.08,
+   "el_deg": 1.59,
+   "se_deg": [
+    3.23,
+    0.94
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 97190,
+   "root_id": 720575940630154660,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 44.7,
+   "el_deg": -39.94,
+   "se_deg": [
+    2.02,
+    1.13
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 101892,
+   "root_id": 720575940631032657,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 134.64,
+   "el_deg": -21.69,
+   "se_deg": [
+    3.22,
+    0.84
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 108651,
+   "root_id": 720575940632475449,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 4.15,
+   "el_deg": -47.8,
+   "se_deg": [
+    2.6,
+    0.94
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 109680,
+   "root_id": 720575940632715234,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 21.22,
+   "el_deg": 50.98,
+   "se_deg": [
+    2.64,
+    0.75
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 110942,
+   "root_id": 720575940633013355,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 118.69,
+   "el_deg": 22.23,
+   "se_deg": [
+    3.48,
+    1.06
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 111699,
+   "root_id": 720575940633218863,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 99.7,
+   "el_deg": -20.01,
+   "se_deg": [
+    2.89,
+    0.88
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 118928,
+   "root_id": 720575940635835967,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 5.87,
+   "el_deg": 41.43,
+   "se_deg": [
+    2.23,
+    1.0
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 121451,
+   "root_id": 720575940636957006,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 34.65,
+   "el_deg": 33.85,
+   "se_deg": [
+    2.5,
+    0.95
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 127954,
+   "root_id": 720575940639817947,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 157.78,
+   "el_deg": -5.66,
+   "se_deg": [
+    5.04,
+    1.03
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 130519,
+   "root_id": 720575940641213824,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 49.49,
+   "el_deg": 8.82,
+   "se_deg": [
+    2.65,
+    1.14
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 134682,
+   "root_id": 720575940645821316,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 106.29,
+   "el_deg": 47.04,
+   "se_deg": [
+    3.33,
+    1.0
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  },
+  {
+   "model_index": 137218,
+   "root_id": 720575940652611745,
+   "type": "LC4",
+   "side": "right",
+   "az_deg": 2.71,
+   "el_deg": -15.22,
+   "se_deg": [
+    3.76,
+    1.87
+   ],
+   "sigma_deg": 15.0,
+   "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+  }
+ ],
+ "eyes": {
+  "left": {
+   "cells": {
+    "LPLC2": 108,
+    "LPLC2_placed": 108,
+    "LC4": 54,
+    "LC4_placed": 54
+   },
+   "orientation": "layer rule (Klapoetke 2017), the fly's",
+   "orientation_accepted": true,
+   "layer_test": {
+    "cells_ab": 107,
+    "cells_cd": 106,
+    "frac_post_agree": 0.785,
+    "frac_dors_agree": 1.0,
+    "angle_P_D_deg": 84.4,
+    "posterior_dir_xyz": [
+     0.73,
+     -0.425,
+     -0.536
+    ],
+    "dorsal_dir_xyz": [
+     -0.435,
+     -0.893,
+     0.116
+    ]
+   },
+   "lc4_map": {
+    "fit_cells": 92,
+    "r2_u": 0.959,
+    "r2_v": 0.993,
+    "accepted": true,
+    "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.96, v 0.99)"
+   },
+   "spread_P5_P95_deg": {
+    "az": 155.5,
+    "el": 110.3
+   },
+   "median_boot_se_deg": {
+    "az": 3.19,
+    "el": 1.06
+   },
+   "distinguishable_positions": {
+    "az": 24.4,
+    "el": 51.9
+   },
+   "nonoverlapping_fields_info": {
+    "az": 3.9,
+    "el": 2.8
+   }
+  },
+  "right": {
+   "cells": {
+    "LPLC2": 102,
+    "LPLC2_placed": 102,
+    "LC4": 50,
+    "LC4_placed": 50
+   },
+   "orientation": "layer rule (Klapoetke 2017), the fly's",
+   "orientation_accepted": true,
+   "layer_test": {
+    "cells_ab": 100,
+    "cells_cd": 101,
+    "frac_post_agree": 0.94,
+    "frac_dors_agree": 1.0,
+    "angle_P_D_deg": 89.5,
+    "posterior_dir_xyz": [
+     -0.849,
+     -0.372,
+     -0.375
+    ],
+    "dorsal_dir_xyz": [
+     0.353,
+     -0.928,
+     0.121
+    ]
+   },
+   "lc4_map": {
+    "fit_cells": 90,
+    "r2_u": 0.953,
+    "r2_v": 0.986,
+    "accepted": true,
+    "source": "shared frame ('T2', 'T2a', 'Tm2', 'Tm3', 'Tm4', 'TmY3'), linear map fitted on this eye's LPLC2 (R2 u 0.95, v 0.99)"
+   },
+   "spread_P5_P95_deg": {
+    "az": 162.4,
+    "el": 113.5
+   },
+   "median_boot_se_deg": {
+    "az": 3.47,
+    "el": 1.04
+   },
+   "distinguishable_positions": {
+    "az": 23.4,
+    "el": 54.6
+   },
+   "nonoverlapping_fields_info": {
+    "az": 4.1,
+    "el": 2.8
+   }
+  }
+ },
+ "stop_A": false,
+ "ours": [
+  "the linear map from column position to degrees: azimuth -10..160 and elevation -60..60 over each eye's P2.5..P97.5 (A4)",
+  "the field shape and width: Gaussian, sigma 20 deg LPLC2, 15 deg LC4 (R2)",
+  "the eye's position: the left eye's cells at negative game azimuth, the right eye's at positive",
+  "the orientation of any eye whose layer test failed, and LC4's if its shared-frame map failed (see eyes.*)"
+ ],
+ "sources": {
+  "annotations": "https://raw.githubusercontent.com/flyconnectome/flywire_annotations/17fc57722002e1a7d38cdd0c89ac382bf92718da/supplemental_files/Supplemental_file1_neuron_annotations.tsv sha256 9a4f8b2f843196074431ebd7cd883536afa1be86c8a4ce90970441e8be81d1be",
+  "connectivity": "https://github.com/philshiu/Drosophila_brain_model.git @ 91bdd1e7dcf193f3e7ca5a8933497fcef63b7960, Connectivity_783.parquet sha256 efeb23fb99098e9c390f6869969b2a121a2ee92c833cfc45ecb2c1d8e1af0347",
+  "layer_rule": "Klapoetke et al. 2017, Nature 551:237, LPLC2 dendrites extend outward along each layer's preferred direction"
+ }
+}
