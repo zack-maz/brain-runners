@@ -99,6 +99,19 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 ## Where to resume (in this order)
 
 **Next: phase 6** (item 3 below), which waits for the user's budget go-ahead. Everything above it is done or parked.
+PRs #8 to #11 are merged (fly2 settled, Brain Battle, fly3 stopped, Brain Run and Jev uncapped).
+
+- **PR #11 (`brain-run`) merged to `main` on 2026-09-26**, with two decisions. Decision 50: **Jev plays without a
+  cap** (every `jev_*`, `bakeoff.players.UNCAPPED`, `UncappedBudget`): its requests cost the user nothing, so
+  `--max-requests` no longer stops them; they are still cached, counted, priced and recorded (`"max": null` in
+  `meta.json`). Claude Haiku and GLM Flash keep their hard cap; Jev still stays off seeds below 1000 without
+  `--tournament`; the track select shows Jev's worst case but does not ask to confirm a lineup whose only spending
+  is Jev's; the fast tests hide every provider key (`tests/conftest.py`). Decision 51: **Brain Battle is Brain Run**
+  on screen: the fighters are runners ("Choose your runners", "Ready to run", "‹ Runners", "N runners") and the
+  home brain's glow pulses visibly; code ids, file names and comments keep the old names.
+- **PR #12** (`1dbfa3b`, merged 2026-09-28): a results card's Requests read "N live" over "M cached"
+  when some answers came from the cache, so a runner that replayed a track shows "0 live / 146 cached" and 0.00 USD
+  instead of a bare 0.
 
 - **Brain Battle, the new front of the live page** (branch `brain-battle`, a worktree at `../brain-battle` beside the
   main checkout; started 2026-09-25): the request, every answer, the five approved mock-ups and where to resume are
@@ -157,12 +170,13 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 - Update 3b's page: `uv run python -m bakeoff view runs/20260921-165433 --output /tmp/3b.html` and open it — the two
   tabs, a log in every mind panel (it follows the row on screen), the picker over the tunnel, and the benchmark of
   what the page holds on the Analysis tab.
-- `live` without `--game v1` plays v2. With a cap of 0 a paid player replays what is cached and stops at its first
-  uncached question.
-- The lobby: `uv run python -m bakeoff live --port 8765 --out /tmp/lobby --players solver,random`, then open the
+- `live` without `--game v1` plays v2. With a cap of 0 a capped paid player (Claude Haiku, GLM Flash) replays what
+  is cached and stops at its first uncached question; Jev has no cap and asks for whatever is not cached (decision 50).
+- Brain Run, the front (the lobby before it): `uv run python -m bakeoff live --port 8765 --out /tmp/lobby --players solver,random`, then open the
   address it prints and start a run from the page; it keeps serving, so another track can be set up when one ends.
   `--start` plays the command line's own run at once, as before, and waits for the browser before its first
-  decision. A track that was played before replays from the cache and spends nothing.
+  decision. A track that was played before replays from the cache and spends nothing; its results cards then read "0 live"
+  over the cached count.
 
 ## Tooling
 

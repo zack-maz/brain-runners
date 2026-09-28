@@ -1,5 +1,9 @@
 # Frontend request of 2026-09-25: Brain Battle
 
+> **Now Brain Run** (decision 51, 2026-09-26): on screen the front is called Brain Run and its fighters are runners
+> ("Choose your runners", "Ready to run", "‹ Runners", "N runners"); the home brain's glow pulses. Code ids, file
+> names and comments keep the old names. The request and answers below are kept as they were given.
+
 The user's request to rework the live viewer's front, recorded as given, with where the project stood that day and
 the questions to settle when it is brainstormed. Decisions go to `DECISIONS.md` once made. Branch: `brain-battle`
 (a worktree next to the main checkout, so the session tracking fly2's tracks on `fly2-settle` is not disturbed).
@@ -143,7 +147,18 @@ we found in my own words, as well as my opinions and thoughts. That can wait to 
   ours is labelled; one track or five is not a result).
 - Not in this spec. It gets its own brainstorm when its turn comes; the numbers it cites come from Records.
 
-## Where this stands (2026-09-25) — resume here
+## Where this stands (2026-09-28) — resume here
+
+- **Brain Battle is built and merged** (PR #9), and so are PRs #8, #10 and #11. PR #11 (`brain-run`) renamed it
+  **Brain Run** on screen (decision 51: runners, not fighters; the home brain's glow pulses) and let **Jev play
+  without a cap** (decision 50): the track select shows Jev's worst case (the whole track), says "Jev plays without a cap" under the total, and does not ask to confirm a
+  lineup whose only spending is Jev's. Claude Haiku and GLM Flash keep their cap under `--max-requests`.
+- **PR #12** (`1dbfa3b`): a results card's Requests read "N live" over "M cached" when some answers
+  came from the cache, so a runner that replayed a track shows "0 live / 146 cached" and 0.00 USD.
+- **Next:** phase 6 (the tournament and the write-up), awaiting the user's budget go-ahead (`docs/NEXT.md`). The
+  write-up page above is its last step.
+
+## Where this stood (2026-09-25)
 
 - **Done:** the request and every answer are recorded above; all five screens are mocked and approved (home,
   character select, track select, results with More numbers, records); decision 44, the rename to plain, guided,

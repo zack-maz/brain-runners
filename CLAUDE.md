@@ -56,8 +56,10 @@ built, calibrated, played and on `main` (PR #7, merged 2026-09-25; decisions 41�
 `docs/superpowers/specs/2026-09-24-fly2-design.md`, plan `docs/superpowers/plans/2026-09-24-fly2.md`): its numbers
 are frozen (`calibration/FLY2_REPORT.md`), its real run and its live smoke are done; on 100 fresh seeds it beats `fly` by 13.4 rows (decision 47).
 `fly3`, a trained readout on the frozen wiring (decision 48), stopped at its probe: the same learner with no brain
-played better (spike 05, decision 49), so it is not built. Brain Battle, the front of `bakeoff live`, is on `main`
-(PR #9, merged 2026-09-26). Then phase 6, the tournament and the write-up, which needs a new budget go-ahead. Each
+played better (spike 05, decision 49), so it is not built. Brain Run (called Brain Battle until decision 51), the
+front of `bakeoff live`, is on `main` (PR #9, merged 2026-09-26; renamed in PR #11). PR #11 (merged 2026-09-26) also
+lets Jev play without a cap (decision 50). PRs #8–#12 are merged; since #12 a results card reads
+"N live" over "M cached". Then phase 6, the tournament and the write-up, which needs a new budget go-ahead. Each
 phase gets its own plan. Resume from `docs/NEXT.md`.
 
 ## How we work here
@@ -83,7 +85,7 @@ phase gets its own plan. Resume from `docs/NEXT.md`.
   one minute); never run two fly processes at once.
 - The viewer is plain JavaScript with no build step and no npm packages. Rules of the game stay in
   Python (`bakeoff/replay.py`); the pure JavaScript (`timeline.js`, `tunnel.js`, `sprites.js`, `roster.js`, `stage.js`, `minds.js`,
-  `log.js`, `picker.js`, `tabs.js`, `feed.js`, `lobby.js`, `bench_view.js`, and Brain Battle's `screens.js`, `select.js`,
+  `log.js`, `picker.js`, `tabs.js`, `feed.js`, `lobby.js`, `bench_view.js`, and Brain Run's `screens.js`, `select.js`,
   `trackpick.js`, `results.js`, `records.js`) is tested by
   `viewer/tests/*.test.js`, which `uv run pytest` runs through `node --test`. Text from a log is always
   escaped (`Minds.esc`) and the page must never load anything from the network (the two brand fonts in
@@ -96,7 +98,7 @@ phase gets its own plan. Resume from `docs/NEXT.md`.
   holds the levels, the scoreboard, what is ours and the benchmark. Every mind panel carries a running log, one line
   per row up to the row on screen and one log open at a time, appended as the frames arrive so it keeps its scroll
   and never runs ahead of the tunnel. One section, "Players", holds both lists as
-  labelled rows (decision 38); since Brain Battle only one is left: who is in the tunnel (shows and hides the
+  labelled rows (decision 38); since Brain Run (then Brain Battle) only one is left: who is in the tunnel (shows and hides the
   runners on screen, live or replay), while who runs next is picked on the character select. The level table only picks the track, and a player that did not run
   the track in view can never be turned on. `viewer/bench_view.js` is the one drawing code for the benchmark, mounted by both
   `bench.html` and the Analysis tab, and `viewer/bench.css` styles it on both pages (keyed to its `data-bench`
@@ -109,17 +111,20 @@ phase gets its own plan. Resume from `docs/NEXT.md`.
   (`bakeoff/fly/shared.py`): never start it next to another fly run. Its records come from `runner.play_row` and
   its frames from `replay.frame_of`, the same functions `run` and `view` use; keep it that way.
 - The page runs the show (update 3a, design `docs/superpowers/specs/2026-09-22-page-control-design.md`): the command
-  binds the port and sets the ceiling, the page (since Brain Battle, its front: the character select picks the
+  binds the port and sets the ceiling, the page (since Brain Battle, now Brain Run, its front: the character select picks the
   players, the track select the track and holds the money confirmation) starts and cancels the run (`GET /state`, `POST /run`, `POST /cancel`, `GET /events?run=`). Every request but the page itself
   carries a token minted at startup and embedded in the page (in the header; in the query for the event stream
   alone, which cannot send headers), so no other page in the browser can drive the run. It is not a defence
   against a program on this machine: whatever may fetch `/` may read the token out of the page. One
   `LiveSession` per command holds one budget per
-  paid player for the whole session (`SharedBudget` gives each run its own record of what it spent), runs one
+  paid player for the whole session (Jev's is an `UncappedBudget`, decision 50; `SharedBudget` gives each run its
+  own record of what it spent), runs one
   `LiveRun` at a time and keeps serving so another track can be played without restarting. `--start` plays the
   command line's own run at once, as before, and holds its first decision until a browser is listening.
-- Brain Battle (decision 45, spec `docs/superpowers/specs/2026-09-25-brain-battle-design.md`) is on `main` (PR #9,
-  merged 2026-09-26), built in two plans. Plan a: `bakeoff/roster.py` is the one list of characters and skins (a test
+- Brain Run (decision 45, spec `docs/superpowers/specs/2026-09-25-brain-battle-design.md`) is on `main` (PR #9,
+  merged 2026-09-26), built in two plans as Brain Battle and renamed by decision 51 (PR #11): on screen it is Brain
+  Run and its fighters are runners ("Choose your runners", "Ready to run", "‹ Runners", "N runners"), and the home
+  brain's glow pulses; code ids, file names and comments keep the old names. Plan a: `bakeoff/roster.py` is the one list of characters and skins (a test
   keeps it equal to the registry), embedded in every page, so runners wear their skin's colours and are labelled
   "Jev · Step 1" (`viewer/roster.js`); `bakeoff/results.py` gives a run's numbers (also on the `end` event),
   `bakeoff/records.py` the leaderboard, pairs and past runs (each player and track from the newest run that completed
@@ -130,7 +135,9 @@ phase gets its own plan. Resume from `docs/NEXT.md`.
   (home, character select, track select, the run screen, results that open by themselves, Records with the
   leaderboard on practice tracks 1000–1019, head to head, past runs and the whole "what is ours" section); the
   lobby's grid is gone (`lobby.js` keeps the money helpers). A lineup that can spend is confirmed once, with its
-  worst case on the RUN button, and Run again goes through the same confirmation. `bakeoff view` keeps its replay page.
+  worst case on the RUN button, and Run again goes through the same confirmation; a lineup whose only spending is
+  Jev's shows its worst case but is not asked (decision 50). A results card's Requests read "N live" over "M cached"
+  when some answers came from the cache. `bakeoff view` keeps its replay page.
 - Capped paid players (Claude Haiku, GLM Flash) spend nothing without `--max-requests` (default 0 replays
   `.cache/responses`); Jev asks whenever its answer is not cached. No fast test can reach a provider:
   `tests/conftest.py` hides every provider key unless a test is marked `live`. Never raise a cap, rerun a paid command or run `pytest -m live` without the user's go-ahead. No paid

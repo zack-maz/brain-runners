@@ -137,3 +137,18 @@ test("the header and the markup, every text escaped", () => {
   assert.match(Results.cardsHtml(Results.cards(RESULTS, ROSTER), true), /^<article class="card leader"/);
   assert.equal(Results.cardsHtml(Results.cards(RESULTS, ROSTER), true).includes("canvas"), false); // More numbers hides the art
 });
+
+test("a card says how many answers came live and how many from the cache, so 0 requests is not a mystery", () => {
+  const cached = { ...RESULTS, players: RESULTS.players.map((e) => (e.player === "jev_guided"
+    ? { ...e, requests: 0, cache_hits: 146 } : e)) };
+  const card = Results.cards(cached, ROSTER).find((c) => c.player === "jev_guided");
+  assert.equal(card.requests, "0 live\n146 cached");
+  const mixed = { ...RESULTS, players: RESULTS.players.map((e) => (e.player === "jev_guided"
+    ? { ...e, requests: 51, cache_hits: 1 } : e)) };
+  assert.equal(Results.cards(mixed, ROSTER).find((c) => c.player === "jev_guided").requests, "51 live\n1 cached");
+  // nothing cached: the number alone, as before
+  assert.equal(Results.cards(RESULTS, ROSTER).find((c) => c.player === "jev_guided").requests, "81");
+  // on the card, one escaped line each
+  assert.match(Results.cardsHtml(Results.cards(cached, ROSTER), false),
+    /<span class="label">Requests<\/span><span class="line">0 live<\/span><span class="line">146 cached<\/span>/);
+});

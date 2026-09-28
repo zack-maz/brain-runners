@@ -28,8 +28,8 @@ The game comes in versions (`bakeoff/game/rules.py`): `v1`, the 300-row game pha
 `v2`, the default, 150 rows that reach full difficulty by row 100. `--game v1` plays the old one; `--lookahead` and
 `--window` change how far players see and rename the game (`v2+look3`). Each run records its game, and `view`
 refuses to mix two games. Jev and the LLM
-(Claude Haiku 4.5) play behind a response cache and a hard request cap; first measured costs
-are in `docs/COSTS.md`.
+(Claude Haiku 4.5) play behind a response cache; the LLM also behind a hard request cap, while Jev, whose requests
+cost you nothing, plays without one (decision 50); first measured costs are in `docs/COSTS.md`.
 
     uv run pytest                                    # fast tests, ~20 s; `-m slow` runs the real brain (1 GB)
     uv run python -m scripts.fetch_fly_data          # once: 400 MB into data/
@@ -38,7 +38,7 @@ are in `docs/COSTS.md`.
     uv run python -m bakeoff view runs/<run_id> [runs/<other_run_id> ...]   # writes replay.html
     uv run python -m bakeoff bench runs/<run_id>[:player,...] [...]          # writes bench.html and bench.json
 
-    uv run python -m bakeoff live --port 8765             # Brain Battle: the browser picks the players and the track
+    uv run python -m bakeoff live --port 8765             # Brain Run: the browser picks the players and the track
     uv run python -m bakeoff live --start --seed 1001 --players fly,jev_step1,haiku_plain --max-requests 150
     uv run python -m bakeoff live --game v1 --seed 1001 --start   # free: replays that run's answers from the cache
 
@@ -55,23 +55,26 @@ come by chance; the page counts the pairs and says so. The page is one offline f
 `live` plays one track in real time: every mind decides the same row before anyone moves on (a jumper skips
 the next row; the slowest mind sets the pace, about a row a second with the fly), each decision goes into a
 normal run directory and, through a server on `127.0.0.1` only, into the same page as it happens. The command
-binds the port and sets the ceiling; the page does the rest, through Brain Battle's screens (decision 45, spec
-`docs/superpowers/specs/2026-09-25-brain-battle-design.md`): home, the character select (up to eight fighters,
-each a character in one of its skins), the track select (the track, its preview, and each fighter's worst case;
-a run that can spend asks for a second press, `RUN` then `CONFIRM` with "spend at most …"), the run screen (with
-Cancel), and the results, which open by themselves when the run ends and lead to another run without restarting
+binds the port and sets the ceiling; the page does the rest, through Brain Run's screens (decisions 45 and 51, spec
+`docs/superpowers/specs/2026-09-25-brain-battle-design.md`; it was called Brain Battle until decision 51): home,
+"Choose your runners" (up to eight runners, each a character in one of its skins), the track select (the track, its
+preview, and each runner's worst case, Jev's included; a run that can spend asks for a second press, `RUN` then
+`CONFIRM` with "spend at most …", but a lineup whose only spending is Jev's is not asked), the run screen (with
+Cancel), and the results (a card per runner; its requests read "N live" over "M cached" when some answers came
+from the cache, so a runner that replayed a track shows 0 live and 0.00 USD), which open by themselves when the run ends and lead to another run without restarting
 the command. Records holds the leaderboard of the practice tracks, head to head for two players, and the past runs
 to watch again or see the results of. The page reads these through three routes that only read files and spend
 nothing, behind the same token as the rest: `GET /results?run=`, `GET /records` and `GET /replay?run=`. `--seed`
 and `--players` fill the character select and the track select; `--start` plays the command line's own run at
-once instead, waiting for a browser first and serving until Ctrl-C (`--no-wait` does neither). The cap is the session's, per paid player, default 0, which makes a free live
-run of a track whose answers are already cached; a live paid run on a seed below 1000 is refused without `--tournament`. `live`
+once instead, waiting for a browser first and serving until Ctrl-C (`--no-wait` does neither). The cap is the session's, per capped paid player (Claude Haiku, GLM
+Flash), default 0, which makes a free live run of a track whose answers are already cached; Jev has no cap; a live paid run on a seed below 1000 is refused without `--tournament`. `live`
 builds one fly brain; do not start a second fly process next to it. Afterwards `view` replays the directory.
 
 Paid players (`jev_plain`, `jev_step1`, `haiku_plain` and the question-set players below) need `TYPESAFE_API_KEY` / `ANTHROPIC_API_KEY` in a git-ignored `.env`
-file at the repo root (template: `.env.example`). They spend nothing unless told to:
+file at the repo root (template: `.env.example`). Claude Haiku and GLM Flash spend nothing unless told to; Jev asks whenever
+its answer is not cached (decision 50):
 
-    uv run python -m bakeoff run --players jev_plain --seeds 1 --seed-start 1000 --max-requests 300 --game v1
+    uv run python -m bakeoff run --players haiku_plain --seeds 1 --seed-start 1000 --max-requests 300 --game v1
 
 `jev_step1` is the Jev of the demo: instead of one broad question it asks Jev four pointed yes/no
 questions in one request ("would `left` land on a gap, that is, does `ahead[0].gaps_relative` contain
@@ -90,13 +93,15 @@ Jev's yes/no questions carry only the question), Jev answers its questions in pa
 one reply, and the LLM's probabilities are numbers it writes down. The questions and the rules are ours
 (`bakeoff/players/question_sets.py`).
 
-The five ways are named `plain`, `guided`, `step1`, `step2` and `map` (decision 44, for the Brain Battle character
-select). Before that they were the one-shot `jev`/`haiku`/`glm`, `choice`, `composed`, `two_step` and `reader`, and
+The five ways are named `plain`, `guided`, `step1`, `step2` and `map` (decision 44, for the character
+select of Brain Run, then called Brain Battle). Before that they were the one-shot `jev`/`haiku`/`glm`, `choice`, `composed`, `two_step` and `reader`, and
 Claude Haiku's players were `llm*` before decision 39. Old names still work wherever a player is named, and runs
 recorded under them (with their cached answers) are read as the new ones.
 
-`--max-requests` is a hard cap on live requests for **each** paid player in the run; the default 0
-only replays `.cache/responses`. Every answer is cached, so a repeated run of the same game and track
+`--max-requests` is a hard cap on live requests for **each** capped paid player in the run (Claude Haiku, GLM
+Flash); the default 0 only replays `.cache/responses`. Jev (every `jev_*`) plays without a cap (decision 50): its
+requests cost you nothing, and they are still cached, counted, priced and recorded (`"max": null` in `meta.json`).
+Every answer is cached, so a repeated run of the same game and track
 is free, and a run stopped by the cap (`status: budget_exhausted`) continues from the cache next time.
 `uv run pytest -m live`
 makes one real request per provider. A live paid run on seeds below 1000 is refused unless

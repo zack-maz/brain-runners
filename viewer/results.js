@@ -78,6 +78,13 @@
     return String(entry.requests);
   }
 
+  // On a card: how many answers came live and how many from the cache, so a runner that played a whole track
+  // with 0 requests plainly replayed it. The More numbers table keeps the two apart as two rows.
+  function cardRequests(entry, roster) {
+    if (!entry.paid || !(entry.cache_hits > 0)) return requestsText(entry, roster);
+    return entry.requests + " live\n" + entry.cache_hits + " cached"; // one line each on the card
+  }
+
   function costText(entry) {
     if (!entry.paid) return "free";
     if (!(entry.price_usd > 0)) return "free tier";
@@ -117,7 +124,7 @@
       rowsWord: single ? "rows" : "rows a track", death: death(r.entry, single), stopped: r.stopped,
       // over several tracks: every complete track finished (a complete track that did not finish is a death)
       finished: single ? !!(r.entry.tracks[0] && r.entry.tracks[0].finished) : r.entry.runs > 0 && r.entry.finished === r.entry.runs,
-      perRow: perRow(r.entry.s_per_row), requests: requestsText(r.entry, roster), cost: costText(r.entry),
+      perRow: perRow(r.entry.s_per_row), requests: cardRequests(r.entry, roster), cost: costText(r.entry),
       paid: !!(r.entry.paid && r.entry.price_usd > 0),
     }));
   }
@@ -199,7 +206,8 @@
       '<div class="rows"><span class="n">' + esc(c.rows) + '</span><span class="word">' + esc(c.rowsWord) + '</span><span class="death' +
       (c.stopped ? " warn" : c.finished ? "" : " bad") + '">' + esc(c.death) + "</span></div>" +
       '<div class="stats"><span><span class="label">Per row</span>' + esc(c.perRow) + '</span><span><span class="label">Requests</span>' +
-      esc(c.requests) + '</span><span><span class="label">Cost</span><span class="' + (c.paid ? "warn" : "muted") + '">' + esc(c.cost) +
+      (c.requests.includes("\n") ? c.requests.split("\n").map((line) => '<span class="line">' + esc(line) + "</span>").join("")
+        : esc(c.requests)) + '</span><span><span class="label">Cost</span><span class="' + (c.paid ? "warn" : "muted") + '">' + esc(c.cost) +
       "</span></span></div></article>").join("");
   }
 

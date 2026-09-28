@@ -193,6 +193,7 @@
   border-top: 1px solid var(--hairline); font-size: 15px; color: var(--bright); }
 #front .card .stats > span, #front .pair .stats > span { display: flex; flex-direction: column; gap: 2px; }
 #front .card .stats .label, #front .pair .stats .label { font-size: 10px; }
+#front .card .stats .line { white-space: nowrap; } /* "135 cached" stays one line */
 #front .numbers-box { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; padding: 14px 20px 16px; }
 #front .numbers-head { display: flex; align-items: center; gap: 16px; }
 #front .result-bar { display: flex; align-items: center; gap: 12px; }
