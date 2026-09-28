@@ -22,6 +22,7 @@ from bakeoff.game.track import generate_track
 from bakeoff.live import LiveRun
 from bakeoff.players import PAID, REGISTRY, UNCAPPED, budget_of, fly2, make_player
 from bakeoff.players.names import canonical
+from bakeoff.prices import PRICE_USD  # noqa: F401  (tests and results read it from here)
 from bakeoff.replay import CONTESTANTS
 
 # the held-out seeds are below this: no paid request and no prompt may touch them before the study plays them
@@ -30,16 +31,7 @@ FIRST_PRACTICE_SEED = 1000
 # the practice tracks the track select offers, 1000 to 1019, and the ones Records ranks on (decision 46)
 PRACTICE_TRACKS = 20
 
-# USD per live request, measured in docs/COSTS.md (update 2a) and rounded up, because this number is what
-# the page asks the user to agree to: it must never be lower than what a request really costs. A price per
-# player, not per provider: the same model costs what its question set makes it read and write, and the
-# map set is about eleven times the plain one's. The budget, not this table, enforces the ceiling.
-# Jev's prices are estimates (its provider does not bill per request; COSTS.md explains the token basis).
-# GLM Flash is free while its free tier lasts.
-PRICE_USD = {"haiku_plain": 0.0006, "haiku_step1": 0.0010, "haiku_guided": 0.0009, "haiku_step2": 0.0016,
-             "haiku_map": 0.0065, "jev_plain": 0.00004, "jev_step1": 0.00003, "jev_guided": 0.00004,
-             "jev_step2": 0.00003, "jev_map": 0.00012,
-             "glm_plain": 0.0, "glm_step1": 0.0, "glm_guided": 0.0, "glm_step2": 0.0, "glm_map": 0.0}
+# USD per live request: bakeoff/prices.py, one table for the page's money and the study's charts
 
 # every player here asks its provider once a row, so a track of N rows costs at worst N requests
 REQUESTS_PER_ROW = 1

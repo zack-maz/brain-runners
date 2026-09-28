@@ -225,3 +225,93 @@ def test_benchmark_of_says_why_instead_of_failing_when_there_is_nothing_to_score
     run = write_run(tmp_path, "open", [record(player="solver", seed=1000, row=0)], {"game": V2})
     out, why = benchmark_of([run])
     assert out is None and "needs runs that ended" in why
+
+
+# ---- the study's numbers (decision 53) -------------------------------------------------------------------------
+
+def test_cost_per_track_counts_every_decision_at_the_listed_price_cached_ones_too():
+    from bakeoff.bench import Episode, player_numbers
+    from bakeoff.prices import PRICE_USD
+    live = [record(player="haiku_step1", seed=1000, row=r, latency_ms=400, usage={"input_tokens": 10, "output_tokens": 1})
+            for r in range(3)]
+    cached = [record(player="haiku_step1", seed=1000, row=3, cache_hit=True, **DIED)]
+    n = player_numbers([Episode("haiku_step1", 1000, "r", tuple(live + cached), "claude-haiku-4-5-20251001")], 150)
+    assert (n["price_usd"], n["cost_basis"], n["decisions_per_track"]) == (PRICE_USD["haiku_step1"], "listed", 4.0)
+    assert n["usd_per_track"] == pytest.approx(4 * PRICE_USD["haiku_step1"])  # the cache hit is billed too
+    replayed = [dict(s, cache_hit=True, latency_ms=None) for s in live + cached]
+    again = player_numbers([Episode("haiku_step1", 1000, "r", tuple(replayed), "claude-haiku-4-5-20251001")], 150)
+    assert again["usd_per_track"] == n["usd_per_track"]  # a replay never looks cheaper
+    jev = player_numbers(episodes_of(("jev_step1", 1000, 5)), 150)
+    assert jev["cost_basis"] == "estimate" and jev["usd_per_track"] == pytest.approx(5 * PRICE_USD["jev_step1"])
+    for free in ("fly", "fly2", "solver", "glm_step1"):
+        f = player_numbers(episodes_of((free, 1000, 5)), 150)
+        assert (f["cost_basis"], f["usd_per_track"], f["rows_per_cent"]) == ("free", 0.0, None)
+
+
+def test_seconds_per_decision_and_per_track_come_from_live_decisions_only():
+    from bakeoff.bench import Episode, player_numbers
+    steps = [record(player="haiku_plain", seed=1, row=r, latency_ms=ms) for r, ms in enumerate([200, 400, 1200])]
+    steps.append(record(player="haiku_plain", seed=1, row=3, cache_hit=True, latency_ms=9000, **DIED))  # not timed
+    n = player_numbers([Episode("haiku_plain", 1, "r", tuple(steps), None)], 150)
+    assert n["s_per_decision_median"] == pytest.approx(0.4)
+    assert n["s_per_decision_mean"] == pytest.approx(0.6)
+    assert n["s_per_track"] == pytest.approx(0.6 * 4)  # the mean decision, times the decisions a track takes
+    assert n["rows_per_second"] == pytest.approx(4 / 2.4)
+    untimed = player_numbers(episodes_of(("solver", 1, 5)), 150)
+    assert untimed["s_per_decision_mean"] is None and untimed["s_per_track"] is None
+    assert untimed["rows_per_second"] is None
+
+
+def test_the_failed_decision_rate_counts_errors_and_invalid_answers():
+    from bakeoff.bench import Episode, player_numbers
+    steps = [record(player="glm_plain", seed=1, row=0, error="429 too many requests"),
+             record(player="glm_plain", seed=1, row=1, invalid=True),
+             record(player="glm_plain", seed=1, row=2, gated=True),  # a gated stay is a fallback, not a failure
+             record(player="glm_plain", seed=1, row=3, **DIED)]
+    assert player_numbers([Episode("glm_plain", 1, "r", tuple(steps), None)], 150)["failed_rate"] == 0.5
+    assert player_numbers(episodes_of(("fly", 1, 5)), 150)["failed_rate"] == 0.0
+
+
+def test_rows_per_cent_divides_by_the_cost_of_a_track():
+    from bakeoff.bench import player_numbers
+    from bakeoff.prices import PRICE_USD
+    n = player_numbers(episodes_of(("haiku_plain", 1, 10)), 150)  # 10 rows, 10 decisions
+    assert n["rows_per_cent"] == pytest.approx(10 / (10 * PRICE_USD["haiku_plain"] * 100))
+
+
+def test_the_frontier_is_who_no_other_player_beats_on_both_axes():
+    from bakeoff.bench import frontier
+
+    def p(name, rows, x):
+        return {"player": name, "mean_rows": rows, "x": x}
+
+    players = [p("cheap", 50, 0.0), p("dear_better", 90, 0.5), p("dear_worse", 40, 0.5), p("mid", 60, 0.1),
+               p("beaten", 55, 0.2), p("solver", 150, 0.0), p("untimed", 200, None)]
+    assert frontier(players, "x") == {"cheap", "mid", "dear_better"}  # the bot and a player with no number: out
+    assert frontier([p("twin_a", 50, 0.1), p("twin_b", 50, 0.1)], "x") == {"twin_a", "twin_b"}  # a tie: both
+    assert frontier([p("alone", 3, 1.0)], "x") == {"alone"}
+    assert frontier([p("same_cost_a", 50, 0.1), p("same_cost_b", 60, 0.1)], "x") == {"same_cost_b"}
+    assert frontier([], "x") == set()
+
+
+def test_the_benchmark_marks_the_frontiers_and_the_yardsticks(tmp_path):
+    from bakeoff.bench import benchmark
+    five = range(1, 6)
+    runs = write_run(tmp_path, "r", [*(s for seed in five for s in episode("fly", seed, 30)),
+                                     *(s for seed in five for s in episode("jev_step1", seed, 90)),
+                                     *(s for seed in five for s in episode("haiku_map", seed, 60)),
+                                     *(s for seed in five for s in episode("solver", seed, 150, finished=True)),
+                                     *episode("haiku_step1", 1, 149)], {"game": V2})
+    out = benchmark(load([Source(runs)]))
+    by = {p["player"]: p for p in out["players"]}
+    assert by["solver"]["yardstick"] and not by["solver"]["frontier_cost"]
+    assert by["fly"]["frontier_cost"] and by["jev_step1"]["frontier_cost"]  # free, and the best for a little more
+    assert not by["haiku_map"]["frontier_cost"]  # fewer rows than Jev, for more money
+    assert not by["haiku_step1"]["frontier_cost"]  # the most rows of all, on one track: not ranked, on no frontier
+    assert not any(p["frontier_speed"] for p in out["players"])  # nothing here was timed
+    assert any("listed price" in n for n in out["notes"]) and any("frontier" in n for n in out["notes"])
+    from bakeoff.bench import format_tables
+    table = format_tables(out)
+    assert "| USD per track | s per decision | failed |" in table
+    assert "| fly | 5 | 30.0 | 30.0 to 30.0 | 30.0 | 0% | free | - | 0.0% |" in table
+    assert "(estimate)" in table.split("| jev_step1 |")[1].splitlines()[0]

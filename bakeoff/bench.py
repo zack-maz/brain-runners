@@ -13,7 +13,9 @@ import numpy as np
 from bakeoff.game.rules import Rules
 from bakeoff.replay import SCHEMA_VERSION
 from bakeoff.players.names import canonical
+from bakeoff.prices import ESTIMATED, PRICE_USD
 from bakeoff.report import PRICES_USD_PER_MTOK, load_meta, load_steps
+from bakeoff.roster import ROSTER
 
 
 @dataclass(frozen=True)
@@ -163,6 +165,11 @@ def _usd(step: dict, model: str | None) -> float | None:
     return (usage.get("input_tokens", 0) * per_input + usage.get("output_tokens", 0) * per_output) / 1e6
 
 
+def _failed(step: dict) -> bool:
+    """A decision that did not come back as a move: the provider failed, or the answer was not one."""
+    return step.get("error") is not None or bool(step.get("invalid"))
+
+
 def player_numbers(episodes: list[Episode], max_rows: int) -> dict:
     """One player's row of the benchmark, over its complete episodes."""
     rows = [e.rows for e in episodes]
@@ -176,6 +183,13 @@ def player_numbers(episodes: list[Episode], max_rows: int) -> dict:
     seconds = [t for t in map(_seconds, steps) if t is not None]
     usd = [u for u in (_usd(s, m) for s, m in priced) if u is not None]
     s_mean = float(np.mean(seconds)) if seconds else None
+    decisions_per_track = len(steps) / len(episodes)
+    # the study's cost (decision 53): every decision at the listed price, a cached one too, so that a replay never
+    # looks cheaper than the run it replays. The flies and the bots are not in the table: free.
+    price = PRICE_USD.get(episodes[0].player, 0.0)
+    usd_per_track = price * decisions_per_track
+    s_per_track = s_mean * decisions_per_track if s_mean is not None else None
+    mean_rows = float(np.mean(rows))
     usd_mean = float(np.mean(usd)) if usd else None
     if usd_mean:
         cost = "priced"
@@ -186,7 +200,7 @@ def player_numbers(episodes: list[Episode], max_rows: int) -> dict:
     return {
         "player": episodes[0].player,
         "seeds": len(episodes),
-        "mean_rows": float(np.mean(rows)),
+        "mean_rows": mean_rows,
         "ci_low": ci[0] if ci else None,
         "ci_high": ci[1] if ci else None,
         "median_rows": float(np.median(rows)),
@@ -199,6 +213,16 @@ def player_numbers(episodes: list[Episode], max_rows: int) -> dict:
         "usd_per_decision": usd_mean,
         "usd_per_row": usd_mean * decisions_per_row if usd_mean is not None and decisions_per_row else None,
         "cost": cost,
+        "price_usd": price,
+        "cost_basis": "free" if price == 0 else "estimate" if episodes[0].player in ESTIMATED else "listed",
+        "decisions_per_track": decisions_per_track,
+        "usd_per_track": usd_per_track,
+        "s_per_decision_mean": s_mean,
+        "s_per_track": s_per_track,
+        "failed_rate": sum(map(_failed, steps)) / len(steps),
+        # the named scores: extras beside the charts, never the verdict. A free player has no rows per cent.
+        "rows_per_cent": mean_rows / (usd_per_track * 100) if usd_per_track > 0 else None,
+        "rows_per_second": mean_rows / s_per_track if s_per_track else None,
         "model": model,
         "live_decisions": sum(_seconds(s) is not None or _usd(s, m) is not None for s, m in priced),
         "cache_hits": sum(bool(s.get("cache_hit")) for s in steps),
@@ -231,14 +255,34 @@ def pair_numbers(a: list[Episode], b: list[Episode]) -> dict:
             "verdict": verdict, "seeds_needed": needed}
 
 
-JEV_PRICE_NOTE = ("Jev has no per-token price, so it shows no cost; its console gave a blended estimate of about "
-                  "0.00003 USD a request (docs/COSTS.md).")
+JEV_PRICE_NOTE = ("Jev has no per-token price, so it shows no cost per row; its USD per track is an estimate "
+                  "from its console (about 0.00003 USD a request, docs/COSTS.md), and it costs you nothing.")
+# the yardsticks are the Bot's skins (bakeoff/roster.py): shown for scale, never on a frontier
+YARDSTICKS = frozenset(skin["player"] for character in ROSTER if character["id"] == "bot" for skin in character["skins"])
+
+
+def frontier(players: list[dict], key: str) -> set[str]:
+    """The players no other player beats on both axes: none has as many rows or more for as little `key` or less,
+    and more of one or less of the other. The yardsticks and players without the number are left out; two
+    players at the same point are both on it."""
+    placed = [p for p in players if p["player"] not in YARDSTICKS and isinstance(p.get(key), (int, float))]
+
+    def beaten(p: dict) -> bool:
+        return any(q[key] <= p[key] and q["mean_rows"] >= p["mean_rows"]
+                   and (q[key] < p[key] or q["mean_rows"] > p["mean_rows"]) for q in placed)
+
+    return {p["player"] for p in placed if not beaten(p)}
 NOTES = ("Time and cost come from live decisions only: a cache hit records neither.",
          f"Intervals are 95% t intervals over tracks (for a pair, of the per-track differences). Below {MIN_SEEDS} "
          "tracks there is no interval and no verdict.",
          "Rows stop at the finish line, so a player that finishes most tracks is understated and two finishers tie.",
          "Tracks needed: how many tracks would give an 80% chance of a verdict if the difference and its spread "
-         "stayed as seen so far. An estimate, not a promise.")
+         "stayed as seen so far. An estimate, not a promise.",
+         "USD per track counts every decision at the listed price (measured, rounded up), cached answers included, "
+         "so a replay never looks cheaper. GLM Flash's free tier, the flies and the bots cost nothing.",
+         "A frontier is the players no other beats on both axes: more rows for less money, or for less time. It "
+         f"names no single winner; the bots are there for scale and are never on it, nor is a player with fewer "
+         f"than {MIN_SEEDS} tracks.")
 
 
 def _comparisons_note(pairs: list[dict]) -> str | None:
@@ -260,6 +304,11 @@ def benchmark(loaded: Loaded) -> dict:
                      key=lambda p: (p["ci_low"] is None, -p["mean_rows"]))
     for p in players:
         p["ranked"] = p["ci_low"] is not None
+    ranked = [p for p in players if p["ranked"]]  # a player with too few tracks for an interval is on no frontier
+    on_cost, on_speed = frontier(ranked, "usd_per_track"), frontier(ranked, "s_per_decision_median")
+    for p in players:
+        p["yardstick"] = p["player"] in YARDSTICKS
+        p["frontier_cost"], p["frontier_speed"] = p["player"] in on_cost, p["player"] in on_speed
     order = [p["player"] for p in players]
     pairs = [pair_numbers(by_player[a], by_player[b]) for i, a in enumerate(order) for b in order[i + 1:]]
     notes = list(NOTES)
@@ -301,14 +350,17 @@ def _interval(low, high) -> str:
 def format_tables(out: dict, pairs: list[tuple[str, str]] | None = None) -> str:
     """The players table, the pairs table (all, or only `pairs`), what was left out, and the notes."""
     lines = [f"game: {out['game'] or 'unknown'} · runs: {', '.join(out['runs'])}", "",
-             "| player | tracks | mean rows | 95% interval | median | finished | s per row | USD per row | live | cached |",
-             "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
+             "| player | tracks | mean rows | 95% interval | median | finished | USD per track | s per decision "
+             "| failed | live | cached |",
+             "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
     for p in out["players"]:
-        usd = _num(p["usd_per_row"], 5) if p["cost"] == "priced" else p["cost"]
+        usd = "free" if p["cost_basis"] == "free" else _num(p["usd_per_track"], 4) + (
+            " (estimate)" if p["cost_basis"] == "estimate" else "")
         interval = _interval(p["ci_low"], p["ci_high"]) if p["ranked"] else "not ranked"
         lines.append(f"| {p['player']} | {p['seeds']} | {_num(p['mean_rows'])} | {interval} "
-                     f"| {_num(p['median_rows'])} | {p['finished']:.0%} | {_num(p['s_per_row'], 2)} "
-                     f"| {usd} | {p['live_decisions']} | {p['cache_hits']} |")
+                     f"| {_num(p['median_rows'])} | {p['finished']:.0%} | {usd} "
+                     f"| {_num(p['s_per_decision_median'], 2)} | {p['failed_rate']:.1%} "
+                     f"| {p['live_decisions']} | {p['cache_hits']} |")
     wanted = None if pairs is None else {frozenset(pair) for pair in pairs}
     lines += ["", "| A | B | tracks | mean A - B | 95% interval | A wins / ties / B wins | verdict | tracks needed |",
               "| --- | --- | --- | --- | --- | --- | --- | --- |"]
