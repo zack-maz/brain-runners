@@ -166,8 +166,8 @@ class Runner:
     def __init__(self, out_root: Path | str = "runs", max_consecutive_errors: int = 5):
         self.out_root = Path(out_root)
         self.max_consecutive_errors = max_consecutive_errors
-        # Deliberately counts consecutive errors across seeds and players within one run()
-        # call: a whole-run circuit breaker, not a per-seed one.
+        # Counts consecutive errors across one player's seeds: a provider that keeps failing stops that player
+        # (it drops out, the others play on), not just one track.
         self._error_streak = 0
 
     def run_seed(self, player: Player, seed: int, run_id: str, rules: Rules | None = None, max_rows: int | None = None,
@@ -177,13 +177,19 @@ class Runner:
         player.reset(game, seed)
         records: list[dict] = []
         while not game.over:
-            record = play_row(player, game, seed, run_id, first=not records)
+            try:
+                record = play_row(player, game, seed, run_id, first=not records)
+            except RunAborted as stop:  # a cap reached before this row's decision
+                stop.seed, stop.row = seed, game.row
+                raise
             records.append(record)
             if sink is not None:
                 sink(record)
             self._error_streak = self._error_streak + 1 if record["error"] is not None else 0
             if self._error_streak > self.max_consecutive_errors:
-                raise RunAborted(f"{self._error_streak} consecutive player errors; last: {record['error']}")
+                stop = RunAborted(f"{self._error_streak} consecutive player errors; last: {record['error']}")
+                stop.seed, stop.row = seed, record["row"]
+                raise stop
         return records
 
     def run(self, players: list[Player], seeds: Sequence[int], rules: Rules | None = None, max_rows: int | None = None,
@@ -200,9 +206,10 @@ class Runner:
         meta_path = run_dir / "meta.json"
         meta = new_meta(run_id, players, seeds, rules, args)
         meta_path.write_text(json.dumps(meta, indent=2))
-        self._error_streak = 0
+        stops: dict[str, RunAborted] = {}
         try:
             for player in players:
+                self._error_streak = 0
                 try:
                     with open(run_dir / f"{player.name}.jsonl", "w") as f:
                         def sink(record: dict, f=f) -> None:
@@ -211,8 +218,13 @@ class Runner:
 
                         for seed in seeds:
                             self.run_seed(player, seed, run_id, rules, sink=sink)
+                except RunAborted as stop:  # this player drops out; the others still play every seed
+                    stops[player.name] = stop
+                    meta["stopped"] = {name: s.stopped() for name, s in stops.items()}
                 finally:
                     _close(player)
+            if players and len(stops) == len(players):  # nobody played on: the run ends as the last stop
+                raise stops[players[-1].name]
         except RunAborted as abort:
             meta["status"] = abort.status
             raise

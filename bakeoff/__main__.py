@@ -192,11 +192,19 @@ def _play_now(session, seed: int, names: list[str], args) -> int:
     run = started.run
     if run.status != "completed":
         print(f"run {run.status}" + (f": {run.error}" if run.error else ""), file=sys.stderr)
+    stopped = _print_stopped((run.meta or {}).get("stopped"))
     _report_run(run)
     if not args.no_wait and run.status != "interrupted":
         print("still serving the page; pick another track there, or Ctrl-C to stop.", flush=True)
         _serve_until_interrupted(session, printed={run.run_id})
-    return 0 if run.status == "completed" else 1
+    return 0 if run.status == "completed" and not stopped else 1
+
+
+def _print_stopped(stopped: dict | None) -> bool:
+    """Says which players dropped out of a run and why (the others played on); True if any did."""
+    for name, stop in (stopped or {}).items():
+        print(f"{name} stopped ({stop['status']}): {stop['reason']}", file=sys.stderr)
+    return bool(stopped)
 
 
 def _serve_until_interrupted(session, printed: set | None = None) -> int:
@@ -209,6 +217,7 @@ def _serve_until_interrupted(session, printed: set | None = None) -> int:
                     printed.add(run.run_id)
                     if run.status != "completed":
                         print(f"run {run.status}" + (f": {run.error}" if run.error else ""), file=sys.stderr)
+                    _print_stopped((run.meta or {}).get("stopped"))
                     _report_run(run)
             time.sleep(0.2)
     except KeyboardInterrupt:
@@ -345,6 +354,9 @@ def main(argv: list[str] | None = None) -> int:
     except RunAborted as e:
         print(f"run {e.status}: {e}", file=sys.stderr)
         status = 1
+    meta_path = run_dir / "meta.json"
+    if meta_path.exists() and _print_stopped(json.loads(meta_path.read_text()).get("stopped")):
+        status = 1  # a player dropped out: the others played on, but the run is not whole
     print(f"run directory: {run_dir}")
     _print_report(run_dir)
     return status

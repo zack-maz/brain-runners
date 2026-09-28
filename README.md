@@ -102,7 +102,8 @@ recorded under them (with their cached answers) are read as the new ones.
 Flash); the default 0 only replays `.cache/responses`. Jev (every `jev_*`) plays without a cap (decision 50): its
 requests cost you nothing, and they are still cached, counted, priced and recorded (`"max": null` in `meta.json`).
 Every answer is cached, so a repeated run of the same game and track
-is free, and a run stopped by the cap (`status: budget_exhausted`) continues from the cache next time.
+is free. A player that reaches its cap, or whose provider keeps failing, drops out and the others play on
+(`stopped` in `meta.json`, decision 52); its answers so far are cached, so it continues from there next time.
 `uv run pytest -m live`
 makes one real request per provider. A live paid run on seeds below 1000 is refused unless
 `--tournament` is passed (tournament seeds stay untouched until phase 6). A run stopped by the cap

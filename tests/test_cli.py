@@ -305,3 +305,15 @@ def test_the_run_command_gives_jev_no_cap_and_every_other_paid_player_the_comman
     assert not _spends_on_tournament_seeds([haiku], 0, 5, tournament=False)
     assert not _spends_on_tournament_seeds([jev], 0, 1000, tournament=False)
     assert not _spends_on_tournament_seeds([jev], 0, 5, tournament=True)
+
+
+def test_a_capped_player_drops_out_and_the_run_says_so(tmp_path, capsys, monkeypatch):
+    fake_paid(monkeypatch)
+    args = ["run", "--players", "solver,haiku_plain", "--seeds", "1", "--seed-start", "1000", "--max-rows", "12",
+            "--out", str(tmp_path / "runs"), "--cache", str(tmp_path / "cache")]
+    assert main(args) == 1  # something stopped early: a script can tell
+    assert "haiku_plain stopped (budget_exhausted): request cap of 0 reached" in capsys.readouterr().err
+    (run_dir,) = (tmp_path / "runs").iterdir()
+    meta = json.loads((run_dir / "meta.json").read_text())
+    assert meta["status"] == "completed" and set(meta["stopped"]) == {"haiku_plain"}
+    assert (run_dir / "solver.jsonl").read_text().strip()

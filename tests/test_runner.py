@@ -295,3 +295,30 @@ def test_what_is_ours_is_the_same_blocks_a_run_records():
     rules = V2.variant(max_rows=40)
     meta = new_meta("r", [make_player("solver")], [5], rules, None)
     assert ours_meta(rules) == {key: meta[key] for key in ("game", "fly", "fly2")}
+
+
+def test_a_player_that_stops_drops_out_and_the_others_play_every_track(tmp_path):
+    class Broke(Scripted):
+        def act(self, senses): raise BudgetExhausted("request cap of 0 reached")
+
+    errs = Scripted(Decision(None, error="boom"), name="errs")
+    run_dir = Runner(tmp_path).run([Broke(None, name="broke"), make_player("solver"), errs], range(2), max_rows=40,
+                                   run_id="drop")
+    meta = json.loads((run_dir / "meta.json").read_text())
+    assert meta["status"] == "completed"
+    assert meta["stopped"] == {
+        "broke": {"status": "budget_exhausted", "reason": "request cap of 0 reached", "seed": 0, "row": 0},
+        "errs": {"status": "aborted", "reason": "6 consecutive player errors; last: boom", "seed": 0, "row": 5}}
+    solver = [json.loads(line) for line in (run_dir / "solver.jsonl").read_text().splitlines()]
+    assert sorted({r["seed"] for r in solver}) == [0, 1]  # the solver played both tracks
+    assert (run_dir / "broke.jsonl").read_text() == ""
+
+
+def test_a_run_whose_every_player_stops_still_ends_as_that_stop(tmp_path):
+    class Broke(Scripted):
+        def act(self, senses): raise BudgetExhausted("request cap of 0 reached")
+
+    with pytest.raises(BudgetExhausted):
+        Runner(tmp_path).run([Broke(None, name="a"), Broke(None, name="b")], range(1), run_id="all")
+    meta = json.loads((tmp_path / "all" / "meta.json").read_text())
+    assert meta["status"] == "budget_exhausted" and set(meta["stopped"]) == {"a", "b"}
