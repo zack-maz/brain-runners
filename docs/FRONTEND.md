@@ -151,9 +151,9 @@ we found in my own words, as well as my opinions and thoughts. That can wait to 
 
 - **Brain Battle is built and merged** (PR #9), and so are PRs #8, #10 and #11. PR #11 (`brain-run`) renamed it
   **Brain Run** on screen (decision 51: runners, not fighters; the home brain's glow pulses) and let **Jev play
-  without a cap** (decision 50): the track select shows Jev's worst case with "no cap" and does not ask to confirm a
+  without a cap** (decision 50): the track select shows Jev's worst case (the whole track), says "Jev plays without a cap" under the total, and does not ask to confirm a
   lineup whose only spending is Jev's. Claude Haiku and GLM Flash keep their cap under `--max-requests`.
-- **Branch `card-cached`** (`1dbfa3b`): a results card's Requests read "N live" over "M cached" when some answers
+- **PR #12** (`1dbfa3b`): a results card's Requests read "N live" over "M cached" when some answers
   came from the cache, so a runner that replayed a track shows "0 live / 146 cached" and 0.00 USD.
 - **Next:** phase 6 (the tournament and the write-up), awaiting the user's budget go-ahead (`docs/NEXT.md`). The
   write-up page above is its last step.

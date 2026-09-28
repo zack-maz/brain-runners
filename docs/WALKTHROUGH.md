@@ -207,8 +207,9 @@ Run tab without the tabs, and what the Analysis tab shows moves to the results a
    practice tracks 1000–1019, each marked with how many of this lineup played it before. Seeds below 1000 are
    locked unless the command was started with `--tournament`. The preview draws the real track. Each runner's
    line says whether it played this track before and its **worst case**: rows × requests per row × price, capped
-   by what is left of the session's budget (Jev's is not capped and says "no cap"), assuming nothing is cached; the
-   total is under it. ‹ Runners goes back with the lineup kept.
+   by what is left of the session's budget (Jev's is not capped: its worst case is the whole track), assuming nothing
+   is cached; the total is under it, and the line below the total says "Jev plays without a cap" when Jev is in the
+   lineup. ‹ Runners goes back with the lineup kept.
 4. **RUN.** A lineup that spends nothing starts at once, and so does one whose only spending is Jev's (its
    requests cost you nothing; its worst case is still shown). If the run can spend, the first press of RUN (or Enter)
    turns it into `CONFIRM` with `spend at most …` underneath, and a second, separate press starts the run; a press

@@ -148,4 +148,7 @@ test("a card says how many answers came live and how many from the cache, so 0 r
   assert.equal(Results.cards(mixed, ROSTER).find((c) => c.player === "jev_guided").requests, "51 live\n1 cached");
   // nothing cached: the number alone, as before
   assert.equal(Results.cards(RESULTS, ROSTER).find((c) => c.player === "jev_guided").requests, "81");
+  // on the card, one escaped line each
+  assert.match(Results.cardsHtml(Results.cards(cached, ROSTER), false),
+    /<span class="label">Requests<\/span><span class="line">0 live<\/span><span class="line">146 cached<\/span>/);
 });

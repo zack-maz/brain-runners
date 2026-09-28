@@ -311,7 +311,7 @@ data, the fonts and the benchmark are all inside that one file, so it can be mai
 <pre><code>uv run python -m bakeoff live --port 8765</code></pre>
 <p>This opens Brain Run on your own machine and prints its address. In the browser you choose your runners on the
 character select, pick the track on the track select, and the page tells you what the run would cost at worst
-before you press RUN (a lineup that can spend asks to CONFIRM first); the command keeps the
+before you press RUN (a lineup that can spend asks to CONFIRM first, unless Jev's is its only spending); the command keeps the
 ceiling, so nothing the page sends can spend more than the cap you started it with (the default cap is 0, which
 replays cached answers and spends nothing; Jev has no cap since decision 50, because its requests cost you
 nothing, and they are still counted and priced). Press RUN and the tunnel fills in real time; when it ends, the

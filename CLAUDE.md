@@ -58,8 +58,8 @@ are frozen (`calibration/FLY2_REPORT.md`), its real run and its live smoke are d
 `fly3`, a trained readout on the frozen wiring (decision 48), stopped at its probe: the same learner with no brain
 played better (spike 05, decision 49), so it is not built. Brain Run (called Brain Battle until decision 51), the
 front of `bakeoff live`, is on `main` (PR #9, merged 2026-09-26; renamed in PR #11). PR #11 (merged 2026-09-26) also
-lets Jev play without a cap (decision 50). PRs #8–#11 are all merged; branch `card-cached` makes a results card
-read "N live" over "M cached". Then phase 6, the tournament and the write-up, which needs a new budget go-ahead. Each
+lets Jev play without a cap (decision 50). PRs #8–#12 are merged; since #12 a results card reads
+"N live" over "M cached". Then phase 6, the tournament and the write-up, which needs a new budget go-ahead. Each
 phase gets its own plan. Resume from `docs/NEXT.md`.
 
 ## How we work here
@@ -111,7 +111,7 @@ phase gets its own plan. Resume from `docs/NEXT.md`.
   (`bakeoff/fly/shared.py`): never start it next to another fly run. Its records come from `runner.play_row` and
   its frames from `replay.frame_of`, the same functions `run` and `view` use; keep it that way.
 - The page runs the show (update 3a, design `docs/superpowers/specs/2026-09-22-page-control-design.md`): the command
-  binds the port and sets the ceiling, the page (since Brain Run, its front: the character select picks the
+  binds the port and sets the ceiling, the page (since Brain Battle, now Brain Run, its front: the character select picks the
   players, the track select the track and holds the money confirmation) starts and cancels the run (`GET /state`, `POST /run`, `POST /cancel`, `GET /events?run=`). Every request but the page itself
   carries a token minted at startup and embedded in the page (in the header; in the query for the event stream
   alone, which cannot send headers), so no other page in the browser can drive the run. It is not a defence

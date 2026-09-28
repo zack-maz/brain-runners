@@ -109,7 +109,7 @@ PRs #8 to #11 are merged (fly2 settled, Brain Battle, fly3 stopped, Brain Run an
   is Jev's; the fast tests hide every provider key (`tests/conftest.py`). Decision 51: **Brain Battle is Brain Run**
   on screen: the fighters are runners ("Choose your runners", "Ready to run", "‹ Runners", "N runners") and the
   home brain's glow pulses visibly; code ids, file names and comments keep the old names.
-- **Branch `card-cached`** (`1dbfa3b`, not merged yet): a results card's Requests read "N live" over "M cached"
+- **PR #12** (`1dbfa3b`, merged 2026-09-28): a results card's Requests read "N live" over "M cached"
   when some answers came from the cache, so a runner that replayed a track shows "0 live / 146 cached" and 0.00 USD
   instead of a bare 0.
 
