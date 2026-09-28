@@ -154,7 +154,7 @@
     const seed = front.seed;
     const fresh = state.seed === seed; // the state answers for the track on screen, not the one before
     $("track-game").textContent = "Run · game " + state.game.version + " · " + state.max_rows + " rows";
-    $("seed-rule").textContent = state.tournament ? "Tournament seeds are open (--tournament)"
+    $("seed-rule").textContent = state.held_out ? "Held-out seeds are open (--held-out)"
       : "Practice seeds are " + state.first_practice_seed + " and up";
     $("seed-shown").textContent = seed;
     $("preview-what").textContent = "The track, row 0 to " + state.max_rows;

@@ -17,7 +17,7 @@ def test_run_then_report(tmp_path, capsys):
     assert meta["status"] == "completed" and meta["seeds"] == [0, 1]
     assert meta["args"] == {"players": "solver,random", "seeds": 2, "seed_start": 0, "game": "v2",
                             "lookahead": None, "window": None, "max_rows": 30,
-                            "max_requests": 0, "cache": ".cache/responses", "tournament": False}
+                            "max_requests": 0, "cache": ".cache/responses", "held_out": False}
     assert meta["models"] == {} and meta["requests"] == {}
 
     assert main(["report", str(run_dir)]) == 0
@@ -204,21 +204,35 @@ def low_seed_paid_args(tmp_path, *extra):
             "--out", str(tmp_path / "runs"), "--cache", str(tmp_path / "cache"), *extra]
 
 
-def test_a_paid_cap_on_seeds_below_1000_without_tournament_is_a_usage_error(tmp_path, capsys, monkeypatch):
+def test_a_paid_cap_on_seeds_below_1000_without_held_out_is_a_usage_error(tmp_path, capsys, monkeypatch):
     sdks = fake_paid(monkeypatch)
     assert main(low_seed_paid_args(tmp_path, "--max-requests", "5")) == 2
-    assert "--tournament" in capsys.readouterr().err
+    assert "--held-out" in capsys.readouterr().err
     assert sdks[0].calls == []
     assert not (tmp_path / "runs").exists()
 
 
-def test_the_tournament_flag_allows_a_paid_cap_on_seeds_below_1000(tmp_path, monkeypatch):
+def test_the_held_out_flag_allows_a_paid_cap_on_seeds_below_1000(tmp_path, monkeypatch):
     sdks = fake_paid(monkeypatch, action="jump")
-    assert main(low_seed_paid_args(tmp_path, "--max-requests", "2", "--tournament")) in (0, 1)
+    assert main(low_seed_paid_args(tmp_path, "--max-requests", "2", "--held-out")) in (0, 1)
     assert sdks[0].calls != []
     (run_dir,) = (tmp_path / "runs").iterdir()
     meta = json.loads((run_dir / "meta.json").read_text())
-    assert meta["args"]["tournament"] is True
+    assert meta["args"]["held_out"] is True
+
+
+def test_the_old_tournament_flag_is_gone_and_help_names_the_held_out_one(capsys):
+    """decision 53: there is no tournament. A saved command that still says --tournament fails loudly
+    instead of being read as something else."""
+    for command in ("run", "live"):
+        with pytest.raises(SystemExit) as stop:
+            main([command, "--tournament"])
+        assert stop.value.code == 2
+        assert "--tournament" in capsys.readouterr().err
+        with pytest.raises(SystemExit):
+            main([command, "--help"])
+        out = capsys.readouterr().out
+        assert "--held-out" in out and "tournament" not in out
 
 
 def test_jev_step1_is_a_paid_player_for_the_seed_rule_and_the_help(tmp_path, capsys):
@@ -294,17 +308,17 @@ def test_report_prints_no_game_line_without_a_game_block(tmp_path, capsys):
 
 
 def test_the_run_command_gives_jev_no_cap_and_every_other_paid_player_the_command_s(tmp_path):
-    from bakeoff.__main__ import _players, _spends_on_tournament_seeds
+    from bakeoff.__main__ import _players, _spends_on_held_out_seeds
     from bakeoff.clients.core import DiskCache, UncappedBudget
     from bakeoff.game.rules import rules_for
     jev, haiku = _players("jev_step1,haiku_plain", DiskCache(tmp_path), 0, rules_for("v2"))
     assert isinstance(jev.budget, UncappedBudget)
     assert (type(haiku.budget).__name__, haiku.budget.max_requests) == ("RequestBudget", 0)
-    # Jev may go live without a cap, so it counts as spending on a tournament seed even at --max-requests 0
-    assert _spends_on_tournament_seeds([jev], 0, 5, tournament=False)
-    assert not _spends_on_tournament_seeds([haiku], 0, 5, tournament=False)
-    assert not _spends_on_tournament_seeds([jev], 0, 1000, tournament=False)
-    assert not _spends_on_tournament_seeds([jev], 0, 5, tournament=True)
+    # Jev may go live without a cap, so it counts as spending on a held-out seed even at --max-requests 0
+    assert _spends_on_held_out_seeds([jev], 0, 5, held_out=False)
+    assert not _spends_on_held_out_seeds([haiku], 0, 5, held_out=False)
+    assert not _spends_on_held_out_seeds([jev], 0, 1000, held_out=False)
+    assert not _spends_on_held_out_seeds([jev], 0, 5, held_out=True)
 
 
 def test_a_capped_player_drops_out_and_the_run_says_so(tmp_path, capsys, monkeypatch):

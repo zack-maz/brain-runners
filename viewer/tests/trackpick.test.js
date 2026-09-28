@@ -10,7 +10,7 @@ const ROSTER = [
 ];
 // the shape of GET /state?seed=1001 (bakeoff/session.py)
 const state = (extra) => ({
-  status: "lobby", max_rows: 150, requests_per_row: 1, max_requests: 200, tournament: false,
+  status: "lobby", max_rows: 150, requests_per_row: 1, max_requests: 200, held_out: false,
   first_practice_seed: 1000, practice_tracks: 20, seed: 1001,
   players: [
     { name: "fly2", paid: false, price_usd: 0, requests_left: null, played_before: true, seeds_played: [1000, 1001], why_not: null },
@@ -24,7 +24,7 @@ const LINEUP = ["haiku_guided", "fly2"];
 test("a track number is whole and never below the lowest the command allows", () => {
   assert.equal(TrackPick.clampSeed(1004.4, state()), 1004);
   assert.equal(TrackPick.clampSeed(7, state()), 1000);
-  assert.equal(TrackPick.clampSeed(7, state({ tournament: true })), 7);
+  assert.equal(TrackPick.clampSeed(7, state({ held_out: true })), 7);
   assert.equal(TrackPick.clampSeed("nope", state()), 1000);
 });
 

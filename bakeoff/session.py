@@ -24,7 +24,8 @@ from bakeoff.players import PAID, REGISTRY, UNCAPPED, budget_of, fly2, make_play
 from bakeoff.players.names import canonical
 from bakeoff.replay import CONTESTANTS
 
-# tournament seeds are below this and must not be paid for, or shape prompts, before the tournament
+# the held-out seeds are below this: no paid request and no prompt may touch them before the study plays them
+# (decision 53; the study's own tracks are 100 to 199)
 FIRST_PRACTICE_SEED = 1000
 # the practice tracks the track select offers, 1000 to 1019, and the ones Records ranks on (decision 46)
 PRACTICE_TRACKS = 20
@@ -138,11 +139,11 @@ class LiveSession:
     """The command's ceiling and the page's lobby. Thread-safe: the run loop is a thread of its own."""
 
     def __init__(self, rules: Rules, out_root: Path | str = "runs", cache_dir: Path | str = ".cache/responses",
-                 max_requests: int = 0, tournament: bool = False, args: dict | None = None,
+                 max_requests: int = 0, held_out: bool = False, args: dict | None = None,
                  token: str | None = None, paid_blocked: str | None = None,
                  ready: tuple[int, list[str]] | None = None):
         self.rules, self.out_root, self.cache = rules, Path(out_root), DiskCache(cache_dir)
-        self.max_requests, self.tournament = max_requests, tournament
+        self.max_requests, self.held_out = max_requests, held_out
         # why no paid player may play at all this session, if any (a vision the briefing does not match)
         self.paid_blocked = paid_blocked
         # what the command line offered: the lobby opens with this track and these players ticked
@@ -186,7 +187,7 @@ class LiveSession:
                 "capped": (name not in UNCAPPED) if paid else None,
                 "played_before": seed is not None and seed in played.get(name, []),
                 # the track select's own practice tracks it has a recorded run of, for its marks: a
-                # tournament seed or a bulk-run seed past the track select's own tracks is not offered there
+                # held-out seed or a bulk-run seed past the track select's own tracks is not offered there
                 "seeds_played": [s for s in played.get(name, [])
                                  if FIRST_PRACTICE_SEED <= s < FIRST_PRACTICE_SEED + PRACTICE_TRACKS],
                 # why this player cannot play this track, so the page can say so before anything is asked
@@ -197,12 +198,12 @@ class LiveSession:
             "status": self.status,
             "game": self.rules.to_json(), "max_rows": self.rules.max_rows,
             "requests_per_row": REQUESTS_PER_ROW,
-            "max_requests": self.max_requests, "tournament": self.tournament,
+            "max_requests": self.max_requests, "held_out": self.held_out,
             "first_practice_seed": FIRST_PRACTICE_SEED, "practice_tracks": PRACTICE_TRACKS,
             "seed": seed,
-            # the real track, for the track select's preview: the rules stay in Python. A tournament seed
+            # the real track, for the track select's preview: the rules stay in Python. A held-out seed
             # is locked until the session is one, same as `why_not` locks paid players off it
-            "track": None if seed is None or (seed < FIRST_PRACTICE_SEED and not self.tournament)
+            "track": None if seed is None or (seed < FIRST_PRACTICE_SEED and not self.held_out)
                      else generate_track(seed, self.rules).to_json(),
             "ready": {"seed": self.ready_seed, "players": list(self.ready_players)},
             "players": players,
@@ -223,9 +224,9 @@ class LiveSession:
             return None
         if self.paid_blocked:
             return self.paid_blocked
-        if seed < FIRST_PRACTICE_SEED and not self.tournament:
-            return (f"paid players may not play seeds below {FIRST_PRACTICE_SEED} (tournament seeds); "
-                    "this command was not started with --tournament")
+        if seed < FIRST_PRACTICE_SEED and not self.held_out:
+            return (f"paid players may not play seeds below {FIRST_PRACTICE_SEED} (held-out seeds); "
+                    "this command was not started with --held-out")
         if self.max_requests > 0 and self.budgets[name].remaining == 0:
             return f"{name} has no requests left of this session's cap of {self.max_requests}"
         return None

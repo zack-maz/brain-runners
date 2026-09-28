@@ -12,8 +12,8 @@
   const Lobby_ = typeof require !== "undefined" ? require("./lobby.js") : root.Lobby;
   const esc = Minds_.esc;
 
-  // The lowest track this command may play: the tournament's seeds only with --tournament.
-  const lowest = (state) => (state.tournament ? 0 : state.first_practice_seed);
+  // The lowest track this command may play: the held-out seeds only with --held-out.
+  const lowest = (state) => (state.held_out ? 0 : state.first_practice_seed);
 
   // A track number the command allows: a whole number, never below the lowest.
   function clampSeed(seed, state) {
