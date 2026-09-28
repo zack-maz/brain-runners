@@ -360,6 +360,20 @@
     when every player has stopped. The error streak now counts per player. It makes GLM Flash's throttled free tier
     safe to put beside the others.
 
+53. **Phase 6 is a study, not a tournament** (the user, 2026-09-28: "get rid of the whole tournament idea ... this
+    should now turn into a research project where we're seeing what performs best at cost and speed"). Design:
+    `docs/superpowers/specs/2026-09-28-study-design.md`. The user chose:
+    - **Held-out seeds 100–199** (game v2); the free players play all 100, Claude Haiku's five skins the first 15
+      (at most 23.85 USD, capped; the user buys about 25 USD of API credit), GLM Flash's five the first 15 only if
+      its free tier fails under 2% of decisions over at least 5 practice tracks.
+    - **Measured:** performance (rows, 95% interval), cost (USD per track and decision at listed price), speed
+      (seconds per decision), reliability. **Verdict:** two trade-off charts (rows vs cost, rows vs speed) with
+      their frontiers, plus named scores (rows per cent, rows per second) as extras, never the verdict.
+    - **The page:** Records stays the historical log; a new **Charts** tab holds all the data; no practice and
+      evaluation split. The numbers come from the benchmark (`bakeoff/bench.py`), extended.
+    - **One Writeup page** is the report: drafted by Claude for now, to be rewritten in the user's own words.
+    - `--tournament` is renamed `--held-out`.
+
 Where we are and what comes next: `docs/NEXT.md`.
 
 ## Prior art to reuse
