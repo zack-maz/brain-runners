@@ -219,9 +219,11 @@
 /* ---- records ------------------------------------------------------------------------------------ */
 #front .records { position: relative; }
 #front .records-top { display: flex; gap: 20px; }
+#front .charts-box { margin-top: 20px; padding: 14px 18px 16px; }
+#front .charts-box section + section { margin-top: 32px; }
 #front .board-box { width: 660px; flex: none; display: flex; flex-direction: column; gap: 4px; padding: 14px 18px 12px; }
 #front .board { display: flex; flex-direction: column; margin-top: 6px; }
-#front .entry { display: grid; grid-template-columns: 22px 14px minmax(0, 1fr) 64px minmax(0, 200px) 76px; align-items: center; gap: 10px;
+#front .entry { display: grid; grid-template-columns: 22px 14px minmax(0, 1fr) 80px minmax(0, 200px) 76px; align-items: center; gap: 10px;
   height: 26px; padding: 0; background: none; border: 0; border-left: 2px solid transparent; cursor: pointer; text-align: left; }
 #front .entry.chosen { border-left-color: var(--accent); }
 #front .entry .rank { font: var(--size-label-sm)/1 var(--font-mono); color: var(--muted); text-align: right; }

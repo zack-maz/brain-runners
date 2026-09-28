@@ -8,10 +8,11 @@ const ROSTER = [
   { id: "jev", name: "Jev", sprite: "visor", skins: [skin("jev_step2", "Step 2", "#B8404F"), skin("jev_map", "Map", "#1E2227", { V: "#7AA2F7" })] },
   { id: "bot", name: "Bot", sprite: "bot", skins: [skin("solver", "Solver", "#7AA2F7")] },
 ];
-// the shape of GET /records (bakeoff/records.py, with bench.benchmark's numbers)
+// the shape of GET /charts (bakeoff/charts.py, with bench.benchmark's numbers) and GET /records' runs
 const player = (name, seeds, mean, lo, hi) => ({ player: name, seeds, mean_rows: mean, ci_low: lo, ci_high: hi, ranked: lo != null });
 const RECORDS = {
-  game: "v2", max_rows: 150, tracks: [1000, 1019], why: null, left_out: 3, unreadable: [], tuned_on: { fly2: [1000, 1199] },
+  game: "v2", max_rows: 150, tracks: [100, 1019], why: null, left_out: 3, unreadable: [], tuned_on: { fly2: [1000, 1199] },
+  tuned_tracks: { fly2: 12 },
   bench: {
     players: [player("solver", 20, 150, 150, 150), player("jev_step2", 5, 144.6, 129.6, 150), player("fly2", 20, 78.2, 61.8, 94.6),
               player("jev_map", 2, 49.6, null, null)],
@@ -41,11 +42,11 @@ test("the leaderboard: ranked players numbered, yardsticks greyed and never rank
   assert.equal(rows[3].span, 0);
 });
 
-test("fly2 is marked on the tracks it was tuned on (decision 46)", () => {
+test("fly2 is marked when some of its tracks here are ones it was tuned on (decision 46)", () => {
   const rows = Records.board(RECORDS, ROSTER);
   assert.deepEqual(rows.filter((r) => r.tuned).map((r) => r.player), ["fly2"]);
-  assert.equal(Records.tunedHere({ ...RECORDS, tracks: [1200, 1219] }, "fly2"), false);
-  assert.match(Records.boardHtml(rows, []), /Fly · Sideways <span class="warn">tuned on these tracks<\/span>/);
+  assert.equal(Records.tunedHere({ ...RECORDS, tuned_tracks: {} }, "fly2"), false);
+  assert.match(Records.boardHtml(rows, []), /Fly · Sideways <span class="warn">tuned on some of these tracks<\/span>/);
 });
 
 test("a black skin gets an edge in its own ink, so it can be seen", () => {
@@ -57,7 +58,8 @@ test("a black skin gets an edge in its own ink, so it can be seen", () => {
 test("the notes: the order is no verdict, what is in-sample, what was left out and what could not be read", () => {
   const notes = Records.boardNotes({ ...RECORDS, unreadable: ["20260101-000000"] }, ROSTER);
   assert.match(notes[0], /^Most players have \d+ tracks?: their intervals overlap/);
-  assert.match(notes[1], /Fly · Sideways's numbers were tuned on tracks 1000–1199/);
+  assert.equal(notes[1], "Fly · Sideways's numbers were tuned on tracks 1000–1199: 12 of its 20 tracks here are among " +
+    "them, so its mean here is partly in-sample.");
   assert.equal(notes[2], "3 older copies of a track left out: each player's track counts once, from its newest run.");
   assert.equal(notes[3], "Could not be read, so not counted: 20260101-000000.");
 });
