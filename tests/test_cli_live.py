@@ -66,9 +66,11 @@ def test_a_paid_player_on_a_tournament_seed_is_refused_before_anything_exists(tm
 def test_without_a_cap_a_paid_player_can_only_replay_the_cache(tmp_path, capsys):
     assert main(live_args(tmp_path, "--seed", "1001", players="solver,haiku_step1")) == 1
     captured = capsys.readouterr()
-    assert "run budget_exhausted: request cap of 0 reached" in captured.err
+    assert "haiku_step1 stopped (budget_exhausted): request cap of 0 reached" in captured.err
     (run_dir,) = (tmp_path / "runs").iterdir()
-    assert json.loads((run_dir / "meta.json").read_text())["requests"] == {"haiku_step1": {"max": 0, "used": 0}}
+    meta = json.loads((run_dir / "meta.json").read_text())
+    assert meta["status"] == "completed"  # the solver played on
+    assert meta["requests"] == {"haiku_step1": {"max": 0, "used": 0}}
 
 
 def test_a_live_run_plays_the_chosen_game_for_the_chosen_length(tmp_path):
@@ -89,7 +91,7 @@ def test_a_paid_player_with_a_different_window_is_refused_before_anything_exists
 
 def test_a_paid_player_with_the_same_window_explicit_is_not_refused_by_this_check(tmp_path, capsys):
     assert main(live_args(tmp_path, "--seed", "1001", "--window", "3", players="solver,haiku_step1")) == 1
-    assert "run budget_exhausted: request cap of 0 reached" in capsys.readouterr().err
+    assert "haiku_step1 stopped (budget_exhausted): request cap of 0 reached" in capsys.readouterr().err
 
 
 def test_usage_errors(tmp_path, capsys):

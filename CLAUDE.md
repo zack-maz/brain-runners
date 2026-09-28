@@ -140,6 +140,7 @@ phase gets its own plan. Resume from `docs/NEXT.md`.
   when some answers came from the cache. `bakeoff view` keeps its replay page.
 - Capped paid players (Claude Haiku, GLM Flash) spend nothing without `--max-requests` (default 0 replays
   `.cache/responses`); Jev asks whenever its answer is not cached. No fast test can reach a provider:
-  `tests/conftest.py` hides every provider key unless a test is marked `live`. Never raise a cap, rerun a paid command or run `pytest -m live` without the user's go-ahead. No paid
+  `tests/conftest.py` hides every provider key unless a test is marked `live`. A player that reaches its cap or whose provider
+  keeps failing drops out and the others play on (`stopped` in `meta.json`, decision 52). Never raise a cap, rerun a paid command or run `pytest -m live` without the user's go-ahead. No paid
   request on a seed below 1000 before the tournament; the CLI refuses a live paid run on seeds
   below 1000 without `--tournament`.

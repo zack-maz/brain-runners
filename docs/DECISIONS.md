@@ -352,6 +352,14 @@
     runners ("Choose your runners", "Ready to run"), and the home brain's glow pulses visibly. On screen only:
     code names, ids and the record of decisions 45–46 keep the old name.
 
+52. **A player that stops drops out; the others play on** (the user, 2026-09-28). Before, one capped player reaching
+    its cap, or one provider failing six times in a row, ended the run for everyone, flies and free players
+    included. Now that player alone stops, in `run` (for the rest of its tracks) and in `live`; `meta.json` records
+    it under `stopped` (`{status, reason, seed, row}`), the page is told ("… stopped: …; the others play on") and its
+    card shows it stopped, and the command names it and exits 1. The run ends `budget_exhausted` or `aborted` only
+    when every player has stopped. The error streak now counts per player. It makes GLM Flash's throttled free tier
+    safe to put beside the others.
+
 Where we are and what comes next: `docs/NEXT.md`.
 
 ## Prior art to reuse

@@ -692,7 +692,9 @@ see). Keys load from a git-ignored <code>.env</code>. The CLI refuses a live pai
 
 <p>A run directory (<code>runs/&lt;timestamp&gt;/</code>) holds <code>meta.json</code> (status, git commit, arguments,
 model ids, fly constants) and one <code>&lt;player&gt;.jsonl</code> file with one line per move. Status goes
-<code>running → completed | aborted | budget_exhausted | interrupted</code>.</p>
+<code>running → completed | aborted | budget_exhausted | interrupted</code>. A player that reaches its cap or whose
+provider keeps failing drops out and the others play on; <code>meta.json</code> names it under <code>stopped</code>,
+and the run ends <code>aborted</code> or <code>budget_exhausted</code> only when every player stopped.</p>
 
 <p>Each record mixes two moments: what the player saw when deciding (<code>row, lane, senses, looming,
 questions</code>) and what happened after (<code>answers, chosen_action, executed_action, solver_action, alive,

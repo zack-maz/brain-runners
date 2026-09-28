@@ -103,16 +103,28 @@ def test_the_directory_is_a_normal_completed_run(tmp_path):
     assert all(p.closed for p in live.players if hasattr(p, "closed"))
 
 
-def test_a_cap_stops_everyone_and_leaves_a_valid_incomplete_run(tmp_path):
+def test_a_capped_player_drops_out_and_the_others_play_on(tmp_path):
     capped = Scripted("paid", "stay", cap=3)
     live, events = run_live(tmp_path, [make_player("solver"), capped])
-    assert live.status == "budget_exhausted" and live.error == "request cap of 3 reached"
-    assert [name for name, _ in events[-2:]] == ["error", "end"]
-    assert events[-2][1] == {"message": "request cap of 3 reached"} and events[-1][1]["status"] == "budget_exhausted"
-    assert json.loads((live.run_dir / "meta.json").read_text())["status"] == "budget_exhausted"
+    assert live.status == "completed" and live.error is None
+    assert ("error", {"message": "paid stopped: request cap of 3 reached; the others play on"}) in events
+    assert events[-1][0] == "end" and events[-1][1]["status"] == "completed"
+    meta = json.loads((live.run_dir / "meta.json").read_text())
+    assert meta["status"] == "completed"
+    assert meta["stopped"] == {"paid": {"status": "budget_exhausted", "reason": "request cap of 3 reached",
+                                        "seed": 1001, "row": 3}}
     replay = build_replay([live.run_dir])
-    assert [(e["player"], e["complete"], len(e["frames"])) for e in replay["episodes"]] == [("solver", False, 4), ("paid", False, 3)]
+    episodes = {e["player"]: e for e in replay["episodes"]}
+    assert episodes["solver"]["complete"] and len(episodes["solver"]["frames"]) > 4
+    assert (episodes["paid"]["complete"], len(episodes["paid"]["frames"])) == (False, 3)
     assert capped.closed
+
+
+def test_a_cap_that_stops_every_player_ends_the_run(tmp_path):
+    live, events = run_live(tmp_path, [Scripted("paid", "stay", cap=3)])
+    assert live.status == "budget_exhausted" and live.error == "request cap of 3 reached"
+    assert events[-1][1]["status"] == "budget_exhausted"
+    assert json.loads((live.run_dir / "meta.json").read_text())["status"] == "budget_exhausted"
 
 
 def test_a_provider_that_keeps_failing_aborts_the_run(tmp_path):

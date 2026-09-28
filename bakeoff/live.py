@@ -19,7 +19,7 @@ from bakeoff.players.base import Player
 from bakeoff.replay import META_KEYS, build_replay, empty_replay, frame_of, summary_of
 from bakeoff.runner import _close, _now, _preflight, _requests, new_meta, play_row
 
-MAX_CONSECUTIVE_ERRORS = 5  # as the runner: a provider that keeps failing ends the run
+MAX_CONSECUTIVE_ERRORS = 5  # as the runner: a provider that keeps failing stops its player, who drops out
 
 
 class Cancelled(Exception):
@@ -169,6 +169,12 @@ class LiveRun:
         return {"status": self.status, "runs": replay["runs"], "scoreboard": replay["scoreboard"],
                 "bench": numbers if numbers else {"why": why}, "results": results}
 
+    def _drop(self, name: str, stop: RunAborted, stops: dict) -> None:
+        """One player stops (a cap, or a provider that keeps failing); the page is told, and the others play on."""
+        stops[name] = stop
+        others = len(stops) < len(self.players)
+        self.broadcast.emit("error", {"message": f"{name} stopped: {stop}" + ("; the others play on" if others else "")})
+
     def _write_meta(self) -> None:
         (self.run_dir / "meta.json").write_text(json.dumps(self.meta, indent=2))
 
@@ -180,19 +186,25 @@ class LiveRun:
         questions: dict[str, list[dict]] = {p.name: [] for p in self.players}
         started: set[str] = set()
         logs = {p.name: open(self.run_dir / f"{p.name}.jsonl", "w") for p in self.players}
-        streak = 0
+        streaks = {p.name: 0 for p in self.players}
+        stops: dict[str, RunAborted] = {}  # who dropped out, and why: the others play on
         try:
             for player in self.players:
                 player.reset(games[player.name], self.seed)
             row = 0
-            while not all(game.over for game in games.values()):
+            while not all(game.over or name in stops for name, game in games.items()):
                 for player in self.players:
                     if self._stop.is_set():
                         raise Cancelled("cancelled")
                     game = games[player.name]
-                    if game.over or game.row != row:
-                        continue  # fallen, finished, or in the air over this row
-                    record = play_row(player, game, self.seed, self.run_id, first=player.name not in started)
+                    if game.over or game.row != row or player.name in stops:
+                        continue  # fallen, finished, dropped out, or in the air over this row
+                    try:
+                        record = play_row(player, game, self.seed, self.run_id, first=player.name not in started)
+                    except RunAborted as stop:  # its cap was reached before this row's decision
+                        stop.seed, stop.row = self.seed, game.row
+                        self._drop(player.name, stop, stops)
+                        continue
                     logs[player.name].write(json.dumps(record) + "\n")
                     logs[player.name].flush()
                     frame = frame_of(record, track.lanes, questions[player.name])
@@ -205,14 +217,17 @@ class LiveRun:
                             "track": track.to_json()})
                     self.broadcast.emit("frame", {"player": player.name, "seed": self.seed, "frame": frame,
                                                   "summary": summary_of(record)})
-                    streak = streak + 1 if record["error"] is not None else 0
-                    if streak > MAX_CONSECUTIVE_ERRORS:
-                        raise RunAborted(f"{streak} consecutive player errors; last: {record['error']}")
+                    streaks[player.name] = streaks[player.name] + 1 if record["error"] is not None else 0
+                    if streaks[player.name] > MAX_CONSECUTIVE_ERRORS:
+                        stop = RunAborted(f"{streaks[player.name]} consecutive player errors; last: {record['error']}")
+                        stop.seed, stop.row = self.seed, record["row"]
+                        self._drop(player.name, stop, stops)
                 row += 1
-            self.status = "completed"
-        except RunAborted as abort:  # a cap was reached (budget_exhausted) or a provider kept failing
-            self.status, self.error = abort.status, str(abort)
-            self.broadcast.emit("error", {"message": self.error})
+            if self.players and len(stops) == len(self.players):  # nobody played on: the run ends as the last stop
+                last = list(stops.values())[-1]  # in the order they stopped
+                self.status, self.error = last.status, str(last)
+            else:
+                self.status = "completed"
         except Cancelled:  # the page pressed cancel, or the operator did
             self.status = "interrupted"
         except KeyboardInterrupt:  # the operator: the directory is still a valid, incomplete run
@@ -227,6 +242,8 @@ class LiveRun:
             for player in self.players:
                 _close(player)
             self.meta.update(status=self.status, finished_at=_now(), requests=_requests(self.players))
+            if stops:
+                self.meta["stopped"] = {name: stop.stopped() for name, stop in stops.items()}
             if self.error:
                 self.meta["error"] = self.error
             self._write_meta()

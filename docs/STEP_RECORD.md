@@ -156,7 +156,8 @@ All players on a seed see the same track.
 | `git_sha` | string or null | commit of the code that ran |
 | `git_dirty` | bool or null | uncommitted changes when the run started |
 | `started_at`, `finished_at` | string | UTC ISO 8601; `finished_at` is null while running |
-| `status` | string | `running`, then `completed`, `aborted`, `budget_exhausted` or `interrupted` |
+| `status` | string | `running`, then `completed`, `aborted`, `budget_exhausted` or `interrupted`; `aborted` or `budget_exhausted` only when every player stopped (decision 52) |
+| `stopped` | object, optional | the players that dropped out while the others played on: `{player: {status, reason, seed, row}}`, `status` being `budget_exhausted` (its cap) or `aborted` (six provider errors in a row); absent when nobody stopped |
 | `players` | string[] | the players planned for this run, in order |
 | `seeds` | int[] | the seeds planned for this run |
 | `game` | object | the game's rules (`bakeoff/game/rules.py`): `version` (`v1`, `v2`, or a vision variant such as `v2+look3`), `lanes`, `max_rows`, `lookahead`, `window` (visible lanes each side), `runway_rows`, `start_gap_rate`, `end_gap_rate`, `difficulty_rows`, `max_gap_width`; and `looming: {gain_hz, falloff, step_hz, max_hz, provisional}`. Runs from before game versions have only `lanes`, `max_rows`, `lookahead`, `window` and `looming`, and were played on v1 |

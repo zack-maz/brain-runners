@@ -92,8 +92,9 @@ uv run python -m bakeoff run --players fly,random,solver --seeds 20 --seed-start
 | `--tournament` | allows paid play on seeds below 1000 — for phase 6 only |
 | `--out DIR`, `--cache DIR` | where runs and cached answers go (`runs/`, `.cache/responses`) |
 
-A run stopped by a capped player's cap ends there (`status: budget_exhausted`) and later players in the list never play — so put
-free players first, or run paid players on their own.
+A capped player whose cap runs out, or whose provider fails six times in a row, drops out; the others still play
+every track (decision 52). The command names who stopped and why and exits 1, and `meta.json` records it under
+`stopped`. Only when every player has stopped does the run end as `budget_exhausted` or `aborted`.
 
 ### `report` — the scoreboard of one run directory, as text
 
