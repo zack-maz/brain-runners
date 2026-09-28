@@ -316,7 +316,8 @@ def test_results_replay_and_records_of_what_this_session_recorded(tmp_path):
     records = lobby.records()
     assert [r["run_id"] for r in records["runs"]] == [run_id]
     assert records["runs"][0]["current"] is False  # it is over: it can be watched, not watched live
-    assert {p["player"] for p in records["bench"]["players"]} == {"solver", "random"}
+    charts = lobby.charts()
+    assert {p["player"] for p in charts["bench"]["players"]} == {"solver", "random"}
 
 
 def test_the_run_playing_now_is_the_one_past_run_that_can_be_watched_live(tmp_path, monkeypatch):

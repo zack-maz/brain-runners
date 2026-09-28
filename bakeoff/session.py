@@ -324,12 +324,18 @@ class LiveSession:
         return None if run_dir is None else build_replay([run_dir])
 
     def records(self) -> dict:
-        """The records screen's numbers (bakeoff/records.py). Reads every run directory, so it is worked out when
+        """The records screen's past runs (bakeoff/records.py). Reads every run directory, so it is worked out when
         the page asks, never on a timer."""
         from bakeoff.records import records_of
 
         current = self.run.run_id if self.run is not None and self.status == "running" else None
         return records_of(self.out_root, self.rules, current=current)
+
+    def charts(self) -> dict:
+        """The charts screen's numbers (bakeoff/charts.py), worked out when the page asks, like the records."""
+        from bakeoff.charts import charts_of  # numpy: only when asked
+
+        return charts_of(self.out_root, self.rules)
 
     def find(self, run_id: str | None) -> LiveRun | None:
         """The run with this id, whether it is still going or already closed; without an id, the
