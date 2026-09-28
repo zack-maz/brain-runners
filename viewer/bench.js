@@ -61,6 +61,16 @@
     };
   }
 
+  // The frontier as a staircase through its players' points (already scaled to the page), cheapest or quickest
+  // first: along to the next player's cost or time, then up to its rows. Nothing to draw for fewer than one.
+  function frontierPath(points) {
+    const sorted = points.slice().sort((a, b) => a.x - b.x || a.y - b.y);
+    if (!sorted.length) return "";
+    let d = `M${sorted[0].x.toFixed(1)},${sorted[0].y.toFixed(1)}`;
+    for (const p of sorted.slice(1)) d += `H${p.x.toFixed(1)}V${p.y.toFixed(1)}`;
+    return d;
+  }
+
   const dash = "–";
   const rows = (v) => (v == null ? dash : v.toFixed(1));
   const interval = (lo, hi) => (lo == null ? dash : `${lo.toFixed(1)} to ${hi.toFixed(1)}`);
@@ -68,9 +78,13 @@
   const seconds = (v) => (v == null ? dash : v < 0.1 ? v.toFixed(3) + " s" : v.toFixed(2) + " s");
   const usd = (v) => (v == null ? dash : v.toPrecision(2) + " USD");
   const signed = (v) => (v == null ? dash : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(1));
+  // a track's cost as the study charts it: free, the listed price, or Jev's estimate (free to the user)
+  const track = (p) => (p.cost_basis === "free" ? "free" : usd(p.usd_per_track) + (p.cost_basis === "estimate" ? " (estimate)" : ""));
+  // a named score: a free player has no rows per cent, and an untimed one no rows per second
+  const score = (v, none) => (v == null ? none : v >= 100 ? Math.round(v).toString() : v.toPrecision(3));
 
-  const api = { esc, linear, log, ticks, logTicks, logDomain, survivalPath, split,
-                fmt: { rows, interval, percent, seconds, usd, signed } };
+  const api = { esc, linear, log, ticks, logTicks, logDomain, survivalPath, split, frontierPath,
+                fmt: { rows, interval, percent, seconds, usd, signed, track, score } };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Bench = api;
 })(typeof window !== "undefined" ? window : globalThis);

@@ -11,7 +11,7 @@ test("why says what is missing, and nothing when there are numbers", () => {
 });
 
 test("the shell names every part the stylesheet keys on", () => {
-  for (const name of ["players", "survival", "survival-table", "cost", "time", "pairs", "notes", "thin"]) {
+  for (const name of ["players", "survival", "survival-table", "cost", "time", "scores", "pairs", "notes", "thin"]) {
     assert.ok(BenchView.SHELL.includes('data-bench="' + name + '"'), name);
   }
 });
