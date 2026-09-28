@@ -74,7 +74,7 @@ Paid players (`jev_plain`, `jev_step1`, `haiku_plain` and the question-set playe
 file at the repo root (template: `.env.example`). Claude Haiku and GLM Flash spend nothing unless told to; Jev asks whenever
 its answer is not cached (decision 50):
 
-    uv run python -m bakeoff run --players jev_plain --seeds 1 --seed-start 1000 --max-requests 300 --game v1
+    uv run python -m bakeoff run --players haiku_plain --seeds 1 --seed-start 1000 --max-requests 300 --game v1
 
 `jev_step1` is the Jev of the demo: instead of one broad question it asks Jev four pointed yes/no
 questions in one request ("would `left` land on a gap, that is, does `ahead[0].gaps_relative` contain

@@ -117,7 +117,8 @@ phase gets its own plan. Resume from `docs/NEXT.md`.
   alone, which cannot send headers), so no other page in the browser can drive the run. It is not a defence
   against a program on this machine: whatever may fetch `/` may read the token out of the page. One
   `LiveSession` per command holds one budget per
-  paid player for the whole session (`SharedBudget` gives each run its own record of what it spent), runs one
+  paid player for the whole session (Jev's is an `UncappedBudget`, decision 50; `SharedBudget` gives each run its
+  own record of what it spent), runs one
   `LiveRun` at a time and keeps serving so another track can be played without restarting. `--start` plays the
   command line's own run at once, as before, and holds its first decision until a browser is listening.
 - Brain Run (decision 45, spec `docs/superpowers/specs/2026-09-25-brain-battle-design.md`) is on `main` (PR #9,

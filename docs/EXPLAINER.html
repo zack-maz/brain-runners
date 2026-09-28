@@ -309,12 +309,13 @@ data, the fonts and the benchmark are all inside that one file, so it can be mai
 
 <h3>Live, with the page running the show</h3>
 <pre><code>uv run python -m bakeoff live --port 8765</code></pre>
-<p>This opens a lobby on your own machine and prints its address. In the browser you pick the track and tick who
-plays, and the page tells you what the run would cost at worst before you press Start; the command keeps the
+<p>This opens Brain Run on your own machine and prints its address. In the browser you choose your runners on the
+character select, pick the track on the track select, and the page tells you what the run would cost at worst
+before you press RUN (a lineup that can spend asks to CONFIRM first); the command keeps the
 ceiling, so nothing the page sends can spend more than the cap you started it with (the default cap is 0, which
 replays cached answers and spends nothing; Jev has no cap since decision 50, because its requests cost you
-nothing, and they are still counted and priced). Press Start and the tunnel fills in real time; when it ends, the page
-is ready for another track without restarting the command.</p>
+nothing, and they are still counted and priced). Press RUN and the tunnel fills in real time; when it ends, the
+results open by themselves, and another track can be played without restarting the command.</p>
 
 <h3>What is on the page</h3>
 <ul>
@@ -483,7 +484,8 @@ JavaScript only draws.</figcaption>
   <li><strong>Report, replay, view, bench</strong> only read run directories. That's why watching is free, and
   why the benchmark can never change what a run recorded.</li>
   <li><strong>The live session</strong> (<code>bakeoff/session.py</code>) is what the page talks to: one per
-  command, holding one budget per paid player for the whole session, the refusal rules (a paid player may not play
+  command, holding one budget per paid player for the whole session (Jev's counts its requests but has no cap,
+  decision 50), the refusal rules (a paid player may not play
   a tournament seed without <code>--tournament</code>, cap or no cap) and one run at a time. The page's requests
   carry a token minted at startup and embedded in the page, which keeps other pages in the browser out; it is not
   a defence against another program on this machine, since whatever can fetch the page can read the token.</li>
