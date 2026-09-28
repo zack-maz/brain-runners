@@ -312,7 +312,8 @@ data, the fonts and the benchmark are all inside that one file, so it can be mai
 <p>This opens a lobby on your own machine and prints its address. In the browser you pick the track and tick who
 plays, and the page tells you what the run would cost at worst before you press Start; the command keeps the
 ceiling, so nothing the page sends can spend more than the cap you started it with (the default cap is 0, which
-replays cached answers and spends nothing). Press Start and the tunnel fills in real time; when it ends, the page
+replays cached answers and spends nothing; Jev has no cap since decision 50, because its requests cost you
+nothing, and they are still counted and priced). Press Start and the tunnel fills in real time; when it ends, the page
 is ready for another track without restarting the command.</p>
 
 <h3>What is on the page</h3>
@@ -658,7 +659,8 @@ written once and given to every model unchanged (<code>bakeoff/players/question_
   </tbody>
 </table>
 </div>
-<p>The names are the Brain Battle character select's skins (decision 44). Until 2026-09-25 the sets were
+<p>The names are the skins of Brain Run's character select (decision 44; Brain Run was called Brain Battle
+until decision 51). Until 2026-09-25 the sets were
 <code>composed</code>, <code>choice</code>, <code>two_step</code> and <code>reader</code>, and the plain players were
 <code>jev</code>, <code>haiku</code> and <code>glm</code>: every run recorded so far is filed under those names (and
 Claude Haiku's under <code>llm*</code>, before decision 39). The tool reads them, and their cached answers, as the
@@ -677,8 +679,9 @@ its probabilities were. It compares two models <em>within</em> one set, never on
 <h3>Money safety</h3>
 <p>Every paid request goes through <code>bakeoff/clients/core.py</code>: first a <strong>disk cache</strong>
 (key = sha256 of provider, model, senses and the full question set, so a changed prompt can never reuse an
-old answer), then a <strong>hard cap</strong> (<code>--max-requests</code>, per paid player, default 0 = replay
-only), then the live call, with SDK retries off so the cap is exact. A provider failure is logged as an error
+old answer), then a <strong>hard cap</strong> (<code>--max-requests</code>, per capped paid player, default 0 = replay
+only; Claude Haiku and GLM Flash are capped, Jev plays without a cap since decision 50 and its requests are still
+cached, counted and priced), then the live call, with SDK retries off so the cap is exact. A provider failure is logged as an error
 and the game runs <code>stay</code> (never the solver's move; being rescued would hide exactly what we want to
 see). Keys load from a git-ignored <code>.env</code>. The CLI refuses a live paid run on seeds below 1000 without
 <code>--tournament</code>.</p>
@@ -727,7 +730,8 @@ does arithmetic the Python does not.</p>
   <li><strong>Say how sure we are, where the number is read.</strong> No interval below five tracks, no verdict
   without one, and a count of how many verdicts chance alone would give among the pairs compared. A benchmark of
   one track says so above its own table.</li>
-  <li><strong>Budget.</strong> No paid request without a cap and a cache; no cap raised without your go-ahead.</li>
+  <li><strong>Budget.</strong> No paid request without a cap and a cache (Jev, whose requests cost you
+nothing, needs only the cache, decision 50); no cap raised without your go-ahead.</li>
   <li><strong>One fly at a time</strong> on the 8 GB Mac (about 1 GB each).</li>
   <li><strong>How work gets done:</strong> brainstorm → spec → plan → one implementer and one reviewer per task →
   final review → PR. Never on <code>main</code>. Tests first; no test touches the network.</li>

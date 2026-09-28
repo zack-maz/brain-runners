@@ -2,6 +2,11 @@
 > `jev_composed`, `jev_choice`, `haiku_two_step`, `haiku_reader` and the like until decision 44). This file uses the
 > names of today (`jev_plain`, `haiku_plain`, `jev_step1`, `jev_guided`, `haiku_step2`, `haiku_map`, ...); the run
 > directories keep their old file names and the tool reads them, and the cached answers, as the new names.
+>
+> Caps: from decision 50 (2026-09-26) Jev runs without a cap. Its requests cost the user nothing today, so every
+> `jev_*` player asks whenever its answer is not cached, whatever `--max-requests` says; its requests are still
+> cached, counted, recorded (`"max": null` in `meta.json`) and priced at the estimate below, so what it would cost
+> stays visible. Claude Haiku and GLM Flash keep their hard cap. The Jev runs below were made under a cap.
 
 2026-09-20. One track each, practice seed 1000, each player run alone, SDK retries off, code at `89dcb7a`.
 Run ids: `20260920-102909` (jev_plain), `20260920-102919` (haiku_plain). Runs and the response cache are git-ignored; the
