@@ -96,20 +96,41 @@ def test_records_carry_what_the_what_is_ours_panel_is_written_from(tmp_path):
         assert set(out["ours"]) == {"game", "fly", "fly2"} and out["ours"]["game"]["looming"]["falloff"] is not None
 
 
+def stop(player, seed, row, status="provider_failing"):
+    """meta.json's `stopped`, as runner.py and live.py record a player that dropped out (errors.RunAborted.stopped)."""
+    return {player: {"status": status, "reason": "6 errors in a row", "seed": seed, "row": row}}
+
+
 def test_a_stopped_episode_no_run_completed_is_picked_apart_so_its_failures_count(tmp_path):
-    """decision 52: a player that stops leaves an episode neither dead nor finished. The newest such copy of a
-    (player, seed) no run completed is picked as a stopped one; a completed copy anywhere wins, and a run still
-    going stops nothing."""
+    """decision 52: a player that stops leaves an episode neither dead nor finished, and meta.json's `stopped` names
+    it. The newest such copy of a (player, seed) no run completed is picked as a stopped one; a completed copy
+    anywhere wins."""
     write_run(tmp_path, "20260921-100000", episode("glm_plain", 1001, 5), {"game": V2_BLOCK})
     old = [record(player="glm_plain", seed=1002, row=r) for r in range(2)]
-    write_run(tmp_path, "20260922-100000", old, {"game": V2_BLOCK, "status": "completed"})
+    write_run(tmp_path, "20260922-100000", old, {"game": V2_BLOCK, "status": "completed",
+                                                 "stopped": stop("glm_plain", 1002, 1)})
     new = [record(player="glm_plain", seed=1002, row=r) for r in range(3)]
+    write_run(tmp_path, "20260923-100000", new, {"game": V2_BLOCK, "status": "completed",
+                                                 "stopped": stop("glm_plain", 1002, 2)})
     redone = [record(player="glm_plain", seed=1001, row=r) for r in range(2)]  # 1001 was completed: not stopped
-    write_run(tmp_path, "20260923-100000", new + redone, {"game": V2_BLOCK, "status": "completed"})
-    going = [record(player="glm_plain", seed=1003, row=r) for r in range(2)]
-    write_run(tmp_path, "20260924-100000", going, {"game": V2_BLOCK, "status": "running"})
+    write_run(tmp_path, "20260924-100000", redone, {"game": V2_BLOCK, "status": "completed",
+                                                    "stopped": stop("glm_plain", 1001, 1)})
     sources, left_out, _, stopped = pick(tmp_path, V2)
     assert [(s.run_dir.name, sorted(s.episodes)) for s in sources] == [("20260921-100000", [("glm_plain", 1001)])]
     assert [(s.run_dir.name, sorted(s.episodes)) for s in stopped] == [("20260923-100000", [("glm_plain", 1002)])]
     assert left_out == 0
     assert pick(tmp_path, V2, tracks=(1001, 1001))[3] == []
+
+
+def test_an_episode_cut_short_without_a_stop_is_not_stopped(tmp_path):
+    """Only meta.json's `stopped` makes an unfinished episode a stopped one: an interrupted or crashed run, a run
+    still going, an old whole-run abort (`stopped: null`) or another player's or seed's stop leave it out."""
+    cut = lambda player, seed: [record(player=player, seed=seed, row=r) for r in range(3)]  # noqa: E731
+    write_run(tmp_path, "20260925-100000", cut("glm_plain", 1001), {"game": V2_BLOCK, "status": "interrupted"})
+    write_run(tmp_path, "20260925-100001", cut("glm_plain", 1002), {"game": V2_BLOCK, "status": "crashed"})
+    write_run(tmp_path, "20260925-100002", cut("glm_plain", 1003), {"game": V2_BLOCK, "status": "running"})
+    write_run(tmp_path, "20260925-100003", cut("glm_plain", 1004),
+              {"game": V2_BLOCK, "status": "budget_exhausted", "stopped": None})
+    write_run(tmp_path, "20260925-100004", cut("glm_plain", 1005) + cut("glm_map", 1006),
+              {"game": V2_BLOCK, "status": "completed", "stopped": stop("glm_plain", 1006, 2)})
+    assert pick(tmp_path, V2)[3] == []

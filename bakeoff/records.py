@@ -44,10 +44,11 @@ def pick(out_root: Path | str, rules: Rules,
          tracks: tuple[int, int] | None = None) -> tuple[list[Source], int, list[str], list[Source]]:
     """(the sources to score, how many older complete episodes were left out, the run ids that could not be
     read, the stopped episodes). Only runs of this game and length, and only the seeds in `tracks` (first and
-    last, inclusive) when it is given. The sources hold complete episodes only. A stopped episode is neither dead
-    nor finished (decision 52: its player dropped out, or the run was cut short): the newest copy of each
-    (player, seed) that no run completed, from a run that is not still going. Its decisions count in the failed
-    rate and nowhere else (bakeoff/bench.py)."""
+    last, inclusive) when it is given. The sources hold complete episodes only. A stopped episode is one its player
+    dropped out of (decision 52): unfinished, and named by its run's meta.json `stopped` (that player, that seed).
+    The newest such copy of each (player, seed) no run completed is taken. Its decisions count in the failed rate
+    and nowhere else (bakeoff/bench.py). Any other episode cut short (an interrupted or crashed run, a run still
+    going, an old whole-run abort) is in no number."""
     taken: set[tuple[str, int]] = set()
     sources, left_out, unreadable = [], 0, []
     unfinished: list[tuple[Path, tuple[str, int]]] = []  # newest run first, like the sources
@@ -81,9 +82,10 @@ def pick(out_root: Path | str, rules: Rules,
                 mine.add(key)
         if mine:
             sources.append(Source(run_dir, episodes=frozenset(mine)))
-        if meta.get("status") != "running":  # a run going now has not stopped anything yet
-            done = {key for key, _ in complete}
-            unfinished += [(run_dir, key) for key in last if key not in done]
+        stops = meta.get("stopped") if isinstance(meta.get("stopped"), dict) else {}
+        named = {(player, stop.get("seed")) for player, stop in stops.items() if isinstance(stop, dict)}
+        done = {key for key, _ in complete}
+        unfinished += [(run_dir, key) for key in last if key not in done and key in named]
     stopped_by_run: dict[Path, set[tuple[str, int]]] = {}
     for run_dir, key in unfinished:  # newest first: the first copy of a pair is the newest
         if key not in taken:

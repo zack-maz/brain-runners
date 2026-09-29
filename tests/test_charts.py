@@ -74,10 +74,14 @@ def test_a_stopped_episode_counts_in_failed_and_stopped_but_in_no_other_number(t
     count, or a provider that made it quit would look reliable."""
     write_run(tmp_path, "20260928-090040", episode("glm_plain", 1001, 4), {"game": V2_BLOCK, "status": "completed"})
     failing = [record(player="glm_plain", seed=1002, row=r, error="429") for r in range(4)]
-    write_run(tmp_path, "20260928-090041", failing, {"game": V2_BLOCK, "status": "completed"})
+    write_run(tmp_path, "20260928-090041", failing, {"game": V2_BLOCK, "status": "completed", "stopped": {
+        "glm_plain": {"status": "provider_failing", "reason": "6 errors in a row", "seed": 1002, "row": 3}}})
+    crashed = [record(player="glm_plain", seed=1003, row=r, error="500") for r in range(4)]  # cut short, not stopped
+    write_run(tmp_path, "20260928-090042", crashed, {"game": V2_BLOCK, "status": "crashed"})
     out = charts_of(tmp_path, V2)
     (glm,) = out["bench"]["players"]
     assert glm["seeds"] == 1 and glm["mean_rows"] == 4 and glm["stopped"] == 1
-    assert glm["failed_rate"] == 4 / 8  # 0 of the finished track's 4 decisions, all 4 of the stopped one's
+    assert glm["failed_rate"] == 4 / 8  # 0 of the finished track's 4 decisions, all 4 of the stopped one's; none
+    # of the crashed run's, which no stop names
     assert out["bench"]["incomplete"] == [{"player": "glm_plain", "seed": 1002, "run_id": "20260928-090041", "rows": 4}]
     assert out["tracks"] == [1001, 1001] and out["track_count"] == 1  # a stopped track is not a scored one
