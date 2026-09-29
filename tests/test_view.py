@@ -82,7 +82,7 @@ def test_the_page_keeps_the_rules_for_the_tabs_and_who_is_in_the_tunnel():
 def test_every_script_the_page_names_exists_and_app_comes_last():
     names = re.findall(r'<script src="([^"]+)"></script>', (VIEWER_DIR / "index.html").read_text())
     assert names == ["timeline.js", "tunnel.js", "sprites.js", "roster.js", "stage.js", "minds.js", "log.js", "picker.js", "tabs.js",
-                     "feed.js", "lobby.js", "bench.js", "bench_view.js", "screens.js", "select.js", "trackpick.js", "results.js", "records.js", "front.js", "app.js"]
+                     "feed.js", "lobby.js", "bench.js", "bench_view.js", "screens.js", "select.js", "trackpick.js", "results.js", "records.js", "writeup.js", "front.js", "app.js"]
     assert all((VIEWER_DIR / name).is_file() for name in names)
 
 

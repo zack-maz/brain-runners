@@ -337,6 +337,12 @@ class LiveSession:
 
         return charts_of(self.out_root, self.rules)
 
+    def writeup(self) -> dict:
+        """The Writeup page's text (bakeoff/writeup.py), read from docs/ each time, so an edit shows on reload."""
+        from bakeoff.writeup import writeup_of
+
+        return writeup_of()
+
     def find(self, run_id: str | None) -> LiveRun | None:
         """The run with this id, whether it is still going or already closed; without an id, the
         run going now (or the last one). The page opens one event stream per run and names it."""

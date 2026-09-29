@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const Screens = require("../screens.js");
 
 test("the screens, in the order the flow goes through them", () => {
-  assert.deepEqual(Screens.NAMES, ["home", "select", "track", "run", "results", "records", "charts"]);
+  assert.deepEqual(Screens.NAMES, ["home", "select", "track", "run", "results", "records", "charts", "writeup"]);
 });
 
 test("a screen that does not exist leaves the one shown, and a page that opens on nothing opens on home", () => {
@@ -20,6 +20,7 @@ test("Back walks the flow backwards, and Records returns to where it was opened 
   assert.equal(Screens.back("records", "home"), "home");
   assert.equal(Screens.back("records", "results"), "results");
   assert.equal(Screens.back("charts", "home"), "home");
+  assert.equal(Screens.back("writeup", "home"), "home");
   assert.equal(Screens.back("home"), "home");
 });
 

@@ -30,6 +30,7 @@
     results: null, more: false, autoResults: false, // the results on screen, and whether the run's end opens them
     records: null, allRuns: false, // the past runs on screen
     charts: null, pair: [], // the charts on screen, and the two players compared
+    writeup: null, // the write-up on screen: {html, source, draft, why}
   };
 
   async function control(path, options) {
@@ -88,6 +89,7 @@
     if (front.screen === "results") renderResults();
     if (front.screen === "records") renderRecords();
     if (front.screen === "charts") renderCharts();
+    if (front.screen === "writeup") renderWriteup();
     renderRunBar();
   }
 
@@ -428,6 +430,37 @@
   }
 
   $("open-charts").addEventListener("click", openCharts);
+
+  // ---- writeup --------------------------------------------------------------------------------------
+  // docs/WRITEUP.html as it is now (GET /writeup): the repository's own words, shown as written, never a log's.
+  // Its numbers are filled from the charts (GET /charts), fetched with it so they are the numbers of the moment.
+  async function openWriteup() {
+    show("writeup");
+    const [text, charts] = await Promise.all([control("/writeup"), control("/charts")]);
+    front.writeup = text.ok ? text.body : { html: null, why: text.body.error || "the writeup could not be read" };
+    if (charts.ok) front.charts = charts.body;
+    renderWriteup();
+  }
+
+  function renderWriteup() {
+    const writeup = front.writeup;
+    if (!writeup) return;
+    $("writeup-why").hidden = !writeup.why;
+    $("writeup-why").textContent = writeup.why || "";
+    $("writeup-draft").hidden = !writeup.draft;
+    $("writeup-source").textContent = writeup.source ? "Source: docs/" + writeup.source : "";
+    const body = $("writeup-body");
+    body.hidden = !writeup.html;
+    body.innerHTML = writeup.html || "";
+    const bench = front.charts && front.charts.bench;
+    for (const span of body.querySelectorAll("[data-stat]")) {
+      const out = Writeup.statText(bench, span.dataset.stat);
+      span.textContent = out.text;
+      span.classList.toggle("bad", !out.ok);
+    }
+  }
+
+  $("open-writeup").addEventListener("click", openWriteup);
   $("leaderboard").addEventListener("click", (event) => { // two rows make a pair: a third starts a new one
     const row = event.target.closest("button[data-player]");
     if (!row) return;

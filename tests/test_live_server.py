@@ -244,7 +244,9 @@ def test_what_was_recorded_is_served_behind_the_token(server):
     assert status == 200 and [r["run_id"] for r in records["runs"]] == [run_id]
     status, charts = payload(httpd, "GET", "/charts")
     assert status == 200 and {p["player"] for p in charts["bench"]["players"]} == {"solver", "random"}
-    for path in (f"/results?run={run_id}", f"/replay?run={run_id}", "/records", "/charts"):
+    status, writeup = payload(httpd, "GET", "/writeup")
+    assert status == 200 and writeup["draft"] is True and "<article" in writeup["html"]
+    for path in (f"/results?run={run_id}", f"/replay?run={run_id}", "/records", "/charts", "/writeup"):
         assert get(httpd, path, token=None)[0].status == 403
         assert get(httpd, path, token="wrong")[0].status == 403
 

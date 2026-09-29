@@ -18,6 +18,7 @@ the run.
 | `GET /results`     | the results of a recorded run (`?run=<run_id>`), for the results screen |
 | `GET /records`     | the past runs, for the records screen |
 | `GET /charts`      | the study's numbers over every recorded track, for the charts screen |
+| `GET /writeup`     | the write-up's text (docs/WRITEUP.html), for the writeup screen |
 | `GET /replay`      | the replay of a recorded run (`?run=<run_id>`), for Records' Watch |
 """
 
@@ -109,7 +110,7 @@ def serve(page: str | None, session: LiveSession, port: int = 8000) -> Threading
             elif self._route == EVENTS_PATH:
                 if self._token():
                     self._events()
-            elif self._route in ("/results", "/records", "/charts", "/replay"):
+            elif self._route in ("/results", "/records", "/charts", "/writeup", "/replay"):
                 if self._token():
                     self._recorded()
             else:
@@ -147,6 +148,8 @@ def serve(page: str | None, session: LiveSession, port: int = 8000) -> Threading
                     return self._json(session.records())
                 if self._route == "/charts":
                     return self._json(session.charts())
+                if self._route == "/writeup":
+                    return self._json(session.writeup())
                 wanted = self._query().get("run")
                 out = session.results(wanted) if self._route == "/results" else session.replay(wanted)
             except (OSError, ValueError) as e:
