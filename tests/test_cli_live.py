@@ -17,7 +17,7 @@ def live_args(tmp_path, *extra, players="solver,random"):
 def test_by_default_the_page_runs_the_show_with_the_demos_three_ready_and_no_budget():
     args = _parser().parse_args(["live"])
     assert (args.players, args.seed, args.start) == (None, None, False)  # the lobby chooses
-    assert (args.max_requests, args.port, args.tournament) == (0, 8000, False)
+    assert (args.max_requests, args.port, args.held_out) == (0, 8000, False)
     assert (DEMO_PLAYERS, DEMO_SEED) == ("fly,jev_step1,haiku_plain", 1001)  # what it offers first
 
 
@@ -51,9 +51,9 @@ def test_a_live_run_leaves_a_normal_run_directory_and_prints_where_to_watch(tmp_
     assert main(["view", str(run_dir), "--output", str(tmp_path / "replay.html")]) == 0  # and it replays afterwards
 
 
-def test_a_paid_player_on_a_tournament_seed_is_refused_before_anything_exists(tmp_path, capsys):
+def test_a_paid_player_on_a_held_out_seed_is_refused_before_anything_exists(tmp_path, capsys):
     """Live, the rule is stricter than `run`'s: a paid player may not play a seed below 1000 at all
-    without --tournament, cap or no cap. The page may start a run at any moment, so the seed is settled
+    without --held-out, cap or no cap. The page may start a run at any moment, so the seed is settled
     once, when the session is built, not per request."""
     assert main(live_args(tmp_path, "--seed", "7", "--max-requests", "5", players="solver,jev_step1")) == 2
     assert "paid players may not play seeds below 1000" in capsys.readouterr().err

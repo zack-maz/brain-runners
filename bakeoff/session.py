@@ -22,23 +22,16 @@ from bakeoff.game.track import generate_track
 from bakeoff.live import LiveRun
 from bakeoff.players import PAID, REGISTRY, UNCAPPED, budget_of, fly2, make_player
 from bakeoff.players.names import canonical
+from bakeoff.prices import PRICE_USD  # noqa: F401  (tests and results read it from here)
 from bakeoff.replay import CONTESTANTS
 
-# tournament seeds are below this and must not be paid for, or shape prompts, before the tournament
+# the held-out seeds are below this: no paid request and no prompt may touch them before the study plays them
+# (decision 53; the study's own tracks are 100 to 199)
 FIRST_PRACTICE_SEED = 1000
 # the practice tracks the track select offers, 1000 to 1019, and the ones Records ranks on (decision 46)
 PRACTICE_TRACKS = 20
 
-# USD per live request, measured in docs/COSTS.md (update 2a) and rounded up, because this number is what
-# the page asks the user to agree to: it must never be lower than what a request really costs. A price per
-# player, not per provider: the same model costs what its question set makes it read and write, and the
-# map set is about eleven times the plain one's. The budget, not this table, enforces the ceiling.
-# Jev's prices are estimates (its provider does not bill per request; COSTS.md explains the token basis).
-# GLM Flash is free while its free tier lasts.
-PRICE_USD = {"haiku_plain": 0.0006, "haiku_step1": 0.0010, "haiku_guided": 0.0009, "haiku_step2": 0.0016,
-             "haiku_map": 0.0065, "jev_plain": 0.00004, "jev_step1": 0.00003, "jev_guided": 0.00004,
-             "jev_step2": 0.00003, "jev_map": 0.00012,
-             "glm_plain": 0.0, "glm_step1": 0.0, "glm_guided": 0.0, "glm_step2": 0.0, "glm_map": 0.0}
+# USD per live request: bakeoff/prices.py, one table for the page's money and the study's charts
 
 # every player here asks its provider once a row, so a track of N rows costs at worst N requests
 REQUESTS_PER_ROW = 1
@@ -138,11 +131,11 @@ class LiveSession:
     """The command's ceiling and the page's lobby. Thread-safe: the run loop is a thread of its own."""
 
     def __init__(self, rules: Rules, out_root: Path | str = "runs", cache_dir: Path | str = ".cache/responses",
-                 max_requests: int = 0, tournament: bool = False, args: dict | None = None,
+                 max_requests: int = 0, held_out: bool = False, args: dict | None = None,
                  token: str | None = None, paid_blocked: str | None = None,
                  ready: tuple[int, list[str]] | None = None):
         self.rules, self.out_root, self.cache = rules, Path(out_root), DiskCache(cache_dir)
-        self.max_requests, self.tournament = max_requests, tournament
+        self.max_requests, self.held_out = max_requests, held_out
         # why no paid player may play at all this session, if any (a vision the briefing does not match)
         self.paid_blocked = paid_blocked
         # what the command line offered: the lobby opens with this track and these players ticked
@@ -186,7 +179,7 @@ class LiveSession:
                 "capped": (name not in UNCAPPED) if paid else None,
                 "played_before": seed is not None and seed in played.get(name, []),
                 # the track select's own practice tracks it has a recorded run of, for its marks: a
-                # tournament seed or a bulk-run seed past the track select's own tracks is not offered there
+                # held-out seed or a bulk-run seed past the track select's own tracks is not offered there
                 "seeds_played": [s for s in played.get(name, [])
                                  if FIRST_PRACTICE_SEED <= s < FIRST_PRACTICE_SEED + PRACTICE_TRACKS],
                 # why this player cannot play this track, so the page can say so before anything is asked
@@ -197,12 +190,12 @@ class LiveSession:
             "status": self.status,
             "game": self.rules.to_json(), "max_rows": self.rules.max_rows,
             "requests_per_row": REQUESTS_PER_ROW,
-            "max_requests": self.max_requests, "tournament": self.tournament,
+            "max_requests": self.max_requests, "held_out": self.held_out,
             "first_practice_seed": FIRST_PRACTICE_SEED, "practice_tracks": PRACTICE_TRACKS,
             "seed": seed,
-            # the real track, for the track select's preview: the rules stay in Python. A tournament seed
+            # the real track, for the track select's preview: the rules stay in Python. A held-out seed
             # is locked until the session is one, same as `why_not` locks paid players off it
-            "track": None if seed is None or (seed < FIRST_PRACTICE_SEED and not self.tournament)
+            "track": None if seed is None or (seed < FIRST_PRACTICE_SEED and not self.held_out)
                      else generate_track(seed, self.rules).to_json(),
             "ready": {"seed": self.ready_seed, "players": list(self.ready_players)},
             "players": players,
@@ -223,9 +216,9 @@ class LiveSession:
             return None
         if self.paid_blocked:
             return self.paid_blocked
-        if seed < FIRST_PRACTICE_SEED and not self.tournament:
-            return (f"paid players may not play seeds below {FIRST_PRACTICE_SEED} (tournament seeds); "
-                    "this command was not started with --tournament")
+        if seed < FIRST_PRACTICE_SEED and not self.held_out:
+            return (f"paid players may not play seeds below {FIRST_PRACTICE_SEED} (held-out seeds); "
+                    "this command was not started with --held-out")
         if self.max_requests > 0 and self.budgets[name].remaining == 0:
             return f"{name} has no requests left of this session's cap of {self.max_requests}"
         return None
@@ -331,12 +324,27 @@ class LiveSession:
         return None if run_dir is None else build_replay([run_dir])
 
     def records(self) -> dict:
-        """The records screen's numbers (bakeoff/records.py). Reads every run directory, so it is worked out when
+        """The records screen's past runs (bakeoff/records.py). Reads every run directory, so it is worked out when
         the page asks, never on a timer."""
         from bakeoff.records import records_of
 
         current = self.run.run_id if self.run is not None and self.status == "running" else None
         return records_of(self.out_root, self.rules, current=current)
+
+    def charts(self, scope: str | None = None) -> dict:
+        """The charts screen's numbers (bakeoff/charts.py), worked out when the page asks, like the records: over
+        every recorded track, or over the held-out ones alone (`scope="held_out"`, what the Writeup cites)."""
+        from bakeoff.charts import HELD_OUT, charts_of  # numpy: only when asked
+
+        if scope not in (None, "all", "held_out"):
+            raise LobbyError(f'no scope "{scope}": it is "all" or "held_out"')
+        return charts_of(self.out_root, self.rules, HELD_OUT if scope == "held_out" else None)
+
+    def writeup(self) -> dict:
+        """The Writeup page's text (bakeoff/writeup.py), read from docs/ each time, so an edit shows on reload."""
+        from bakeoff.writeup import writeup_of
+
+        return writeup_of()
 
     def find(self, run_id: str | None) -> LiveRun | None:
         """The run with this id, whether it is still going or already closed; without an id, the

@@ -46,7 +46,7 @@ def _parser() -> argparse.ArgumentParser:
     run.add_argument("--players", default="random,solver", help=f"comma-separated; available: {sorted(REGISTRY)}")
     run.add_argument("--seeds", type=int, default=20, help="number of seeds (default 20)")
     run.add_argument("--seed-start", type=int, default=0,
-                     help="first seed; practice seeds must not overlap tournament seeds")
+                     help="first seed; practice seeds (1000 and up) must not overlap the held-out seeds")
     _add_game_arguments(run)
     run.add_argument("--max-rows", type=int, help="play a prefix of each track (default: the whole track)")
     run.add_argument("--out", default="runs")
@@ -55,8 +55,8 @@ def _parser() -> argparse.ArgumentParser:
                           "only replays the cache. Worst case a run spends this many requests per capped paid player. "
                           f"{UNCAPPED_HELP}")
     run.add_argument("--cache", default=str(DEFAULT_CACHE_DIR), help="response cache directory")
-    run.add_argument("--tournament", action="store_true",
-                     help="allows live paid requests on seeds below 1000; for the phase 6 tournament only")
+    run.add_argument("--held-out", action="store_true",
+                     help="allows live paid requests on seeds below 1000, the held-out seeds; for the study's runs only")
     report = sub.add_parser("report", help="summarize an existing run directory")
     report.add_argument("run_dir")
     view = sub.add_parser("view", help="write a replay of one or more run directories as one HTML file")
@@ -84,7 +84,8 @@ def _parser() -> argparse.ArgumentParser:
                            "only replays the cache, which makes a free live run of a track that was already played. "
                            f"{UNCAPPED_HELP}")
     live.add_argument("--cache", default=str(DEFAULT_CACHE_DIR), help="response cache directory")
-    live.add_argument("--tournament", action="store_true", help="allows live paid requests on seeds below 1000")
+    live.add_argument("--held-out", action="store_true",
+                      help="allows live paid requests on seeds below 1000, the held-out seeds")
     live.add_argument("--start", action="store_true",
                       help="play at once with --players on --seed, as before; without it the page opens in the "
                            "Brain Run home and starts the run when you say so")
@@ -105,13 +106,13 @@ def _players(names: str, cache: DiskCache, max_requests: int, rules: Rules) -> l
     return players
 
 
-def _spends_on_tournament_seeds(players: list, max_requests: int, first_seed: int, tournament: bool) -> bool:
+def _spends_on_held_out_seeds(players: list, max_requests: int, first_seed: int, held_out: bool) -> bool:
     spends = any(p.name in UNCAPPED for p in players) or (max_requests > 0 and any(p.name in PAID for p in players))
-    return spends and first_seed < FIRST_PRACTICE_SEED and not tournament
+    return spends and first_seed < FIRST_PRACTICE_SEED and not held_out
 
 
-SEED_RULE = ("paid players may not spend requests on seeds below 1000 (tournament seeds); "
-             "use {flag} 1000 or higher, or pass --tournament")
+SEED_RULE = ("paid players may not spend requests on seeds below 1000 (held-out seeds); "
+             "use {flag} 1000 or higher, or pass --held-out")
 
 # the paid players' briefing (bakeoff/players/briefing.py) tells them they see 3 lanes either side; until
 # that text follows the window, a different window would be a lie to a paid player, cache or not
@@ -139,12 +140,12 @@ def _live(args) -> int:
     names = [canonical(n.strip()) for n in (args.players or DEMO_PLAYERS).split(",")]
     run_args = {"command": "live", "game": args.game, "lookahead": args.lookahead, "window": args.window,
                 "max_rows": args.max_rows, "max_requests": args.max_requests, "cache": args.cache,
-                "tournament": args.tournament, "port": args.port}
+                "held_out": args.held_out, "port": args.port}
     # a vision the paid players' briefing does not match: they may not play this session at all
     blocked = (WINDOW_RULE.format(chosen=RULES[args.game].window, requested=args.window)
                if args.window is not None and args.window != RULES[args.game].window else None)
     session = LiveSession(rules, out_root=args.out, cache_dir=args.cache, max_requests=args.max_requests,
-                          tournament=args.tournament, args=run_args, paid_blocked=blocked, ready=(seed, names))
+                          held_out=args.held_out, args=run_args, paid_blocked=blocked, ready=(seed, names))
     try:
         session.check(seed, names)  # what the command line asks for, refused before anything is bound
     except LobbyError as e:
@@ -329,7 +330,7 @@ def main(argv: list[str] | None = None) -> int:
     except ValueError as e:
         print(e, file=sys.stderr)
         return 2
-    if _spends_on_tournament_seeds(players, args.max_requests, args.seed_start, args.tournament):
+    if _spends_on_held_out_seeds(players, args.max_requests, args.seed_start, args.held_out):
         print(SEED_RULE.format(flag="--seed-start"), file=sys.stderr)
         return 2
     if _paid_window_mismatch(players, RULES[args.game].window, args.window):
@@ -341,7 +342,7 @@ def main(argv: list[str] | None = None) -> int:
     seeds = range(args.seed_start, args.seed_start + args.seeds)
     run_args = {"players": args.players, "seeds": args.seeds, "seed_start": args.seed_start, "game": args.game,
                 "lookahead": args.lookahead, "window": args.window, "max_rows": args.max_rows,
-                "max_requests": args.max_requests, "cache": args.cache, "tournament": args.tournament}
+                "max_requests": args.max_requests, "cache": args.cache, "held_out": args.held_out}
     status = 0
     try:
         runner.run(players, seeds, rules, max_rows=args.max_rows, run_id=run_id, args=run_args)

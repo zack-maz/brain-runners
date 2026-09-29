@@ -4,7 +4,7 @@
 // text, for textContent: a player name or a refusal from the server is never markup.
 //
 // `state` is what GET /state answers (bakeoff/session.py): {status, game, max_rows, requests_per_row,
-// max_requests, tournament, first_practice_seed, seed, players: [{name, paid, price_usd,
+// max_requests, held_out, first_practice_seed, seed, players: [{name, paid, price_usd,
 // requests_left, capped, played_before, why_not}], run}. `capped` is false for Jev, which plays without a cap
 // (decision 50): its worst case is the whole track, shown and priced, but it costs the user nothing to confirm.
 (function (root) {
@@ -76,9 +76,9 @@
     const cap = state.max_requests === 0
       ? "This command was started without a cap, so paid players only replay answers that are already cached."
       : "This command's cap is " + state.max_requests + " requests for each paid player, for the whole session.";
-    const seeds = state.tournament
-      ? "Seeds below " + state.first_practice_seed + " are allowed here (--tournament)."
-      : "Paid players may only play seeds " + state.first_practice_seed + " and up; the tournament seeds are kept unseen.";
+    const seeds = state.held_out
+      ? "Seeds below " + state.first_practice_seed + " are allowed here (--held-out)."
+      : "Paid players may only play seeds " + state.first_practice_seed + " and up; the held-out seeds are kept unseen.";
     const jev = (state.players || []).some((p) => p.paid && p.capped === false)
       ? " Jev plays without a cap; its requests are still counted and priced." : "";
     return cap + jev + " " + seeds + " Nothing on this page can raise either.";

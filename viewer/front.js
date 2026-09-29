@@ -28,7 +28,10 @@
     screen: "home", from: "home", state: null, sel: Select.make(roster, []), seed: null, armed: false, refusal: null,
     timer: null, leaving: false, starting: false, cancelError: null, notice: null, armedAt: 0,
     results: null, more: false, autoResults: false, // the results on screen, and whether the run's end opens them
-    records: null, pair: [], allRuns: false, // the records on screen, and the two players compared
+    records: null, allRuns: false, // the past runs on screen
+    charts: null, pair: [], // the charts on screen, and the two players compared
+    writeup: null, // the write-up on screen: {html, source, draft, why}
+    writeupCharts: null, // the numbers it cites: {held_out, all}, GET /charts' answer for each scope
   };
 
   async function control(path, options) {
@@ -86,6 +89,8 @@
     if (front.screen === "track") renderTrack();
     if (front.screen === "results") renderResults();
     if (front.screen === "records") renderRecords();
+    if (front.screen === "charts") renderCharts();
+    if (front.screen === "writeup") renderWriteup();
     renderRunBar();
   }
 
@@ -154,7 +159,7 @@
     const seed = front.seed;
     const fresh = state.seed === seed; // the state answers for the track on screen, not the one before
     $("track-game").textContent = "Run · game " + state.game.version + " · " + state.max_rows + " rows";
-    $("seed-rule").textContent = state.tournament ? "Tournament seeds are open (--tournament)"
+    $("seed-rule").textContent = state.held_out ? "Held-out seeds are open (--held-out)"
       : "Practice seeds are " + state.first_practice_seed + " and up";
     $("seed-shown").textContent = seed;
     $("preview-what").textContent = "The track, row 0 to " + state.max_rows;
@@ -351,9 +356,7 @@
   async function openRecords() {
     show("records");
     const { ok, body } = await control("/records");
-    front.records = ok ? body : { why: body.error || "the records could not be read", runs: [], bench: null };
-    const chips = ok ? Records.chips(front.records, roster) : [];
-    if (front.pair.length !== 2 && chips.length) front.pair = [chips[0].a, chips[0].b];
+    front.records = ok ? body : { why: body.error || "the records could not be read", runs: [] };
     renderRecords();
   }
 
@@ -363,15 +366,6 @@
     if (!records) return;
     $("records-why").hidden = !records.why;
     $("records-why").textContent = records.why || "";
-    $("board-title").textContent = records.game == null ? "" : "Leaderboard · game " + records.game + " practice tracks" +
-      (records.tracks ? " " + records.tracks[0] + "–" + records.tracks[1] : "");
-    $("leaderboard").innerHTML = Records.boardHtml(Records.board(records, roster), front.pair);
-    $("board-notes").innerHTML = Records.boardNotes(records, roster).map((n) => '<p class="warn small">' + Minds.esc(n) + "</p>").join("");
-    const [a, b] = front.pair;
-    $("chips").innerHTML = Records.chipsHtml(Records.chips(records, roster), a, b);
-    const pair = a && b ? Records.pairOf(records, a, b) : null;
-    $("pair").innerHTML = pair ? Records.pairHtml(Records.pairView(pair, roster, records.max_rows))
-      : '<p class="muted small">Pick two players to compare them on the tracks both played.</p>';
     const past = Records.pastRuns(records, roster, front.allRuns);
     $("past").innerHTML = Records.runsHtml(past.rows);
     $("all-runs").hidden = past.total <= Records.SHOWN_RUNS;
@@ -382,17 +376,6 @@
   }
 
   $("open-records").addEventListener("click", openRecords);
-  $("leaderboard").addEventListener("click", (event) => { // two rows make a pair: a third starts a new one
-    const row = event.target.closest("button[data-player]");
-    if (!row) return;
-    const player = row.dataset.player;
-    front.pair = front.pair.length === 1 && front.pair[0] !== player ? [front.pair[0], player] : [player];
-    renderRecords();
-  });
-  $("chips").addEventListener("click", (event) => {
-    const chip = event.target.closest("button[data-a]");
-    if (chip) { front.pair = [chip.dataset.a, chip.dataset.b]; renderRecords(); }
-  });
   $("all-runs").addEventListener("click", () => { front.allRuns = !front.allRuns; renderRecords(); });
   $("past").addEventListener("click", async (event) => {
     const button = event.target.closest("button");
@@ -415,6 +398,89 @@
   };
   $("ours-toggle").addEventListener("click", () => setOurs($("ours-panel").hidden));
   $("ours-close").addEventListener("click", () => setOurs(false));
+
+  // ---- charts ---------------------------------------------------------------------------------------
+  // Every recorded track of this game, each player and track once (GET /charts): the leaderboard and the head to
+  // head on top, the benchmark's tables and trade-off charts below them, drawn by the one renderer (bench_view.js).
+  async function openCharts() {
+    show("charts");
+    const { ok, body } = await control("/charts");
+    front.charts = ok ? body : { why: body.error || "the charts could not be read", bench: null };
+    const chips = ok ? Records.chips(front.charts, roster) : [];
+    if (front.pair.length !== 2 && chips.length) front.pair = [chips[0].a, chips[0].b];
+    renderCharts();
+    if (front.charts.bench) BenchView.mount($("charts-bench"), front.charts.bench);
+    $("charts-bench").hidden = !front.charts.bench;
+  }
+
+  function renderCharts() {
+    const charts = front.charts;
+    if (!charts) return;
+    $("charts-why").hidden = !charts.why;
+    $("charts-why").textContent = charts.why || "";
+    $("charts-scope").textContent = Records.scope(charts);
+    $("board-title").textContent = charts.game == null ? "" : "Mean rows · each player on the tracks it ran";
+    $("leaderboard").innerHTML = Records.boardHtml(Records.board(charts, roster), front.pair);
+    $("board-notes").innerHTML = Records.boardNotes(charts, roster).map((n) => '<p class="warn small">' + Minds.esc(n) + "</p>").join("");
+    const [a, b] = front.pair;
+    $("chips").innerHTML = Records.chipsHtml(Records.chips(charts, roster), a, b);
+    const pair = a && b ? Records.pairOf(charts, a, b) : null;
+    $("pair").innerHTML = pair ? Records.pairHtml(Records.pairView(pair, roster, charts.max_rows))
+      : '<p class="muted small">Pick two players to compare them on the tracks both played.</p>';
+  }
+
+  $("open-charts").addEventListener("click", openCharts);
+
+  // ---- writeup ------------------------------------------------------------------------------------
+  // docs/WRITEUP.html as it is now (GET /writeup): the repository's own words, shown as written, never a log's.
+  // Its numbers are filled from the charts, fetched with it so they are the numbers of the moment: over the held-out
+  // tracks (GET /charts?scope=held_out), which its Method promises, and over every track (GET /charts) for a
+  // citation that ends in `all`.
+  async function openWriteup() {
+    show("writeup");
+    const [text, held, all] = await Promise.all([control("/writeup"), control("/charts?scope=held_out"), control("/charts")]);
+    front.writeup = text.ok ? text.body : { html: null, why: text.body.error || "the writeup could not be read" };
+    const scoped = (r) => (r.ok ? r.body : { bench: null, why: r.body.error || "the charts could not be read" });
+    front.writeupCharts = { held_out: scoped(held), all: scoped(all) };
+    renderWriteup();
+  }
+
+  function renderWriteup() {
+    const writeup = front.writeup;
+    if (!writeup) return;
+    $("writeup-why").hidden = !writeup.why;
+    $("writeup-why").textContent = writeup.why || "";
+    $("writeup-draft").hidden = !writeup.draft;
+    $("writeup-source").textContent = writeup.source ? "Source: docs/" + writeup.source : "";
+    const body = $("writeup-body");
+    body.hidden = !writeup.html;
+    body.innerHTML = writeup.html || "";
+    const scopes = front.writeupCharts || {};
+    const range = (scopes.held_out && scopes.held_out.held_out) || (scopes.all && scopes.all.held_out); // the server's HELD_OUT
+    $("writeup-scope").textContent = writeup.html && range ? Writeup.scopeLine(scopes.held_out, range) : "";
+    const spans = [...body.querySelectorAll("[data-stat]")];
+    $("writeup-numbers-why").innerHTML = Writeup.numbersWhy(scopes, spans.map((span) => span.dataset.stat))
+      .map((why) => '<p class="warn">' + Minds.esc(why) + "</p>").join("");
+    for (const span of spans) {
+      const out = Writeup.statText(scopes, span.dataset.stat);
+      span.textContent = out.text;
+      span.title = out.scope ? "over " + Writeup.SCOPES[out.scope] : "";
+      span.classList.toggle("bad", !out.ok);
+    }
+  }
+
+  $("open-writeup").addEventListener("click", openWriteup);
+  $("leaderboard").addEventListener("click", (event) => { // two rows make a pair: a third starts a new one
+    const row = event.target.closest("button[data-player]");
+    if (!row) return;
+    const player = row.dataset.player;
+    front.pair = front.pair.length === 1 && front.pair[0] !== player ? [front.pair[0], player] : [player];
+    renderCharts();
+  });
+  $("chips").addEventListener("click", (event) => {
+    const chip = event.target.closest("button[data-a]");
+    if (chip) { front.pair = [chip.dataset.a, chip.dataset.b]; renderCharts(); }
+  });
 
   // ---- keys and Back -------------------------------------------------------------------------------
   document.addEventListener("click", (event) => {

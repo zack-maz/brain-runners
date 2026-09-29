@@ -49,8 +49,9 @@ def load_steps(run_dir: Path | str) -> list[dict]:
 
 
 def load_meta(run_dir: Path | str) -> dict | None:
-    """meta.json of a run, or None if it is absent or unreadable. Its player list is brought up to
-    date like the records' (decision 39), because the replay orders its runners by it."""
+    """meta.json of a run, or None if it is absent or unreadable. Its player list and the tables keyed by
+    player are brought up to date like the records' (decision 39): the replay orders its runners by the list,
+    and the benchmark matches each player's model to its steps."""
     try:
         meta = json.loads((Path(run_dir) / "meta.json").read_text())
     except (OSError, ValueError):
@@ -59,6 +60,9 @@ def load_meta(run_dir: Path | str) -> dict | None:
         return None
     if isinstance(meta.get("players"), list):
         meta["players"] = [canonical(p) if isinstance(p, str) else p for p in meta["players"]]
+    for key in ("models", "requests", "stopped"):
+        if isinstance(meta.get(key), dict):
+            meta[key] = {canonical(p): value for p, value in meta[key].items()}
     return meta
 
 

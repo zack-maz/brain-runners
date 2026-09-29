@@ -98,8 +98,26 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 
 ## Where to resume (in this order)
 
-**Next: phase 6** (item 3 below), which waits for the user's budget go-ahead. Everything above it is done or parked.
-PRs #8 to #11 are merged (fly2 settled, Brain Battle, fly3 stopped, Brain Run and Jev uncapped).
+**Next: phase 6 is now the study** (decision 53, spec `docs/superpowers/specs/2026-09-28-study-design.md`, approved
+2026-09-28). **Its code (step 1) is built on branch `study`** (plan `docs/superpowers/plans/2026-09-28-study.md`,
+prototyped, six tasks byte-identical to the prototype): `--held-out` replaces `--tournament`; the benchmark prices
+every decision at the listed price (`bakeoff/prices.py`) and adds seconds per decision, failures, frontiers and
+named scores; Brain Run has Charts (every recorded track) and Writeup (`docs/WRITEUP.html`, an empty draft); Records
+is the log of past runs. Found on the way: an old run's `meta.json` kept its models under pre-decision-39 names, so
+merging it with a new run failed; `report.load_meta` now renames them. After the review and merge come the free
+runs (step 2, spec section 6). There is no tournament any more: a
+research project on which mind performs best for its cost and speed, on held-out seeds 100–199 (free players all
+100, Claude Haiku ×5 the first 15 within about 25 USD of API credit, GLM Flash the first 15 only if its free tier
+fails under 2% of decisions), a new Charts tab, and one Writeup page drafted by Claude for the user to rewrite.
+PRs #8 to #13 are merged (fly2 settled, Brain Battle, fly3 stopped, Brain Run and Jev uncapped, the live/cached card,
+drop-out: a player that stops leaves the others playing, decision 52).
+
+**GLM's free-tier drain** started 2026-09-28 15:06: all five `glm_*` skins, one practice track at a time, seeds
+1001–1019, cap 1000 each (a scratch script; runs land in `runs/`). Its failed-decision rate decides GLM's place in
+the study. Its first track, 1001, had 0 failed decisions. Read the decision from two numbers, never from Charts'
+mean rows alone: each skin's `failed_rate` on Charts (or `bakeoff bench`), which since the final review's fix wave
+counts the decisions of a track the skin stopped on too, beside its "stopped N" count; and each drain run's
+`meta.json` `stopped`, which names a skin that hit its cap or whose provider kept failing (decision 52).
 
 - **PR #11 (`brain-run`) merged to `main` on 2026-09-26**, with two decisions. Decision 50: **Jev plays without a
   cap** (every `jev_*`, `bakeoff.players.UNCAPPED`, `UncappedBudget`): its requests cost the user nothing, so

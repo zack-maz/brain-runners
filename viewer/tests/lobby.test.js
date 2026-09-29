@@ -6,7 +6,7 @@ const player = (name, extra) => ({ name, paid: false, price_usd: 0, requests_lef
                                    why_not: null, ...extra });
 const state = (extra) => ({
   status: "lobby", game: { version: "v2" }, max_rows: 150, requests_per_row: 1, max_requests: 0,
-  tournament: false, first_practice_seed: 1000, seed: 1001, run: null,
+  held_out: false, first_practice_seed: 1000, seed: 1001, run: null,
   players: [player("fly"), player("solver"),
             player("haiku_plain", { paid: true, price_usd: 0.0006, requests_left: 200 }),
             player("jev_step1", { paid: true, price_usd: 0.00003, requests_left: 200 }),
@@ -78,7 +78,7 @@ test("the ceiling is written out, cap or no cap", () => {
   assert.match(Lobby.ceilingText(state()), /without a cap, so paid players only replay answers that are already cached/);
   assert.match(Lobby.ceilingText(state()), /may only play seeds 1000 and up/);
   assert.match(Lobby.ceilingText(state({ max_requests: 700 })), /cap is 700 requests for each paid player/);
-  assert.match(Lobby.ceilingText(state({ tournament: true })), /Seeds below 1000 are allowed here/);
+  assert.match(Lobby.ceilingText(state({ held_out: true })), /Seeds below 1000 are allowed here/);
   assert.match(Lobby.ceilingText(state()), /Nothing on this page can raise either\./);
 });
 

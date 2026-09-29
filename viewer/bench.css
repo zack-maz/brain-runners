@@ -7,11 +7,13 @@
 .pair-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: var(--gutter); }
 .pair-charts h2.label { margin-bottom: 20px; }
 
-[data-bench="players"] th, [data-bench="players"] td, [data-bench="pairs"] th, [data-bench="pairs"] td { padding: 6px 14px 6px 0; text-align: right; white-space: nowrap;
+[data-bench="players"] th, [data-bench="players"] td, [data-bench="pairs"] th, [data-bench="pairs"] td,
+[data-bench="scores"] th, [data-bench="scores"] td { padding: 6px 14px 6px 0; text-align: right; white-space: nowrap;
   border-bottom: 1px solid var(--hairline); }
-[data-bench="players"] th, [data-bench="pairs"] th { font: 400 var(--size-label)/1.4 var(--font-mono); letter-spacing: var(--tracking-label);
+[data-bench="players"] th, [data-bench="pairs"] th, [data-bench="scores"] th { font: 400 var(--size-label)/1.4 var(--font-mono); letter-spacing: var(--tracking-label);
   text-transform: uppercase; color: var(--muted); }
 [data-bench="players"] th:first-child, [data-bench="players"] td:first-child,
+[data-bench="scores"] th:first-child, [data-bench="scores"] td:first-child,
 [data-bench="pairs"] td:nth-child(-n+2), [data-bench="pairs"] th:nth-child(-n+2),
 [data-bench="pairs"] td.verdict, [data-bench="pairs"] th.verdict { text-align: left; }
 [data-bench="players"] tbody tr { cursor: pointer; }
@@ -19,6 +21,8 @@
 [data-bench="players"] tr[aria-current="true"] td:first-child { color: var(--accent); }
 [data-bench="players"] tr[aria-current="true"] td { color: var(--bright); }
 [data-bench="pairs"] tr.focus td { color: var(--bright); }
+[data-bench="scores"] tr[aria-current="true"] td { color: var(--bright); }
+[data-bench="scores"] tr[aria-current="true"] td:first-child { color: var(--accent); }
 .muted-cell { color: var(--muted); }
 .ci { vertical-align: middle; }
 .ci .track { stroke: var(--hairline); stroke-width: 1; }
@@ -36,6 +40,10 @@ tr[aria-current="true"] .ci .mean { fill: var(--accent); }
 .chart .dot { fill: var(--text); cursor: pointer; }
 .chart .whisker { stroke: var(--muted); stroke-width: 1; }
 .chart .dot.focus { fill: var(--accent); }
+.chart .dot.yardstick { fill: var(--line-strong); }
+.chart .dot.unranked { fill-opacity: 0; stroke: var(--muted); stroke-width: 1.5; } /* too few tracks: hollow, still clickable */
+.chart .dot.unranked.focus { stroke: var(--accent); }
+.chart .frontier { fill: none; stroke: var(--text); stroke-width: 1; stroke-dasharray: 4 3; }
 .chart .whisker.focus { stroke: var(--accent); }
 .chart text.name { fill: var(--text); }
 .chart text.name.focus { fill: var(--accent); }

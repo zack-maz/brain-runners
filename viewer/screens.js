@@ -2,11 +2,11 @@
 // screen shown at a time, no navigation, nothing kept in the URL. Pure, tested.
 //
 //   home ─Launch─▶ select ─Ready─▶ track ─RUN─▶ run ─(the run ends)─▶ results
-//   Records opens from home and from results, and Back returns to where it was opened from.
+//   Records opens from home and from results, and Back returns to where it was opened from. Charts and Writeup open from home.
 (function (root) {
   "use strict";
 
-  const NAMES = ["home", "select", "track", "run", "results", "records"];
+  const NAMES = ["home", "select", "track", "run", "results", "records", "charts", "writeup"];
 
   // The screen to show: the one asked for when it exists, otherwise the one already shown, otherwise home.
   function select(current, wanted) {

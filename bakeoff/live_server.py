@@ -16,7 +16,9 @@ the run.
 | `POST /cancel`     | stop the run that is going |
 | `GET /events`      | the frames of a run, Server-Sent Events (`?run=<run_id>`) |
 | `GET /results`     | the results of a recorded run (`?run=<run_id>`), for the results screen |
-| `GET /records`     | the leaderboard, the pairs and the past runs, for the records screen |
+| `GET /records`     | the past runs, for the records screen |
+| `GET /charts`      | the study's numbers over every recorded track (`?scope=held_out`: the held-out ones), for the charts and writeup screens |
+| `GET /writeup`     | the write-up's text (docs/WRITEUP.html), for the writeup screen |
 | `GET /replay`      | the replay of a recorded run (`?run=<run_id>`), for Records' Watch |
 """
 
@@ -108,7 +110,7 @@ def serve(page: str | None, session: LiveSession, port: int = 8000) -> Threading
             elif self._route == EVENTS_PATH:
                 if self._token():
                     self._events()
-            elif self._route in ("/results", "/records", "/replay"):
+            elif self._route in ("/results", "/records", "/charts", "/writeup", "/replay"):
                 if self._token():
                     self._recorded()
             else:
@@ -144,8 +146,14 @@ def serve(page: str | None, session: LiveSession, port: int = 8000) -> Threading
             try:
                 if self._route == "/records":
                     return self._json(session.records())
+                if self._route == "/charts":
+                    return self._json(session.charts(self._query().get("scope")))
+                if self._route == "/writeup":
+                    return self._json(session.writeup())
                 wanted = self._query().get("run")
                 out = session.results(wanted) if self._route == "/results" else session.replay(wanted)
+            except LobbyError as e:  # a request this route does not answer, not a run it cannot read
+                return self._json({"ok": False, "error": str(e)}, status=400)
             except (OSError, ValueError) as e:
                 return self._json({"ok": False, "error": f"cannot read that run: {e}"}, status=500)
             except Exception as e:  # a record that parses but is not one of ours: still a reason, not a hangup

@@ -6,7 +6,7 @@
   "use strict";
 
   const B = typeof module !== "undefined" && module.exports ? require("./bench.js") : root.Bench;
-  const { esc, linear, log, ticks, logTicks, logDomain, survivalPath, split, fmt } = B;
+  const { esc, linear, log, ticks, logTicks, logDomain, survivalPath, split, frontierPath, fmt } = B;
 
   const W = 720, H = 320, M = { left: 48, right: 120, top: 12, bottom: 36 };
 
@@ -30,15 +30,30 @@
   </details>
 </section>
 
-<section aria-label="Rows against cost and time" class="pair-charts">
-  <div>
-    <h2 class="label">Rows against cost</h2>
-    <svg data-bench="cost" class="chart" role="img" aria-label="Mean rows against USD per row. The same numbers are in the players table."></svg>
+<section aria-label="Rows against cost and time">
+  <p class="note first">Each dot is a player's mean rows, its whisker the 95% interval, each point over its own tracks
+    (how many is in the scores table). The dashed line is the frontier: the players no other beats on both axes, more
+    rows for less, drawn among the players with at least five tracks. It names no single winner. A hollow dot has
+    fewer than five tracks, so it is not ranked and never on the frontier, however high it sits.</p>
+  <div class="pair-charts">
+    <div>
+      <h2 class="label">Rows against cost per track</h2>
+      <svg data-bench="cost" class="chart" role="img" aria-label="Mean rows against USD per track, free players in their own column. The same numbers are in the scores table."></svg>
+    </div>
+    <div>
+      <h2 class="label">Rows against time per decision</h2>
+      <svg data-bench="time" class="chart" role="img" aria-label="Mean rows against the median seconds a decision took. The same numbers are in the scores table."></svg>
+    </div>
   </div>
-  <div>
-    <h2 class="label">Rows against time</h2>
-    <svg data-bench="time" class="chart" role="img" aria-label="Mean rows against seconds per row. The same numbers are in the players table."></svg>
-  </div>
+</section>
+
+<section aria-label="Scores">
+  <h2 class="label">Rows for the money and the time</h2>
+  <p class="note first">Extras beside the charts, never the verdict: rows per cent is mean rows over a track's cost in
+    cents; rows per second is mean rows over the seconds a track's decisions took. Failed is the share of decisions
+    that came back as no move, the decisions of a track the player stopped on included; "stopped" counts those
+    tracks, left out of every other number.</p>
+  <div class="scroll"><table data-bench="scores"></table></div>
 </section>
 
 <section aria-label="Pairs">
@@ -52,6 +67,27 @@
   <h2 class="label">What these numbers do and do not say</h2>
   <ul class="prose" data-bench="notes"></ul>
 </section>`;
+
+  // A dot's classes on a trade-off chart: the focus, a yardstick, and a player with too few tracks to be ranked
+  // (drawn hollow, so a dot above the frontier that is not on it reads as what it is).
+  function dotClass(p, focus) {
+    return "dot" + (p.player === focus ? " focus" : "") + (p.yardstick ? " yardstick" : "") + (p.ranked ? "" : " unranked");
+  }
+
+  // A dot's name: on the cost chart, Jev's cost is an estimate and its name says so.
+  function dotLabel(p, chart) {
+    return p.player + (chart === "cost" && p.cost_basis === "estimate" ? " (est.)" : "");
+  }
+
+  // A player's name in the scores table, with what sets it apart from a ranked player.
+  function scoresName(p) {
+    return p.player + (p.yardstick ? " (yardstick)" : "") + (p.ranked ? "" : " (not ranked)");
+  }
+
+  // The failed share, and how many tracks the player stopped on when it stopped on any.
+  function failedText(p) {
+    return fmt.percent(p.failed_rate) + (p.stopped > 0 ? " · stopped " + p.stopped : "");
+  }
 
   // Draw `data` (what bakeoff/bench.py wrote) into `element`. Returns nothing; clicking a player
   // anywhere moves the focus and redraws. Called again with new numbers, it simply redraws.
@@ -86,16 +122,16 @@
     }
 
     function playersTable() {
-      const head = ["player", "tracks", "mean rows", "95% interval", "", "median", "finished", "s per row", "USD per row",
-                    "live", "cached"];
+      const head = ["player", "tracks", "mean rows", "95% interval", "", "median", "finished", "USD per track",
+                    "s per decision", "failed", "live", "cached"];
       const rows = data.players.map((p) => {
         const cur = p.player === focus ? ' aria-current="true"' : "";
         const interval = p.ranked ? fmt.interval(p.ci_low, p.ci_high) : "not ranked";
-        const cost = p.cost === "priced" ? fmt.usd(p.usd_per_row) : esc(p.cost);
         return `<tr data-player="${esc(p.player)}"${cur} tabindex="0"><td>${esc(p.player)}</td><td>${p.seeds}</td>` +
           `<td>${fmt.rows(p.mean_rows)}</td><td>${interval}</td><td>${ciBar(p)}</td>` +
-          `<td>${fmt.rows(p.median_rows)}</td><td>${fmt.percent(p.finished)}</td><td>${fmt.seconds(p.s_per_row)}</td>` +
-          `<td>${cost}</td><td>${p.live_decisions}</td><td>${p.cache_hits}</td></tr>`;
+          `<td>${fmt.rows(p.median_rows)}</td><td>${fmt.percent(p.finished)}</td><td>${esc(fmt.track(p))}</td>` +
+          `<td>${fmt.seconds(p.s_per_decision_median)}</td><td>${fmt.percent(p.failed_rate)}</td>` +
+          `<td>${p.live_decisions}</td><td>${p.cache_hits}</td></tr>`;
       });
       const table = at("players");
       table.innerHTML = `<thead><tr>${head.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody>`;
@@ -145,31 +181,47 @@
       at("survival-table").innerHTML = `<thead>${head}</thead><tbody>${rows.join("")}</tbody>`;
     }
 
-    // `strips`: for a player without a value, the label of the strip it is listed in (never drawn at 0)
-    function scatter(name, key, xLabel, xFormat, strips) {
-      const { placed, missing } = split(data.players, key);
+    // `strips`: for a player without a value, the label of the strip it is listed in (never drawn at 0).
+    // `zero`: the label of a column at the left for players whose value is 0 (the free ones), or null.
+    // `edge`: the players' flag for this chart's frontier, drawn as a dashed staircase through them.
+    function scatter(name, key, xLabel, xFormat, strips, zero, edge) {
+      const zeroes = zero ? data.players.filter((p) => p[key] === 0) : [];
+      const { placed, missing } = split(data.players.filter((p) => !zeroes.includes(p)), key);
       const svg = at(name);
       const w = 520, h = 340, m = { left: 48, right: 24, top: 12, bottom: 76 };
+      const left = m.left + (zeroes.length ? 44 : 12); // room for the free column
       svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
       const y = linear([0, data.max_rows], [h - m.bottom, m.top + 8]);
       let s = "";
       for (const t of ticks(0, data.max_rows, 3)) s += `<line class="grid" x1="${m.left}" x2="${w - m.right}" y1="${y(t)}" y2="${y(t)}"/>` +
         `<text x="${m.left - 8}" y="${y(t) + 4}" text-anchor="end">${t}</text>`;
       s += `<text x="${m.left}" y="${m.top - 2}">mean rows</text>`;
+      const at_ = new Map(); // player -> its x on this chart
+      if (zeroes.length) {
+        for (const p of zeroes) at_.set(p.player, m.left + 16);
+        s += `<text x="${m.left + 16}" y="${h - m.bottom + 18}" text-anchor="middle">${esc(zero)}</text>`;
+      }
       if (placed.length) {
         const domain = logDomain(placed.map((p) => p[key]));
-        const x = log(domain, [m.left + 12, w - m.right - 12]);
+        const x = log(domain, [left, w - m.right - 12]);
+        for (const p of placed) at_.set(p.player, x(p[key]));
         for (const t of logTicks(domain[0], domain[1])) s += `<text x="${x(t)}" y="${h - m.bottom + 18}" text-anchor="middle">${xFormat(t)}</text>`;
-        s += `<line class="axis" x1="${m.left}" x2="${w - m.right}" y1="${h - m.bottom}" y2="${h - m.bottom}"/>`;
         s += `<text x="${w - m.right}" y="${h - m.bottom + 34}" text-anchor="end">${xLabel}, log scale</text>`;
-        for (const p of placed) {
-          const f = p.player === focus ? " focus" : "";
-          const cx = x(p[key]);
-          if (p.ci_low != null) s += `<line class="whisker${f}" x1="${cx}" x2="${cx}" y1="${y(p.ci_low)}" y2="${y(p.ci_high)}"/>`;
-          s += `<circle class="dot${f}" data-player="${esc(p.player)}" cx="${cx}" cy="${y(p.mean_rows)}" r="${f ? 5 : 4}"><title>${esc(p.player)}</title></circle>`;
-          if (f) s += `<text class="name focus" x="${cx + 8}" y="${y(p.mean_rows) - 8}">${esc(p.player)}</text>`;
-          else if (placed.length <= 12) s += `<text class="dot-name" x="${cx + 7}" y="${y(p.mean_rows) + 3}">${esc(p.player)}</text>`;
-        }
+      }
+      if (at_.size) s += `<line class="axis" x1="${m.left}" x2="${w - m.right}" y1="${h - m.bottom}" y2="${h - m.bottom}"/>`;
+      const drawn = [...zeroes, ...placed];
+      const onEdge = drawn.filter((p) => p[edge]).map((p) => ({ x: at_.get(p.player), y: y(p.mean_rows) }));
+      if (onEdge.length) s += `<path class="frontier" d="${frontierPath(onEdge)}"/>`;
+      for (const p of drawn) {
+        const f = p.player === focus ? " focus" : "";
+        const cx = at_.get(p.player);
+        const label = esc(dotLabel(p, name));
+        if (p.ci_low != null) s += `<line class="whisker${f}" x1="${cx}" x2="${cx}" y1="${y(p.ci_low)}" y2="${y(p.ci_high)}"/>`;
+        s += `<circle class="${dotClass(p, focus)}" data-player="${esc(p.player)}" cx="${cx}" cy="${y(p.mean_rows)}" r="${f ? 5 : 4}"><title>${label}</title></circle>`;
+        if (f) s += `<text class="name focus" x="${cx + 8}" y="${y(p.mean_rows) - 8}">${label}</text>`;
+        // with many players only the frontier is named, so the line can be read without clicking. A frontier
+        // player's step leaves it to the right at its own height, so its name sits above the line, not on it.
+        else if (drawn.length <= 12 || p[edge]) s += `<text class="dot-name" x="${cx + 7}" y="${y(p.mean_rows) + (p[edge] ? -6 : 3)}">${label}</text>`;
       }
       const groups = {};
       for (const p of missing) (groups[strips(p)] = groups[strips(p)] || []).push(esc(p.player));
@@ -178,6 +230,20 @@
       });
       svg.innerHTML = s;
       svg.querySelectorAll(".dot").forEach((el) => el.addEventListener("click", () => setFocus(el.dataset.player)));
+    }
+
+    // the named scores, in the players table's order: extras, never the verdict
+    function scoresTable() {
+      const head = ["player", "tracks", "mean rows", "USD per track", "rows per cent", "s per decision", "rows per second", "failed"];
+      const rows = data.players.map((p) => {
+        const cur = p.player === focus ? ' aria-current="true"' : "";
+        return `<tr data-player="${esc(p.player)}"${cur}><td>${esc(scoresName(p))}</td>` +
+          `<td>${p.seeds}</td><td>${fmt.rows(p.mean_rows)}</td><td>${esc(fmt.track(p))}</td>` +
+          `<td>${esc(fmt.perCent(p))}</td>` +
+          `<td>${fmt.seconds(p.s_per_decision_median)}</td><td>${esc(fmt.score(p.rows_per_second, "no time"))}</td>` +
+          `<td>${esc(failedText(p))}</td></tr>`;
+      });
+      at("scores").innerHTML = `<thead><tr>${head.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody>`;
     }
 
     function pairsTable() {
@@ -206,8 +272,10 @@
       leadLine();
       playersTable();
       survivalChart();
-      scatter("cost", "usd_per_row", "USD per row", (t) => String(t), (p) => (p.cost === "free" ? "free" : "no price"));
-      scatter("time", "s_per_row", "seconds per row", (t) => String(t), () => "no time recorded");
+      scatter("cost", "usd_per_track", "USD per track", (t) => String(t), () => "no price", "free", "frontier_cost");
+      scatter("time", "s_per_decision_median", "seconds per decision", (t) => String(t), () => "no time recorded", null,
+              "frontier_speed");
+      scoresTable();
       pairsTable();
     }
 
@@ -223,7 +291,7 @@
     return null;
   }
 
-  const api = { mount, why, SHELL };
+  const api = { mount, why, SHELL, dotClass, dotLabel, scoresName, failedText };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.BenchView = api;
 })(typeof window !== "undefined" ? window : globalThis);

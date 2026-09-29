@@ -29,6 +29,8 @@
     <div class="menu">
       <button type="button" id="launch" class="launch"><span aria-hidden="true">&#9654;</span>LAUNCH</button>
       <button type="button" id="open-records" class="secondary">Records</button>
+      <button type="button" id="open-charts" class="secondary">Charts</button>
+      <button type="button" id="open-writeup" class="secondary">Writeup</button>
       <span class="label blink">Press enter</span>
     </div>
   </div>
@@ -111,6 +113,24 @@
   <div class="screen-head"><button type="button" class="back label" data-back id="records-back">&lsaquo; Home</button>
     <h2 class="shout big">RECORDS</h2><button type="button" id="ours-toggle" class="toggle" aria-expanded="false">What is ours</button></div>
   <p class="warn" id="records-why" hidden></p>
+  <div class="panel runs-box">
+    <div class="row"><span class="label">Past runs &middot; newest first</span><button type="button" id="all-runs" class="toggle"></button></div>
+    <div id="past" class="past-list"></div>
+  </div>
+  <div id="ours-panel" class="ours-panel" hidden>
+    <span class="label">What is ours, not theirs</span>
+    <p>Every question Jev, Haiku and GLM Flash are asked, and the code rule that turns their answers into a move, are ours: a skin is a question set plus its rule.</p>
+    <p>The flies are untrained and use only their innate wiring. How gaps become input to their eyes, which neurons we read as a turn or a jump, and the thresholds are ours, fixed on practice tracks and frozen.</p>
+    <p>Prices are our estimates per request; Jev is not billed per request.</p>
+    <div id="ours-slot"></div>
+    <button type="button" id="ours-close" class="toggle">Close</button>
+  </div>
+</section>
+
+<section id="screen-charts" class="screen records charts" hidden aria-label="Charts">
+  <div class="screen-head"><button type="button" class="back label" data-back>&lsaquo; Home</button>
+    <h2 class="shout big">CHARTS</h2><span class="label" id="charts-scope"></span></div>
+  <p class="warn" id="charts-why" hidden></p>
   <div class="records-top">
     <div class="panel board-box">
       <div class="row"><span class="label" id="board-title"></span><span class="muted small">mean rows &middot; bar is the 95% interval</span></div>
@@ -124,18 +144,16 @@
       <div id="pair" class="pair"></div>
     </div>
   </div>
-  <div class="panel runs-box">
-    <div class="row"><span class="label">Past runs &middot; newest first</span><button type="button" id="all-runs" class="toggle"></button></div>
-    <div id="past" class="past-list"></div>
-  </div>
-  <div id="ours-panel" class="ours-panel" hidden>
-    <span class="label">What is ours, not theirs</span>
-    <p>Every question Jev, Haiku and GLM Flash are asked, and the code rule that turns their answers into a move, are ours: a skin is a question set plus its rule.</p>
-    <p>The flies are untrained and use only their innate wiring. How gaps become input to their eyes, which neurons we read as a turn or a jump, and the thresholds are ours, fixed on practice tracks and frozen.</p>
-    <p>Prices are our estimates per request; Jev is not billed per request.</p>
-    <div id="ours-slot"></div>
-    <button type="button" id="ours-close" class="toggle">Close</button>
-  </div>
+  <div class="panel charts-box" id="charts-bench"></div>
+</section>
+<section id="screen-writeup" class="screen writeup" hidden aria-label="Writeup">
+  <div class="screen-head"><button type="button" class="back label" data-back>&lsaquo; Home</button>
+    <h2 class="shout big">WRITEUP</h2><span class="label warn" id="writeup-draft" hidden>Draft &middot; Claude's, to be rewritten</span></div>
+  <p class="warn" id="writeup-why" hidden></p>
+  <p class="muted small" id="writeup-scope"></p>
+  <div id="writeup-numbers-why"></div>
+  <div id="writeup-body" class="panel writeup-body prose"></div>
+  <p class="muted small" id="writeup-source"></p>
 </section>
 </div>
 
@@ -297,6 +315,7 @@
 <script src="trackpick.js"></script>
 <script src="results.js"></script>
 <script src="records.js"></script>
+<script src="writeup.js"></script>
 <script src="front.js"></script>
 <script src="app.js"></script>
 </body>

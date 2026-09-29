@@ -52,3 +52,31 @@ test("formats", () => {
   assert.equal(fmt.signed(-16.2), "−16.2");
   assert.equal(fmt.signed(35), "+35.0");
 });
+
+test("the frontier is a staircase from the cheapest point, along and then up", () => {
+  const { frontierPath } = require("../bench.js");
+  assert.equal(frontierPath([]), "");
+  assert.equal(frontierPath([{ x: 10, y: 50 }]), "M10.0,50.0");
+  // given out of order, drawn cheapest first; y grows downwards on a page, so more rows is a smaller y
+  assert.equal(frontierPath([{ x: 90, y: 20 }, { x: 10, y: 80 }, { x: 40, y: 60 }]), "M10.0,80.0H40.0V60.0H90.0V20.0");
+});
+
+test("a track's cost and the named scores say free, estimate and no time instead of a number", () => {
+  assert.equal(fmt.track({ cost_basis: "free", usd_per_track: 0 }), "free");
+  assert.equal(fmt.track({ cost_basis: "listed", usd_per_track: 0.1302 }), "0.13 USD");
+  assert.equal(fmt.track({ cost_basis: "estimate", usd_per_track: 0.00391 }), "0.0039 USD (estimate)");
+  assert.equal(fmt.score(null, "free"), "free");
+  assert.equal(fmt.score(370.12, "free"), "370");
+  assert.equal(fmt.score(10.155, "free"), "10.2");
+  assert.equal(fmt.score(0.5071, "no time"), "0.507");
+});
+
+test("rows per cent and the price say free and mark Jev's estimate, never reading as measured", () => {
+  assert.equal(fmt.perCent({ cost_basis: "free", rows_per_cent: null }), "free");
+  assert.equal(fmt.perCent({ cost_basis: "listed", rows_per_cent: 10.155 }), "10.2");
+  assert.equal(fmt.perCent({ cost_basis: "estimate", rows_per_cent: 360.4 }), "360 (estimate)");
+  assert.equal(fmt.perCent({ cost_basis: "listed", rows_per_cent: null }), "–");
+  assert.equal(fmt.price({ cost_basis: "free", price_usd: 0 }), "free");
+  assert.equal(fmt.price({ cost_basis: "listed", price_usd: 0.0006 }), "0.00060 USD");
+  assert.equal(fmt.price({ cost_basis: "estimate", price_usd: 0.00003 }), "0.000030 USD (estimate)");
+});

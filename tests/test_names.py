@@ -15,7 +15,7 @@ from bakeoff.players.names import RENAMED, canonical
 from bakeoff.replay import build_replay
 from bakeoff.report import load_meta, load_steps
 from bakeoff.session import answered_models, played_before
-from tests.test_replay import record, write_run
+from tests.test_replay import DIED, record, write_run
 
 V2 = {"name": "v2", "version": "v2", "max_rows": 150, "lanes": 12, "lookahead": 6, "window": 3,
       "start_gap_rate": 0.04, "end_gap_rate": 0.16, "difficulty_rows": 100, "runway_rows": 5, "max_gap_width": 3}
@@ -79,6 +79,22 @@ def test_a_run_recorded_before_the_rename_reads_back_under_the_new_name(tmp_path
     assert {s["player"] for s in load_steps(run)} == {"haiku_plain", "haiku_step1", "jev_plain", "jev_step1"}
     assert load_meta(run)["players"] == ["haiku_plain", "haiku_step1", "jev_plain", "jev_step1"]
     assert json.loads((run / "llm.jsonl").read_text().splitlines()[0])["player"] == "llm"
+
+
+def test_an_old_runs_model_and_requests_read_back_under_the_new_name(tmp_path):
+    """Found scoring every recorded run for the study: a run from before the rename keys its models by the old
+    name, so the benchmark saw no model for glm_step1 there and refused to merge it with a new run."""
+    from bakeoff.bench import Source, load
+    old = write_run(tmp_path, "old", [record(player="glm_composed", seed=1000, row=0, **DIED)],
+                    {"players": ["glm_composed"], "game": V2, "models": {"glm_composed": "glm-4.5-flash"},
+                     "requests": {"glm_composed": {"max": 700, "used": 43}}, "stopped": {"glm_composed": None}})
+    new = write_run(tmp_path, "new", [record(player="glm_step1", seed=1001, row=0, **DIED)],
+                    {"players": ["glm_step1"], "game": V2, "models": {"glm_step1": "glm-4.5-flash"}})
+    meta = load_meta(old)
+    assert meta["models"] == {"glm_step1": "glm-4.5-flash"} and meta["requests"] == {"glm_step1": {"max": 700, "used": 43}}
+    assert meta["stopped"] == {"glm_step1": None}
+    loaded = load([Source(old), Source(new)])
+    assert {(e.player, e.model) for e in loaded.episodes} == {("glm_step1", "glm-4.5-flash")}
 
 
 def test_an_old_run_and_a_new_one_merge_as_one_player(tmp_path):

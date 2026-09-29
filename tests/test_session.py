@@ -157,9 +157,12 @@ def test_every_refusal_names_its_reason(tmp_path, seed, players, reason):
         session(tmp_path).check(seed, players)
 
 
-def test_a_free_player_may_play_a_tournament_seed_and_a_paid_one_may_with_the_flag(tmp_path):
+def test_a_free_player_may_play_a_held_out_seed_and_a_paid_one_may_with_the_flag(tmp_path):
     session(tmp_path).check(7, ["solver"])  # nothing is spent, so nothing is at stake
-    session(tmp_path, tournament=True).check(7, ["solver", "haiku_plain"])
+    session(tmp_path, held_out=True).check(7, ["solver", "haiku_plain"])
+    assert "not started with --held-out" in session(tmp_path).why_not("haiku_plain", 7)
+    assert session(tmp_path, held_out=True).state()["held_out"] is True
+    assert "tournament" not in session(tmp_path).state()
 
 
 def test_a_paid_player_with_no_request_left_of_the_session_cap_is_refused(tmp_path):
@@ -278,20 +281,20 @@ def test_the_state_carries_every_track_a_player_has_played_and_the_real_track_fo
 def test_seeds_played_only_lists_the_track_selects_practice_range(tmp_path):
     """spec B: 'the practice seeds 1000-1019 it has a recorded run of' (M1), not every seed ever played."""
     lobby = session(tmp_path)
-    play(lobby, seed=7, players=["solver"])  # a tournament seed: never offered by the track select
+    play(lobby, seed=7, players=["solver"])  # a held-out seed: never offered by the track select
     play(lobby, seed=1001, players=["solver"])  # a track-select practice seed
     play(lobby, seed=1150, players=["solver"])  # a bulk-run practice seed, past the track select's 20
     by_name = {p["name"]: p for p in lobby.state()["players"]}
     assert by_name["solver"]["seeds_played"] == [1001]
 
 
-def test_state_previews_no_track_for_a_tournament_seed_unless_the_session_is_one(tmp_path):
-    """spec: tournament seeds must not shape prompts before the tournament (M2), so the preview track for
-    one is withheld from a session not started with --tournament."""
+def test_state_previews_no_track_for_a_held_out_seed_unless_the_session_is_one(tmp_path):
+    """spec: held-out seeds must not shape prompts before the study plays them (M2), so the preview track for
+    one is withheld from a session not started with --held-out."""
     from bakeoff.game.track import generate_track
 
     assert session(tmp_path).state(seed=7)["track"] is None
-    assert session(tmp_path, tournament=True).state(seed=7)["track"] == generate_track(7, RULES).to_json()
+    assert session(tmp_path, held_out=True).state(seed=7)["track"] == generate_track(7, RULES).to_json()
 
 
 def test_only_a_recorded_run_directory_can_be_named(tmp_path):
@@ -313,7 +316,8 @@ def test_results_replay_and_records_of_what_this_session_recorded(tmp_path):
     records = lobby.records()
     assert [r["run_id"] for r in records["runs"]] == [run_id]
     assert records["runs"][0]["current"] is False  # it is over: it can be watched, not watched live
-    assert {p["player"] for p in records["bench"]["players"]} == {"solver", "random"}
+    charts = lobby.charts()
+    assert {p["player"] for p in charts["bench"]["players"]} == {"solver", "random"}
 
 
 def test_the_run_playing_now_is_the_one_past_run_that_can_be_watched_live(tmp_path, monkeypatch):
@@ -342,6 +346,6 @@ def test_jev_plays_without_a_cap_but_its_requests_are_still_counted(tmp_path):
     assert players["fly"]["capped"] is None
 
 
-def test_jev_still_keeps_off_the_tournament_seeds(tmp_path):
+def test_jev_still_keeps_off_the_held_out_seeds(tmp_path):
     with pytest.raises(LobbyError, match="paid players may not play seeds below 1000"):
         session(tmp_path).check(7, ["jev_step1"])

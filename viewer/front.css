@@ -219,9 +219,20 @@
 /* ---- records ------------------------------------------------------------------------------------ */
 #front .records { position: relative; }
 #front .records-top { display: flex; gap: 20px; }
+#front .charts-box { margin-top: 20px; padding: 14px 18px 16px; }
+#front .charts-box section + section { margin-top: 32px; }
+
+/* ---- writeup ------------------------------------------------------------------------------------ */
+#front .writeup-body { max-width: var(--measure); padding: 18px 24px 22px; }
+#front .writeup-body h2 { font: 400 var(--size-label)/1.4 var(--font-mono); letter-spacing: var(--tracking-label);
+  text-transform: uppercase; color: var(--muted); margin: 28px 0 8px; }
+#front .writeup-body h2:first-child { margin-top: 0; }
+#front .writeup-body p { color: var(--text); margin: 0 0 12px; }
+#front .writeup-body [data-stat] { color: var(--bright); font-family: var(--font-mono); }
+#front .writeup-body [data-stat].bad { color: var(--bad); }
 #front .board-box { width: 660px; flex: none; display: flex; flex-direction: column; gap: 4px; padding: 14px 18px 12px; }
 #front .board { display: flex; flex-direction: column; margin-top: 6px; }
-#front .entry { display: grid; grid-template-columns: 22px 14px minmax(0, 1fr) 64px minmax(0, 200px) 76px; align-items: center; gap: 10px;
+#front .entry { display: grid; grid-template-columns: 22px 14px minmax(0, 1fr) 80px minmax(0, 200px) 76px; align-items: center; gap: 10px;
   height: 26px; padding: 0; background: none; border: 0; border-left: 2px solid transparent; cursor: pointer; text-align: left; }
 #front .entry.chosen { border-left-color: var(--accent); }
 #front .entry .rank { font: var(--size-label-sm)/1 var(--font-mono); color: var(--muted); text-align: right; }

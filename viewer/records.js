@@ -1,9 +1,10 @@
-// The records screen: the leaderboard, the head to head, and the past runs. Every number is `bakeoff
-// bench`'s, worked out by bakeoff/records.py (GET /records); this file only orders, words and draws them. Pure
-// and tested; the markup is returned as strings.
+// The leaderboard and the head to head of the Charts screen, and the past runs of the Records screen. Every
+// number is `bakeoff bench`'s, worked out by bakeoff/charts.py (GET /charts) and bakeoff/records.py (GET /records);
+// this file only orders, words and draws them. Pure and tested; the markup is returned as strings.
 //
-// `records` is {game, max_rows, tracks, bench: {players, pairs, notes} | null, why, left_out, unreadable, runs,
-// tuned_on, ours}; `roster` is bakeoff/roster.py's JSON.
+// `records` is GET /charts' {game, max_rows, tracks, track_count, held_out, bench: {players, pairs, notes} | null, why, left_out,
+// unreadable, tuned_on, tuned_tracks} for the board, and GET /records' {runs, ...} for the past runs; `roster`
+// is bakeoff/roster.py's JSON.
 (function (root) {
   "use strict";
 
@@ -29,11 +30,9 @@
     return !!found && found.character.id === "bot";
   };
 
-  // Did this player's frozen numbers come from the tracks ranked here? (fly2 was tuned on 1000 to 1199.)
+  // Were any of this player's tracks here ones its frozen numbers were fitted on? (fly2: 1000 to 1199.)
   function tunedHere(records, player) {
-    const on = (records.tuned_on || {})[player];
-    const tracks = records.tracks || [];
-    return !!on && tracks.length === 2 && on[0] <= tracks[1] && on[1] >= tracks[0];
+    return ((records.tuned_tracks || {})[player] || 0) > 0;
   }
 
   // The leaderboard, in bench's order: ranked players first by mean rows, then those with too few tracks
@@ -72,8 +71,9 @@
     }
     for (const r of rows.filter((x) => x.tuned)) {
       const on = records.tuned_on[r.player];
-      notes.push(labelOf(roster, r.player) + "'s numbers were tuned on tracks " + on[0] + "–" + on[1] +
-        ", these tracks included: its mean here is in-sample.");
+      const n = records.tuned_tracks[r.player];
+      notes.push(labelOf(roster, r.player) + "'s numbers were tuned on tracks " + on[0] + "–" + on[1] + ": " + n + " of its " +
+        r.tracks + " here are among them, so its mean here is partly in-sample.");
     }
     if (records.left_out) {
       notes.push(records.left_out + " older " + (records.left_out === 1 ? "copy" : "copies") + " of a track left out: each " +
@@ -178,7 +178,7 @@
       (chosen.includes(r.player) ? " chosen" : "") + '" data-player="' + esc(r.player) + '">' +
       '<span class="rank">' + esc(r.rank) + '</span><span class="swatch" style="background:' + esc(r.colour) +
       (r.edge ? ";box-shadow:inset 0 0 0 1px " + esc(r.edge) : "") + '"></span><span class="name">' + esc(r.name) +
-      (r.tuned ? ' <span class="warn">tuned on these tracks</span>' : "") + '</span><span class="tracks">' + esc(r.tracks) +
+      (r.tuned ? ' <span class="warn">tuned on some of these tracks</span>' : "") + '</span><span class="tracks">' + esc(r.tracks) +
       '</span><span class="band"><span class="ci" style="left:' + r.lo.toFixed(2) + "%;width:" + r.span.toFixed(2) + '%"></span>' +
       '<span class="mean" style="left:calc(' + r.mean.toFixed(2) + '% - 1px)"></span></span><span class="value">' + esc(r.value) +
       "</span></button>").join("");
@@ -215,7 +215,17 @@
     }).join("");
   }
 
-  const api = { SHOWN_RUNS, tunedHere, board, boardNotes, pairOf, chips, pairView, when, tracksText, playersText, pastRuns,
+  // The Charts screen's scope line. The tracks are counted, not only bounded: "between 100 and 1499" alone would
+  // read as some 1,400 tracks.
+  function scope(charts) {
+    if (!charts || !charts.tracks) return "";
+    const [lo, hi] = charts.tracks, n = charts.track_count;
+    const tracks = lo === hi ? n + " track, " + lo : n + " tracks between " + lo + " and " + hi;
+    return "game " + charts.game + " · every recorded track: " + tracks +
+      (charts.held_out ? " · held out " + charts.held_out[0] + "–" + charts.held_out[1] : "");
+  }
+
+  const api = { SHOWN_RUNS, scope, tunedHere, board, boardNotes, pairOf, chips, pairView, when, tracksText, playersText, pastRuns,
                 boardHtml, chipsHtml, pairHtml, runsHtml };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Records = api;
