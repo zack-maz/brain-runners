@@ -144,7 +144,28 @@ def test_a_connection_dropped_mid_reply_is_a_provider_error_not_a_crash(monkeypa
     transport = HttpTransport("https://example.invalid/chat/completions", "secret-key")
     with pytest.raises(ProviderError) as failure:
         transport.post({"model": "glm-4.5-flash"})
-    assert "secret-key" not in str(failure.value) and type(error).__name__ in str(failure.value)
+    import bakeoff.clients.glm as glm_module
+    assert "secret-key" not in str(failure.value) and str(failure.value).startswith(type(error).__name__)
+    assert str(failure.value).startswith(glm_module.RETRYABLE)  # what the transport says is what the retry reads
+
+
+def test_an_error_reply_cut_off_mid_body_keeps_its_status_and_is_retryable(monkeypatch):
+    import io
+    import urllib.error
+
+    import bakeoff.clients.glm as glm_module
+
+    class CutOff(io.BytesIO):
+        def read(self, *args):
+            raise ConnectionResetError(54, "Connection reset by peer")
+
+    def overloaded(*args, **kwargs):  # no test touches the network
+        raise urllib.error.HTTPError("https://example.invalid", 503, "Service Unavailable", {}, CutOff())
+
+    monkeypatch.setattr("urllib.request.urlopen", overloaded)
+    with pytest.raises(ProviderError) as failure:
+        HttpTransport("https://example.invalid/chat/completions", "secret-key").post({"model": "glm-4.5-flash"})
+    assert str(failure.value) == "HTTP 503: <body unreadable>" and str(failure.value).startswith(glm_module.RETRYABLE)
 
 
 def test_a_dropped_connection_is_retried_like_the_queue(tmp_path, monkeypatch):

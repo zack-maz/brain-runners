@@ -48,7 +48,11 @@ class HttpTransport:
             with urllib.request.urlopen(request, timeout=self._timeout_s) as response:
                 return json.loads(response.read().decode())
         except urllib.error.HTTPError as e:
-            raise ProviderError(f"HTTP {e.code}: {e.read().decode(errors='replace')[:200]}") from e
+            try:  # the error's body comes off the same socket and can be cut off too: keep the status, retry on it
+                detail = e.read().decode(errors="replace")[:200]
+            except (OSError, http.client.HTTPException):
+                detail = "<body unreadable>"
+            raise ProviderError(f"HTTP {e.code}: {detail}") from e
         # OSError covers URLError, TimeoutError and a reset read from the socket after the headers came
         # (ConnectionResetError, which once crashed a whole run); HTTPException covers a reply cut off mid-way
         except (OSError, http.client.HTTPException, ValueError) as e:
