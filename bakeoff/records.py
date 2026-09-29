@@ -40,12 +40,17 @@ def _same_game(meta: dict, rules: Rules) -> bool:
     return recorded.same_game(rules) and recorded.max_rows == rules.max_rows
 
 
-def pick(out_root: Path | str, rules: Rules, tracks: tuple[int, int] | None = None) -> tuple[list[Source], int, list[str]]:
+def pick(out_root: Path | str, rules: Rules,
+         tracks: tuple[int, int] | None = None) -> tuple[list[Source], int, list[str], list[Source]]:
     """(the sources to score, how many older complete episodes were left out, the run ids that could not be
-    read). Only runs of this game and length, only complete episodes, and only the seeds in `tracks` (first and
-    last, inclusive) when it is given."""
+    read, the stopped episodes). Only runs of this game and length, and only the seeds in `tracks` (first and
+    last, inclusive) when it is given. The sources hold complete episodes only. A stopped episode is neither dead
+    nor finished (decision 52: its player dropped out, or the run was cut short): the newest copy of each
+    (player, seed) that no run completed, from a run that is not still going. Its decisions count in the failed
+    rate and nowhere else (bakeoff/bench.py)."""
     taken: set[tuple[str, int]] = set()
     sources, left_out, unreadable = [], 0, []
+    unfinished: list[tuple[Path, tuple[str, int]]] = []  # newest run first, like the sources
     for run_dir in _run_dirs(Path(out_root)):
         meta = load_meta(run_dir)
         if meta is None:
@@ -76,7 +81,16 @@ def pick(out_root: Path | str, rules: Rules, tracks: tuple[int, int] | None = No
                 mine.add(key)
         if mine:
             sources.append(Source(run_dir, episodes=frozenset(mine)))
-    return sources, left_out, unreadable
+        if meta.get("status") != "running":  # a run going now has not stopped anything yet
+            done = {key for key, _ in complete}
+            unfinished += [(run_dir, key) for key in last if key not in done]
+    stopped_by_run: dict[Path, set[tuple[str, int]]] = {}
+    for run_dir, key in unfinished:  # newest first: the first copy of a pair is the newest
+        if key not in taken:
+            taken.add(key)
+            stopped_by_run.setdefault(run_dir, set()).add(key)
+    stopped = [Source(run_dir, episodes=frozenset(keys)) for run_dir, keys in stopped_by_run.items()]
+    return sources, left_out, unreadable, stopped
 
 
 def past_runs(out_root: Path | str, current: str | None = None) -> list[dict]:

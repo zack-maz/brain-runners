@@ -331,11 +331,14 @@ class LiveSession:
         current = self.run.run_id if self.run is not None and self.status == "running" else None
         return records_of(self.out_root, self.rules, current=current)
 
-    def charts(self) -> dict:
-        """The charts screen's numbers (bakeoff/charts.py), worked out when the page asks, like the records."""
-        from bakeoff.charts import charts_of  # numpy: only when asked
+    def charts(self, scope: str | None = None) -> dict:
+        """The charts screen's numbers (bakeoff/charts.py), worked out when the page asks, like the records: over
+        every recorded track, or over the held-out ones alone (`scope="held_out"`, what the Writeup cites)."""
+        from bakeoff.charts import HELD_OUT, charts_of  # numpy: only when asked
 
-        return charts_of(self.out_root, self.rules)
+        if scope not in (None, "all", "held_out"):
+            raise LobbyError(f'no scope "{scope}": it is "all" or "held_out"')
+        return charts_of(self.out_root, self.rules, HELD_OUT if scope == "held_out" else None)
 
     def writeup(self) -> dict:
         """The Writeup page's text (bakeoff/writeup.py), read from docs/ each time, so an edit shows on reload."""

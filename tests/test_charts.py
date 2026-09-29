@@ -51,3 +51,33 @@ def test_charts_say_why_instead_of_failing(tmp_path):
     bad = write_run(tmp_path, "20260928-090021", episode("fly", 1000, 3), {"game": V2_BLOCK})
     (bad / "fly.jsonl").write_text("not json\n{}\n")  # broken before its last line
     assert charts_of(tmp_path, V2)["unreadable"] == ["20260928-090021"]
+
+
+def test_a_practice_track_does_not_change_a_held_out_number(tmp_path):
+    """The Writeup's Method says held-out tracks 100-199, so it cites the held-out scope: seed 1000 is left out."""
+    write_run(tmp_path, "20260928-090030", episode("fly", 100, 4) + episode("fly", 101, 6), {"game": V2_BLOCK})
+    held_out = charts_of(tmp_path, V2, tracks=HELD_OUT)
+    write_run(tmp_path, "20260928-090031", episode("fly", 1000, 150, finished=True), {"game": V2_BLOCK})
+    again = charts_of(tmp_path, V2, tracks=HELD_OUT)
+    assert again["bench"]["players"] == held_out["bench"]["players"] and again["bench"]["players"][0]["mean_rows"] == 5
+    assert again["scope"] == "held_out" and again["tracks"] == [100, 101] and again["track_count"] == 2
+    every = charts_of(tmp_path, V2)
+    assert every["scope"] == "all" and every["bench"]["players"][0]["mean_rows"] == 160 / 3 and every["track_count"] == 3
+    (tmp_path / "x").mkdir()
+    write_run(tmp_path / "x", "20260928-090032", episode("fly", 1000, 4), {"game": V2_BLOCK})
+    assert charts_of(tmp_path / "x", V2, tracks=HELD_OUT)["why"] == (
+        "no completed track 100–199 of game v2 has been recorded yet.")
+
+
+def test_a_stopped_episode_counts_in_failed_and_stopped_but_in_no_other_number(tmp_path):
+    """decision 52: a player that stops leaves the others playing; its unfinished track's failed decisions still
+    count, or a provider that made it quit would look reliable."""
+    write_run(tmp_path, "20260928-090040", episode("glm_plain", 1001, 4), {"game": V2_BLOCK, "status": "completed"})
+    failing = [record(player="glm_plain", seed=1002, row=r, error="429") for r in range(4)]
+    write_run(tmp_path, "20260928-090041", failing, {"game": V2_BLOCK, "status": "completed"})
+    out = charts_of(tmp_path, V2)
+    (glm,) = out["bench"]["players"]
+    assert glm["seeds"] == 1 and glm["mean_rows"] == 4 and glm["stopped"] == 1
+    assert glm["failed_rate"] == 4 / 8  # 0 of the finished track's 4 decisions, all 4 of the stopped one's
+    assert out["bench"]["incomplete"] == [{"player": "glm_plain", "seed": 1002, "run_id": "20260928-090041", "rows": 4}]
+    assert out["tracks"] == [1001, 1001] and out["track_count"] == 1  # a stopped track is not a scored one

@@ -272,6 +272,40 @@ def test_the_failed_decision_rate_counts_errors_and_invalid_answers():
     assert player_numbers(episodes_of(("fly", 1, 5)), 150)["failed_rate"] == 0.0
 
 
+
+def test_a_stopped_episodes_decisions_count_as_failed_and_it_counts_as_stopped():
+    """decision 52: the decisions that made a player drop out are in its failed rate; every other number stays over
+    its complete episodes."""
+    from bakeoff.bench import Episode, player_numbers
+    stopped = Episode("glm_plain", 2, "r", tuple(record(player="glm_plain", seed=2, row=r, error="429") for r in range(6)),
+                      None)
+    n = player_numbers(episodes_of(("glm_plain", 1, 4)), 150, stopped=[stopped])
+    assert n["failed_rate"] == 6 / 10 and n["stopped"] == 1
+    assert n["seeds"] == 1 and n["mean_rows"] == 4 and n["decisions_per_track"] == 4
+    assert player_numbers(episodes_of(("glm_plain", 1, 4)), 150)["stopped"] == 0
+
+
+def test_a_paid_player_can_never_chart_as_free():
+    """Every paid player has a listed price in the benchmark's table, so none falls through to "free" unless its
+    price is 0 (GLM Flash's free tier)."""
+    from bakeoff import bench
+    from bakeoff.bench import player_numbers
+    from bakeoff.players import PAID
+    assert set(bench.PRICE_USD) == set(PAID)
+    for name in PAID:
+        basis = player_numbers(episodes_of((name, 1, 3)), 150)["cost_basis"]
+        assert (basis == "free") == (bench.PRICE_USD[name] == 0), name
+
+
+def test_the_notes_never_say_cost_comes_from_live_decisions_only():
+    from bakeoff.bench import JEV_PRICE_NOTE, NOTES
+    for note in (*NOTES, JEV_PRICE_NOTE):
+        assert "cost come from live" not in note and "cost comes from live" not in note, note
+        assert "cost per row" not in note, note  # no column shows it any more
+    assert NOTES[0] == "Time comes from live decisions only: a cache hit records none."
+    assert JEV_PRICE_NOTE == ("Jev's USD per track is an estimate (about 0.00003 USD a request, docs/COSTS.md); it "
+                              "costs you nothing.")
+
 def test_rows_per_cent_divides_by_the_cost_of_a_track():
     from bakeoff.bench import player_numbers
     from bakeoff.prices import PRICE_USD

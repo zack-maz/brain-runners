@@ -15,7 +15,7 @@ def test_each_player_and_track_counts_once_from_the_newest_run_that_completed_it
     write_run(tmp_path, "20260922-100000", episode("fly", 1000, 9), {"game": V2_BLOCK})
     stopped = [record(player="fly", seed=1001, row=r) for r in range(4)]  # alive at its last record: not a result
     write_run(tmp_path, "20260923-100000", stopped, {"game": V2_BLOCK})
-    sources, left_out, unreadable = pick(tmp_path, V2)
+    sources, left_out, unreadable, _ = pick(tmp_path, V2)
     assert [(s.run_dir.name, sorted(s.episodes)) for s in sources] == [
         ("20260922-100000", [("fly", 1000)]), ("20260921-100000", [("fly", 1001)])]
     assert left_out == 1 and unreadable == []
@@ -26,9 +26,9 @@ def test_other_games_and_other_lengths_stay_out_and_tracks_narrow_the_seeds(tmp_
     write_run(tmp_path, "20260921-090001", episode("fly", 1001, 4), {"game": V1.to_json()})
     write_run(tmp_path, "20260921-090002", episode("fly", 1002, 4), {"game": {**V2_BLOCK, "max_rows": 40}})
     write_run(tmp_path, "20260921-090003", episode("fly", 1003, 4), {})  # no game block: from before game versions
-    sources, _, _ = pick(tmp_path, V2)
+    sources, _, _, _ = pick(tmp_path, V2)
     assert [(s.run_dir.name, sorted(s.episodes)) for s in sources] == [("20260921-090000", [("fly", 999), ("fly", 1000)])]
-    sources, _, _ = pick(tmp_path, V2, tracks=(1000, 1019))
+    sources, _, _, _ = pick(tmp_path, V2, tracks=(1000, 1019))
     assert [(s.run_dir.name, sorted(s.episodes)) for s in sources] == [("20260921-090000", [("fly", 1000)])]
 
 
@@ -59,7 +59,7 @@ def test_a_keyless_record_is_unreadable_but_other_runs_still_score(tmp_path):
     write_run(tmp_path, "20260921-090020", episode("fly", 1000, 3), {"game": V2_BLOCK})
     bad = write_run(tmp_path, "20260921-090021", episode("fly", 1001, 3), {"game": V2_BLOCK})
     (bad / "fly.jsonl").write_text(json.dumps({"player": "fly", "seed": 1001}) + "\n")  # parses; no "row"
-    sources, left_out, unreadable = pick(tmp_path, V2)
+    sources, left_out, unreadable, _ = pick(tmp_path, V2)
     assert unreadable == ["20260921-090021"]
     assert [(s.run_dir.name, sorted(s.episodes)) for s in sources] == [("20260921-090020", [("fly", 1000)])]
 
@@ -69,7 +69,7 @@ def test_a_run_whose_meta_json_cannot_be_read_is_unreadable_not_silently_dropped
     run_dir.mkdir()
     (run_dir / "meta.json").write_text("not json")
     (run_dir / "fly.jsonl").write_text(json.dumps({"player": "fly", "seed": 1000, "row": 0}) + "\n")
-    sources, left_out, unreadable = pick(tmp_path, V2)
+    sources, left_out, unreadable, _ = pick(tmp_path, V2)
     assert sources == [] and unreadable == ["20260921-090022"]
 
 
@@ -94,3 +94,22 @@ def test_records_carry_what_the_what_is_ours_panel_is_written_from(tmp_path):
     for out in (records_of(tmp_path / "missing", V2), records_of(tmp_path, V2)):
         assert out["ours"] == ours_meta(V2)
         assert set(out["ours"]) == {"game", "fly", "fly2"} and out["ours"]["game"]["looming"]["falloff"] is not None
+
+
+def test_a_stopped_episode_no_run_completed_is_picked_apart_so_its_failures_count(tmp_path):
+    """decision 52: a player that stops leaves an episode neither dead nor finished. The newest such copy of a
+    (player, seed) no run completed is picked as a stopped one; a completed copy anywhere wins, and a run still
+    going stops nothing."""
+    write_run(tmp_path, "20260921-100000", episode("glm_plain", 1001, 5), {"game": V2_BLOCK})
+    old = [record(player="glm_plain", seed=1002, row=r) for r in range(2)]
+    write_run(tmp_path, "20260922-100000", old, {"game": V2_BLOCK, "status": "completed"})
+    new = [record(player="glm_plain", seed=1002, row=r) for r in range(3)]
+    redone = [record(player="glm_plain", seed=1001, row=r) for r in range(2)]  # 1001 was completed: not stopped
+    write_run(tmp_path, "20260923-100000", new + redone, {"game": V2_BLOCK, "status": "completed"})
+    going = [record(player="glm_plain", seed=1003, row=r) for r in range(2)]
+    write_run(tmp_path, "20260924-100000", going, {"game": V2_BLOCK, "status": "running"})
+    sources, left_out, _, stopped = pick(tmp_path, V2)
+    assert [(s.run_dir.name, sorted(s.episodes)) for s in sources] == [("20260921-100000", [("glm_plain", 1001)])]
+    assert [(s.run_dir.name, sorted(s.episodes)) for s in stopped] == [("20260923-100000", [("glm_plain", 1002)])]
+    assert left_out == 0
+    assert pick(tmp_path, V2, tracks=(1001, 1001))[3] == []

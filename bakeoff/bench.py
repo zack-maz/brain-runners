@@ -170,8 +170,10 @@ def _failed(step: dict) -> bool:
     return step.get("error") is not None or bool(step.get("invalid"))
 
 
-def player_numbers(episodes: list[Episode], max_rows: int) -> dict:
-    """One player's row of the benchmark, over its complete episodes."""
+def player_numbers(episodes: list[Episode], max_rows: int, stopped: list[Episode] = ()) -> dict:
+    """One player's row of the benchmark, over its complete episodes. `stopped` are its episodes that are neither
+    dead nor finished (decision 52: it dropped out): their decisions count in the failed rate, so a provider that
+    made a player quit never looks reliable, and in no other number."""
     rows = [e.rows for e in episodes]
     steps = [s for e in episodes for s in e.steps]
     priced = [(s, e.model) for e in episodes for s in e.steps]  # each step priced by its own run's model
@@ -210,6 +212,7 @@ def player_numbers(episodes: list[Episode], max_rows: int) -> dict:
         "s_per_decision_median": float(np.median(seconds)) if seconds else None,
         "s_per_decision_p90": float(np.percentile(seconds, 90)) if seconds else None,
         "s_per_row": s_mean * decisions_per_row if s_mean is not None and decisions_per_row else None,
+        # measured tokens at the per-token price, live decisions only: not the study's cost, which is usd_per_track
         "usd_per_decision": usd_mean,
         "usd_per_row": usd_mean * decisions_per_row if usd_mean is not None and decisions_per_row else None,
         "cost": cost,
@@ -219,7 +222,9 @@ def player_numbers(episodes: list[Episode], max_rows: int) -> dict:
         "usd_per_track": usd_per_track,
         "s_per_decision_mean": s_mean,
         "s_per_track": s_per_track,
-        "failed_rate": sum(map(_failed, steps)) / len(steps),
+        "failed_rate": (sum(map(_failed, steps)) + sum(_failed(s) for e in stopped for s in e.steps))
+                       / (len(steps) + sum(len(e.steps) for e in stopped)),
+        "stopped": len(stopped),
         # the named scores: extras beside the charts, never the verdict. A free player has no rows per cent.
         "rows_per_cent": mean_rows / (usd_per_track * 100) if usd_per_track > 0 else None,
         "rows_per_second": mean_rows / s_per_track if s_per_track else None,
@@ -255,8 +260,7 @@ def pair_numbers(a: list[Episode], b: list[Episode]) -> dict:
             "verdict": verdict, "seeds_needed": needed}
 
 
-JEV_PRICE_NOTE = ("Jev has no per-token price, so it shows no cost per row; its USD per track is an estimate "
-                  "from its console (about 0.00003 USD a request, docs/COSTS.md), and it costs you nothing.")
+JEV_PRICE_NOTE = "Jev's USD per track is an estimate (about 0.00003 USD a request, docs/COSTS.md); it costs you nothing."
 # the yardsticks are the Bot's skins (bakeoff/roster.py): shown for scale, never on a frontier
 YARDSTICKS = frozenset(skin["player"] for character in ROSTER if character["id"] == "bot" for skin in character["skins"])
 
@@ -272,7 +276,7 @@ def frontier(players: list[dict], key: str) -> set[str]:
                    and (q[key] < p[key] or q["mean_rows"] > p["mean_rows"]) for q in placed)
 
     return {p["player"] for p in placed if not beaten(p)}
-NOTES = ("Time and cost come from live decisions only: a cache hit records neither.",
+NOTES = ("Time comes from live decisions only: a cache hit records none.",
          f"Intervals are 95% t intervals over tracks (for a pair, of the per-track differences). Below {MIN_SEEDS} "
          "tracks there is no interval and no verdict.",
          "Rows stop at the finish line, so a player that finishes most tracks is understated and two finishers tie.",
@@ -298,9 +302,12 @@ def benchmark(loaded: Loaded) -> dict:
     by_player: dict[str, list[Episode]] = {}
     for e in loaded.episodes:
         by_player.setdefault(e.player, []).append(e)
+    stopped: dict[str, list[Episode]] = {}
+    for e in loaded.incomplete:
+        stopped.setdefault(e.player, []).append(e)
     max_rows = loaded.game.max_rows if loaded.game else max((e.rows for e in loaded.episodes), default=0)
     # players with an interval are ranked by mean rows; those with too few tracks follow, not ranked
-    players = sorted((player_numbers(eps, max_rows) for eps in by_player.values()),
+    players = sorted((player_numbers(eps, max_rows, stopped.get(name, [])) for name, eps in by_player.items()),
                      key=lambda p: (p["ci_low"] is None, -p["mean_rows"]))
     for p in players:
         p["ranked"] = p["ci_low"] is not None
