@@ -79,12 +79,16 @@
   const usd = (v) => (v == null ? dash : v.toPrecision(2) + " USD");
   const signed = (v) => (v == null ? dash : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(1));
   // a track's cost as the study charts it: free, the listed price, or Jev's estimate (free to the user)
-  const track = (p) => (p.cost_basis === "free" ? "free" : usd(p.usd_per_track) + (p.cost_basis === "estimate" ? " (estimate)" : ""));
+  const estimate = (p) => (p.cost_basis === "estimate" ? " (estimate)" : "");
+  const track = (p) => (p.cost_basis === "free" ? "free" : usd(p.usd_per_track) + estimate(p));
   // a named score: a free player has no rows per cent, and an untimed one no rows per second
   const score = (v, none) => (v == null ? none : v >= 100 ? Math.round(v).toString() : v.toPrecision(3));
+  // rows per cent and the price per request: Jev's rest on its estimated price, so they say so, like its track cost
+  const perCent = (p) => (p.rows_per_cent == null ? (p.cost_basis === "free" ? "free" : dash) : score(p.rows_per_cent) + estimate(p));
+  const price = (p) => (p.cost_basis === "free" ? "free" : usd(p.price_usd) + estimate(p));
 
   const api = { esc, linear, log, ticks, logTicks, logDomain, survivalPath, split, frontierPath,
-                fmt: { rows, interval, percent, seconds, usd, signed, track, score } };
+                fmt: { rows, interval, percent, seconds, usd, signed, track, score, perCent, price } };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Bench = api;
 })(typeof window !== "undefined" ? window : globalThis);

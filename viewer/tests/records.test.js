@@ -116,3 +116,11 @@ test("the first ten past runs, then all of them when asked", () => {
   assert.equal(Records.pastRuns(many, ROSTER, true).rows.length, 12);
   assert.equal(Records.SHOWN_RUNS, 10);
 });
+
+test("the charts' scope counts the different tracks, so a range never reads as every track in it", () => {
+  assert.equal(Records.scope({ ...RECORDS, held_out: [100, 199], track_count: 45 }),
+    "game v2 · every recorded track: 45 tracks between 100 and 1019 · held out 100–199");
+  assert.equal(Records.scope({ ...RECORDS, held_out: [100, 199], tracks: [1001, 1001], track_count: 1 }),
+    "game v2 · every recorded track: 1 track, 1001 · held out 100–199");
+  assert.equal(Records.scope({ ...RECORDS, held_out: [100, 199], tracks: null, track_count: 0 }), "");
+});

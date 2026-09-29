@@ -2,7 +2,7 @@
 // number is `bakeoff bench`'s, worked out by bakeoff/charts.py (GET /charts) and bakeoff/records.py (GET /records);
 // this file only orders, words and draws them. Pure and tested; the markup is returned as strings.
 //
-// `records` is GET /charts' {game, max_rows, tracks, bench: {players, pairs, notes} | null, why, left_out,
+// `records` is GET /charts' {game, max_rows, tracks, track_count, held_out, bench: {players, pairs, notes} | null, why, left_out,
 // unreadable, tuned_on, tuned_tracks} for the board, and GET /records' {runs, ...} for the past runs; `roster`
 // is bakeoff/roster.py's JSON.
 (function (root) {
@@ -215,7 +215,17 @@
     }).join("");
   }
 
-  const api = { SHOWN_RUNS, tunedHere, board, boardNotes, pairOf, chips, pairView, when, tracksText, playersText, pastRuns,
+  // The Charts screen's scope line. The tracks are counted, not only bounded: "between 100 and 1499" alone would
+  // read as some 1,400 tracks.
+  function scope(charts) {
+    if (!charts || !charts.tracks) return "";
+    const [lo, hi] = charts.tracks, n = charts.track_count;
+    const tracks = lo === hi ? n + " track, " + lo : n + " tracks between " + lo + " and " + hi;
+    return "game " + charts.game + " · every recorded track: " + tracks +
+      (charts.held_out ? " · held out " + charts.held_out[0] + "–" + charts.held_out[1] : "");
+  }
+
+  const api = { SHOWN_RUNS, scope, tunedHere, board, boardNotes, pairOf, chips, pairView, when, tracksText, playersText, pastRuns,
                 boardHtml, chipsHtml, pairHtml, runsHtml };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Records = api;

@@ -296,7 +296,7 @@
       (run.fly.provisional
         ? '<li class="warn">These values were provisional when this run was made: not yet calibrated.</li>'
         : "<li>The gain, the falloff and the two thresholds were chosen once, by a rule fixed beforehand, on practice tracks " +
-          "1000 to 1199 of game v1 that are not in the tournament, then frozen (calibration/REPORT.md)." +
+          "1000 to 1199 of game v1, which are not the held-out tracks, then frozen (calibration/REPORT.md)." +
           // a run from before game versions has no version and was v1
           (run.game.version && run.game.version !== "v1"
             ? " This run is game " + esc(run.game.version) + "; the fly was not retuned for it." : "") +

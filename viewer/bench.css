@@ -41,6 +41,8 @@ tr[aria-current="true"] .ci .mean { fill: var(--accent); }
 .chart .whisker { stroke: var(--muted); stroke-width: 1; }
 .chart .dot.focus { fill: var(--accent); }
 .chart .dot.yardstick { fill: var(--line-strong); }
+.chart .dot.unranked { fill-opacity: 0; stroke: var(--muted); stroke-width: 1.5; } /* too few tracks: hollow, still clickable */
+.chart .dot.unranked.focus { stroke: var(--accent); }
 .chart .frontier { fill: none; stroke: var(--text); stroke-width: 1; stroke-dasharray: 4 3; }
 .chart .whisker.focus { stroke: var(--accent); }
 .chart text.name { fill: var(--text); }

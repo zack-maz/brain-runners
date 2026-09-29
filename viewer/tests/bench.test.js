@@ -70,3 +70,13 @@ test("a track's cost and the named scores say free, estimate and no time instead
   assert.equal(fmt.score(10.155, "free"), "10.2");
   assert.equal(fmt.score(0.5071, "no time"), "0.507");
 });
+
+test("rows per cent and the price say free and mark Jev's estimate, never reading as measured", () => {
+  assert.equal(fmt.perCent({ cost_basis: "free", rows_per_cent: null }), "free");
+  assert.equal(fmt.perCent({ cost_basis: "listed", rows_per_cent: 10.155 }), "10.2");
+  assert.equal(fmt.perCent({ cost_basis: "estimate", rows_per_cent: 360.4 }), "360 (estimate)");
+  assert.equal(fmt.perCent({ cost_basis: "listed", rows_per_cent: null }), "–");
+  assert.equal(fmt.price({ cost_basis: "free", price_usd: 0 }), "free");
+  assert.equal(fmt.price({ cost_basis: "listed", price_usd: 0.0006 }), "0.00060 USD");
+  assert.equal(fmt.price({ cost_basis: "estimate", price_usd: 0.00003 }), "0.000030 USD (estimate)");
+});

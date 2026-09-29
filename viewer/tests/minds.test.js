@@ -150,7 +150,8 @@ test("Minds.ours names the calibrated four and says the rest were not tuned", ()
 test("Minds.ours says the fly was calibrated on v1 and not retuned for any other game", () => {
   const looming = { gain_hz: 25, falloff: 1, max_hz: 250, step_hz: 25 };
   const game = (version) => flyRun({ game: { version, looming } });
-  assert.match(Minds.ours(flyRun()), /practice tracks 1000 to 1199 of game v1/);
+  assert.match(Minds.ours(flyRun()), /practice tracks 1000 to 1199 of game v1, which are not the held-out tracks,/);
+  assert.doesNotMatch(Minds.ours(flyRun()), /tournament/); // decision 53: a study, not a tournament
   assert.doesNotMatch(Minds.ours(flyRun()), /not retuned/); // a run from before versions was v1
   assert.doesNotMatch(Minds.ours(game("v1")), /not retuned/);
   assert.match(Minds.ours(game("v2")), /This run is game v2; the fly was not retuned for it\./);

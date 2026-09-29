@@ -31,8 +31,10 @@
 </section>
 
 <section aria-label="Rows against cost and time">
-  <p class="note first">Each dot is a player's mean rows, its whisker the 95% interval. The dashed line is the
-    frontier: the players no other beats on both axes, more rows for less. It names no single winner.</p>
+  <p class="note first">Each dot is a player's mean rows, its whisker the 95% interval, each point over its own tracks
+    (how many is in the scores table). The dashed line is the frontier: the players no other beats on both axes, more
+    rows for less, drawn among the players with at least five tracks. It names no single winner. A hollow dot has
+    fewer than five tracks, so it is not ranked and never on the frontier, however high it sits.</p>
   <div class="pair-charts">
     <div>
       <h2 class="label">Rows against cost per track</h2>
@@ -49,7 +51,8 @@
   <h2 class="label">Rows for the money and the time</h2>
   <p class="note first">Extras beside the charts, never the verdict: rows per cent is mean rows over a track's cost in
     cents; rows per second is mean rows over the seconds a track's decisions took. Failed is the share of decisions
-    that came back as no move.</p>
+    that came back as no move, the decisions of a track the player stopped on included; "stopped" counts those
+    tracks, left out of every other number.</p>
   <div class="scroll"><table data-bench="scores"></table></div>
 </section>
 
@@ -64,6 +67,27 @@
   <h2 class="label">What these numbers do and do not say</h2>
   <ul class="prose" data-bench="notes"></ul>
 </section>`;
+
+  // A dot's classes on a trade-off chart: the focus, a yardstick, and a player with too few tracks to be ranked
+  // (drawn hollow, so a dot above the frontier that is not on it reads as what it is).
+  function dotClass(p, focus) {
+    return "dot" + (p.player === focus ? " focus" : "") + (p.yardstick ? " yardstick" : "") + (p.ranked ? "" : " unranked");
+  }
+
+  // A dot's name: on the cost chart, Jev's cost is an estimate and its name says so.
+  function dotLabel(p, chart) {
+    return p.player + (chart === "cost" && p.cost_basis === "estimate" ? " (est.)" : "");
+  }
+
+  // A player's name in the scores table, with what sets it apart from a ranked player.
+  function scoresName(p) {
+    return p.player + (p.yardstick ? " (yardstick)" : "") + (p.ranked ? "" : " (not ranked)");
+  }
+
+  // The failed share, and how many tracks the player stopped on when it stopped on any.
+  function failedText(p) {
+    return fmt.percent(p.failed_rate) + (p.stopped > 0 ? " · stopped " + p.stopped : "");
+  }
 
   // Draw `data` (what bakeoff/bench.py wrote) into `element`. Returns nothing; clicking a player
   // anywhere moves the focus and redraws. Called again with new numbers, it simply redraws.
@@ -190,13 +214,14 @@
       if (onEdge.length) s += `<path class="frontier" d="${frontierPath(onEdge)}"/>`;
       for (const p of drawn) {
         const f = p.player === focus ? " focus" : "";
-        const kind = p.yardstick ? " yardstick" : "";
         const cx = at_.get(p.player);
+        const label = esc(dotLabel(p, name));
         if (p.ci_low != null) s += `<line class="whisker${f}" x1="${cx}" x2="${cx}" y1="${y(p.ci_low)}" y2="${y(p.ci_high)}"/>`;
-        s += `<circle class="dot${f}${kind}" data-player="${esc(p.player)}" cx="${cx}" cy="${y(p.mean_rows)}" r="${f ? 5 : 4}"><title>${esc(p.player)}</title></circle>`;
-        if (f) s += `<text class="name focus" x="${cx + 8}" y="${y(p.mean_rows) - 8}">${esc(p.player)}</text>`;
-        // with many players only the frontier is named, so the line can be read without clicking
-        else if (drawn.length <= 12 || p[edge]) s += `<text class="dot-name" x="${cx + 7}" y="${y(p.mean_rows) + 3}">${esc(p.player)}</text>`;
+        s += `<circle class="${dotClass(p, focus)}" data-player="${esc(p.player)}" cx="${cx}" cy="${y(p.mean_rows)}" r="${f ? 5 : 4}"><title>${label}</title></circle>`;
+        if (f) s += `<text class="name focus" x="${cx + 8}" y="${y(p.mean_rows) - 8}">${label}</text>`;
+        // with many players only the frontier is named, so the line can be read without clicking. A frontier
+        // player's step leaves it to the right at its own height, so its name sits above the line, not on it.
+        else if (drawn.length <= 12 || p[edge]) s += `<text class="dot-name" x="${cx + 7}" y="${y(p.mean_rows) + (p[edge] ? -6 : 3)}">${label}</text>`;
       }
       const groups = {};
       for (const p of missing) (groups[strips(p)] = groups[strips(p)] || []).push(esc(p.player));
@@ -212,11 +237,11 @@
       const head = ["player", "tracks", "mean rows", "USD per track", "rows per cent", "s per decision", "rows per second", "failed"];
       const rows = data.players.map((p) => {
         const cur = p.player === focus ? ' aria-current="true"' : "";
-        return `<tr data-player="${esc(p.player)}"${cur}><td>${esc(p.player)}${p.yardstick ? " (yardstick)" : ""}</td>` +
+        return `<tr data-player="${esc(p.player)}"${cur}><td>${esc(scoresName(p))}</td>` +
           `<td>${p.seeds}</td><td>${fmt.rows(p.mean_rows)}</td><td>${esc(fmt.track(p))}</td>` +
-          `<td>${esc(fmt.score(p.rows_per_cent, p.cost_basis === "free" ? "free" : "–"))}</td>` +
+          `<td>${esc(fmt.perCent(p))}</td>` +
           `<td>${fmt.seconds(p.s_per_decision_median)}</td><td>${esc(fmt.score(p.rows_per_second, "no time"))}</td>` +
-          `<td>${fmt.percent(p.failed_rate)}</td></tr>`;
+          `<td>${esc(failedText(p))}</td></tr>`;
       });
       at("scores").innerHTML = `<thead><tr>${head.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody>`;
     }
@@ -266,7 +291,7 @@
     return null;
   }
 
-  const api = { mount, why, SHELL };
+  const api = { mount, why, SHELL, dotClass, dotLabel, scoresName, failedText };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.BenchView = api;
 })(typeof window !== "undefined" ? window : globalThis);
