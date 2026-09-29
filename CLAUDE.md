@@ -1,8 +1,8 @@
 # brain-bakeoff
 
 An LLM (Claude Haiku 4.5), Jev (TypeSafe System One) and an untrained fruit-fly connectome
-simulation play the same seeded runs of a "Run"-style tunnel game; output is a watchable replay
-tournament. Read these before doing anything:
+simulation play the same seeded runs of a "Run"-style tunnel game; output is a watchable replay and a study of
+which mind performs best for its cost and speed (decision 53). Read these before doing anything:
 
 0. `docs/EXPLAINER.html` — the plain-language tour of the whole project, high level first, then technical
    (written 2026-09-21, refreshed 2026-09-24 after the updates and 2026-09-25 for fly2).
@@ -59,8 +59,10 @@ are frozen (`calibration/FLY2_REPORT.md`), its real run and its live smoke are d
 played better (spike 05, decision 49), so it is not built. Brain Run (called Brain Battle until decision 51), the
 front of `bakeoff live`, is on `main` (PR #9, merged 2026-09-26; renamed in PR #11). PR #11 (merged 2026-09-26) also
 lets Jev play without a cap (decision 50). PRs #8–#12 are merged; since #12 a results card reads
-"N live" over "M cached". Then phase 6, the tournament and the write-up, which needs a new budget go-ahead. Each
-phase gets its own plan. Resume from `docs/NEXT.md`.
+"N live" over "M cached". Phase 6 is the study (decision 53, spec `docs/superpowers/specs/2026-09-28-study-design.md`),
+not a tournament: its code is built on branch `study` (plan `docs/superpowers/plans/2026-09-28-study.md`): the seed
+flag `--held-out`, the benchmark's cost per track, time per decision, failures and frontiers, and Brain Run's
+Charts and Writeup screens. Its runs come next. Each phase gets its own plan. Resume from `docs/NEXT.md`.
 
 ## How we work here
 
@@ -86,7 +88,7 @@ phase gets its own plan. Resume from `docs/NEXT.md`.
 - The viewer is plain JavaScript with no build step and no npm packages. Rules of the game stay in
   Python (`bakeoff/replay.py`); the pure JavaScript (`timeline.js`, `tunnel.js`, `sprites.js`, `roster.js`, `stage.js`, `minds.js`,
   `log.js`, `picker.js`, `tabs.js`, `feed.js`, `lobby.js`, `bench_view.js`, and Brain Run's `screens.js`, `select.js`,
-  `trackpick.js`, `results.js`, `records.js`) is tested by
+  `trackpick.js`, `results.js`, `records.js`, `writeup.js`) is tested by
   `viewer/tests/*.test.js`, which `uv run pytest` runs through `node --test`. Text from a log is always
   escaped (`Minds.esc`) and the page must never load anything from the network (the two brand fonts in
   `viewer/fonts/` are embedded as base64 by `bakeoff/view.py`). The page is the user's brand: tokens from
@@ -128,12 +130,15 @@ phase gets its own plan. Resume from `docs/NEXT.md`.
   keeps it equal to the registry), embedded in every page, so runners wear their skin's colours and are labelled
   "Jev · Step 1" (`viewer/roster.js`); `bakeoff/results.py` gives a run's numbers (also on the `end` event),
   `bakeoff/records.py` the leaderboard, pairs and past runs (each player and track from the newest run that completed
-  it, practice seeds only); the report has `wrong_moves` and `fatal_wrong_moves`. Three read-only routes sit behind
-  the token: `GET /results?run=`, `GET /records`, `GET /replay?run=`; `run=` must be a run id naming a directory
+  it); the report has `wrong_moves` and `fatal_wrong_moves`. Read-only routes sit behind the token:
+  `GET /results?run=`, `GET /records`, `GET /charts`, `GET /writeup`, `GET /replay?run=`; `run=` must be a run id naming a directory
   under the session's `--out` with a `meta.json`, or it is a 404. Plan b, the screens
   (`docs/superpowers/plans/2026-09-25-brain-battle-b.md`, decision 46): `bakeoff live` opens on the front
-  (home, character select, track select, the run screen, results that open by themselves, Records with the
-  leaderboard on practice tracks 1000–1019, head to head, past runs and the whole "what is ours" section); the
+  (home, character select, track select, the run screen, results that open by themselves, Records with the past
+  runs and the whole "what is ours" section); since the study (decision 53) the leaderboard and the head to head
+  are on Charts (`bakeoff/charts.py`: every recorded track of the game, with the benchmark's trade-off charts
+  below), and Writeup shows `docs/WRITEUP.html` as written, its numbers cited with `data-stat` and filled from the
+  charts, never typed; the
   lobby's grid is gone (`lobby.js` keeps the money helpers). A lineup that can spend is confirmed once, with its
   worst case on the RUN button, and Run again goes through the same confirmation; a lineup whose only spending is
   Jev's shows its worst case but is not asked (decision 50). A results card's Requests read "N live" over "M cached"
@@ -142,5 +147,5 @@ phase gets its own plan. Resume from `docs/NEXT.md`.
   `.cache/responses`); Jev asks whenever its answer is not cached. No fast test can reach a provider:
   `tests/conftest.py` hides every provider key unless a test is marked `live`. A player that reaches its cap or whose provider
   keeps failing drops out and the others play on (`stopped` in `meta.json`, decision 52). Never raise a cap, rerun a paid command or run `pytest -m live` without the user's go-ahead. No paid
-  request on a seed below 1000 before the tournament; the CLI refuses a live paid run on seeds
-  below 1000 without `--tournament`.
+  request on a seed below 1000 outside the study's runs; the CLI refuses a live paid run on seeds
+  below 1000 without `--held-out`. Prices per player are in `bakeoff/prices.py`.
