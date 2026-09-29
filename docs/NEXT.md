@@ -114,7 +114,10 @@ drop-out: a player that stops leaves the others playing, decision 52).
 
 **GLM's free-tier drain** started 2026-09-28 15:06: all five `glm_*` skins, one practice track at a time, seeds
 1001–1019, cap 1000 each (a scratch script; runs land in `runs/`). Its failed-decision rate decides GLM's place in
-the study. Its first track, 1001, had 0 failed decisions.
+the study. Its first track, 1001, had 0 failed decisions. Read the decision from two numbers, never from Charts'
+mean rows alone: each skin's `failed_rate` on Charts (or `bakeoff bench`), which since the final review's fix wave
+counts the decisions of a track the skin stopped on too, beside its "stopped N" count; and each drain run's
+`meta.json` `stopped`, which names a skin that hit its cap or whose provider kept failing (decision 52).
 
 - **PR #11 (`brain-run`) merged to `main` on 2026-09-26**, with two decisions. Decision 50: **Jev plays without a
   cap** (every `jev_*`, `bakeoff.players.UNCAPPED`, `UncappedBudget`): its requests cost the user nothing, so
