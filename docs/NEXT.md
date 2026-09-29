@@ -99,13 +99,17 @@ Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Be
 ## Where to resume (in this order)
 
 **Next: phase 6 is now the study** (decision 53, spec `docs/superpowers/specs/2026-09-28-study-design.md`, approved
-2026-09-28). **Its code (step 1) is built on branch `study`** (plan `docs/superpowers/plans/2026-09-28-study.md`,
-prototyped, six tasks byte-identical to the prototype): `--held-out` replaces `--tournament`; the benchmark prices
+2026-09-28). **Its code (step 1) is built and merged into `main`** (`25cbff5`; plan
+`docs/superpowers/plans/2026-09-28-study.md`, prototyped, six tasks byte-identical to the prototype, one Opus final
+review and its fixes): `--held-out` replaces `--tournament`; the benchmark prices
 every decision at the listed price (`bakeoff/prices.py`) and adds seconds per decision, failures, frontiers and
 named scores; Brain Run has Charts (every recorded track) and Writeup (`docs/WRITEUP.html`, an empty draft); Records
 is the log of past runs. Found on the way: an old run's `meta.json` kept its models under pre-decision-39 names, so
-merging it with a new run failed; `report.load_meta` now renames them. After the review and merge come the free
-runs (step 2, spec section 6). There is no tournament any more: a
+merging it with a new run failed; `report.load_meta` now renames them. **Step 2, the free runs, started 2026-09-28 18:05**: Jev ×5 and the
+three yardsticks, and in a queue of their own the two flies, on held-out seeds 100–199 in batches of 25 (spec
+section 6). A GLM connection reset read mid-reply (`ConnectionResetError`) crashed the drain's track 1002 run
+(`runs/20260928-153822`) instead of counting as a player error; since branch `fix/network-errors` it is a
+`ProviderError`, retried like the queue, and a drop-out if it persists (decision 52). There is no tournament any more: a
 research project on which mind performs best for its cost and speed, on held-out seeds 100–199 (free players all
 100, Claude Haiku ×5 the first 15 within about 25 USD of API credit, GLM Flash the first 15 only if its free tier
 fails under 2% of decisions), a new Charts tab, and one Writeup page drafted by Claude for the user to rewrite.

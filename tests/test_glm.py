@@ -1,5 +1,6 @@
 """The GLM client: one OpenAI-compatible chat completion per decision. No test touches the network."""
 
+import http.client
 import json
 
 import pytest
@@ -127,3 +128,41 @@ def test_a_failure_that_is_not_the_queue_is_not_retried(tmp_path):
     with pytest.raises(ProviderError, match="401"):
         glm.ask(SENSES, QUESTIONS)
     assert len(http.calls) == 1 and glm.budget.used == 1
+
+
+@pytest.mark.parametrize("error", [ConnectionResetError(54, "Connection reset by peer"),
+                                   http.client.RemoteDisconnected("closed"),
+                                   http.client.IncompleteRead(b"")])
+def test_a_connection_dropped_mid_reply_is_a_provider_error_not_a_crash(monkeypatch, error):
+    """The GLM drain's track 1002 crashed the whole run on a reset read from the socket (an OSError, not a
+    URLError): the transport must turn it into a ProviderError, which the free tier's retry and the drop-out
+    rule (decision 52) then handle."""
+    def drop(*args, **kwargs):  # no test touches the network
+        raise error
+
+    monkeypatch.setattr("urllib.request.urlopen", drop)
+    transport = HttpTransport("https://example.invalid/chat/completions", "secret-key")
+    with pytest.raises(ProviderError) as failure:
+        transport.post({"model": "glm-4.5-flash"})
+    assert "secret-key" not in str(failure.value) and type(error).__name__ in str(failure.value)
+
+
+def test_a_dropped_connection_is_retried_like_the_queue(tmp_path, monkeypatch):
+    import bakeoff.clients.glm as glm_module
+
+    monkeypatch.setattr(glm_module, "RETRY_PAUSES_S", (0, 0, 0))
+    replies = [ProviderError("ConnectionResetError: [Errno 54] Connection reset by peer"),
+               ProviderError("RemoteDisconnected: closed"), ProviderError("IncompleteRead: IncompleteRead(0 bytes)"),
+               glm_reply(text='{"gap_stay": 0.3}')]
+
+    class Flaky(FakeHttp):
+        def post(self, body):
+            self.calls.append(body)
+            reply = replies[len(self.calls) - 1]
+            if isinstance(reply, Exception):
+                raise reply
+            return reply
+
+    glm = GlmClient(DiskCache(tmp_path / "cache"), RequestBudget(4), sdk=Flaky(None))
+    payload = glm.ask(SENSES, QUESTIONS).payload
+    assert payload["text"] == '{"gap_stay": 0.3}' and payload["attempts"] == 4 and glm.budget.used == 4

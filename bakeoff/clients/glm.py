@@ -4,6 +4,7 @@ one HTTP request. GLM Flash is a free tier: its price is 0, not unknown (docs/CO
 
 from __future__ import annotations
 
+import http.client
 import json
 import os
 import time
@@ -21,7 +22,9 @@ TIMEOUT_S = 60.0
 # of HTTP requests a run may make. Claude Haiku and Jev keep no retries: they are metered, not queued.
 RETRIES = 3
 RETRY_PAUSES_S = (5.0, 20.0, 60.0)  # the free tier throttles in bursts: back off rather than burn the cap
-RETRYABLE = ("HTTP 429", "HTTP 500", "HTTP 502", "HTTP 503", "HTTP 504", "TimeoutError", "URLError")
+# A connection dropped mid-reply (ConnectionResetError and the like) is the same queue failing: retried too.
+RETRYABLE = ("HTTP 429", "HTTP 500", "HTTP 502", "HTTP 503", "HTTP 504", "TimeoutError", "URLError",
+             "ConnectionResetError", "ConnectionAbortedError", "RemoteDisconnected", "IncompleteRead")
 # the international endpoint; a mainland account reads GLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4 from .env
 DEFAULT_BASE_URL = "https://api.z.ai/api/paas/v4"
 
@@ -46,7 +49,9 @@ class HttpTransport:
                 return json.loads(response.read().decode())
         except urllib.error.HTTPError as e:
             raise ProviderError(f"HTTP {e.code}: {e.read().decode(errors='replace')[:200]}") from e
-        except (urllib.error.URLError, TimeoutError, ValueError) as e:
+        # OSError covers URLError, TimeoutError and a reset read from the socket after the headers came
+        # (ConnectionResetError, which once crashed a whole run); HTTPException covers a reply cut off mid-way
+        except (OSError, http.client.HTTPException, ValueError) as e:
             raise ProviderError(f"{type(e).__name__}: {e}") from e
 
     def close(self) -> None:
