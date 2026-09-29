@@ -1,8 +1,11 @@
 <!-- The Writeup page's source (decision 53): a fragment of HTML, shown in Brain Run's Writeup screen as it is, so
      only this repository's own words go here, never text from a log. A number is never typed: it is a span the
      page fills from the Charts numbers, <span data-stat="PLAYER FIELD"></span>, with FIELD one of
-     bakeoff/writeup.py's STAT_FIELDS. While Claude drafts it, the article says data-draft="true"; the user
-     rewrites it later in their own words and removes that. -->
+     bakeoff/writeup.py's STAT_FIELDS. It is over the held-out tracks 100 to 199, as the Method says; add "all",
+     <span data-stat="PLAYER FIELD all"></span>, to cite every recorded track instead. The page loads nothing from
+     the network, so a src= or href= to http:, https: or // is refused and the page shows why instead. While
+     Claude drafts it, the article says data-draft="true"; the user rewrites it later in their own words and
+     removes that. -->
 <article data-draft="true">
   <h2>The question</h2>
   <p>Which mind runs the tunnel furthest for what it costs and for how long it thinks: Jev, Claude Haiku, GLM

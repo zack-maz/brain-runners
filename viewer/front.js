@@ -31,6 +31,7 @@
     records: null, allRuns: false, // the past runs on screen
     charts: null, pair: [], // the charts on screen, and the two players compared
     writeup: null, // the write-up on screen: {html, source, draft, why}
+    writeupCharts: null, // the numbers it cites: {held_out, all}, GET /charts' answer for each scope
   };
 
   async function control(path, options) {
@@ -417,8 +418,7 @@
     if (!charts) return;
     $("charts-why").hidden = !charts.why;
     $("charts-why").textContent = charts.why || "";
-    $("charts-scope").textContent = charts.tracks ? "game " + charts.game + " · every recorded track, " + charts.tracks[0] +
-      "–" + charts.tracks[1] + " · held out " + charts.held_out[0] + "–" + charts.held_out[1] : "";
+    $("charts-scope").textContent = Records.scope(charts);
     $("board-title").textContent = charts.game == null ? "" : "Mean rows · each player on the tracks it ran";
     $("leaderboard").innerHTML = Records.boardHtml(Records.board(charts, roster), front.pair);
     $("board-notes").innerHTML = Records.boardNotes(charts, roster).map((n) => '<p class="warn small">' + Minds.esc(n) + "</p>").join("");
@@ -431,14 +431,17 @@
 
   $("open-charts").addEventListener("click", openCharts);
 
-  // ---- writeup --------------------------------------------------------------------------------------
+  // ---- writeup ------------------------------------------------------------------------------------
   // docs/WRITEUP.html as it is now (GET /writeup): the repository's own words, shown as written, never a log's.
-  // Its numbers are filled from the charts (GET /charts), fetched with it so they are the numbers of the moment.
+  // Its numbers are filled from the charts, fetched with it so they are the numbers of the moment: over the held-out
+  // tracks (GET /charts?scope=held_out), which its Method promises, and over every track (GET /charts) for a
+  // citation that ends in `all`.
   async function openWriteup() {
     show("writeup");
-    const [text, charts] = await Promise.all([control("/writeup"), control("/charts")]);
+    const [text, held, all] = await Promise.all([control("/writeup"), control("/charts?scope=held_out"), control("/charts")]);
     front.writeup = text.ok ? text.body : { html: null, why: text.body.error || "the writeup could not be read" };
-    if (charts.ok) front.charts = charts.body;
+    const scoped = (r) => (r.ok ? r.body : { bench: null, why: r.body.error || "the charts could not be read" });
+    front.writeupCharts = { held_out: scoped(held), all: scoped(all) };
     renderWriteup();
   }
 
@@ -452,10 +455,16 @@
     const body = $("writeup-body");
     body.hidden = !writeup.html;
     body.innerHTML = writeup.html || "";
-    const bench = front.charts && front.charts.bench;
-    for (const span of body.querySelectorAll("[data-stat]")) {
-      const out = Writeup.statText(bench, span.dataset.stat);
+    const scopes = front.writeupCharts || {};
+    const range = (scopes.held_out && scopes.held_out.held_out) || (scopes.all && scopes.all.held_out); // the server's HELD_OUT
+    $("writeup-scope").textContent = writeup.html && range ? Writeup.scopeLine(scopes.held_out, range) : "";
+    const spans = [...body.querySelectorAll("[data-stat]")];
+    $("writeup-numbers-why").innerHTML = Writeup.numbersWhy(scopes, spans.map((span) => span.dataset.stat))
+      .map((why) => '<p class="warn">' + Minds.esc(why) + "</p>").join("");
+    for (const span of spans) {
+      const out = Writeup.statText(scopes, span.dataset.stat);
       span.textContent = out.text;
+      span.title = out.scope ? "over " + Writeup.SCOPES[out.scope] : "";
       span.classList.toggle("bad", !out.ok);
     }
   }
