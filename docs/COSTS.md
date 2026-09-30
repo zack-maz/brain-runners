@@ -276,3 +276,18 @@ nothing of ours was fitted to:
 "fly2 ahead"**. The question left open by the 20-track run is settled: fly2 is the better pure fly. Its deaths
 change kind: fly dies by jumping into a gap, fly2 a third of the time by dodging into one (the rule dodges before
 it jumps, and a dodge does not look where it lands).
+
+## The study: Claude Haiku on held-out tracks 100–114 (game v2, 2026-09-29, decision 54)
+
+Four skins (`haiku_plain`, `haiku_step1`, `haiku_guided`, `haiku_step2`; no `haiku_map`), 15 tracks each, capped at
+2250 requests per skin in total (worst case 9.23 USD). Spent **5.09 USD** (the report's `cost_usd`, from the
+tokens): track 100 0.37 (`runs/20260929-175320`); 101–114 in `runs/20260929-175905` (`haiku_plain` 0.35,
+`haiku_step1` 1.26 up to track 112), `runs/20260929-193446` (`haiku_step1` 113–114, 0.17) and
+`runs/20260929-193721` (`haiku_guided` 0.86, `haiku_step2` 2.08). The Mac slept with its lid closed during
+`runs/20260929-175905`, and the network loss stopped three skins (decision 52); the rerun replayed the answered
+rows from the cache and stayed inside each skin's 2250. The failed requests during the outage were connection
+errors and cost nothing.
+
+On the 15 tracks both ran (Charts, held-out scope), each Jev twin against its Claude Haiku twin: guided, step 1 and
+step 2 Jev ahead (95% intervals of the difference just above zero for step 1 and step 2); plain, Claude Haiku ahead.
+Claude Haiku took 0.7 to 1.0 s a decision, Jev about 0.1 s. 15 tracks: an indication, not a result.

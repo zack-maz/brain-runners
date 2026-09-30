@@ -22,12 +22,12 @@ and speed"; "the important [thing] is getting hella runs in and getting accurate
   | players | tracks | cost |
   |---|---|---|
   | Jev ×5, fly, fly2, solver, random, always jump | all 100 (100–199) | free; about 5 hours, one fly process at a time |
-  | Claude Haiku ×5 | the first 15 (100–114) | at most 23.85 USD, guaranteed by `--max-requests 2250` (15 × 150 rows) |
+  | Claude Haiku ×4 (decision 54: no `haiku_map`) | the first 15 (100–114) | at most 9.23 USD, guaranteed by `--max-requests 2250` (15 × 150 rows); was ×5 at 23.85 USD |
   | GLM Flash ×5 | the first 15 (100–114), **only if** the drain shows under 2% failed decisions over at least 5 practice tracks for all five skins | free (0 USD, `glm-4.5-flash`); otherwise out, and the report says why with the drain's numbers |
 
 - Every comparison uses only the tracks both players ran (as `bakeoff bench` already does), so Haiku or GLM against
   anyone rests on 15 tracks and free against free on 100. The report says so beside every comparison.
-- Budget: the user buys about 25 USD of Anthropic API credit (pay as you go; a Claude subscription does not cover
+- Budget (decision 54): 10 USD of Anthropic API credit, was about 25 USD (pay as you go; a Claude subscription does not cover
   API use). Jev's requests cost the user nothing (decision 50). GLM Flash costs 0 USD; its limit is the free tier's
   throttle, which the drain on practice tracks 1001–1019 (started 2026-09-28) measures.
 

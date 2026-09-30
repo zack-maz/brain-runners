@@ -12,15 +12,84 @@
     Flash, an untrained fruit-fly connectome (two ways of feeding it), and three bots for scale.</p>
 
   <h2>Method</h2>
-  <p>Held-out tracks 100 to 199 of game v2, which no player was tuned on and none had played. To be written from
-    the runs: who played which tracks, the prices, and how many tracks each comparison rests on.</p>
+  <p>Every player ran the held-out tracks 100 to 199 of game v2: 150 rows each, getting harder until full
+    difficulty at row 100. No player was tuned on them and none had played them before the study. A player sees
+    six rows ahead and three lanes either side, and each row it stays, moves left or right, or jumps.</p>
+  <ul>
+    <li><strong>The free players ran all of them</strong>: the five Jev players
+      (<span data-stat="jev_step2 seeds"></span> tracks each), the two flies and the three bots.</li>
+    <li><strong>Claude Haiku ran the first 15</strong> (100 to 114), within a 10 USD budget (the cap keeps the worst case under it), with four
+      of its five question sets. The map set was left out: it is the priciest, and its Jev twin is among the weakest
+      players (decision 54).</li>
+    <li><strong>GLM Flash</strong>: to be settled from its free-tier trial on practice tracks (decision 53's rule:
+      under 2% failed decisions on every question set).</li>
+  </ul>
+  <p>Every comparison between two players uses only the tracks both ran, so anything about Claude Haiku rests on
+    its <span data-stat="haiku_step2 seeds"></span> tracks and free against free on
+    <span data-stat="jev_step2 seeds"></span>. A mean is given with its 95% interval over tracks.</p>
+  <p>Cost is every decision at the listed price per request, answers replayed from the cache included, so a replay
+    never looks cheaper. Claude Haiku's prices are measured; Jev's are an estimate, since its provider does not bill
+    per request and costs this project nothing (decision 50). The flies, the bots and GLM Flash's free tier cost
+    nothing. Speed is the median time a live decision took.</p>
 
   <h2>Results</h2>
-  <p>To be written from the numbers once the runs are in.</p>
+  <p><strong>The best Jev player nearly matches the solver.</strong> <code>jev_step2</code> ran
+    <span data-stat="jev_step2 mean_rows"></span> rows on average
+    (<span data-stat="jev_step2 ci_low"></span> to <span data-stat="jev_step2 ci_high"></span>) and finished
+    <span data-stat="jev_step2 finished"></span> of the tracks, against the solver's
+    <span data-stat="solver mean_rows"></span>. It took <span data-stat="jev_step2 s_per_decision_median"></span>
+    per decision at an estimated <span data-stat="jev_step2 usd_per_track"></span> per track.</p>
+  <p><strong>How the questions are asked matters more than it seemed.</strong> The same Jev ran
+    <span data-stat="jev_step2 mean_rows"></span> rows with eight pointed questions two moves ahead,
+    <span data-stat="jev_step1 mean_rows"></span> with four one move ahead,
+    <span data-stat="jev_guided mean_rows"></span> with one guided question,
+    <span data-stat="jev_map mean_rows"></span> reading a map of every tile and
+    <span data-stat="jev_plain mean_rows"></span> asked only "which move?", which is about where a coin lands
+    (<span data-stat="random mean_rows"></span>).</p>
+  <p><strong>Claude Haiku, same questions.</strong> <code>haiku_step2</code>
+    <span data-stat="haiku_step2 mean_rows"></span> rows, <code>haiku_step1</code>
+    <span data-stat="haiku_step1 mean_rows"></span>, <code>haiku_guided</code>
+    <span data-stat="haiku_guided mean_rows"></span>, <code>haiku_plain</code>
+    <span data-stat="haiku_plain mean_rows"></span>, at <span data-stat="haiku_step2 usd_per_track"></span>,
+    <span data-stat="haiku_step1 usd_per_track"></span>, <span data-stat="haiku_guided usd_per_track"></span> and
+    <span data-stat="haiku_plain usd_per_track"></span> per track, and
+    <span data-stat="haiku_step2 s_per_decision_median"></span> per decision for <code>haiku_step2</code>.</p>
+  <p><strong>Against its Jev twin, on the tracks both ran</strong> (the head to head on the Charts screen): with the
+    three question sets that point at the tiles (guided, step 1, step 2) Jev ran further on the same questions, each time with a
+    95% interval above zero, though for step 1 and step 2 only just. Asked only "which move?", Claude Haiku ran
+    further than Jev. Jev also answered several times faster
+    (<span data-stat="jev_step1 s_per_decision_median"></span> against
+    <span data-stat="haiku_step1 s_per_decision_median"></span> for step 1) at an estimated fraction of the
+    price. These rest on <span data-stat="haiku_step1 seeds"></span> tracks, and among this many pairs a few
+    verdicts are expected by chance alone, so the narrow ones are an indication, not a result.</p>
+  <p><strong>The flies.</strong> Untrained, the fly ran <span data-stat="fly mean_rows"></span> rows and fly2,
+    fed a sideways channel of ours, <span data-stat="fly2 mean_rows"></span>
+    (<span data-stat="fly2 ci_low"></span> to <span data-stat="fly2 ci_high"></span>), both well above the bots that
+    ignore the track (<span data-stat="always_jump mean_rows"></span> for always jumping). They cost nothing but are
+    the slowest of the free players: <span data-stat="fly2 s_per_decision_median"></span> per decision, simulated on
+    this laptop, against <span data-stat="jev_step2 s_per_decision_median"></span> for Jev (Claude Haiku took
+    <span data-stat="haiku_step2 s_per_decision_median"></span> for step 2). On the
+    rows-for-cost chart fly2 sits on the frontier beside the two best Jev players.</p>
+  <p>To be written: the frontiers, the named scores (rows per cent, rows per second) and GLM Flash.</p>
 
   <h2>What is ours</h2>
-  <p>To be written: every question and rule the models are given, and the flies' input, read-out and
-    thresholds.</p>
+  <ul>
+    <li><strong>Every question and every rule.</strong> The wording of each question set and the code that turns
+      the answers into a move are this project's, not TypeSafe's or Anthropic's. Plain asks "which move?" once;
+      guided asks one question naming the tile each move lands on; step 1 asks four yes/no questions (would this
+      move land on a gap?) and code picks the least likely; step 2 asks eight, two moves ahead, and code takes the
+      lowest combined risk; map asks about every visible tile and code plans a path.</li>
+    <li><strong>What differs between a Jev player and its Claude Haiku twin</strong> besides the model: Claude Haiku
+      is also given a briefing of the rules (Jev's yes/no questions carry only the question, except in the guided
+      set); Jev answers each question separately, while Claude Haiku writes all its answers in one reply; and
+      Claude Haiku's probability is a number it states.</li>
+    <li><strong>The flies' input, read-out and thresholds.</strong> The wiring is the real fly's, untrained. How a
+      gap becomes input to its eye (looming), which neurons are read as a turn or a jump, and the thresholds are
+      ours. The fly's thresholds were fixed on game v1 practice tracks and never retuned; fly2's sideways channel
+      and its numbers were fixed on practice tracks too, never on the held-out ones.</li>
+    <li><strong>The solver</strong> searches what every player can see, not the whole track: a gap just out of
+      sight can trap it, which is why it did not finish every track.</li>
+  </ul>
 
   <h2>Opinions and thoughts</h2>
   <p>Kept apart from the analysis, and the user's to write.</p>

@@ -374,6 +374,22 @@
     - **One Writeup page** is the report: drafted by Claude for now, to be rewritten in the user's own words.
     - `--tournament` is renamed `--held-out`.
 
+54. **Claude Haiku's budget is 10 USD, not 25; `haiku_map` is left out** (the user, 2026-09-29: "25 is too much.
+    Let's reduce to 10"). The five skins' worst case is 1.59 USD a track (150 rows, one request a row), and
+    `haiku_map` alone is 61% of it. The user chose four skins on the planned 15 tracks over all five on 6:
+    `haiku_plain`, `haiku_step1`, `haiku_guided` and `haiku_step2` on held-out tracks 100–114, `--max-requests 2250`
+    each in total (track 100 first with 150, then 101–114 with 2100), worst case 9.23 USD. `haiku_map` plays no
+    held-out track, so `jev_map` has no Claude Haiku twin in the study; the Writeup says so and why (the priciest
+    skin, and its Jev twin is among the weakest players).
+
+55. **`glm_plain` reads a bare move word as that move** (the user, 2026-09-29). Asked for `{"action": ...}`, GLM
+    Flash answered the bare word (`stay`, `right`) on every decision of its free-tier trial, so all of them were
+    invalid and it failed decision 53's under-2% rule on its own, while GLM's four other skins passed. Of three
+    choices (GLM out, only `glm_plain` out, accept the word) the user chose to accept it: a reply that is exactly
+    one known move, after the fence is stripped, from a finished turn, is read as that move; anything looser stays
+    invalid. The reading is ours, and `glm_plain` is no longer an exact twin of `haiku_plain` in how it is read.
+    Old runs keep their recorded `invalid` flags; `glm_plain` replays practice tracks 1001–1005 to be judged again.
+
 Where we are and what comes next: `docs/NEXT.md`.
 
 ## Prior art to reuse
