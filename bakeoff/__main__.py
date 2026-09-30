@@ -20,10 +20,11 @@ from bakeoff.session import FIRST_PRACTICE_SEED, LiveSession, LobbyError
 from bakeoff.view import render_html
 
 CAPPED = tuple(name for name in PAID if name not in UNCAPPED)
-UNCAPPED_HELP = (f"Jev ({', '.join(UNCAPPED)}) plays without a cap: its requests cost you nothing (decision 50), "
-                 "and are still counted and priced")
+UNCAPPED_HELP = (f"{', '.join(UNCAPPED)} play without a cap, counted and priced" if UNCAPPED
+                 else "every paid player is capped, Jev included (decision 58)")
 DEMO_PLAYERS = "fly,jev_step1,haiku_plain"  # the demo's three: what the character select offers first
 DEMO_SEED = 1001
+BOTS = ["solver", "random", "always_jump"]  # the demo's fallback when none of its three can play: free, no data
 
 
 def _add_game_arguments(parser: argparse.ArgumentParser) -> None:
@@ -73,7 +74,7 @@ def _parser() -> argparse.ArgumentParser:
     live = sub.add_parser("live", help="play one track in real time and watch it in the browser (loopback only); "
                                        "the run is recorded like any other")
     live.add_argument("--players", help=f"comma-separated; available: {sorted(REGISTRY)}. Without it the page "
-                                        f"opens on the Brain Run home with the demo's three picked ({DEMO_PLAYERS})")
+                                        f"opens on the Brain Runners home with the demo's three picked ({DEMO_PLAYERS})")
     live.add_argument("--seed", type=int, help=f"the track; practice seeds are 1000 and up (default {DEMO_SEED} in "
                                                "the track select, where the page may choose another)")
     _add_game_arguments(live)
@@ -88,7 +89,7 @@ def _parser() -> argparse.ArgumentParser:
                       help="allows live paid requests on seeds below 1000, the held-out seeds")
     live.add_argument("--start", action="store_true",
                       help="play at once with --players on --seed, as before; without it the page opens in the "
-                           "Brain Run home and starts the run when you say so")
+                           "Brain Runners home and starts the run when you say so")
     live.add_argument("--port", type=int, default=8000, help="the page is served on 127.0.0.1 only (default port 8000)")
     live.add_argument("--no-wait", action="store_true",
                       help="do not wait for a browser before the run, and do not keep serving after it")
@@ -96,8 +97,7 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def _players(names: str, cache: DiskCache, max_requests: int, rules: Rules) -> list:
-    # one budget per paid player: the providers bill separately, and one must not starve the other; Jev has none
-    # (decision 50), its requests are only counted
+    # one budget per paid player: the providers bill separately, and one must not starve the other
     players = [make_player(name, cache=cache, budget=budget_of(name, max_requests)) if name in PAID
                else make_player(name) for name in (canonical(n.strip()) for n in names.split(","))]
     for p in players:  # a question set that cannot be asked on this vision is a usage error, before anyone plays
@@ -126,7 +126,7 @@ def _paid_window_mismatch(players: list, chosen_window: int, requested_window: i
 
 def _live(args) -> int:
     """The page runs the show: the command sets the ceiling, binds the loopback port and keeps serving;
-    Brain Run in the browser picks the players and the track. `--start` plays at once, as before."""
+    Brain Runners in the browser picks the players and the track. `--start` plays at once, as before."""
     try:  # the session plays every run of this command, so --max-rows belongs to its rules
         rules = resolve(_rules(args), args.max_rows)
     except (KeyError, ValueError) as e:
@@ -146,6 +146,12 @@ def _live(args) -> int:
                if args.window is not None and args.window != RULES[args.game].window else None)
     session = LiveSession(rules, out_root=args.out, cache_dir=args.cache, max_requests=args.max_requests,
                           held_out=args.held_out, args=run_args, paid_blocked=blocked, ready=(seed, names))
+    if args.players is None:
+        # the demo is a suggestion: leave out whoever could not play (the fly without its data, a paid player with
+        # no requests to ask, as on a fresh clone), and run the bots if nobody is left
+        names = [n for n in names if session.why_not(n, seed) is None
+                 and (n not in PAID or n in UNCAPPED or args.max_requests > 0)] or BOTS
+        session.ready_players = names
     try:
         session.check(seed, names)  # what the command line asks for, refused before anything is bound
     except LobbyError as e:

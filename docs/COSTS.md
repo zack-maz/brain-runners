@@ -246,7 +246,7 @@ floor, not its ability. The benchmark shows it but does not rank it, since a ran
 ## fly2: the second pure fly (game v2, 2026-09-25, free)
 
 fly2 is a local simulation like the fly: the response surfaces, the calibration and the real run below all cost
-nothing (`calibration/FLY2_REPORT.md`, decision 43).
+nothing (`docs/calibration/FLY2_REPORT.md`, decision 43).
 
 **Real run** (`uv run python -m bakeoff run --players fly,fly2 --seeds 20 --seed-start 1000`, `runs/20260925-101614`,
 game v2, `completed`, 22 minutes wall):

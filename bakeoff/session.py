@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from bakeoff.clients.core import DiskCache, RequestBudget, SharedBudget
+from bakeoff.fly import data as fly_data  # cheap: hashlib and paths, no brian2
 from bakeoff.game.rules import Rules
 from bakeoff.game.track import generate_track
 from bakeoff.live import LiveRun
@@ -88,7 +89,7 @@ def about_of(name: str) -> str | None:
     it had already won."""
     if name == "fly2":
         return (fly2.about() if fly2.CALIBRATED
-                else "not calibrated yet: its input, read-out and numbers are fixed by calibration/FLY2_REPORT.md")
+                else "not calibrated yet: its input, read-out and numbers are fixed by docs/calibration/FLY2_REPORT.md")
     return {"fly": "looming \u2192 escape reflex (phase 2)"}.get(name)
 
 
@@ -133,8 +134,10 @@ class LiveSession:
     def __init__(self, rules: Rules, out_root: Path | str = "runs", cache_dir: Path | str = ".cache/responses",
                  max_requests: int = 0, held_out: bool = False, args: dict | None = None,
                  token: str | None = None, paid_blocked: str | None = None,
-                 ready: tuple[int, list[str]] | None = None):
+                 ready: tuple[int, list[str]] | None = None, fly_data_problems=None):
         self.rules, self.out_root, self.cache = rules, Path(out_root), DiskCache(cache_dir)
+        # why the fly data cannot be used (bakeoff.fly.data.problems, no hashing: a file check), or []
+        self.fly_data_problems = fly_data_problems or fly_data.problems
         self.max_requests, self.held_out = max_requests, held_out
         # why no paid player may play at all this session, if any (a vision the briefing does not match)
         self.paid_blocked = paid_blocked
@@ -175,7 +178,7 @@ class LiveSession:
                 # what it answered as last: the asked-for name may be a moving one (`jev-latest`)
                 "model_answered": answered.get(name) if paid else None,
                 "requests_left": self.budgets[name].remaining if paid else None,
-                # False for Jev, which plays without a cap (decision 50): its worst case is the whole track
+                # False for a player in UNCAPPED (none since decision 58): its worst case is the whole track
                 "capped": (name not in UNCAPPED) if paid else None,
                 "played_before": seed is not None and seed in played.get(name, []),
                 # the track select's own practice tracks it has a recorded run of, for its marks: a
@@ -211,7 +214,9 @@ class LiveSession:
         """Why this player may not play this track, or None. The one place that rule lives: `check`
         refuses with it and `state` shows it."""
         if name == "fly2" and not fly2.CALIBRATED:
-            return "fly2 is not calibrated yet (calibration/FLY2_REPORT.md)"
+            return "fly2 is not calibrated yet (docs/calibration/FLY2_REPORT.md)"
+        if name in ("fly", "fly2") and self.fly_data_problems():
+            return "the fly model and data are not downloaded: uv run python -m scripts.fetch_fly_data"
         if name not in PAID:
             return None
         if self.paid_blocked:

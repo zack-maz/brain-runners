@@ -6,6 +6,8 @@ tests/test_live_server.py rather than by blocking here."""
 import json
 import socket
 
+import pytest
+
 from bakeoff.__main__ import DEMO_PLAYERS, DEMO_SEED, _parser, main
 
 
@@ -30,7 +32,7 @@ def test_the_lobby_serves_until_it_is_interrupted_and_reports_the_runs_the_page_
                  "--cache", str(tmp_path / "cache")]) == 0
     out = capsys.readouterr().out
     assert "watch: http://127.0.0.1:" in out and "the page runs the show" in out
-    assert "fly,jev_step1,haiku_plain on track 1001" in out
+    assert "on track 1001" in out  # who is ready: test_without_players_the_demo_keeps_only_who_can_really_play
     assert lobby and lobby[0].status == "lobby" and not (tmp_path / "runs").exists()
 
 
@@ -110,3 +112,26 @@ def test_usage_errors(tmp_path, capsys):
         assert main(args) == 2
         assert "cannot listen on 127.0.0.1:" in capsys.readouterr().err
     assert not (tmp_path / "runs").exists()
+
+
+@pytest.mark.parametrize("fly_problems, max_requests, ready", [
+    (["data/model missing"], "0", "solver,random,always_jump"),  # a fresh clone: no fly data, no cap
+    ([], "0", "fly"),                                           # the fly is there, the paid players cannot ask
+    ([], "5", "fly,jev_step1,haiku_plain"),                     # the whole demo
+])
+def test_without_players_the_demo_keeps_only_who_can_really_play(tmp_path, capsys, monkeypatch, fly_problems,
+                                                                   max_requests, ready):
+    """No --players: the demo lineup is a suggestion, so a runner that could not play is left out rather than the
+    command refusing to start; with nobody left, the three bots run."""
+    monkeypatch.setattr("bakeoff.fly.data.problems", lambda *a, **k: fly_problems)
+    monkeypatch.setattr("bakeoff.__main__._serve_until_interrupted", lambda session, printed=None: 0)
+    assert main(["live", "--port", "0", "--max-rows", "12", "--max-requests", max_requests,
+                 "--out", str(tmp_path / "runs"), "--cache", str(tmp_path / "cache")]) == 0
+    assert f"Ready: {ready} on track 1001" in capsys.readouterr().out
+
+
+def test_players_named_on_the_command_line_are_still_refused_if_they_cannot_play(tmp_path, capsys, monkeypatch):
+    monkeypatch.setattr("bakeoff.fly.data.problems", lambda *a, **k: ["data/model missing"])
+    assert main(["live", "--port", "0", "--players", "fly,solver", "--out", str(tmp_path / "runs"),
+                 "--cache", str(tmp_path / "cache")]) == 2
+    assert "fetch_fly_data" in capsys.readouterr().err

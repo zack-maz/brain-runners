@@ -143,7 +143,7 @@ const flyRun = (extra) => ({
 test("Minds.ours names the calibrated four and says the rest were not tuned", () => {
   const html = Minds.ours(flyRun());
   assert.match(html, /gain.{0,40}falloff.{0,40}two thresholds/s);
-  assert.match(html, /chosen once.*frozen \(calibration\/REPORT\.md\)/s);
+  assert.match(html, /chosen once.*frozen \(docs\/calibration\/REPORT\.md\)/s);
   assert.match(html, /cap, the step and the window length are fixed design choices of ours and were not tuned/);
 });
 

@@ -50,7 +50,7 @@ Branch: `phase6-updates`.
 ## Where each one stood on 2026-09-21
 
 1. The fly is untrained by rule (`CLAUDE.md`, honesty rule): innate wiring only, looming weighting and two
-   thresholds frozen on practice seeds 1000–1199 (`calibration/REPORT.md`, "never retune"). A trained fly or a new
+   thresholds frozen on practice seeds 1000–1199 (`docs/calibration/REPORT.md`, "never retune"). A trained fly or a new
    fly mapping would have to be a new player next to `fly`, not a change to it, with its own calibration on
    practice seeds and its own on-screen label saying what is ours. "Trained" also needs defining: plasticity inside
    the connectome model, or a learned readout on top of fixed wiring (the second is much cheaper to honestly

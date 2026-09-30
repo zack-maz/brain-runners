@@ -12,7 +12,7 @@ from bakeoff.players.base import Decision
 from bakeoff.senses import LOOMING_FALLOFF, LOOMING_GAIN_HZ, looming_rates
 
 # The fly's only tuning, and OURS: fixed once on practice seeds 1000-1199 together with the looming
-# gain and falloff in bakeoff/senses.py (calibration/REPORT.md). Do not retune: tournament seeds
+# gain and falloff in bakeoff/senses.py (docs/calibration/REPORT.md). Do not retune: tournament seeds
 # must never influence these numbers. A turn threshold of 0 means any net steering spike turns.
 TURN_THRESHOLD_HZ = 0.0
 JUMP_THRESHOLD_HZ = 200.0

@@ -110,7 +110,7 @@ def test_an_uncalibrated_fly2_is_refused_before_the_run_directory_exists(tmp_pat
 def test_the_committed_constants_are_the_calibration_winner():
     from pathlib import Path
 
-    text = (Path(__file__).resolve().parents[1] / "calibration" / "FLY2_REPORT.md").read_text()
+    text = (Path(__file__).resolve().parents[1] / "docs" / "calibration" / "FLY2_REPORT.md").read_text()
     heading = text.split("## Winner: ")[1]
     assert heading.startswith(fly2.MAPPING + ",")
     row = heading.split("\n\n")[2].splitlines()[2]

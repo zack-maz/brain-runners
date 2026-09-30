@@ -75,7 +75,7 @@ test("with nothing left of the cap the page says what a paid player can still do
 });
 
 test("the ceiling is written out, cap or no cap", () => {
-  assert.match(Lobby.ceilingText(state()), /without a cap, so paid players only replay answers that are already cached/);
+  assert.match(Lobby.ceilingText(state()), /with a cap of 0, so paid players only replay answers that are already cached/);
   assert.match(Lobby.ceilingText(state()), /may only play seeds 1000 and up/);
   assert.match(Lobby.ceilingText(state({ max_requests: 700 })), /cap is 700 requests for each paid player/);
   assert.match(Lobby.ceilingText(state({ held_out: true })), /Seeds below 1000 are allowed here/);

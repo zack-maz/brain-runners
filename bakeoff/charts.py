@@ -1,4 +1,4 @@
-"""Charts, for the Brain Run charts screen (decision 53, docs/superpowers/specs/2026-09-28-study-design.md,
+"""Charts, for the Brain Runners charts screen (decision 53, docs/superpowers/specs/2026-09-28-study-design.md,
 section 4): every recorded episode of this game, each player and track once from the newest run that completed
 it, scored by the benchmark. Reads files only, spends nothing. The numbers are `bakeoff bench`'s; nothing here
 adds a statistic.
@@ -19,7 +19,7 @@ from bakeoff.records import pick
 # the study's own tracks (decision 53): no player was tuned on them, none played them before the study
 HELD_OUT = (100, 199)
 
-# fly2's frozen numbers were fitted on these seeds (calibration/FLY2_REPORT.md, decision 43): a mean over them is
+# fly2's frozen numbers were fitted on these seeds (docs/calibration/FLY2_REPORT.md, decision 43): a mean over them is
 # in-sample for fly2 in a way it is not for anyone else, so `charts_of` counts them.
 TUNED_ON = {"fly2": [min(PRACTICE_SEEDS), max(PRACTICE_SEEDS)]}
 

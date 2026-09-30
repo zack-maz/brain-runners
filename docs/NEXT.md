@@ -3,6 +3,17 @@
 This file is rewritten whenever the state changes. What the user has decided stays in `docs/DECISIONS.md`
 (numbered, only ever added to); measured runs and money are in `docs/COSTS.md`.
 
+## Now (2026-09-30)
+
+**The study is done and the project is released as Brain Runners** (decision 57): the public repository
+`zack-maz/brain-runners`, MIT, with `README.md`, `docs/SETUP.md` for running it with one's own keys, the study's
+runs as a Release download (`scripts/study_data.py`), and a project page on motg.dev. The study's runs: every free
+player on held-out tracks 100–199, Claude Haiku ×4 on 100–114 for 5.09 USD (decision 54); GLM Flash qualified but
+left out (decision 56); Jev capped like every paid player again (decision 58). Left: the Writeup's frontiers and
+named scores, and the user's own words in it; the demo video for motg.dev; the X post.
+
+Everything below is the record of how it got here.
+
 ## Where we are
 
 Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Before phase 6 came the updates of
@@ -157,9 +168,9 @@ counts the decisions of a track the skin stopped on too, beside its "stopped N" 
 0. **`fly2`, the second pure fly, is built, calibrated, played and merged** (decisions 41–43, spec
    `docs/superpowers/specs/2026-09-24-fly2-design.md`, plan `docs/superpowers/plans/2026-09-24-fly2.md`, generated
    from the prototype `proto/fly2`, 9 tasks, branch `fly2`). Spike 04, the probe, passed on 2026-09-24
-   (`spikes/04-fly2-probe/REPORT.md` on branch `spike/fly2-probe`): every candidate turns away from a gap under a
+   (`docs/spikes/04-fly2-probe/REPORT.md` on branch `spike/fly2-probe`): every candidate turns away from a gap under a
    strong centre, and M3 is admitted. M3, "a sideways channel", is frozen as decision 43
-   (`calibration/FLY2_REPORT.md`): gain 250 Hz, falloff 2, turn threshold 40 Hz, jump threshold 175 Hz; on held-out seeds
+   (`docs/calibration/FLY2_REPORT.md`): gain 250 Hz, falloff 2, turn threshold 40 Hz, jump threshold 175 Hz; on held-out seeds
    1200–1399 (stand-in brain) fly2 scored 82.34 rows, the same rule with no brain 74.05, shuffled wiring 27.84, fly 65.98. The real run is done: `fly,fly2` on v2 seeds
    1000–1019 (`runs/20260925-101614`), fly mean 66.55 rows, fly2 mean 78.20; `bakeoff bench` says "can't tell yet"
    (+11.7 rows, 95% interval -4.5 to 27.8, about 69 tracks for a verdict). The live smoke is done too: `bakeoff
@@ -170,7 +181,7 @@ counts the decisions of a track the skin stopped on too, beside its "stopped N" 
    verdict "fly2 ahead" (`docs/COSTS.md`).
    Recorded as decision 47. **fly3, the trained fly** (track 2 of decision 41; decision 48, spec
    `docs/superpowers/specs/2026-09-25-fly3-design.md`), **stopped at its probe** (decision 49): spike 05 (branch
-   `spike/fly3-probe`, local; `spikes/05-fly3-probe/REPORT.md`) passed parts A (a place on the eye for the looming
+   `spike/fly3-probe`, local; `docs/spikes/05-fly3-probe/REPORT.md`) passed parts A (a place on the eye for the looming
    cells) and B (the descending neurons name a gap's lane 80% of the time), and ended "stop C": on seeds 1300–1309
    fly3 scored 86.5 rows, the same learner with no brain 112.5, a blind brain 19.6. fly3 is not built. The only
    untested lever is a stronger input (about 1.5 h), if ever wanted. No fast engine is needed. Phase 6 waits.
@@ -238,7 +249,7 @@ All of this is one to five practice tracks: an impression, not a result.
 
 ## Open
 
-- Whether the tournament reuses seeds 0–19 or takes fresh seeds below 1000.
+- Settled by decision 53: the study uses fresh held-out seeds 100–199 (there is no tournament).
 - Left from update 3b's review (Minor, not fixed): the lobby still never polls `/state`, so the page's freshness
   depends on the `end` event arriving (the event can no longer be lost to the benchmark, but a poll every few
   seconds while running would close the gap for good).
