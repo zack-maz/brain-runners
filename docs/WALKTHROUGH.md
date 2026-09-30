@@ -1,7 +1,7 @@
 # Walkthrough: how to use every part of this tool
 
-Written 2026-09-24, after the updates; brought up to date 2026-09-28 (Brain Run, decision 51; Jev uncapped,
-decision 50). What this project *is* lives in `docs/EXPLAINER.html`; this file is the
+Written 2026-09-24, after the updates; brought up to date 2026-09-28 and 2026-09-30 (Brain Runners, decisions 51
+and 57; Jev capped like every paid player, decision 58). What this project *is* lives in `docs/EXPLAINER.html`; this file is the
 hands-on guide: every command, every flag that matters, every part of the page, and what each one costs.
 
 Two rules to read first, because everything else assumes them:
@@ -10,8 +10,8 @@ Two rules to read first, because everything else assumes them:
   replays answers already in the cache and stops a paid player at its first uncached question. Every request is
   cached, counted and priced (decision 58; until then Jev played without a cap, decision 50). Watching, scoring and
   replaying are always free.
-- **Seeds below 1000 are tournament seeds.** Nothing is tuned on them and no paid player may play one until the
-  tournament (`--tournament`). Seeds 1000 and up are practice.
+- **Seeds below 1000 are held out.** Nothing is tuned on them, and no paid player may spend on one without
+  `--held-out` (the study used 100–199). Seeds 1000 and up are practice.
 
 ---
 
@@ -88,8 +88,8 @@ uv run python -m bakeoff run --players fly,random,solver --seeds 20 --seed-start
 | `--game v1\|v2` | the game version (default `v2`) |
 | `--lookahead N`, `--window N` | change how far players see; this renames the game (`v2+look3`) so results never mix |
 | `--max-rows N` | play only the first N rows of each track |
-| `--max-requests N` | the hard cap, **per capped paid player** (Claude Haiku, GLM Flash); 0 (default) replays the cache only. Jev has none: `meta.json` records its `"max"` as `null` |
-| `--tournament` | allows paid play on seeds below 1000 — for phase 6 only |
+| `--max-requests N` | the hard cap, **per paid player** (Jev, Claude Haiku, GLM Flash; decision 58); 0 (default) replays the cache only |
+| `--held-out` | allows paid play on seeds below 1000, the held-out seeds — for the study's runs |
 | `--out DIR`, `--cache DIR` | where runs and cached answers go (`runs/`, `.cache/responses`) |
 
 A capped player whose cap runs out, or whose provider fails six times in a row, drops out; the others still play
@@ -141,7 +141,7 @@ some verdicts arrive by chance, and the notes count how many.
 uv run python -m bakeoff live --port 8765
 ```
 
-This opens **Brain Run** (called Brain Battle until decision 51), the front of the live page: the command binds the port and sets the money ceiling, the
+This opens **Brain Runners** (called Brain Battle until decision 51, Brain Run until decision 57), the front of the live page: the command binds the port and sets the money ceiling, the
 browser does the rest. Open the address it prints: the home screen leads to the character select (who plays), the
 track select (which track, and what it can cost at worst), the run, and the results, which open by themselves when
 the run ends. From the results you can run again, pick a new track or other runners, so you can play another track
@@ -153,7 +153,7 @@ without restarting the command. Records holds everything played before. Ctrl-C s
 | `--start` | play the command line's own run at once: the page opens on the run screen, and the first decision waits for a browser |
 | `--seed N`, `--players a,b` | the runners the character select opens with and the track the track select opens on (and what `--start` plays); without them, the demo's three (`fly,jev_step1,haiku_plain`) on track 1001 |
 | `--max-requests N` | the ceiling for the **whole session**, per capped paid player (Claude Haiku, GLM Flash) — the page can never raise it; Jev has none |
-| `--max-rows`, `--game`, `--lookahead`, `--window`, `--cache`, `--out`, `--tournament` | as in `run` |
+| `--max-rows`, `--game`, `--lookahead`, `--window`, `--cache`, `--out`, `--held-out` | as in `run` |
 | `--no-wait` | do not wait for a browser and do not keep serving afterwards (needs `--start`) |
 
 Every player decides the same row before anyone moves on, so the slowest mind sets the pace (about a row a second
@@ -165,7 +165,7 @@ directory, so `view` replays it afterwards.
 ## 4. The page, part by part
 
 The same page serves a saved replay and a live run. A replay file has no server and no front: it opens on the two
-tabs below. A live run opens on Brain Run's screens instead (see "Starting a run" below); its run screen is the
+tabs below. A live run opens on Brain Runners' screens instead (see "Starting a run" below); its run screen is the
 Run tab without the tabs, and what the Analysis tab shows moves to the results and Records screens.
 
 ### The Run tab
@@ -202,11 +202,11 @@ Run tab without the tabs, and what the Analysis tab shows moves to the results a
    portrait, or Space on the one under the cursor (← →), drops the next runner in that character's first skin not
    already taken; a slot's dots, or X and Y, change its skin, and the same skin can never be chosen twice.
    Backspace or a slot's ✕ removes it. The line under the portraits describes the focused slot: who it is, what it
-   does, its price, and why it may not play if it may not (a tournament seed, no cap left). With one runner or
+   does, its price, and why it may not play if it may not (a held-out seed, no cap left). With one runner or
    more, READY TO RUN (or Enter) goes on; the count in the corner reads "N / 8 runners".
 3. **Track select.** ‹ › or ← → step the track, Random (or R) picks a practice track, and the tiles offer the
    practice tracks 1000–1019, each marked with how many of this lineup played it before. Seeds below 1000 are
-   locked unless the command was started with `--tournament`. The preview draws the real track. Each runner's
+   locked unless the command was started with `--held-out`. The preview draws the real track. Each runner's
    line says whether it played this track before and its **worst case**: rows × requests per row × price, capped
    by what is left of the session's budget, assuming nothing is cached; the total is under it. ‹ Runners goes back with the lineup kept.
 4. **RUN.** A lineup that spends nothing starts at once. If the run can spend, the first press of RUN (or Enter)
@@ -247,7 +247,7 @@ Every paid request goes through three gates, in order:
    `meta.json`. In a
    live session the cap belongs to the session, not the run: each run records only what it spent, and nothing the
    page sends can raise the ceiling.
-3. **The seed rule.** Paid players may not play seeds below 1000 without `--tournament`.
+3. **The seed rule.** Paid players may not play seeds below 1000 without `--held-out`.
 
 A provider failure is logged as an error and the game runs `stay` — never the solver's move, because being rescued
 would hide exactly what we want to see.
@@ -328,7 +328,7 @@ uv run pytest -m live    # one real request per provider — spends money, opt i
 
 No fast test touches the network. The viewer's pure modules (`log.js`, `tabs.js`, `picker.js`, `lobby.js`,
 `timeline.js`, `tunnel.js`, `sprites.js`, `roster.js`, `stage.js`, `minds.js`, `feed.js`, `bench.js`, `bench_view.js`,
-and Brain Run's `screens.js`, `select.js`, `trackpick.js`, `results.js`, `records.js`) have
+and Brain Runners' `screens.js`, `select.js`, `trackpick.js`, `results.js`, `records.js`) have
 their own tests, skipped when node is not installed.
 
 ---
@@ -344,7 +344,7 @@ their own tests, skipped when node is not installed.
 | `view` refuses two directories | they are different game versions, or the same (player, seed) appears twice |
 | `bench` refuses | runs of different track lengths, or fewer than five tracks for an interval |
 | "No completed run to score" on the Analysis tab | nothing in view has ended yet |
-| A runner that may not play | the reason is on the character select's line for that slot and on its track select line, and RUN stays off: a tournament seed, or no cap left |
+| A runner that may not play | the reason is on the character select's line for that slot and on its track select line, and RUN stays off: a held-out seed, or no cap left |
 | The fly is slow or the machine swaps | two fly processes are running; there must only ever be one |
 
 ---

@@ -74,7 +74,7 @@
   // The ceiling the command set, and the seed rule: the line under the track select.
   function ceilingText(state) {
     const cap = state.max_requests === 0
-      ? "This command was started without a cap, so paid players only replay answers that are already cached."
+      ? "This command was started with a cap of 0, so paid players only replay answers that are already cached."
       : "This command's cap is " + state.max_requests + " requests for each paid player, for the whole session.";
     const seeds = state.held_out
       ? "Seeds below " + state.first_practice_seed + " are allowed here (--held-out)."

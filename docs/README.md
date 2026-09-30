@@ -38,8 +38,8 @@ know why something is the way it is.
 | | |
 |---|---|
 | `RESEARCH.md` | The fly-brain resources behind the simulation. |
-| `research/` | Deeper research on the fly's circuits and the FlyWire tools. |
+| `research/` | Deeper research on the fly's circuits and the FlyWire tools, kept as written: paths and scripts in it are as they were then (`calibration/` has since moved under `docs/`). |
 | `calibration/` | How the flies' thresholds and inputs were fixed on practice tracks, then frozen: `REPORT.md` (fly) and `FLY2_REPORT.md` (fly2). |
-| `spikes/` | A probe's brief. The other probes' reports live on their own branches. |
+| `spikes/` | The five probes' reports (and the first one's brief). Their throwaway code stayed on local branches, so where `DECISIONS.md` or `NEXT.md` says a report is "on branch `spike/…`", read `docs/spikes/`. |
 
 `media/` holds the images the README shows.

@@ -61,7 +61,7 @@ front of `bakeoff live`, is on `main` (PR #9, merged 2026-09-26; renamed in PR #
 lets Jev play without a cap (decision 50). PRs #8–#12 are merged; since #12 a results card reads
 "N live" over "M cached". Phase 6 is the study (decision 53, spec `docs/superpowers/specs/2026-09-28-study-design.md`),
 not a tournament: its code is built on branch `study` (plan `docs/superpowers/plans/2026-09-28-study.md`): the seed
-flag `--held-out`, the benchmark's cost per track, time per decision, failures and frontiers, and Brain Runners's
+flag `--held-out`, the benchmark's cost per track, time per decision, failures and frontiers, and Brain Runners'
 Charts and Writeup screens. Its runs are done (decisions 54–56), and the project is released as the public
 repository Brain Runners (decision 57; Jev capped again, decision 58). Probe reports are copied into `docs/spikes/`;
 `calibration/` lives under `docs/`. Each phase gets its own plan. Resume from `docs/NEXT.md`.
@@ -89,7 +89,7 @@ repository Brain Runners (decision 57; Jev capped again, decision 58). Probe rep
   one minute); never run two fly processes at once.
 - The viewer is plain JavaScript with no build step and no npm packages. Rules of the game stay in
   Python (`bakeoff/replay.py`); the pure JavaScript (`timeline.js`, `tunnel.js`, `sprites.js`, `roster.js`, `stage.js`, `minds.js`,
-  `log.js`, `picker.js`, `tabs.js`, `feed.js`, `lobby.js`, `bench_view.js`, and Brain Runners's `screens.js`, `select.js`,
+  `log.js`, `picker.js`, `tabs.js`, `feed.js`, `lobby.js`, `bench_view.js`, and Brain Runners' `screens.js`, `select.js`,
   `trackpick.js`, `results.js`, `records.js`, `writeup.js`) is tested by
   `viewer/tests/*.test.js`, which `uv run pytest` runs through `node --test`. Text from a log is always
   escaped (`Minds.esc`) and the page must never load anything from the network (the two brand fonts in
@@ -142,11 +142,10 @@ repository Brain Runners (decision 57; Jev capped again, decision 58). Probe rep
   below), and Writeup shows `docs/WRITEUP.html` as written, its numbers cited with `data-stat` and filled from the
   charts, never typed; the
   lobby's grid is gone (`lobby.js` keeps the money helpers). A lineup that can spend is confirmed once, with its
-  worst case on the RUN button, and Run again goes through the same confirmation; a lineup whose only spending is
-  Jev's shows its worst case but is not asked (decision 50). A results card's Requests read "N live" over "M cached"
+  worst case on the RUN button, and Run again goes through the same confirmation; Jev included (decision 58). A results card's Requests read "N live" over "M cached"
   when some answers came from the cache. `bakeoff view` keeps its replay page.
-- Capped paid players (Claude Haiku, GLM Flash) spend nothing without `--max-requests` (default 0 replays
-  `.cache/responses`); Jev asks whenever its answer is not cached. No fast test can reach a provider:
+- Paid players (Jev, Claude Haiku, GLM Flash) spend nothing without `--max-requests` (default 0 replays
+  `.cache/responses`; decision 58). No fast test can reach a provider:
   `tests/conftest.py` hides every provider key unless a test is marked `live`. A player that reaches its cap or whose provider
   keeps failing drops out and the others play on (`stopped` in `meta.json`, decision 52). Never raise a cap, rerun a paid command or run `pytest -m live` without the user's go-ahead. No paid
   request on a seed below 1000 outside the study's runs; the CLI refuses a live paid run on seeds

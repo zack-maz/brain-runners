@@ -59,7 +59,7 @@ come by chance; the page counts the pairs and says so. The page is one offline f
 `live` plays one track in real time: every mind decides the same row before anyone moves on (a jumper skips
 the next row; the slowest mind sets the pace, about a row a second with the fly), each decision goes into a
 normal run directory and, through a server on `127.0.0.1` only, into the same page as it happens. The command
-binds the port and sets the ceiling; the page does the rest, through Brain Runners's screens (decisions 45 and 51, spec
+binds the port and sets the ceiling; the page does the rest, through Brain Runners' screens (decisions 45 and 51, spec
 `docs/superpowers/specs/2026-09-25-brain-battle-design.md`; it was called Brain Battle until decision 51): home,
 "Choose your runners" (up to eight runners, each a character in one of its skins), the track select (the track, its
 preview, and each runner's worst case, Jev's included; a run that can spend asks for a second press, `RUN` then

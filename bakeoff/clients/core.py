@@ -75,8 +75,8 @@ class RequestBudget:
 
 
 class UncappedBudget(RequestBudget):
-    """Counts live requests but never stops one: for a paid player whose requests cost the user nothing (Jev,
-    decision 50). Its requests are still recorded and priced, so what it would cost stays visible."""
+    """Counts live requests but never stops one: for a paid player in UNCAPPED (Jev under
+    decision 50; none since decision 58). Its requests are still recorded and priced, so what it would cost stays visible."""
 
     def __init__(self):
         self.max_requests = None
@@ -148,7 +148,7 @@ class PaidClient:
         self._owns_sdk = sdk is None
 
     def preflight(self) -> None:
-        # with no cap (None, Jev) the key is asked for at the first live request, so a replay of the cache needs none
+        # with no cap (None: a player in UNCAPPED) the key is asked for at the first live request, so a replay of the cache needs none
         if self._owns_sdk and (self.budget.max_requests or 0) > 0:
             require_key(self.key_name)
 

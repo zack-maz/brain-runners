@@ -110,7 +110,7 @@
         state.max_requests + " runs out. Cached answers are free, so the real cost is usually lower.";
     }
     if (!state.max_requests) {
-      return "This command has no cap: the paid runners replay answers already cached and stop at their first " +
+      return "This command's cap is 0: the paid runners replay answers already cached and stop at their first " +
         "uncached question, so this run spends nothing.";
     }
     return "Every row costs " + state.requests_per_row + " request for every paid runner, until its cap of " +

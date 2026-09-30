@@ -73,6 +73,11 @@
 <h1>Three minds, one tunnel</h1>
 <p class="lede">Two fruit fly brains, a small AI that answers yes/no questions, and two chatbots all play the
 same video game. We watch how each one thinks while it plays.</p>
+<p><strong>Since this was written</strong> (2026-09-30): phase 6 became a study rather than a tournament
+(decision 53), run on held-out tracks 100–199; its results are in <code>docs/WRITEUP.html</code> and the README.
+GLM Flash was left out of it (decision 56), Jev is now capped like every paid player (decision 58), and the
+project is released as <strong>Brain Runners</strong> (decision 57). Where this page speaks of the tournament,
+read the study.</p>
 
 <p>This page starts in plain language and gets more technical as it goes. Stop reading whenever you have
 enough. Each part is marked with its level.</p>
@@ -309,12 +314,12 @@ data, the fonts and the benchmark are all inside that one file, so it can be mai
 
 <h3>Live, with the page running the show</h3>
 <pre><code>uv run python -m bakeoff live --port 8765</code></pre>
-<p>This opens Brain Run on your own machine and prints its address. In the browser you choose your runners on the
+<p>This opens Brain Runners on your own machine and prints its address. In the browser you choose your runners on the
 character select, pick the track on the track select, and the page tells you what the run would cost at worst
-before you press RUN (a lineup that can spend asks to CONFIRM first, unless Jev's is its only spending); the command keeps the
+before you press RUN (a lineup that can spend asks to CONFIRM first); the command keeps the
 ceiling, so nothing the page sends can spend more than the cap you started it with (the default cap is 0, which
-replays cached answers and spends nothing; Jev has no cap since decision 50, because its requests cost you
-nothing, and they are still counted and priced). Press RUN and the tunnel fills in real time; when it ends, the
+replays cached answers and spends nothing; since decision 58 that holds for Jev too, and every request is
+counted and priced). Press RUN and the tunnel fills in real time; when it ends, the
 results open by themselves, and another track can be played without restarting the command.</p>
 
 <h3>What is on the page</h3>
@@ -484,9 +489,8 @@ JavaScript only draws.</figcaption>
   <li><strong>Report, replay, view, bench</strong> only read run directories. That's why watching is free, and
   why the benchmark can never change what a run recorded.</li>
   <li><strong>The live session</strong> (<code>bakeoff/session.py</code>) is what the page talks to: one per
-  command, holding one budget per paid player for the whole session (Jev's counts its requests but has no cap,
-  decision 50), the refusal rules (a paid player may not play
-  a tournament seed without <code>--tournament</code>, cap or no cap) and one run at a time. The page's requests
+  command, holding one budget per paid player for the whole session (Jev's included, decision 58), the refusal rules (a paid player may not play
+  a held-out seed without <code>--held-out</code>, cap or no cap) and one run at a time. The page's requests
   carry a token minted at startup and embedded in the page, which keeps other pages in the browser out; it is not
   a defence against another program on this machine, since whatever can fetch the page can read the token.</li>
   <li><strong>The benchmark</strong> (<code>bakeoff/bench.py</code>) scores recorded runs: 95% t intervals over
@@ -661,7 +665,7 @@ written once and given to every model unchanged (<code>bakeoff/players/question_
   </tbody>
 </table>
 </div>
-<p>The names are the skins of Brain Run's character select (decision 44; Brain Run was called Brain Battle
+<p>The names are the skins of Brain Runners' character select (decision 44; Brain Runners was called Brain Battle
 until decision 51). Until 2026-09-25 the sets were
 <code>composed</code>, <code>choice</code>, <code>two_step</code> and <code>reader</code>, and the plain players were
 <code>jev</code>, <code>haiku</code> and <code>glm</code>: every run recorded so far is filed under those names (and
@@ -681,12 +685,11 @@ its probabilities were. It compares two models <em>within</em> one set, never on
 <h3>Money safety</h3>
 <p>Every paid request goes through <code>bakeoff/clients/core.py</code>: first a <strong>disk cache</strong>
 (key = sha256 of provider, model, senses and the full question set, so a changed prompt can never reuse an
-old answer), then a <strong>hard cap</strong> (<code>--max-requests</code>, per capped paid player, default 0 = replay
-only; Claude Haiku and GLM Flash are capped, Jev plays without a cap since decision 50 and its requests are still
-cached, counted and priced), then the live call, with SDK retries off so the cap is exact. A provider failure is logged as an error
+old answer), then a <strong>hard cap</strong> (<code>--max-requests</code>, per paid player, default 0 = replay
+only; Jev, Claude Haiku and GLM Flash alike since decision 58, every request cached, counted and priced), then the live call, with SDK retries off so the cap is exact. A provider failure is logged as an error
 and the game runs <code>stay</code> (never the solver's move; being rescued would hide exactly what we want to
 see). Keys load from a git-ignored <code>.env</code>. The CLI refuses a live paid run on seeds below 1000 without
-<code>--tournament</code>.</p>
+<code>--held-out</code>.</p>
 
 <h2 id="data">11. Runs, records and replays</h2>
 
@@ -734,8 +737,8 @@ does arithmetic the Python does not.</p>
   <li><strong>Say how sure we are, where the number is read.</strong> No interval below five tracks, no verdict
   without one, and a count of how many verdicts chance alone would give among the pairs compared. A benchmark of
   one track says so above its own table.</li>
-  <li><strong>Budget.</strong> No paid request without a cap and a cache (Jev, whose requests cost you
-nothing, needs only the cache, decision 50); no cap raised without your go-ahead.</li>
+  <li><strong>Budget.</strong> No paid request without a cap and a cache, Jev's included (decision
+58); no cap raised without your go-ahead.</li>
   <li><strong>One fly at a time</strong> on the 8 GB Mac (about 1 GB each).</li>
   <li><strong>How work gets done:</strong> brainstorm → spec → plan → one implementer and one reviewer per task →
   final review → PR. Never on <code>main</code>. Tests first; no test touches the network.</li>

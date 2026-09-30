@@ -29,7 +29,8 @@ Open the address it prints (`http://127.0.0.1:8000/`; the server listens on this
 screen: **Launch** picks runners and a track and plays it, **Records** lists past runs to watch again, **Charts**
 has the study's numbers, **Writeup** the write-up. Ctrl-C stops the server.
 
-The three bots (solver, random, always jump) play for free. `docs/WALKTHROUGH.md` explains every screen.
+The three bots (solver, random, always jump) play for free, and until you add keys and a cap (step 5) or the fly
+data (step 6) they are the runners the page picks for you. `docs/WALKTHROUGH.md` explains every screen.
 
 ## 4. Your keys
 

@@ -18,6 +18,7 @@ RULES = rules_for("v2").variant(max_rows=12)
 
 
 def session(tmp_path, **options):
+    options.setdefault("fly_data_problems", lambda: [])  # the fly data counts as there unless a test says not
     return LiveSession(RULES, out_root=tmp_path / "runs", cache_dir=tmp_path / "cache", **options)
 
 
@@ -345,3 +346,15 @@ def test_jev_is_capped_like_claude_haiku(tmp_path):
 def test_jev_still_keeps_off_the_held_out_seeds(tmp_path):
     with pytest.raises(LobbyError, match="paid players may not play seeds below 1000"):
         session(tmp_path).check(7, ["jev_step1"])
+
+
+def test_a_fly_without_its_data_says_how_to_get_it_instead_of_failing_at_run(tmp_path):
+    """A fresh clone has no data/: the flies are marked unavailable on the page, with the command that fetches
+    the data, instead of looking selectable and failing when RUN is pressed."""
+    lobby = session(tmp_path, fly_data_problems=lambda: ["data/model missing"])
+    for name in ("fly", "fly2"):
+        assert lobby.why_not(name, 1001) == ("the fly model and data are not downloaded: "
+                                             "uv run python -m scripts.fetch_fly_data")
+    assert lobby.why_not("solver", 1001) is None
+    with pytest.raises(LobbyError, match="fetch_fly_data"):
+        lobby.check(1001, ["fly", "solver"])

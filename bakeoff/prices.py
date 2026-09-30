@@ -15,5 +15,5 @@ PRICE_USD = {"haiku_plain": 0.0006, "haiku_step1": 0.0010, "haiku_guided": 0.000
              "jev_step2": 0.00003, "jev_map": 0.00012,
              "glm_plain": 0.0, "glm_step1": 0.0, "glm_guided": 0.0, "glm_step2": 0.0, "glm_map": 0.0}
 
-# Jev's provider bills the user nothing (decision 50): its price is an estimate, charted as one
+# Jev's provider does not bill per request: its price is an estimate from tokens, charted as one
 ESTIMATED = frozenset(name for name in PRICE_USD if name.startswith("jev_"))

@@ -24,6 +24,7 @@ UNCAPPED_HELP = (f"{', '.join(UNCAPPED)} play without a cap, counted and priced"
                  else "every paid player is capped, Jev included (decision 58)")
 DEMO_PLAYERS = "fly,jev_step1,haiku_plain"  # the demo's three: what the character select offers first
 DEMO_SEED = 1001
+BOTS = ["solver", "random", "always_jump"]  # the demo's fallback when none of its three can play: free, no data
 
 
 def _add_game_arguments(parser: argparse.ArgumentParser) -> None:
@@ -145,6 +146,12 @@ def _live(args) -> int:
                if args.window is not None and args.window != RULES[args.game].window else None)
     session = LiveSession(rules, out_root=args.out, cache_dir=args.cache, max_requests=args.max_requests,
                           held_out=args.held_out, args=run_args, paid_blocked=blocked, ready=(seed, names))
+    if args.players is None:
+        # the demo is a suggestion: leave out whoever could not play (the fly without its data, a paid player with
+        # no requests to ask, as on a fresh clone), and run the bots if nobody is left
+        names = [n for n in names if session.why_not(n, seed) is None
+                 and (n not in PAID or args.max_requests > 0)] or BOTS
+        session.ready_players = names
     try:
         session.check(seed, names)  # what the command line asks for, refused before anything is bound
     except LobbyError as e:
