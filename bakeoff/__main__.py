@@ -150,7 +150,7 @@ def _live(args) -> int:
         # the demo is a suggestion: leave out whoever could not play (the fly without its data, a paid player with
         # no requests to ask, as on a fresh clone), and run the bots if nobody is left
         names = [n for n in names if session.why_not(n, seed) is None
-                 and (n not in PAID or args.max_requests > 0)] or BOTS
+                 and (n not in PAID or n in UNCAPPED or args.max_requests > 0)] or BOTS
         session.ready_players = names
     try:
         session.check(seed, names)  # what the command line asks for, refused before anything is bound
