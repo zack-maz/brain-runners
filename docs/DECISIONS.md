@@ -382,6 +382,14 @@
     held-out track, so `jev_map` has no Claude Haiku twin in the study; the Writeup says so and why (the priciest
     skin, and its Jev twin is among the weakest players).
 
+55. **`glm_plain` reads a bare move word as that move** (the user, 2026-09-29). Asked for `{"action": ...}`, GLM
+    Flash answered the bare word (`stay`, `right`) on every decision of its free-tier trial, so all of them were
+    invalid and it failed decision 53's under-2% rule on its own, while GLM's four other skins passed. Of three
+    choices (GLM out, only `glm_plain` out, accept the word) the user chose to accept it: a reply that is exactly
+    one known move, after the fence is stripped, from a finished turn, is read as that move; anything looser stays
+    invalid. The reading is ours, and `glm_plain` is no longer an exact twin of `haiku_plain` in how it is read.
+    Old runs keep their recorded `invalid` flags; `glm_plain` replays practice tracks 1001–1005 to be judged again.
+
 Where we are and what comes next: `docs/NEXT.md`.
 
 ## Prior art to reuse

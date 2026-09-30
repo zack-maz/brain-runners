@@ -107,7 +107,7 @@ is the log of past runs. Found on the way: an old run's `meta.json` kept its mod
 merging it with a new run failed; `report.load_meta` now renames them. After the review and merge come the free
 runs (step 2, spec section 6). There is no tournament any more: a
 research project on which mind performs best for its cost and speed, on held-out seeds 100–199 (free players all
-100, Claude Haiku ×5 the first 15 within about 25 USD of API credit, GLM Flash the first 15 only if its free tier
+100, Claude Haiku ×4 the first 15 within 10 USD (decision 54), GLM Flash the first 15 only if its free tier
 fails under 2% of decisions), a new Charts tab, and one Writeup page drafted by Claude for the user to rewrite.
 **Study step 2, the free runs, is done** (2026-09-28 to 09-29): every free player on all 100 held-out tracks
 (Charts, scope held_out). Mean rows: solver 149.2 (trapped on 102 and 130: it trusts only the visible window),
@@ -115,7 +115,7 @@ fails under 2% of decisions), a new Charts tab, and one Writeup page drafted by 
 `jev_plain` 25.3, random 22.4. A DNS outage on 09-28 18:24 dropped every Jev mid-batch (decision 52 worked: the
 others played on); the missing Jev tracks were rerun, and Charts keeps each pair from the newest run that completed
 it. **Step 4, Claude Haiku** (decision 54: 10 USD, four skins, no `haiku_map`): track 100 played 2026-09-29
-(`runs/20260929-175320`, 0.38 USD), tracks 101–114 running with `--max-requests 2100`. Step 3, GLM's decision,
+(`runs/20260929-175320`, 0.37 USD) and tracks 101–114 are done: 5.09 USD in all (`docs/COSTS.md`). Step 3, GLM's decision,
 waits on the drain (stuck on track 1004 while the Mac slept on battery).
 PRs #8 to #13 are merged (fly2 settled, Brain Battle, fly3 stopped, Brain Run and Jev uncapped, the live/cached card,
 drop-out: a player that stops leaves the others playing, decision 52).

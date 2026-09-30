@@ -280,8 +280,8 @@ it jumps, and a dodge does not look where it lands).
 ## The study: Claude Haiku on held-out tracks 100–114 (game v2, 2026-09-29, decision 54)
 
 Four skins (`haiku_plain`, `haiku_step1`, `haiku_guided`, `haiku_step2`; no `haiku_map`), 15 tracks each, capped at
-2250 requests per skin in total (worst case 9.23 USD). Spent **about 5.10 USD** (the report's `cost_usd`, from the
-tokens): track 100 0.38 (`runs/20260929-175320`); 101–114 in `runs/20260929-175905` (`haiku_plain` 0.35,
+2250 requests per skin in total (worst case 9.23 USD). Spent **5.09 USD** (the report's `cost_usd`, from the
+tokens): track 100 0.37 (`runs/20260929-175320`); 101–114 in `runs/20260929-175905` (`haiku_plain` 0.35,
 `haiku_step1` 1.26 up to track 112), `runs/20260929-193446` (`haiku_step1` 113–114, 0.17) and
 `runs/20260929-193721` (`haiku_guided` 0.86, `haiku_step2` 2.08). The Mac slept with its lid closed during
 `runs/20260929-175905`, and the network loss stopped three skins (decision 52); the rerun replayed the answered
