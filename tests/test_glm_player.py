@@ -111,3 +111,21 @@ def test_preflight_names_the_zhipu_key(tmp_path, monkeypatch):
 def test_the_factory_makes_it_and_it_spends_nothing_without_a_budget():
     made = make_player("glm_plain")
     assert made.name == "glm_plain" and made.budget.remaining == 0
+
+
+@pytest.mark.parametrize("text, chosen", [("stay", "stay"), ("right", "right"), (" jump\n", "jump"),
+                                          ("```\nleft\n```", "left")])
+def test_a_bare_move_word_is_read_as_that_move(tmp_path, text, chosen):
+    """Decision 55: GLM Flash, asked for {"action": ...}, answers the bare word ("stay"). The whole reply being
+    exactly one known move is read as that move; the log keeps the text as it came."""
+    glm, _ = player(tmp_path, glm_reply(text))
+    decision = glm.act(senses_for())
+    assert decision.chosen_action == chosen and not decision.invalid and not decision.needs_fallback
+    assert decision.answers["text"] == text
+
+
+@pytest.mark.parametrize("reply", [glm_reply("Stay"), glm_reply("stay."), glm_reply("stay or jump"),
+                                   glm_reply("stay", finish_reason="length")])
+def test_anything_looser_than_one_bare_move_from_a_finished_turn_stays_invalid(tmp_path, reply):
+    glm, _ = player(tmp_path, reply)
+    assert glm.act(senses_for()).invalid
