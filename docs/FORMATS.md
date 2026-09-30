@@ -1,19 +1,25 @@
-# Step record and `meta.json` (schema version 1)
+# Data formats
+
+What a run leaves on disk, and what the page draws from it. The runner writes step records (the first part);
+`bakeoff/replay.py` turns run directories into the replay data the viewer draws (the second part). Both are
+contracts: change one only with its readers.
+
+## Step record and `meta.json` (schema version 1)
 
 The contract between the runner and everything that reads a run: the report and
 `bakeoff/replay.py`, which turns run directories into the replay viewer's data
-(`docs/REPLAY_DATA.md`; the viewer is JavaScript and cannot import Python, so the rules below are
+(the replay data, below; the viewer is JavaScript and cannot import Python, so the rules below are
 applied once, in Python). The code that writes it is `bakeoff/runner.py`; the spec's "Step record"
 section is the short version and points here.
 
-## Files in a run directory
+### Files in a run directory
 
 - `meta.json` — one object per run, rewritten when the run ends (see below).
 - `<player>.jsonl` — one file per player. One JSON object per line, one line per decision
   (one row of the game). Lines of one seed are contiguous and seeds come in run order. A run
   killed mid-write may leave a truncated last line; readers skip it.
 
-## Two moments in one record
+### Two moments in one record
 
 A record is written after the move, so it mixes two moments.
 
@@ -27,7 +33,7 @@ describe the decision itself.)
 `row` and `lane` are where the runner stood *before* the move. To draw the state after the move,
 use the next record's `row`/`lane`, or derive the landing tile as below.
 
-## Step record keys
+### Step record keys
 
 | key | type | meaning |
 | --- | --- | --- |
@@ -61,7 +67,7 @@ use the next record's `row`/`lane`, or derive the landing tile as below.
 The fallback rule: when `gated`, `invalid`, `error` is set, or `chosen_action` is null, the
 runner executes `stay`. It is never the solver's move.
 
-### `senses`
+#### `senses`
 
 `{lane, lanes, rows_survived, ahead, actions}`. `lane` and `rows_survived` are at decision time
 (so `senses.lane == lane`). `lanes` is 12, the tunnel's width (a separate `Rules` field, not changed by
@@ -71,7 +77,7 @@ applied. The 6 rows and the 3 lanes either side are the game's default `lookahea
 (`bakeoff/game/rules.py`); a run with a different vision (`--lookahead`, `--window`, decision 22) shows
 more or fewer entries here. `actions` maps each action to a description.
 
-### `info` of the fly
+#### `info` of the fly
 
 One object per decision, everything the viewer needs to draw the fly's "mind". Neuron-group keys
 are `<cell type>_<side>`: `DNa01`, `DNb01` (steering), `DNp01` (Giant Fiber) and `DNa02` (logged
@@ -90,7 +96,7 @@ only, never decides), each `_left` and `_right`; every group is a single neuron.
 | `turn_threshold_hz`, `jump_threshold_hz` | float | the fly's only tuning (ours), as used for this decision |
 | `wall_ms` | float | wall-clock time of the simulated window |
 
-### Paid players
+#### Paid players
 
 One request per row. `latency_ms` is set only for a live request; `cache_hit: true` means the answer
 came from `.cache/responses` and cost nothing. A provider failure sets `error` (`"<ExceptionName>:
@@ -119,7 +125,7 @@ decision is `invalid` unless every answer is usable (a Noul a finite number from
 moves; for an LLM twin also JSON with `stop_reason` `end_turn`). The report's `brier_all` scores every Noul whose
 truth the senses show (`bakeoff.senses.truth_of`).
 
-## The landing tile
+### The landing tile
 
 Given `row`, `lane` and `executed_action` (`lanes` from `track.lanes`):
 
@@ -134,7 +140,7 @@ reaches that tile**: it stays on (`row`, `lane`), and no further record follows;
 at the landing tile. A landing row past `max_rows` (a jump from `max_rows - 1`) is past the finish
 line and cannot kill. `finished` is true when the runner's row after the move is `>= max_rows`.
 
-## `track`
+### `track`
 
 Present only in the first record of each seed (null elsewhere): `{seed, lanes, max_rows, gaps}`.
 `gaps[r]` is the sorted list of lane indices that are gaps in row `r`; the list has
@@ -147,7 +153,7 @@ in another version. Within a version the difficulty ramp is fixed (`difficulty_r
 smaller `max_rows` plays the first rows of the same track (its `gaps` is a prefix of the full track's).
 All players on a seed see the same track.
 
-## `meta.json`
+### `meta.json`
 
 | key | type | meaning |
 | --- | --- | --- |
@@ -180,3 +186,80 @@ as optional.
 
 A run that is not `completed` may lack records for some players or seeds; compare `players` and
 `seeds` with the files to see what is missing.
+
+## Replay data (replay version 1)
+
+The contract between `bakeoff/replay.py` (Python, which knows the rules of the game) and the
+viewer in `viewer/` (JavaScript, which only draws). `uv run python -m bakeoff view <run_dir>...`
+builds this object from one or more run directories and embeds it in one HTML file. The step
+records it is built from are described above.
+
+### Top level
+
+| key | type | meaning |
+| --- | --- | --- |
+| `replay_version` | int | 1. Bumped on any breaking change to this object |
+| `game` | object or null | the game every run in the replay played (`Rules.to_json()`: `version`, `lanes`, `max_rows`, `lookahead`, `window`, the ramp), null when no run has a `meta.json`. Runs of different games are an error (`ValueError`, exit 2): a seed is a different track in another game. Runs that differ only in `max_rows` are the same game. A `game` block without `version` is v1 |
+| `runs` | object[] | one per run directory, in the order given: `run_id` plus these keys of its `meta.json`, null when absent: `status`, `git_sha`, `git_dirty`, `started_at`, `finished_at`, `players`, `seeds`, `game`, `fly`, `models`, `requests`. A directory without `meta.json` is named after the directory |
+| `players` | string[] | players with at least one episode, ordered by `CONTESTANTS` in `bakeoff/replay.py`: `fly`, `jev_step1`, `haiku_plain` (the demo's three), then `jev_plain`, `glm_plain`, `fly2`, `jev_guided`, `haiku_guided`, `haiku_step1`, `jev_step2`, `haiku_step2`, `jev_map`, `haiku_map`, `glm_step1`, `glm_guided`, `glm_step2`, `glm_map` (runs recorded under the old names, `llm*` and `jev_composed` and the like, are read as these, decision 44); any player not in that list follows, in the order the runs planned them |
+| `seeds` | int[] | every seed with at least one episode, ascending |
+| `tracks` | object | `{"<seed>": track}`, the step record's `track`. When runs played the same seed with different `max_rows`, the longest is kept (the shorter one is its prefix) |
+| `episodes` | object[] | one per (player, seed), sorted by seed, then by `players` order |
+| `scoreboard` | object | `columns`: `run_id` followed by the report's columns; `rows`: the report's rows, one per player per run, in `players` order; `same_seeds`: false when the scoreboard's rows do not all average the same seeds (the means count complete episodes only, so a seed on which a player was cut off, or a player that never started, makes it false), so their means are not a fair comparison and the viewer says so |
+
+One (player, seed) may appear in only one of the run directories, and only once within a run
+directory. Two versions of the same episode are an error (`ValueError`, exit 2 from the CLI),
+never a silent pick.
+
+### Episode
+
+`player`, `seed`, `run_id`, `complete` (false for a run that was cut off: no death, no finish),
+`finished`, `death_cause`, `rows_survived` (all three from the last record), `max_rows` of the run
+that played it, `questions` and `frames`.
+
+`questions` lists the distinct `questions` objects of the episode's records, normally one. A frame
+points into it with `q`, so the briefing text is stored once and not once per row.
+
+### Frame
+
+A frame is a step record without `run_id`, `player`, `seed`, `senses`, `questions` and `track`,
+plus three keys:
+
+| key | type | meaning |
+| --- | --- | --- |
+| `ahead` | int[][] | the `gaps_relative` lists of `senses.ahead`, nearest row first: what the player was shown |
+| `landing` | `[row, lane]` | the tile the executed move lands on, by the rules above ("The landing tile"). For every frame but the last it is the next frame's `row` and `lane`; after a fatal move it is the gap the runner fell into |
+| `q` | int or null | index into the episode's `questions`; null when nothing was asked |
+
+Frames are sorted by `row`. A jump advances two rows, so rows are not consecutive.
+
+### How the viewer uses it
+
+The page never reads this object directly: `viewer/feed.js` hands it over as calls (`onMeta` with `game`, then
+`onEpisode` and `onFrame` per episode), the same calls a live run makes, so the two cannot drift apart.
+
+### The live stream
+
+`bakeoff live` serves the page with an empty replay (`episodes: []`, the run's entry in `runs`) and
+`<body data-live="/events">`, and streams Server-Sent Events from `/events`, built by the same functions as
+this object (`bakeoff.replay.frame_of`, `summary_of`):
+
+| event | data |
+| --- | --- |
+| `episode` | `{episode, track}`: an episode as above without `frames` (`complete` false, `rows_survived` 0), sent once, just before the player's first frame |
+| `frame` | `{player, seed, frame, summary}`: one frame as above; `summary` is `{complete, finished, death_cause, rows_survived}` after it |
+| `end` | `{status, runs, scoreboard}`: the run's final status and the replay's `runs` and `scoreboard` |
+| `error` | `{message}`: why the run stopped early (a request cap, a provider that kept failing) |
+
+A page that connects late or reconnects gets the whole history again; `viewer/feed.js` drops what it
+already has. After `end` the page closes the stream.
+
+Replay time is measured in rows and every player is on the same clock: at time `t` every runner
+still alive is at row `t`, so they all run the same stretch of one tunnel. The frame on screen is
+the last one with `row <= t`; between `row` and `landing[0]` the runner moves from one to the
+other (a jump takes two ticks). After the last frame's landing the episode is `dead`, `finished`
+or, when `complete` is false, `cut`.
+
+All text from a log (an LLM's answer, an error message, a question) is escaped before it is put
+on the page, and the embedded JSON writes every `<` as `\u003c` so nothing in it can end its
+`<script>` element. The page loads nothing from the network.

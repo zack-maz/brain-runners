@@ -352,6 +352,6 @@ their own tests, skipped when node is not installed.
 ## Where to go next
 
 - `docs/EXPLAINER.html` — what the project is, from the idea down to the code.
-- `docs/NEXT.md` — where things stand and what comes next. `docs/DECISIONS.md` — every decision, numbered.
+- `docs/history/NEXT.md` — where things stand and what comes next. `docs/DECISIONS.md` — every decision, numbered.
 - `docs/COSTS.md` — what every paid run actually cost and showed.
-- `docs/STEP_RECORD.md` and `docs/REPLAY_DATA.md` — the record and replay formats.
+- `docs/FORMATS.md` and `docs/FORMATS.md` — the record and replay formats.

@@ -1,6 +1,6 @@
 # Spike 04: does any fly2 candidate turn away from a gap while the centre is driven hard? (2026-09-24, throwaway)
 
-Gate 1 of `docs/superpowers/specs/2026-09-24-fly2-design.md` ("Order and gates", step 1). Real brain (Shiu et al.
+Gate 1 of `docs/history/superpowers/specs/2026-09-24-fly2-design.md` ("Order and gates", step 1). Real brain (Shiu et al.
 model, the project's `Brain`), one PoissonGroup over LPLC2, LC4, LPLC4 and LC22 of both eyes, 100 ms windows, 8
 seeded trials per condition (seeds 4000–4007). Per condition only the candidate's own cells get a Poisson target's
 zero refractory period; the rest keep the model's default. Script `probe.py`, every number in `probe.json`.

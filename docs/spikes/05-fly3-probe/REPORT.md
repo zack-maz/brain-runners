@@ -1,6 +1,6 @@
 # Spike 05: the fly3 probe (2026-09-25, throwaway)
 
-Question (decision 45, `docs/superpowers/specs/2026-09-25-fly3-design.md`, "Order and gates → 1. The probe"): can
+Question (decision 45, `docs/history/superpowers/specs/2026-09-25-fly3-design.md`, "Order and gates → 1. The probe"): can
 every LPLC2/LC4 cell get its own place on the eye (part A); do the brain's descending neurons (DNs) then know where a
 single gap is (part B); and does a readout learned by imitating the solver play at least as well as the same learner
 without the brain, and clearly better than the same readout on a blind brain (part C)?

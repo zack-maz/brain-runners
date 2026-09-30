@@ -6,10 +6,12 @@ which mind performs best for its cost and speed (decision 53). Read these before
 
 0. `docs/EXPLAINER.html` — the plain-language tour of the whole project, high level first, then technical
    (written 2026-09-21, refreshed 2026-09-24 after the updates and 2026-09-25 for fly2).
-1. `docs/NEXT.md` — where things stand and what to do next, in order (rewritten as the state changes).
-   `docs/DECISIONS.md` — what the user has decided, numbered, only ever added to.
-2. `docs/superpowers/specs/2026-09-19-tunnel-run-design.md` — the approved design (binding), extended by
-   `docs/superpowers/specs/2026-09-20-demo-player-design.md` (the demo player; also binding).
+1. `docs/DECISIONS.md` — what the user has decided, numbered, only ever added to; its last entries are where
+   things stand. `docs/history/` is the build record, kept as written: `NEXT.md` (the running state until the
+   release, decision 57), and every spec, plan and mock-up. New specs and plans still go to `docs/superpowers/`
+   (the workflow's default), which starts fresh.
+2. `docs/history/superpowers/specs/2026-09-19-tunnel-run-design.md` — the approved design (binding), extended by
+   `docs/history/superpowers/specs/2026-09-20-demo-player-design.md` (the demo player; also binding).
 3. `docs/RESEARCH.md` — fly-brain resources. Spike results: branch `spike/fly-steering`,
    `docs/spikes/01-fly-steering/REPORT.md` (throwaway code; port ideas, do not merge it). Also spike 02, branch
    `spike/jev-questions`, `docs/spikes/02-jev-questions/REPORT.md` (why Jev's one-shot Choice, now `jev_plain`, fails), and spike 03,
@@ -18,24 +20,24 @@ which mind performs best for its cost and speed (decision 53). Read these before
 ## Status
 
 Design approved 2026-09-19. Phase 1 built (game, senses, baselines, runner, report, CLI). Phase 2
-built (plan: `docs/superpowers/plans/2026-09-19-phase2-fly-player.md`): fly player on the real
+built (plan: `docs/history/superpowers/plans/2026-09-19-phase2-fly-player.md`): fly player on the real
 Brian2 model, looming weighting and two thresholds fixed on practice seeds 1000–1199 and frozen
 (`docs/calibration/REPORT.md`; never retune, never let seeds below 1000 influence them). First
 scoreboard in `docs/calibration/RESULTS.md`. Phase 3 built (plan:
-`docs/superpowers/plans/2026-09-20-phase3-paid-players.md`): `jev_plain` and `haiku_plain` players (then `jev` and `haiku`) behind
+`docs/history/superpowers/plans/2026-09-20-phase3-paid-players.md`): `jev_plain` and `haiku_plain` players (then `jev` and `haiku`) behind
 `bakeoff/clients/core.py` (disk cache, hard cap per paid player, no SDK retries). First costs in
-`docs/COSTS.md`. Phase 4 built (plan: `docs/superpowers/plans/2026-09-20-phase4-replay-viewer.md`):
-`bakeoff/replay.py` merges run directories into one replay object (`docs/REPLAY_DATA.md`) and
+`docs/COSTS.md`. Phase 4 built (plan: `docs/history/superpowers/plans/2026-09-20-phase4-replay-viewer.md`):
+`bakeoff/replay.py` merges run directories into one replay object (`docs/FORMATS.md`) and
 `python -m bakeoff view` embeds it with `viewer/` in one offline HTML file (PR #3, merged). Phase 5a built
-(plan: `docs/superpowers/plans/2026-09-21-phase5a-jev-composed.md`): the `jev_step1` player (four pointed
+(plan: `docs/history/superpowers/plans/2026-09-21-phase5a-jev-composed.md`): the `jev_step1` player (four pointed
 Nouls, code picks the action least likely to land on a gap; the wording and the rule are ours), 247 rows on
 practice track 1000 (`docs/COSTS.md`). Phase 5b built (plan: `...-phase5b-demo-player.md`): the replay page is the
-demo player, the project's main tool (design: `docs/superpowers/specs/2026-09-20-demo-player-design.md`): one tunnel,
+demo player, the project's main tool (design: `docs/history/superpowers/specs/2026-09-20-demo-player-design.md`): one tunnel,
 three pixel runners, the mind strip, blue as the cursor, the user's brand, one offline file. Phase 5c built (plan:
 `...-phase5c-go-live.md`): `python -m bakeoff live` plays a track in lockstep in real time, records a normal run
 directory and streams it into the same page from a loopback server; first real go-live on practice seed 1001
 (`runs/20260921-132459`). Phase 5 is merged (PR #4). Before phase 6 come ten
-updates (`docs/UPDATES.md`, decision 20), on branch `phase6-updates`. Update 1, game v2, is built (plan
+updates (`docs/history/UPDATES.md`, decision 20), on branch `phase6-updates`. Update 1, game v2, is built (plan
 `...-update1-game-v2.md`): named game versions in `bakeoff/game/rules.py`; `v2` (default) is 150 rows at full
 difficulty by row 100, `v1` is the old 300-row game, pinned tile for tile; runs record their game and `view` never
 mixes two; everything recorded so far is v1 (`--game v1` replays it). Update 2a, the Jev family, is built (plan
@@ -47,24 +49,25 @@ reader → map, the one-shot `jev`/`haiku`/`glm` → `*_plain`) and Haiku's play
 its paid runs are done (five v2 practice tracks, `docs/COSTS.md`). Update 2b, the fly, stopped at its probe (spike 03, decision 30). Item 7, the benchmark, is built:
 `python -m bakeoff bench` (`bakeoff/bench.py`, page `viewer/bench.html`), decision 31. Item 10, the GLM Flash twins, is
 built and parked after one track (decisions 33–34). The page (items 4, 5, 8 and 9; decision 35, design
-`docs/superpowers/specs/2026-09-22-page-control-design.md`) is built as updates 3a (the control channel, the session
+`docs/history/superpowers/specs/2026-09-22-page-control-design.md`) is built as updates 3a (the control channel, the session
 ceiling, the lobby) and 3b (the logs, the Run and Analysis tabs, the picker, the benchmark in the page), each
 reviewed and fixed; decisions 36–39 settle their open questions and the rename of Claude Haiku's players.
 **Everything before phase 6 is built and on `main`** (PR #6 "Opus v1", merged 2026-09-25); what is left of it is
 GLM Flash's parked tracks. `fly2`, a second pure fly with a richer input of ours (M3, a sideways channel), is
 built, calibrated, played and on `main` (PR #7, merged 2026-09-25; decisions 41–43, spec
-`docs/superpowers/specs/2026-09-24-fly2-design.md`, plan `docs/superpowers/plans/2026-09-24-fly2.md`): its numbers
+`docs/history/superpowers/specs/2026-09-24-fly2-design.md`, plan `docs/history/superpowers/plans/2026-09-24-fly2.md`): its numbers
 are frozen (`docs/calibration/FLY2_REPORT.md`), its real run and its live smoke are done; on 100 fresh seeds it beats `fly` by 13.4 rows (decision 47).
 `fly3`, a trained readout on the frozen wiring (decision 48), stopped at its probe: the same learner with no brain
 played better (spike 05, decision 49), so it is not built. Brain Runners (called Brain Battle until decision 51, Brain Run until decision 57), the
 front of `bakeoff live`, is on `main` (PR #9, merged 2026-09-26; renamed in PR #11). PR #11 (merged 2026-09-26) also
 lets Jev play without a cap (decision 50). PRs #8–#12 are merged; since #12 a results card reads
-"N live" over "M cached". Phase 6 is the study (decision 53, spec `docs/superpowers/specs/2026-09-28-study-design.md`),
-not a tournament: its code is built on branch `study` (plan `docs/superpowers/plans/2026-09-28-study.md`): the seed
+"N live" over "M cached". Phase 6 is the study (decision 53, spec `docs/history/superpowers/specs/2026-09-28-study-design.md`),
+not a tournament: its code is built on branch `study` (plan `docs/history/superpowers/plans/2026-09-28-study.md`): the seed
 flag `--held-out`, the benchmark's cost per track, time per decision, failures and frontiers, and Brain Runners'
 Charts and Writeup screens. Its runs are done (decisions 54–56), and the project is released as the public
 repository Brain Runners (decision 57; Jev capped again, decision 58). Probe reports are copied into `docs/spikes/`;
-`calibration/` lives under `docs/`. Each phase gets its own plan. Resume from `docs/NEXT.md`.
+`calibration/` lives under `docs/`. Each phase gets its own plan. Resume from the last decisions in `docs/DECISIONS.md` and
+`docs/history/NEXT.md`'s "Now" section.
 
 ## How we work here
 
@@ -114,7 +117,7 @@ repository Brain Runners (decision 57; Jev capped again, decision 58). Probe rep
   (standard library, no dependency). It builds one fly brain in its own process, shared by every fly of a run
   (`bakeoff/fly/shared.py`): never start it next to another fly run. Its records come from `runner.play_row` and
   its frames from `replay.frame_of`, the same functions `run` and `view` use; keep it that way.
-- The page runs the show (update 3a, design `docs/superpowers/specs/2026-09-22-page-control-design.md`): the command
+- The page runs the show (update 3a, design `docs/history/superpowers/specs/2026-09-22-page-control-design.md`): the command
   binds the port and sets the ceiling, the page (since Brain Battle, now Brain Runners, its front: the character select picks the
   players, the track select the track and holds the money confirmation) starts and cancels the run (`GET /state`, `POST /run`, `POST /cancel`, `GET /events?run=`). Every request but the page itself
   carries a token minted at startup and embedded in the page (in the header; in the query for the event stream
@@ -125,7 +128,7 @@ repository Brain Runners (decision 57; Jev capped again, decision 58). Probe rep
   own record of what it spent), runs one
   `LiveRun` at a time and keeps serving so another track can be played without restarting. `--start` plays the
   command line's own run at once, as before, and holds its first decision until a browser is listening.
-- Brain Runners (decision 45, spec `docs/superpowers/specs/2026-09-25-brain-battle-design.md`) is on `main` (PR #9,
+- Brain Runners (decision 45, spec `docs/history/superpowers/specs/2026-09-25-brain-battle-design.md`) is on `main` (PR #9,
   merged 2026-09-26), built in two plans as Brain Battle and renamed by decision 51 (PR #11): on screen it is Brain
   Run and its fighters are runners ("Choose your runners", "Ready to run", "‹ Runners", "N runners"), and the home
   brain's glow pulses; code ids, file names and comments keep the old names. Plan a: `bakeoff/roster.py` is the one list of characters and skins (a test
@@ -135,7 +138,7 @@ repository Brain Runners (decision 57; Jev capped again, decision 58). Probe rep
   it); the report has `wrong_moves` and `fatal_wrong_moves`. Read-only routes sit behind the token:
   `GET /results?run=`, `GET /records`, `GET /charts`, `GET /writeup`, `GET /replay?run=`; `run=` must be a run id naming a directory
   under the session's `--out` with a `meta.json`, or it is a 404. Plan b, the screens
-  (`docs/superpowers/plans/2026-09-25-brain-battle-b.md`, decision 46): `bakeoff live` opens on the front
+  (`docs/history/superpowers/plans/2026-09-25-brain-battle-b.md`, decision 46): `bakeoff live` opens on the front
   (home, character select, track select, the run screen, results that open by themselves, Records with the past
   runs and the whole "what is ours" section); since the study (decision 53) the leaderboard and the head to head
   are on Charts (`bakeoff/charts.py`: every recorded track of the game, with the benchmark's trade-off charts

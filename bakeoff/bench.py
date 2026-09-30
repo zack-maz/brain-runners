@@ -1,5 +1,5 @@
 """The benchmark (item 7): which player is better and how sure we can be, and what each costs in money and time
-for what it scores, from recorded runs only (docs/superpowers/specs/2026-09-22-benchmark-design.md). It reads run
+for what it scores, from recorded runs only (docs/history/superpowers/specs/2026-09-22-benchmark-design.md). It reads run
 directories and spends nothing."""
 
 from __future__ import annotations

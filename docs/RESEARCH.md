@@ -2,7 +2,7 @@
 
 This is a research pass from 2026-09-19; it is not kept current. The project uses FlyWire v783 connectivity
 (138,639 neurons in the model) and steers with DNa01 + DNb01 (DNa02 is logged only, never decides). For current
-facts about the fly, see `docs/STEP_RECORD.md` and the fly code (`bakeoff/fly/`).
+facts about the fly, see `docs/FORMATS.md` and the fly code (`bakeoff/fly/`).
 
 Gathered by a web-research agent; items marked (unverified) are its claims about very
 recent material that nobody here has checked by running code.
@@ -48,7 +48,7 @@ inspiration and leads to test, not as precedent.
 ## 2026-09-24: research for fly2
 
 Three research agents answered briefs before the design of `fly2`
-(`docs/superpowers/specs/2026-09-24-fly2-design.md`): why `fly` dies, which inborn circuits fit the game, and what
+(`docs/history/superpowers/specs/2026-09-24-fly2-design.md`): why `fly` dies, which inborn circuits fit the game, and what
 other projects did with this model. Their reports and the briefs they were given are in
 `docs/research/2026-09-24-fly/`. Spike 04, the probe that followed, is on branch `spike/fly2-probe`,
 `docs/spikes/04-fly2-probe/REPORT.md`.
