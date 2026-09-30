@@ -303,8 +303,8 @@ def test_the_notes_never_say_cost_comes_from_live_decisions_only():
         assert "cost come from live" not in note and "cost comes from live" not in note, note
         assert "cost per row" not in note, note  # no column shows it any more
     assert NOTES[0] == "Time comes from live decisions only: a cache hit records none."
-    assert JEV_PRICE_NOTE == ("Jev's USD per track is an estimate (about 0.00003 USD a request, docs/COSTS.md); it "
-                              "costs you nothing.")
+    assert JEV_PRICE_NOTE == ("Jev's USD per track is an estimate (about 0.00003 USD a request, docs/COSTS.md); what "
+                              "it really costs depends on your TypeSafe plan.")
 
 def test_rows_per_cent_divides_by_the_cost_of_a_track():
     from bakeoff.bench import player_numbers

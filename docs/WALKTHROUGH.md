@@ -6,10 +6,10 @@ hands-on guide: every command, every flag that matters, every part of the page, 
 
 Two rules to read first, because everything else assumes them:
 
-- **Claude Haiku and GLM Flash spend nothing unless you pass `--max-requests`.** The default is 0, which replays
-  answers already in the cache and stops a capped paid player at its first uncached question. **Jev has no cap**
-  (decision 50): its requests cost you nothing, so a `jev_*` player asks whenever its answer is not cached, and every
-  request is still cached, counted and priced. Watching, scoring and replaying are always free.
+- **Jev, Claude Haiku and GLM Flash spend nothing unless you pass `--max-requests`.** The default is 0, which
+  replays answers already in the cache and stops a paid player at its first uncached question. Every request is
+  cached, counted and priced (decision 58; until then Jev played without a cap, decision 50). Watching, scoring and
+  replaying are always free.
 - **Seeds below 1000 are tournament seeds.** Nothing is tuned on them and no paid player may play one until the
   tournament (`--tournament`). Seeds 1000 and up are practice.
 
@@ -208,11 +208,8 @@ Run tab without the tabs, and what the Analysis tab shows moves to the results a
    practice tracks 1000–1019, each marked with how many of this lineup played it before. Seeds below 1000 are
    locked unless the command was started with `--tournament`. The preview draws the real track. Each runner's
    line says whether it played this track before and its **worst case**: rows × requests per row × price, capped
-   by what is left of the session's budget (Jev's is not capped: its worst case is the whole track), assuming nothing
-   is cached; the total is under it, and the line below the total says "Jev plays without a cap" when Jev is in the
-   lineup. ‹ Runners goes back with the lineup kept.
-4. **RUN.** A lineup that spends nothing starts at once, and so does one whose only spending is Jev's (its
-   requests cost you nothing; its worst case is still shown). If the run can spend, the first press of RUN (or Enter)
+   by what is left of the session's budget, assuming nothing is cached; the total is under it. ‹ Runners goes back with the lineup kept.
+4. **RUN.** A lineup that spends nothing starts at once. If the run can spend, the first press of RUN (or Enter)
    turns it into `CONFIRM` with `spend at most …` underneath, and a second, separate press starts the run; a press
    within half a second of the first, or a held Enter, does not count. Changing the track or the lineup disarms
    it. If the run is refused, the reason shows above the button.
@@ -246,8 +243,8 @@ Every paid request goes through three gates, in order:
 1. **The disk cache** (`.cache/responses`). The key is a hash of provider, model, the senses and the full question
    set, so a changed prompt can never reuse an old answer. A track that was played before replays for free.
 2. **The hard cap** (`--max-requests`, per capped paid player, default 0). SDK retries are off, so the cap is exact.
-   Jev has no cap (decision 50, `UNCAPPED`, `UncappedBudget`): its requests cost you nothing, and they are still
-   counted and priced on the track select, the results and in `meta.json` (`"max": null`). In a
+   Jev included (decision 58). Every request is counted and priced on the track select, the results and in
+   `meta.json`. In a
    live session the cap belongs to the session, not the run: each run records only what it spent, and nothing the
    page sends can raise the ceiling.
 3. **The seed rule.** Paid players may not play seeds below 1000 without `--tournament`.

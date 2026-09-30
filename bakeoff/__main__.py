@@ -20,8 +20,8 @@ from bakeoff.session import FIRST_PRACTICE_SEED, LiveSession, LobbyError
 from bakeoff.view import render_html
 
 CAPPED = tuple(name for name in PAID if name not in UNCAPPED)
-UNCAPPED_HELP = (f"Jev ({', '.join(UNCAPPED)}) plays without a cap: its requests cost you nothing (decision 50), "
-                 "and are still counted and priced")
+UNCAPPED_HELP = (f"{', '.join(UNCAPPED)} play without a cap, counted and priced" if UNCAPPED
+                 else "every paid player is capped, Jev included (decision 58)")
 DEMO_PLAYERS = "fly,jev_step1,haiku_plain"  # the demo's three: what the character select offers first
 DEMO_SEED = 1001
 
@@ -96,8 +96,7 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def _players(names: str, cache: DiskCache, max_requests: int, rules: Rules) -> list:
-    # one budget per paid player: the providers bill separately, and one must not starve the other; Jev has none
-    # (decision 50), its requests are only counted
+    # one budget per paid player: the providers bill separately, and one must not starve the other
     players = [make_player(name, cache=cache, budget=budget_of(name, max_requests)) if name in PAID
                else make_player(name) for name in (canonical(n.strip()) for n in names.split(","))]
     for p in players:  # a question set that cannot be asked on this vision is a usage error, before anyone plays

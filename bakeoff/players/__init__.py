@@ -23,13 +23,14 @@ REGISTRY: dict[str, Callable[..., Player]] = {
     **{player.name: player for player in SET_PLAYERS}}
 # these take cache= and budget=; without a budget they can only replay the cache
 PAID = ("jev_plain", "jev_step1", "haiku_plain", "glm_plain", *(player.name for player in SET_PLAYERS))
-# the paid players that play without a cap: Jev's requests cost the user nothing (decision 50). They are still
-# counted and priced, and still kept off the tournament seeds
-UNCAPPED = tuple(name for name in PAID if name.startswith("jev_"))
+# the paid players that play without a cap. None since decision 58: whoever runs it sets every paid player's cap,
+# Jev's included, because a stranger's TypeSafe key may be billed (decision 50 had Jev uncapped, when its requests
+# cost the one user nothing). The machinery stays, so an uncapped player is one name away.
+UNCAPPED: tuple[str, ...] = ()
 
 
 def budget_of(name: str, max_requests: int) -> RequestBudget:
-    """A paid player's budget: the command's cap, or none for Jev (decision 50)."""
+    """A paid player's budget: the command's cap, or none for a player in UNCAPPED (none since decision 58)."""
     return UncappedBudget() if name in UNCAPPED else RequestBudget(max_requests)
 
 

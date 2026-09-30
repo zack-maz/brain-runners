@@ -5,8 +5,8 @@
 //
 // `state` is what GET /state answers (bakeoff/session.py): {status, game, max_rows, requests_per_row,
 // max_requests, held_out, first_practice_seed, seed, players: [{name, paid, price_usd,
-// requests_left, capped, played_before, why_not}], run}. `capped` is false for Jev, which plays without a cap
-// (decision 50): its worst case is the whole track, shown and priced, but it costs the user nothing to confirm.
+// requests_left, capped, played_before, why_not}], run}. `capped` is false for a player in UNCAPPED (none
+// since decision 58): its worst case is the whole track, shown and priced, and it is not asked to be confirmed.
 (function (root) {
   "use strict";
 
@@ -86,7 +86,7 @@
 
   // Does starting this run need confirming? Only when it can really spend: a run that has no request
   // left of the cap spends nothing whatever it asks for.
-  // Jev's requests cost the user nothing (decision 50), so Jev alone is never asked to be confirmed.
+  // A player the server marks uncapped is never asked to be confirmed (none since decision 58).
   const spends = (state, chosen) => estimate(state, chosen).lines.some((line) => line.requests > 0 && !line.uncapped);
 
   const api = { usd, estimate, estimateText, whyNot, ceilingText, spends };

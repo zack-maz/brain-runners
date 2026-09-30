@@ -76,8 +76,8 @@ Charts and Writeup screens. Its runs come next. Each phase gets its own plan. Re
 - Keys live in a git-ignored `.env`. A guard blocks every shell command that mentions `.env`,
   so programs must load it themselves (python-dotenv) and never print values.
 - Budget is limited: paid players need a response cache and a hard request cap from their
-  first commit; start paid runs with one capped track. The one exception is Jev (decision 50): its requests cost
-  the user nothing, so `jev_*` play without a cap (`UNCAPPED`, `UncappedBudget`), still cached, counted and priced.
+  first commit; start paid runs with one capped track. Jev included (decision 58): a stranger's TypeSafe key may be
+  billed, so `UNCAPPED` is empty (decision 50 had Jev uncapped while its requests cost the one user nothing).
   Measured: the LLM about 0.0006 USD per request, Jev about
   0.00003 USD (an estimate, `docs/COSTS.md`).
 - The fly simulation needs about 1 GB and must run one process at a time on this 8 GB Mac.
@@ -119,7 +119,7 @@ Charts and Writeup screens. Its runs come next. Each phase gets its own plan. Re
   alone, which cannot send headers), so no other page in the browser can drive the run. It is not a defence
   against a program on this machine: whatever may fetch `/` may read the token out of the page. One
   `LiveSession` per command holds one budget per
-  paid player for the whole session (Jev's is an `UncappedBudget`, decision 50; `SharedBudget` gives each run its
+  paid player for the whole session (`SharedBudget` gives each run its
   own record of what it spent), runs one
   `LiveRun` at a time and keeps serving so another track can be played without restarting. `--start` plays the
   command line's own run at once, as before, and holds its first decision until a browser is listening.

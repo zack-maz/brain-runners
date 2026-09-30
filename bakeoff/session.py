@@ -175,7 +175,7 @@ class LiveSession:
                 # what it answered as last: the asked-for name may be a moving one (`jev-latest`)
                 "model_answered": answered.get(name) if paid else None,
                 "requests_left": self.budgets[name].remaining if paid else None,
-                # False for Jev, which plays without a cap (decision 50): its worst case is the whole track
+                # False for a player in UNCAPPED (none since decision 58): its worst case is the whole track
                 "capped": (name not in UNCAPPED) if paid else None,
                 "played_before": seed is not None and seed in played.get(name, []),
                 # the track select's own practice tracks it has a recorded run of, for its marks: a

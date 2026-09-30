@@ -244,9 +244,9 @@ def test_jev_step1_is_a_paid_player_for_the_seed_rule_and_the_help(tmp_path, cap
     with pytest.raises(SystemExit):
         main(["run", "--help"])
     out = " ".join(capsys.readouterr().out.split())
-    assert ("EACH capped paid player (haiku_plain, glm_plain, haiku_step1, haiku_guided, haiku_step2, haiku_map, "
-            "glm_step1, glm_guided, glm_step2, glm_map)") in out
-    assert "Jev (jev_plain, jev_step1, jev_guided, jev_step2, jev_map) plays without a cap" in out
+    assert ("EACH capped paid player (jev_plain, jev_step1, haiku_plain, glm_plain, jev_guided, jev_step2, jev_map, "
+            "haiku_step1, haiku_guided, haiku_step2, haiku_map, glm_step1, glm_guided, glm_step2, glm_map)") in out
+    assert "every paid player is capped, Jev included (decision 58)" in out
 
 
 def test_max_requests_0_on_low_seeds_is_not_refused_by_the_guard(tmp_path, capsys, monkeypatch):
@@ -307,18 +307,19 @@ def test_report_prints_no_game_line_without_a_game_block(tmp_path, capsys):
     assert "game:" not in capsys.readouterr().out
 
 
-def test_the_run_command_gives_jev_no_cap_and_every_other_paid_player_the_command_s(tmp_path):
+def test_the_run_command_gives_every_paid_player_jev_included_the_command_s_cap(tmp_path):
+    """Decision 58: whoever runs it sets Jev's cap too, since a stranger's TypeSafe key may be billed."""
     from bakeoff.__main__ import _players, _spends_on_held_out_seeds
-    from bakeoff.clients.core import DiskCache, UncappedBudget
+    from bakeoff.clients.core import DiskCache
     from bakeoff.game.rules import rules_for
     jev, haiku = _players("jev_step1,haiku_plain", DiskCache(tmp_path), 0, rules_for("v2"))
-    assert isinstance(jev.budget, UncappedBudget)
-    assert (type(haiku.budget).__name__, haiku.budget.max_requests) == ("RequestBudget", 0)
-    # Jev may go live without a cap, so it counts as spending on a held-out seed even at --max-requests 0
-    assert _spends_on_held_out_seeds([jev], 0, 5, held_out=False)
-    assert not _spends_on_held_out_seeds([haiku], 0, 5, held_out=False)
-    assert not _spends_on_held_out_seeds([jev], 0, 1000, held_out=False)
-    assert not _spends_on_held_out_seeds([jev], 0, 5, held_out=True)
+    for player in (jev, haiku):
+        assert (type(player.budget).__name__, player.budget.max_requests) == ("RequestBudget", 0)
+    # at --max-requests 0 nobody can spend, so nobody is kept off a held-out seed; with a cap, Jev is
+    assert not _spends_on_held_out_seeds([jev], 0, 5, held_out=False)
+    assert _spends_on_held_out_seeds([jev], 3, 5, held_out=False)
+    assert not _spends_on_held_out_seeds([jev], 3, 1000, held_out=False)
+    assert not _spends_on_held_out_seeds([jev], 3, 5, held_out=True)
 
 
 def test_a_capped_player_drops_out_and_the_run_says_so(tmp_path, capsys, monkeypatch):

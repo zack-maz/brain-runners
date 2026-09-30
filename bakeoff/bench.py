@@ -260,7 +260,7 @@ def pair_numbers(a: list[Episode], b: list[Episode]) -> dict:
             "verdict": verdict, "seeds_needed": needed}
 
 
-JEV_PRICE_NOTE = "Jev's USD per track is an estimate (about 0.00003 USD a request, docs/COSTS.md); it costs you nothing."
+JEV_PRICE_NOTE = "Jev's USD per track is an estimate (about 0.00003 USD a request, docs/COSTS.md); what it really costs depends on your TypeSafe plan."
 # the yardsticks are the Bot's skins (bakeoff/roster.py): shown for scale, never on a frontier
 YARDSTICKS = frozenset(skin["player"] for character in ROSTER if character["id"] == "bot" for skin in character["skins"])
 

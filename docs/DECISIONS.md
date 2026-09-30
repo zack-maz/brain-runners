@@ -405,6 +405,12 @@
     study's runs are a download attached to a GitHub Release, not part of the repository. A hosted version with
     visitors' keys was designed and dropped the same day. The Python package stays `bakeoff`.
 
+58. **Jev is capped like every paid player again** (the user, 2026-09-30, for the public release: "user decides
+    cap"). Decision 50 let Jev play without a cap because its requests cost the one user nothing; for someone
+    running the repository with their own TypeSafe key that may not hold. So whoever runs it sets Jev's cap with
+    `--max-requests` (default 0: replay the cache only), and the page's confirmation covers Jev as it does Claude
+    Haiku. `UNCAPPED` is empty; the machinery for an uncapped player stays. Replaces decision 50.
+
 Where we are and what comes next: `docs/NEXT.md`.
 
 ## Prior art to reuse
