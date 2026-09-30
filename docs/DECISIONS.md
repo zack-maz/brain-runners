@@ -390,6 +390,21 @@
     invalid. The reading is ours, and `glm_plain` is no longer an exact twin of `haiku_plain` in how it is read.
     Old runs keep their recorded `invalid` flags; `glm_plain` replays practice tracks 1001–1005 to be judged again.
 
+56. **GLM Flash leaves the study** (the user, 2026-09-30: "I don't want to do GLM. It will take too long"). It
+    passed decision 53's rule on practice tracks 1001–1006 once decision 55 let `glm_plain` read a bare word (every
+    skin under 2% failed decisions), but its held-out run was stopped after `glm_plain`'s 15 tracks and five of
+    `glm_step1`'s (`runs/20260930-131452`, interrupted): with `glm_map` at about 18 s a decision it would have taken
+    most of a day. The study's results are Jev, Claude Haiku, the two flies and the bots; GLM's players stay in the
+    code, playable with a user's own key.
+
+57. **Brain Runners, a public repository, no deployment** (the user, 2026-09-30). The front is called Brain Runners
+    (the logo reads BRAIN over an outlined RUNNERS; Brain Run until now). The project is released as the public
+    GitHub repository `zack-maz/brain-runners` (renamed from `brain-bakeoff`), MIT-licensed, with a README and a
+    setup guide for running it with one's own keys, and a project page on motg.dev like Iran Monitor's and GSD for
+    IBM Bob's. The working record is kept and filed under `docs/` (`calibration/` and `spikes/` moved there). The
+    study's runs are a download attached to a GitHub Release, not part of the repository. A hosted version with
+    visitors' keys was designed and dropped the same day. The Python package stays `bakeoff`.
+
 Where we are and what comes next: `docs/NEXT.md`.
 
 ## Prior art to reuse

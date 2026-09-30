@@ -617,7 +617,7 @@
     // front, and keeps the two tabs
     document.querySelector(".tabs").hidden = true;
     document.querySelector(".top").hidden = true;
-    document.title = "Brain Run";
+    document.title = "Brain Runners";
     Front.start();
   }
 })();

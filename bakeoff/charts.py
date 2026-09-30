@@ -1,4 +1,4 @@
-"""Charts, for the Brain Run charts screen (decision 53, docs/superpowers/specs/2026-09-28-study-design.md,
+"""Charts, for the Brain Runners charts screen (decision 53, docs/superpowers/specs/2026-09-28-study-design.md,
 section 4): every recorded episode of this game, each player and track once from the newest run that completed
 it, scored by the benchmark. Reads files only, spends nothing. The numbers are `bakeoff bench`'s; nothing here
 adds a statistic.

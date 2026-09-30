@@ -56,12 +56,12 @@ built, calibrated, played and on `main` (PR #7, merged 2026-09-25; decisions 41�
 `docs/superpowers/specs/2026-09-24-fly2-design.md`, plan `docs/superpowers/plans/2026-09-24-fly2.md`): its numbers
 are frozen (`docs/calibration/FLY2_REPORT.md`), its real run and its live smoke are done; on 100 fresh seeds it beats `fly` by 13.4 rows (decision 47).
 `fly3`, a trained readout on the frozen wiring (decision 48), stopped at its probe: the same learner with no brain
-played better (spike 05, decision 49), so it is not built. Brain Run (called Brain Battle until decision 51), the
+played better (spike 05, decision 49), so it is not built. Brain Runners (called Brain Battle until decision 51, Brain Run until decision 57), the
 front of `bakeoff live`, is on `main` (PR #9, merged 2026-09-26; renamed in PR #11). PR #11 (merged 2026-09-26) also
 lets Jev play without a cap (decision 50). PRs #8–#12 are merged; since #12 a results card reads
 "N live" over "M cached". Phase 6 is the study (decision 53, spec `docs/superpowers/specs/2026-09-28-study-design.md`),
 not a tournament: its code is built on branch `study` (plan `docs/superpowers/plans/2026-09-28-study.md`): the seed
-flag `--held-out`, the benchmark's cost per track, time per decision, failures and frontiers, and Brain Run's
+flag `--held-out`, the benchmark's cost per track, time per decision, failures and frontiers, and Brain Runners's
 Charts and Writeup screens. Its runs come next. Each phase gets its own plan. Resume from `docs/NEXT.md`.
 
 ## How we work here
@@ -87,7 +87,7 @@ Charts and Writeup screens. Its runs come next. Each phase gets its own plan. Re
   one minute); never run two fly processes at once.
 - The viewer is plain JavaScript with no build step and no npm packages. Rules of the game stay in
   Python (`bakeoff/replay.py`); the pure JavaScript (`timeline.js`, `tunnel.js`, `sprites.js`, `roster.js`, `stage.js`, `minds.js`,
-  `log.js`, `picker.js`, `tabs.js`, `feed.js`, `lobby.js`, `bench_view.js`, and Brain Run's `screens.js`, `select.js`,
+  `log.js`, `picker.js`, `tabs.js`, `feed.js`, `lobby.js`, `bench_view.js`, and Brain Runners's `screens.js`, `select.js`,
   `trackpick.js`, `results.js`, `records.js`, `writeup.js`) is tested by
   `viewer/tests/*.test.js`, which `uv run pytest` runs through `node --test`. Text from a log is always
   escaped (`Minds.esc`) and the page must never load anything from the network (the two brand fonts in
@@ -100,7 +100,7 @@ Charts and Writeup screens. Its runs come next. Each phase gets its own plan. Re
   holds the levels, the scoreboard, what is ours and the benchmark. Every mind panel carries a running log, one line
   per row up to the row on screen and one log open at a time, appended as the frames arrive so it keeps its scroll
   and never runs ahead of the tunnel. One section, "Players", holds both lists as
-  labelled rows (decision 38); since Brain Run (then Brain Battle) only one is left: who is in the tunnel (shows and hides the
+  labelled rows (decision 38); since Brain Runners (then Brain Battle) only one is left: who is in the tunnel (shows and hides the
   runners on screen, live or replay), while who runs next is picked on the character select. The level table only picks the track, and a player that did not run
   the track in view can never be turned on. `viewer/bench_view.js` is the one drawing code for the benchmark, mounted by both
   `bench.html` and the Analysis tab, and `viewer/bench.css` styles it on both pages (keyed to its `data-bench`
@@ -113,7 +113,7 @@ Charts and Writeup screens. Its runs come next. Each phase gets its own plan. Re
   (`bakeoff/fly/shared.py`): never start it next to another fly run. Its records come from `runner.play_row` and
   its frames from `replay.frame_of`, the same functions `run` and `view` use; keep it that way.
 - The page runs the show (update 3a, design `docs/superpowers/specs/2026-09-22-page-control-design.md`): the command
-  binds the port and sets the ceiling, the page (since Brain Battle, now Brain Run, its front: the character select picks the
+  binds the port and sets the ceiling, the page (since Brain Battle, now Brain Runners, its front: the character select picks the
   players, the track select the track and holds the money confirmation) starts and cancels the run (`GET /state`, `POST /run`, `POST /cancel`, `GET /events?run=`). Every request but the page itself
   carries a token minted at startup and embedded in the page (in the header; in the query for the event stream
   alone, which cannot send headers), so no other page in the browser can drive the run. It is not a defence
@@ -123,7 +123,7 @@ Charts and Writeup screens. Its runs come next. Each phase gets its own plan. Re
   own record of what it spent), runs one
   `LiveRun` at a time and keeps serving so another track can be played without restarting. `--start` plays the
   command line's own run at once, as before, and holds its first decision until a browser is listening.
-- Brain Run (decision 45, spec `docs/superpowers/specs/2026-09-25-brain-battle-design.md`) is on `main` (PR #9,
+- Brain Runners (decision 45, spec `docs/superpowers/specs/2026-09-25-brain-battle-design.md`) is on `main` (PR #9,
   merged 2026-09-26), built in two plans as Brain Battle and renamed by decision 51 (PR #11): on screen it is Brain
   Run and its fighters are runners ("Choose your runners", "Ready to run", "‹ Runners", "N runners"), and the home
   brain's glow pulses; code ids, file names and comments keep the old names. Plan a: `bakeoff/roster.py` is the one list of characters and skins (a test

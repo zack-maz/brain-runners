@@ -1,4 +1,4 @@
-"""Records, for the Brain Run records screen: the historical log of past runs (decision 53), and which recorded
+"""Records, for the Brain Runners records screen: the historical log of past runs (decision 53), and which recorded
 episodes a score may count (`pick`), which the Charts screen (bakeoff/charts.py) scores. Reads files only, spends
 nothing.
 
