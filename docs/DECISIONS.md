@@ -414,8 +414,8 @@
 59. **The docs are tidied into one history folder** (the user, 2026-09-30: "we have a lot of docs. Let's clean up
     and consolidate"). The build record moves, unchanged, into `docs/history/`: the specs, plans and mock-ups, and
     `NEXT.md`, `UPDATES.md`, `FRONTEND.md` and `REFERENCE.md`. `STEP_RECORD.md` and `REPLAY_DATA.md` become one
-    `docs/FORMATS.md`. The index of the docs is a section of the root README (no `docs/README.md`). Nothing is
-    removed; `docs/research/` stays where it is.
+    `docs/FORMATS.md`. The index of the docs is a section of the root README, replacing `docs/README.md`. No other
+    document is removed; `docs/research/` stays where it is.
 
 The build record, including the running notes (`docs/history/NEXT.md`), is in `docs/history/`.
 

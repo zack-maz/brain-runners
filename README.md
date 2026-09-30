@@ -67,7 +67,7 @@ Step by step, with what each key costs: [`docs/SETUP.md`](docs/SETUP.md).
 | [`docs/WRITEUP.html`](docs/WRITEUP.html), [`docs/COSTS.md`](docs/COSTS.md) | The study's write-up, and every paid run with what it cost. |
 | [`docs/DECISIONS.md`](docs/DECISIONS.md) | Every decision, numbered; the code and the write-up cite them. |
 | [`docs/FORMATS.md`](docs/FORMATS.md) | What a run leaves on disk, and the replay data the page draws. |
-| [`docs/RESEARCH.md`](docs/RESEARCH.md), `docs/research/` | The fly-brain resources and deeper research (kept as written). |
+| [`docs/RESEARCH.md`](docs/RESEARCH.md), `docs/research/` | The fly-brain resources and deeper research, kept as written (its paths still say `calibration/` at the top, from before it moved under `docs/`). |
 | `docs/calibration/`, `docs/spikes/` | How the flies were fixed and frozen, and the five probes' reports. Their throwaway code stayed on local branches: where the record says a report is "on branch `spike/…`", read `docs/spikes/`. |
 | [`docs/history/`](docs/history/README.md) | How it was built: every spec, plan and mock-up, and the running notes. |
 

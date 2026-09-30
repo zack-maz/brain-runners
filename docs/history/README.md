@@ -6,7 +6,7 @@ What each step decided is in `docs/DECISIONS.md`, which the code and the write-u
 
 | | |
 |---|---|
-| `superpowers/specs/` | The design of each phase, approved before it was built. |
+| `superpowers/specs/` | The design of each phase, approved before it was built (with the demo player's mock-ups in `specs/mockups/`). |
 | `superpowers/plans/` | The implementation plan of each phase, task by task. |
 | `mockups/` | The approved mock-ups of the Brain Runners screens. |
 | `NEXT.md` | The running state of the project while it was built, rewritten as it changed. |
