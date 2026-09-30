@@ -11,17 +11,17 @@ which mind performs best for its cost and speed (decision 53). Read these before
 2. `docs/superpowers/specs/2026-09-19-tunnel-run-design.md` — the approved design (binding), extended by
    `docs/superpowers/specs/2026-09-20-demo-player-design.md` (the demo player; also binding).
 3. `docs/RESEARCH.md` — fly-brain resources. Spike results: branch `spike/fly-steering`,
-   `spikes/01-fly-steering/REPORT.md` (throwaway code; port ideas, do not merge it). Also spike 02, branch
-   `spike/jev-questions`, `spikes/02-jev-questions/REPORT.md` (why Jev's one-shot Choice, now `jev_plain`, fails), and spike 03,
-   branch `spike/fly-bands`, `spikes/03-fly-bands/REPORT.md` (update 2b's probe result).
+   `docs/spikes/01-fly-steering/REPORT.md` (throwaway code; port ideas, do not merge it). Also spike 02, branch
+   `spike/jev-questions`, `docs/spikes/02-jev-questions/REPORT.md` (why Jev's one-shot Choice, now `jev_plain`, fails), and spike 03,
+   branch `spike/fly-bands`, `docs/spikes/03-fly-bands/REPORT.md` (update 2b's probe result).
 
 ## Status
 
 Design approved 2026-09-19. Phase 1 built (game, senses, baselines, runner, report, CLI). Phase 2
 built (plan: `docs/superpowers/plans/2026-09-19-phase2-fly-player.md`): fly player on the real
 Brian2 model, looming weighting and two thresholds fixed on practice seeds 1000–1199 and frozen
-(`calibration/REPORT.md`; never retune, never let seeds below 1000 influence them). First
-scoreboard in `calibration/RESULTS.md`. Phase 3 built (plan:
+(`docs/calibration/REPORT.md`; never retune, never let seeds below 1000 influence them). First
+scoreboard in `docs/calibration/RESULTS.md`. Phase 3 built (plan:
 `docs/superpowers/plans/2026-09-20-phase3-paid-players.md`): `jev_plain` and `haiku_plain` players (then `jev` and `haiku`) behind
 `bakeoff/clients/core.py` (disk cache, hard cap per paid player, no SDK retries). First costs in
 `docs/COSTS.md`. Phase 4 built (plan: `docs/superpowers/plans/2026-09-20-phase4-replay-viewer.md`):
@@ -54,7 +54,7 @@ reviewed and fixed; decisions 36–39 settle their open questions and the rename
 GLM Flash's parked tracks. `fly2`, a second pure fly with a richer input of ours (M3, a sideways channel), is
 built, calibrated, played and on `main` (PR #7, merged 2026-09-25; decisions 41–43, spec
 `docs/superpowers/specs/2026-09-24-fly2-design.md`, plan `docs/superpowers/plans/2026-09-24-fly2.md`): its numbers
-are frozen (`calibration/FLY2_REPORT.md`), its real run and its live smoke are done; on 100 fresh seeds it beats `fly` by 13.4 rows (decision 47).
+are frozen (`docs/calibration/FLY2_REPORT.md`), its real run and its live smoke are done; on 100 fresh seeds it beats `fly` by 13.4 rows (decision 47).
 `fly3`, a trained readout on the frozen wiring (decision 48), stopped at its probe: the same learner with no brain
 played better (spike 05, decision 49), so it is not built. Brain Run (called Brain Battle until decision 51), the
 front of `bakeoff live`, is on `main` (PR #9, merged 2026-09-26; renamed in PR #11). PR #11 (merged 2026-09-26) also

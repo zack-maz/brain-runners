@@ -17,7 +17,7 @@ first (`docs/UPDATES.md`) are done bar one: game v2; the Jev family and its LLM 
 2a); the fly's richer-input probe, stopped there (update 2b); the benchmark (item 7); the GLM Flash twins, parked
 after one track while the free tier throttles (item 10); and the page that runs the show (updates 3a and 3b).
 Details in `docs/NEXT.md`. The untrained fly plays: on seeds 0–19 of game v1 it survives 127 rows on average
-(random 35, always-jump 48, solver 300; `calibration/RESULTS.md`).
+(random 35, always-jump 48, solver 300; `docs/calibration/RESULTS.md`).
 
 A second pure fly, `fly2`, adds a richer input of ours, a sideways channel (M3) (the wiring, the model and the neurons are
 still the fly's; the mapping, the read-out and the rule are ours). It is built, calibrated and played (decisions

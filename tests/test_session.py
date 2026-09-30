@@ -241,7 +241,7 @@ def test_an_uncalibrated_fly2_is_shown_with_its_reason_and_cannot_be_started(tmp
     monkeypatch.setattr(fly2, "CALIBRATED", False)
     live = session(tmp_path)
     by_name = {p["name"]: p for p in live.state(seed=1001)["players"]}
-    assert by_name["fly2"]["why_not"] == "fly2 is not calibrated yet (calibration/FLY2_REPORT.md)"
+    assert by_name["fly2"]["why_not"] == "fly2 is not calibrated yet (docs/calibration/FLY2_REPORT.md)"
     assert by_name["fly2"]["paid"] is False and by_name["fly"]["why_not"] is None
     with pytest.raises(LobbyError, match="fly2 is not calibrated yet"):
         live.start(1001, ["fly2"])
@@ -256,7 +256,7 @@ def test_each_fly_says_what_it_is_and_nobody_else_needs_to(tmp_path, monkeypatch
     monkeypatch.setattr(fly2, "CALIBRATED", False)
     by_name = {p["name"]: p for p in session(tmp_path).state()["players"]}
     assert by_name["fly"]["about"] == "looming → escape reflex (phase 2)"
-    assert by_name["fly2"]["about"] == "not calibrated yet: its input, read-out and numbers are fixed by calibration/FLY2_REPORT.md"
+    assert by_name["fly2"]["about"] == "not calibrated yet: its input, read-out and numbers are fixed by docs/calibration/FLY2_REPORT.md"
     assert by_name["haiku_plain"]["about"] is None and by_name["solver"]["about"] is None
 
     monkeypatch.setattr(fly2, "CALIBRATED", True)

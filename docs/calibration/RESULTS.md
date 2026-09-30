@@ -1,6 +1,6 @@
 # Fly: first results with the real brain
 
-Constants from `calibration/REPORT.md` (ours, not the fly's biology), real Brian2 brain, one
+Constants from `docs/calibration/REPORT.md` (ours, not the fly's biology), real Brian2 brain, one
 decision per 100 ms window, input noise seeded per (track seed, row) so these runs repeat exactly.
 
 On check seeds 1000-1019 the real brain averaged 117.95 rows; the stand-in brain used for
@@ -32,7 +32,7 @@ the reference (same 6-row, ±3-lane view; not a contestant).
 
 Real: last record per seed in `runs/20260919-151934/fly.jsonl` (`rows_survived`). Stand-in: for
 each seed, `play(FlyPlayer(brain_factory=lambda: brain), generate_track(seed))[0].rows_survived`
-with `brain = SurrogateBrain(load_surface("calibration/response_surface.json"))`.
+with `brain = SurrogateBrain(load_surface("docs/calibration/response_surface.json"))`.
 
 | seed | real brain rows | stand-in rows |
 | --- | --- | --- |
@@ -62,7 +62,7 @@ changes the rest of a run.
 
 ## Known asymmetry: the fly leans right
 
-Measured from the committed `calibration/response_surface.json` (8 trials per input), mean turn
+Measured from the committed `docs/calibration/response_surface.json` (8 trials per input), mean turn
 signal (DNa01 + DNb01, right minus left) when both eyes get the same rate:
 
 | both eyes (Hz) | 25 | 50 | 75 | 100 | 125 | 150 | 175 | 200 | 225 | 250 |

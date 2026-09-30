@@ -14,7 +14,7 @@
    so runs need a request cap and a response cache from day one.
 
 5. **Fly route: pure fly, test first.** A throwaway spike (branch `spike/fly-steering`,
-   `spikes/01-fly-steering/REPORT.md`) showed the untrained model steers *away from threats*
+   `docs/spikes/01-fly-steering/REPORT.md`) showed the untrained model steers *away from threats*
    reliably (36 of 36 one-sided trials, graded, cancels when both eyes are stimulated) and its
    Giant Fiber escape neuron fires graded with threat, but it cannot steer toward food: smell
    carries no side information and food input locks the left steering neuron on. About
@@ -27,7 +27,7 @@
    `250 / row³` Hz to its eye, capped at 250 Hz and rounded to 25 Hz steps; any net steering
    spike turns (threshold 0 Hz); Giant Fiber mean above 200 Hz jumps. Chosen by a fixed rule from
    768 candidates on practice seeds 1000–1199 using a measured response surface as a stand-in
-   brain, confirmed with the real brain. Frozen: `calibration/REPORT.md`, `calibration/RESULTS.md`.
+   brain, confirmed with the real brain. Frozen: `docs/calibration/REPORT.md`, `docs/calibration/RESULTS.md`.
 9. **`always_jump` is a second floor** and the report shows `jump_share`, so a jump-heavy player
    is judged against the right baseline.
 10. **Tournament seeds must be below 1000**; 1000–1399 were used for calibration. The fly has
@@ -60,7 +60,7 @@
     known weaknesses are on the page, with what is ours labelled as ours.
 
 14. **Why Jev fell after 23 rows (spike 02, 2026-09-20, branch `spike/jev-questions`,
-    `spikes/02-jev-questions/REPORT.md`; 200 capped requests on practice seed 1000, about 0.014 USD).** Not a
+    `docs/spikes/02-jev-questions/REPORT.md`; 200 capped requests on practice seed 1000, about 0.014 USD).** Not a
     bug. Jev reads the track almost perfectly (pointed yes/no questions: 1 wrong in 800), but the one-shot
     Choice carries no information about which actions are fatal: on the 55 dangerous states it landed on a
     gap in 29%, always staying in 33%, the LLM in 2%. From the rules alone Jev cannot map an action to its
@@ -148,7 +148,7 @@
     path plus random detours) by a rule fixed beforehand, then frozen; `fly_rich` then plays 1000–1019 once. A probe
     comes first: find an ordering of the cells that follows their view and check that the brain's output differs by
     band; if it does not, `fly_rich` is not built and that is the result. `fly` is never touched.
-30. **Update 2b stops at the probe** (2026-09-22, spike 03, branch `spike/fly-bands`, `spikes/03-fly-bands/REPORT.md`).
+30. **Update 2b stops at the probe** (2026-09-22, spike 03, branch `spike/fly-bands`, `docs/spikes/03-fly-bands/REPORT.md`).
     Ordered by the eye positions of their columnar inputs, each eye's looming cells respond by band only in strength
     (dorsal bands drive the Giant Fiber about 30% harder, one azimuth end turns about half as hard), never with a
     different action. The user chose a play test with a rule fixed beforehand; on v2 practice seeds 1100-1104 with
@@ -240,7 +240,7 @@
     - **Controls reported with the result:** no brain, shuffled wiring, and `fly`.
     - **A probe first (spike 04):** if no candidate turns away from the gap's side, the update stops there.
 42. **The probe passes; the turn readout is chosen per candidate** (the user, 2026-09-24; spike 04, branch
-    `spike/fly2-probe`, `spikes/04-fly2-probe/REPORT.md`). With the centre driven at 500 Hz, every candidate still
+    `spike/fly2-probe`, `docs/spikes/04-fly2-probe/REPORT.md`). With the centre driven at 500 Hz, every candidate still
     turns away from the side of an extra gap, so fly2 goes on to the surfaces. M3's sideways channel (LPLC4 + LC22)
     turns the fly away from its own side and drives no Giant Fiber, so M3 is admitted. The spec's DNa02 test gives
     a different answer for each candidate, and the user chose to apply it per candidate:
@@ -249,7 +249,7 @@
     - **M1:** DNa02 is above the noise for a left gap at 300 and 500 Hz and within it for every right gap. The test
       says "cancels" only when DNa02 is within the noise in the uneven conditions, and here it is not, so M1 keeps
       DNa02 + DNa01 + DNg13. This is the controller's reading of the test and the user may still reverse it.
-43. **fly2 is M3, the sideways channel, frozen** (the user, 2026-09-25; `calibration/FLY2_REPORT.md`). The rule
+43. **fly2 is M3, the sideways channel, frozen** (the user, 2026-09-25; `docs/calibration/FLY2_REPORT.md`). The rule
     of decision 41, fixed before any surface was measured, picked M3 over M1 and M2 on v2 practice seeds 1000–1199.
     - **What M3 is:** gaps in the runner's own lane drive LPLC2 + LC4 of both eyes; gaps in side lanes drive
       LPLC4 + LC22 of that side's eye.
@@ -332,7 +332,7 @@
       user asked to be investigated: the "any safe move" target, weighting the rows where a wrong move kills, the
       input strength against how many DNs fire, early/late timing within the window, and noise averaging.
 49. **fly3 stops at its probe** (the user accepted it on 2026-09-26; spike 05, branch `spike/fly3-probe`, local,
-    `spikes/05-fly3-probe/REPORT.md`, DONE `stop C`). Part A passed (every looming cell gets a place on the eye: LPLC2
+    `docs/spikes/05-fly3-probe/REPORT.md`, DONE `stop C`). Part A passed (every looming cell gets a place on the eye: LPLC2
     from its lobula-plate layers by a published rule, LC4 through a map fitted on LPLC2) and part B passed (the DNs
     name a single gap's lane 80% of the time at the strongest gain). Part C, the play test on seeds 1300–1309: fly3 86.5 rows, the same learner on the input
     with no brain 112.5, the same readout on a blind brain 19.6. With the same learner the frozen wiring is a worse

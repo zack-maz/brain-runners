@@ -51,4 +51,4 @@ Three research agents answered briefs before the design of `fly2`
 (`docs/superpowers/specs/2026-09-24-fly2-design.md`): why `fly` dies, which inborn circuits fit the game, and what
 other projects did with this model. Their reports and the briefs they were given are in
 `docs/research/2026-09-24-fly/`. Spike 04, the probe that followed, is on branch `spike/fly2-probe`,
-`spikes/04-fly2-probe/REPORT.md`.
+`docs/spikes/04-fly2-probe/REPORT.md`.

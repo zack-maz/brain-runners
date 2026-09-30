@@ -68,7 +68,7 @@ def test_report_names_the_winner_and_says_whose_tuning_it_is():
 
 
 def test_the_committed_constants_are_the_calibration_winner():
-    text = (Path(__file__).resolve().parents[1] / "calibration" / "REPORT.md").read_text()
+    text = (Path(__file__).resolve().parents[1] / "docs" / "calibration" / "REPORT.md").read_text()
     winner_row = text.split("## Winner\n\n")[1].splitlines()[2]
     winner = tuple(float(cell) for cell in winner_row.strip("| ").split(" | ")[:4])
     assert winner == (LOOMING_GAIN_HZ, LOOMING_FALLOFF, fly.TURN_THRESHOLD_HZ, fly.JUMP_THRESHOLD_HZ)

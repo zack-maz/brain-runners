@@ -20,7 +20,7 @@ from bakeoff.game.engine import Game
 from bakeoff.players.base import Decision
 from bakeoff.players.fly import jump_signal_hz
 
-# Frozen by the calibration on practice seeds 1000-1199 (calibration/FLY2_REPORT.md, decision 43). Never retune:
+# Frozen by the calibration on practice seeds 1000-1199 (docs/calibration/FLY2_REPORT.md, decision 43). Never retune:
 # tournament seeds must never influence these numbers.
 MAPPING = "M3"
 GAIN_HZ = 250.0
@@ -28,7 +28,7 @@ FALLOFF = 2.0
 TURN_THRESHOLD_HZ = 40.0
 JUMP_THRESHOLD_HZ = 175.0
 CALIBRATED = True
-# Copied from calibration/FLY2_REPORT.md's Controls table (mean rows on the held-out seeds, stand-in brain);
+# Copied from docs/calibration/FLY2_REPORT.md's Controls table (mean rows on the held-out seeds, stand-in brain);
 # tests/test_fly2_player.py checks every value against the report. "candidates" is how many mappings were measured.
 CONTROLS = {"seeds": "1200-1399", "practice_seeds": "1000-1199", "candidates": 3,
             "fly2": 82.34, "no_brain": 74.05, "shuffled": 27.84, "fly": 65.98}
@@ -87,7 +87,7 @@ class Fly2Player:
         if self._brain_factory is _real_brain:
             if not CALIBRATED:
                 raise ValueError("fly2 is not calibrated yet: run python -m bakeoff.fly.calibrate2 first "
-                                 "(calibration/FLY2_REPORT.md)")
+                                 "(docs/calibration/FLY2_REPORT.md)")
             from bakeoff.fly import data
 
             data.require()

@@ -8,7 +8,7 @@ from bakeoff.fly.reading import Reading
 from bakeoff.fly.channels import MAPPINGS, Mapping
 from bakeoff.fly.surface import LEVELS_HZ, SurrogateBrain, load_surface, main, measure_mapping, measure_surface
 
-SURFACE_FILE = Path(__file__).resolve().parents[1] / "calibration" / "response_surface.json"
+SURFACE_FILE = Path(__file__).resolve().parents[1] / "docs" / "calibration" / "response_surface.json"
 
 
 class CountingBrain:

@@ -88,7 +88,7 @@ def about_of(name: str) -> str | None:
     it had already won."""
     if name == "fly2":
         return (fly2.about() if fly2.CALIBRATED
-                else "not calibrated yet: its input, read-out and numbers are fixed by calibration/FLY2_REPORT.md")
+                else "not calibrated yet: its input, read-out and numbers are fixed by docs/calibration/FLY2_REPORT.md")
     return {"fly": "looming \u2192 escape reflex (phase 2)"}.get(name)
 
 
@@ -211,7 +211,7 @@ class LiveSession:
         """Why this player may not play this track, or None. The one place that rule lives: `check`
         refuses with it and `state` shows it."""
         if name == "fly2" and not fly2.CALIBRATED:
-            return "fly2 is not calibrated yet (calibration/FLY2_REPORT.md)"
+            return "fly2 is not calibrated yet (docs/calibration/FLY2_REPORT.md)"
         if name not in PAID:
             return None
         if self.paid_blocked:

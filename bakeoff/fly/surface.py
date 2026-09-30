@@ -5,13 +5,13 @@ Looming rates come in steps of LOOMING_STEP_HZ, so an eye has 11 levels and the 
 which thousands of practice games can be played in seconds (the real brain needs about 0.7 s per
 decision). The stand-in is a calibration tool only: tournament runs always use the real brain.
 
-    uv run python -m bakeoff.fly.surface calibration/response_surface.json
+    uv run python -m bakeoff.fly.surface docs/calibration/response_surface.json
 
 Schema 2 is fly2's (bakeoff/fly/channels.py): any number of named channels, each with its own levels, every
 combination measured. `--mapping M1` measures a candidate; `--shuffle-seed N` measures it on shuffled wiring
 (the control, never a player):
 
-    uv run python -m bakeoff.fly.surface --mapping M1 calibration/fly2_surface_M1.json
+    uv run python -m bakeoff.fly.surface --mapping M1 docs/calibration/fly2_surface_M1.json
 """
 
 from __future__ import annotations

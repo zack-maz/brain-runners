@@ -294,7 +294,7 @@ tracks, like the five above, is an impression, not a result:</p>
 3 ties, 5 losses) but calls it "can't tell yet": at this gap, telling the two flies apart with confidence would
 take about 69 tracks.</p>
 <p style="font-size:14px;color:var(--muted)">Full detail in <code>docs/COSTS.md</code> and
-<code>calibration/FLY2_REPORT.md</code>. fly2's stand-in brain had predicted 72.0 rows for these seeds; the real
+<code>docs/calibration/FLY2_REPORT.md</code>. fly2's stand-in brain had predicted 72.0 rows for these seeds; the real
 brain did a little better, 78.2.</p>
 
 <h2 id="watch">5. How to watch it, and run it</h2>
@@ -384,7 +384,7 @@ no interval below five tracks, and says how many of its verdicts chance alone wo
   <li><span class="label">Calibration · fly2 frozen (decision 43)</span>M3 won the rule on practice seeds
   1000&ndash;1199. Its read-out: turn = right minus left of DNa02 + DNa01 + DNg13, jump = the Giant Fiber, dodge
   before jump. On held-out seeds, fly2 averaged 82.3 rows against <code>fly</code>'s 66.0. Frozen in
-  <code>calibration/FLY2_REPORT.md</code>.</li>
+  <code>docs/calibration/FLY2_REPORT.md</code>.</li>
   <li><span class="label">First real run</span><code>fly</code> and <code>fly2</code> played v2 seeds
   1000&ndash;1019 on the real brain: fly2 averaged 78.2 rows, <code>fly</code> 66.6. The benchmark says it can't
   tell them apart yet.</li>
@@ -544,7 +544,7 @@ a second way in and out, further down.</p>
 200 Hz). They were picked once from 768 candidates by a rule fixed in advance, on practice seeds 1000–1199, using a
 measured "response surface" as a fast stand-in for the brain, then checked against the real brain (stand-in
 predicted 118.7 average rows on seeds 1000–1019, the real brain did 118.0). Frozen:
-<code>calibration/REPORT.md</code>. They must never be retuned.</p>
+<code>docs/calibration/REPORT.md</code>. They must never be retuned.</p>
 </div>
 
 <div class="note">
@@ -584,7 +584,7 @@ run on track 1001 was move for move the same as the batch run two days earlier.<
 <p>The sideways mapping, the read-out and the rule, plus four numbers: the gain (250 Hz) and falloff (row
 squared) of the input, and the two thresholds (40 Hz, 175 Hz). Picked once by a rule fixed before any
 measurement, from three candidate mappings measured on the real brain, on practice seeds 1000&ndash;1199, then
-played once on held-out seeds 1200&ndash;1399 (82.3 rows). Frozen: <code>calibration/FLY2_REPORT.md</code>. They
+played once on held-out seeds 1200&ndash;1399 (82.3 rows). Frozen: <code>docs/calibration/FLY2_REPORT.md</code>. They
 must never be retuned.</p>
 </div>
 
@@ -757,7 +757,7 @@ nothing, needs only the cache, decision 50); no cap raised without your go-ahead
     <tr><td><code>bakeoff/bench.py</code></td><td>the benchmark: intervals, pairs, survival, cost and time per row</td></tr>
     <tr><td><code>bakeoff/session.py</code></td><td>the live session: the ceiling, the refusal rules, one run at a time</td></tr>
     <tr><td><code>viewer/</code></td><td>the demo player (plain JS, no build step) and its tests</td></tr>
-    <tr><td><code>calibration/</code></td><td>the fly's frozen tuning and first scoreboard</td></tr>
+    <tr><td><code>docs/calibration/</code></td><td>the fly's frozen tuning and first scoreboard</td></tr>
     <tr><td><code>docs/DECISIONS.md</code></td><td>every decision, in order</td></tr>
     <tr><td><code>docs/NEXT.md</code></td><td>where things stand and what comes next</td></tr>
     <tr><td><code>docs/UPDATES.md</code></td><td>the ten updates between phase 5 and the tournament</td></tr>

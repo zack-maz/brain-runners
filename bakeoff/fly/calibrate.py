@@ -7,7 +7,7 @@ winner only, to show how much of its score is luck. CHECK_SEEDS are the practice
 brain replays afterwards, to show how far the stand-in can be trusted. Tournament seeds (below
 1000) are never touched.
 
-    uv run python -m bakeoff.fly.calibrate calibration/response_surface.json calibration/REPORT.md
+    uv run python -m bakeoff.fly.calibrate docs/calibration/response_surface.json docs/calibration/REPORT.md
 """
 
 from __future__ import annotations

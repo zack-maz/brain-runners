@@ -9,9 +9,9 @@ seeds once. The controls are scored on the same seeds by the same rule:
 - fly itself, with its frozen numbers, on its own stand-in brain.
 Tournament seeds (below 1000) are never played.
 
-    uv run python -m bakeoff.fly.calibrate2 --surface M1=calibration/fly2_surface_M1.json \\
-        --surface M2=calibration/fly2_surface_M2.json --surface M3=calibration/fly2_surface_M3.json \\
-        [--shuffled calibration/fly2_surface_shuffled.json] calibration/FLY2_REPORT.md
+    uv run python -m bakeoff.fly.calibrate2 --surface M1=docs/calibration/fly2_surface_M1.json \\
+        --surface M2=docs/calibration/fly2_surface_M2.json --surface M3=docs/calibration/fly2_surface_M3.json \\
+        [--shuffled docs/calibration/fly2_surface_shuffled.json] docs/calibration/FLY2_REPORT.md
 """
 
 from __future__ import annotations
@@ -31,7 +31,7 @@ from bakeoff.players import make_player
 from bakeoff.players.fly import FlyPlayer
 from bakeoff.players.fly2 import Fly2Player, NoBrainPlayer
 
-FLY_SURFACE = Path(__file__).resolve().parents[2] / "calibration" / "response_surface.json"
+FLY_SURFACE = Path(__file__).resolve().parents[2] / "docs" / "calibration" / "response_surface.json"
 CONFIG_COLUMNS = ("gain_hz", "falloff", "turn_threshold_hz", "jump_threshold_hz")
 REPORT_COLUMNS = SCORE_COLUMNS + ("deaths",)
 

@@ -296,7 +296,7 @@
       (run.fly.provisional
         ? '<li class="warn">These values were provisional when this run was made: not yet calibrated.</li>'
         : "<li>The gain, the falloff and the two thresholds were chosen once, by a rule fixed beforehand, on practice tracks " +
-          "1000 to 1199 of game v1, which are not the held-out tracks, then frozen (calibration/REPORT.md)." +
+          "1000 to 1199 of game v1, which are not the held-out tracks, then frozen (docs/calibration/REPORT.md)." +
           // a run from before game versions has no version and was v1
           (run.game.version && run.game.version !== "v1"
             ? " This run is game " + esc(run.game.version) + "; the fly was not retuned for it." : "") +
@@ -322,7 +322,7 @@
     const count = c && c.candidates != null ? " (one of " + cell(c.candidates) + ")" : "";
     const seeds = c && c.practice_seeds != null ? "on practice tracks " + esc(c.practice_seeds) + " of game v2, " : "";
     html += "<li>The mapping" + count + ", the gain, the falloff and the two thresholds were chosen once, by a rule fixed " +
-      "before any measurement, " + seeds + "then frozen (calibration/FLY2_REPORT.md).</li>";
+      "before any measurement, " + seeds + "then frozen (docs/calibration/FLY2_REPORT.md).</li>";
     if (c) {
       html += "<li>Controls, mean rows on held-out tracks " + esc(c.seeds) + ", all played on the stand-in brain (the measured " +
         "response surfaces): fly2 " + cell(c.fly2) + ", the same rule with no brain " + cell(c.no_brain) +

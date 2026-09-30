@@ -45,7 +45,7 @@ Q3 Anything that makes the idea unworkable or suggests a better output readout (
   supplemental neuron annotations TSV with root_id, cell_type, side, super_class). Use the
   connectivity version whose IDs match the annotations (v783) and check how many of your
   chosen IDs are actually present in the model's neuron list; report the coverage.
-- Python via `uv` only, inside `spikes/01-fly-steering/` (its own pyproject is fine). No
+- Python via `uv` only, inside `docs/spikes/01-fly-steering/` (its own pyproject is fine). No
   global installs. Brian2 2.10+ supports Apple Silicon and Python 3.12–3.14.
 - Read the repo's `model.py`/`example.ipynb` for how stimulation and readout work; reuse its
   functions rather than rewriting the model. Keep its default parameters.
@@ -55,7 +55,7 @@ Q3 Anything that makes the idea unworkable or suggests a better output readout (
   what and move on.
 
 ## Deliverable
-`spikes/01-fly-steering/REPORT.md`, plain language first, numbers after:
+`docs/spikes/01-fly-steering/REPORT.md`, plain language first, numbers after:
 1. One-paragraph verdict: can the pure fly plausibly steer a snake? (yes / weakly / no)
 2. Q1 numbers in a small table. 3. Q2 results per sensory set: neuron counts used, mean ±
 sd firing per condition for left and right output neurons, asymmetry, sign, gradedness.
