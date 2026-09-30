@@ -3,6 +3,17 @@
 This file is rewritten whenever the state changes. What the user has decided stays in `docs/DECISIONS.md`
 (numbered, only ever added to); measured runs and money are in `docs/COSTS.md`.
 
+## Now (2026-09-30)
+
+**The study is done and the project is released as Brain Runners** (decision 57): the public repository
+`zack-maz/brain-runners`, MIT, with `README.md`, `docs/SETUP.md` for running it with one's own keys, the study's
+runs as a Release download (`scripts/study_data.py`), and a project page on motg.dev. The study's runs: every free
+player on held-out tracks 100–199, Claude Haiku ×4 on 100–114 for 5.09 USD (decision 54); GLM Flash qualified but
+left out (decision 56); Jev capped like every paid player again (decision 58). Left: the Writeup's frontiers and
+named scores, and the user's own words in it; the demo video for motg.dev; the X post.
+
+Everything below is the record of how it got here.
+
 ## Where we are
 
 Phases 1 to 5 are built and on `main` (phase 5 was PR #4, merged 2026-09-21). Before phase 6 came the updates of
@@ -238,7 +249,7 @@ All of this is one to five practice tracks: an impression, not a result.
 
 ## Open
 
-- Whether the tournament reuses seeds 0–19 or takes fresh seeds below 1000.
+- Settled by decision 53: the study uses fresh held-out seeds 100–199 (there is no tournament).
 - Left from update 3b's review (Minor, not fixed): the lobby still never polls `/state`, so the page's freshness
   depends on the `end` event arriving (the event can no longer be lost to the benchmark, but a poll every few
   seconds while running would close the gap for good).

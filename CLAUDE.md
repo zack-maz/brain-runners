@@ -62,7 +62,9 @@ lets Jev play without a cap (decision 50). PRs #8–#12 are merged; since #12 a 
 "N live" over "M cached". Phase 6 is the study (decision 53, spec `docs/superpowers/specs/2026-09-28-study-design.md`),
 not a tournament: its code is built on branch `study` (plan `docs/superpowers/plans/2026-09-28-study.md`): the seed
 flag `--held-out`, the benchmark's cost per track, time per decision, failures and frontiers, and Brain Runners's
-Charts and Writeup screens. Its runs come next. Each phase gets its own plan. Resume from `docs/NEXT.md`.
+Charts and Writeup screens. Its runs are done (decisions 54–56), and the project is released as the public
+repository Brain Runners (decision 57; Jev capped again, decision 58). Probe reports are copied into `docs/spikes/`;
+`calibration/` lives under `docs/`. Each phase gets its own plan. Resume from `docs/NEXT.md`.
 
 ## How we work here
 
