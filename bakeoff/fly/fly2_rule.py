@@ -1,6 +1,6 @@
 """The rule that picks fly2's input mapping and fixes its numbers: written before any surface was measured.
 
-Design: docs/superpowers/specs/2026-09-24-fly2-design.md, "Order and gates", step 3 (decision 41). Everything
+Design: docs/history/superpowers/specs/2026-09-24-fly2-design.md, "Order and gates", step 3 (decision 41). Everything
 this rule chooses is OURS, not the fly's biology: which mapping turns gaps into input, the gain and falloff of
 that mapping, and the two thresholds on the fly's read-out neurons.
 

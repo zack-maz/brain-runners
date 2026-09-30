@@ -2,7 +2,7 @@
 
 The viewer is JavaScript and cannot import Python, so everything that needs the rules of the game
 (where a move lands, which run is complete, the scoreboard) is worked out here and tested here.
-The format is described in docs/REPLAY_DATA.md."""
+The format is described in docs/FORMATS.md."""
 
 from __future__ import annotations
 
@@ -35,7 +35,7 @@ def empty_replay(rules: Rules) -> dict:
 
 
 def landing(row: int, lane: int, executed_action: str, lanes: int) -> list[int]:
-    """The tile a move lands on (docs/STEP_RECORD.md, "The landing tile"). On a death the runner
+    """The tile a move lands on (docs/FORMATS.md, "The landing tile"). On a death the runner
     never reaches it; the viewer draws the fall there."""
     advance = 2 if executed_action == "jump" else 1
     shift = {"left": -1, "right": 1}.get(executed_action, 0)
@@ -43,7 +43,7 @@ def landing(row: int, lane: int, executed_action: str, lanes: int) -> list[int]:
 
 
 def frame_of(step: dict, lanes: int, questions: list[dict]) -> dict:
-    """A step record as a frame (docs/REPLAY_DATA.md). `questions` is the episode's list of distinct
+    """A step record as a frame (docs/FORMATS.md). `questions` is the episode's list of distinct
     question sets; a set not seen before is appended to it and the frame points at it with `q`."""
     frame = {k: v for k, v in step.items() if k not in DROPPED}
     frame["ahead"] = [entry["gaps_relative"] for entry in step["senses"]["ahead"]]

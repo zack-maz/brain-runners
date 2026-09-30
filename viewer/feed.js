@@ -8,7 +8,7 @@
 //   handlers.onEnd({status, runs, scoreboard})            live only: the run is over
 //   handlers.onError(message)                             live only
 //
-// fromEmbedded(replay) reads the object bakeoff/replay.py built (docs/REPLAY_DATA.md). fromStream(url)
+// fromEmbedded(replay) reads the object bakeoff/replay.py built (docs/FORMATS.md). fromStream(url)
 // listens to `bakeoff live`, whose events carry the same shapes. The page never reads the replay object
 // itself. Pure apart from the EventSource, which tests replace.
 (function (root) {

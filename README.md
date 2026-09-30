@@ -57,11 +57,19 @@ again. Playing a new run with the bots is free. For the other minds:
 
 Step by step, with what each key costs: [`docs/SETUP.md`](docs/SETUP.md).
 
-## More
+## Docs
 
-- `docs/EXPLAINER.html`: the whole project in plain language, then the technical detail.
-- `docs/WALKTHROUGH.md`: every command and every part of the page.
-- `docs/README.md`: an index of everything else: the decisions, the design specs, the fly research.
+| | |
+|---|---|
+| [`docs/SETUP.md`](docs/SETUP.md) | Installing it, your own keys, and how spending is kept in your hands. |
+| [`docs/WALKTHROUGH.md`](docs/WALKTHROUGH.md) | Every command and every part of the page, and what each costs. |
+| [`docs/EXPLAINER.html`](docs/EXPLAINER.html) | The whole project in plain language, then the technical detail. |
+| [`docs/WRITEUP.html`](docs/WRITEUP.html), [`docs/COSTS.md`](docs/COSTS.md) | The study's write-up, and every paid run with what it cost. |
+| [`docs/DECISIONS.md`](docs/DECISIONS.md) | Every decision, numbered; the code and the write-up cite them. |
+| [`docs/FORMATS.md`](docs/FORMATS.md) | What a run leaves on disk, and the replay data the page draws. |
+| [`docs/RESEARCH.md`](docs/RESEARCH.md), `docs/research/` | The fly-brain resources and deeper research, kept as written (its paths still say `calibration/` at the top, from before it moved under `docs/`). |
+| `docs/calibration/`, `docs/spikes/` | How the flies were fixed and frozen, and the five probes' reports. Their throwaway code stayed on local branches: where the record says a report is "on branch `spike/…`", read `docs/spikes/`. |
+| [`docs/history/`](docs/history/README.md) | How it was built: every spec, plan and mock-up, and the running notes. |
 
 The fly model is Shiu et al.'s ([philshiu/Drosophila_brain_model](https://github.com/philshiu/Drosophila_brain_model)),
 with FlyWire's annotations ([flyconnectome/flywire_annotations](https://github.com/flyconnectome/flywire_annotations)).

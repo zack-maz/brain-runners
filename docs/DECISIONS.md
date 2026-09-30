@@ -21,7 +21,7 @@
    0.6–0.7 s wall-clock per 100 ms decision on the user's M1.
 6. **Flagship game: a "Run"-style tunnel runner** (https://www.coolmathgames.com/0-run), not a
    slither-style food arena. Left/right = the fly's steering neurons, jump = its Giant Fiber.
-7. **Design approved 2026-09-19:** `docs/superpowers/specs/2026-09-19-tunnel-run-design.md`.
+7. **Design approved 2026-09-19:** `docs/history/superpowers/specs/2026-09-19-tunnel-run-design.md`.
    LLM is Claude Haiku 4.5. Turn-based, one decision per row, same seeded tracks for everyone.
 8. **Fly input and tuning (phase 2, ours, not the fly's biology):** each visible gap adds
    `250 / row³` Hz to its eye, capped at 250 Hz and rounded to 25 Hz steps; any net steering
@@ -52,7 +52,7 @@
 13. **Replay viewer (phase 4):** `python -m bakeoff view <run_dir>...` writes one self-contained HTML
     file, so a replay opens from disk, works offline and can be sent to someone. Python
     (`bakeoff/replay.py`) merges the run directories and applies the rules of the game (landing
-    tiles, complete or cut off, scoreboard); the JavaScript only draws (`docs/REPLAY_DATA.md`). Players
+    tiles, complete or cut off, scoreboard); the JavaScript only draws (`docs/FORMATS.md`). Players
     are lined up by row, not by decision, so every column shows the same stretch of track and a jump
     takes two ticks. The tiles a player was shown are drawn brighter. The same (player, seed) in two
     run directories is an error. When the players did not all play the same seeds, the scoreboard
@@ -75,7 +75,7 @@
     perfect answers would have. 1 answer in 928 was on the wrong side of 0.5. On safe rows its four answers
     differ by a hundredth, so ties are rare and it wanders sideways instead of running straight; never fatally.
     The rule stays as specified and the write-up names the wandering.
-16. **The demo player is the main tool** (design: `docs/superpowers/specs/2026-09-20-demo-player-design.md`).
+16. **The demo player is the main tool** (design: `docs/history/superpowers/specs/2026-09-20-demo-player-design.md`).
     Everything built so far is restyled to the user's brand (`~/Documents/PROJECTS/BRAND/brand.css`:
     near-black, concrete greys, one rationed blue, Hanken Grotesk, JetBrains Mono labels; BLAME! and Zima
     Blue as seasoning) and arranged around it.
@@ -99,11 +99,11 @@
     that, and any tournament seed, needs a new go-ahead. **Used (2026-09-21):** 460 Jev requests (232 for
     track 1000, 228 live on track 1001) and 92 Claude Haiku requests (0.054 USD); nothing on a seed below
     1000. What is left of this authorization ended with that session.
-20. **All eight updates in `docs/UPDATES.md` come before phase 6** (2026-09-21): a trained or better fly, two more
+20. **All eight updates in `docs/history/UPDATES.md` come before phase 6** (2026-09-21): a trained or better fly, two more
     Jev variants with the LLM fed the same signals, the number of rows of vision, one live log tab per mind, any
     seed live, a faster difficulty ramp, a benchmark for time, cost and performance, and the analysis moved to its
     own tab. Worked on branch `phase6-updates`, starting with the game (vision and ramp).
-21. **Game v2** (2026-09-21, design `docs/superpowers/specs/2026-09-21-game-v2-design.md`, measured on practice
+21. **Game v2** (2026-09-21, design `docs/history/superpowers/specs/2026-09-21-game-v2-design.md`, measured on practice
     seeds 1000–1199 with free players only): the faster ramp's job is to separate the players sooner; the track is
     150 rows and reaches full gap density by row 100 (perfect play still finishes 97%; the fly's stand-in brain
     averages 68 rows instead of 124, random 24). Vision stays 6 rows × 3 lanes either side: perfect play gains
@@ -116,9 +116,9 @@
     pins it); `v2` is the default. Every run records its rules in `meta.json`; a run from before versions reads as
     v1; `view` refuses to mix games. The fly's frozen numbers were fixed on v1 tracks and are not retuned for v2;
     the page says so.
-24. **Built as update 1** (plan `docs/superpowers/plans/2026-09-21-update1-game-v2.md`). Amended while prototyping:
+24. **Built as update 1** (plan `docs/history/superpowers/plans/2026-09-21-update1-game-v2.md`). Amended while prototyping:
     `--max-rows` stays (a shorter track is a prefix of the same game, so it keeps its version).
-25. **The players update (items 1 and 2 of `docs/UPDATES.md`, 2026-09-21).** Measured first, for free, on v2 practice
+25. **The players update (items 1 and 2 of `docs/history/UPDATES.md`, 2026-09-21).** Measured first, for free, on v2 practice
     seeds 1000–1199 with perfect answers: the composed Jev's one-step rule averages 112 rows (26% finish), a two-step
     rule 140 (74%), the solver 149 (97%). The fly's input is two eye rates of 11 levels each, so a trained readout on
     it could only learn a 121-entry table. The user chose: **the fly** gets richer input first (`fly_rich`,
@@ -135,10 +135,10 @@
     only.
 27. **The LLM stays Claude Haiku** for update 2a (the user, 2026-09-21); a **GLM Flash** twin (Zhipu's free tier,
     through an OpenAI-compatible client) comes later as another model, and is one of the players the page will let
-    the user select (items 9 and 10 of `docs/UPDATES.md`). OpenAI's GPT-5.6 Luna was considered (about 4 to 5 times
+    the user select (items 9 and 10 of `docs/history/UPDATES.md`). OpenAI's GPT-5.6 Luna was considered (about 4 to 5 times
     cheaper than Haiku); not chosen for now.
 28. **This file is the log only** (the user, 2026-09-21): numbered decisions, only ever added to. Where things
-    stand, the resume list, the open items and what the write-up must carry moved to `docs/NEXT.md`, which is
+    stand, the resume list, the open items and what the write-up must carry moved to `docs/history/NEXT.md`, which is
     rewritten as the state changes.
 29. **Update 2b is `fly_rich` only** (the user, 2026-09-22): `fly_trained` is dropped for now. Aim: honest science,
     what the real wiring can do with better input. The input says where a threat is, not just which side: each eye's
@@ -154,7 +154,7 @@
     different action. The user chose a play test with a rule fixed beforehand; on v2 practice seeds 1100-1104 with
     the frozen v1 thresholds the band flies survived 21.6 and 29.6 rows against `fly`'s 58.2 and never jumped. So
     `fly_rich` is not built; `fly` stays the only fly, and the report is the result for the write-up.
-31. **The benchmark (item 7)** (the user, 2026-09-22; design `docs/superpowers/specs/2026-09-22-benchmark-design.md`):
+31. **The benchmark (item 7)** (the user, 2026-09-22; design `docs/history/superpowers/specs/2026-09-22-benchmark-design.md`):
     one report that says both who is better with confidence (paired comparisons on shared seeds, bootstrap
     intervals, survival curves, seeds needed) and the cost/performance trade-off (USD and seconds per row). It reads
     recorded runs only and spends nothing. `python -m bakeoff bench` prints the tables and writes `bench.json` and
@@ -165,7 +165,7 @@
     `docs/COSTS.md`. Now: 95% Student t intervals (paired for pairs), none below 5 tracks; tracks needed is for an
     80% chance of a verdict; a note counts the pairs compared and the verdicts chance alone would give; runs of
     different lengths are refused. A test simulates the verdict rate with no difference (about 5%).
-33. **The GLM Flash twins** (the user, 2026-09-22; item 10 of `docs/UPDATES.md`): a third model on all four question
+33. **The GLM Flash twins** (the user, 2026-09-22; item 10 of `docs/history/UPDATES.md`): a third model on all four question
     sets (`glm_composed`, `glm_choice`, `glm_two_step`, `glm_reader`), sent the same request as the Haiku twins
     (`ChatSetPlayer`), so the model is what differs. `glm-4.5-flash` through the OpenAI-compatible endpoint
     (`ZHIPU_API_KEY`, `GLM_BASE_URL` for a mainland account), called with the standard library: one HTTP request per
@@ -176,7 +176,7 @@
     run of tracks 1001–1004 aborted on six refusals in a row. Item 10 is part done; pick it up when the quota
     recovers. The page work (items 4, 5, 8, 9) comes next, with GLM among the selectable players.
 35. **The page runs the show** (the user, 2026-09-22; items 4, 5, 8, 9; design
-    `docs/superpowers/specs/2026-09-22-page-control-design.md`). `bakeoff live` opens a lobby: the page picks the
+    `docs/history/superpowers/specs/2026-09-22-page-control-design.md`). `bakeoff live` opens a lobby: the page picks the
     track and the runners, starts and cancels runs, and can set up another when one ends (the old flags stay, plus
     `--start`). The page may start paid runs after showing the worst-case cost and asking, but the command keeps the
     ceiling: `--max-requests` is the session's cap per paid player and `--tournament` is still needed below seed
@@ -227,7 +227,7 @@
     stripped for the parse only, so the log still keeps the answer as it came. Free tier, so its price is 0, and it
     spends nothing until someone plays it with `--max-requests`.
 41. **`fly2`, a second pure fly** (the user, 2026-09-24; research in `docs/research/2026-09-24-fly/`, design in
-    `docs/superpowers/specs/2026-09-24-fly2-design.md`, branch `fly2`). The research found that the input is the
+    `docs/history/superpowers/specs/2026-09-24-fly2-design.md`, branch `fly2`). The research found that the input is the
     bottleneck: the best table on `fly`'s two eye totals scores 66.7 rows on v2 held-out seeds, and the fly already
     scores 66.0. The user chose the following:
     - **Pure first:** the fly is improved within decision 2. A trained fly comes later as a separate, labelled player.
@@ -287,10 +287,10 @@
     so every answer already paid for still replays; the run directories keep their old file names and are read
     through `canonical()` in `bakeoff/players/names.py`, which maps every old name, the `llm*` ones of decision 39
     included, straight to its new one. The new names were chosen for the Brain Battle character select
-    (`docs/FRONTEND.md`), where each set is a skin.
+    (`docs/history/FRONTEND.md`), where each set is a skin.
 
 45. **Brain Battle is the front of `bakeoff live`** (the user, 2026-09-25; spec
-    `docs/superpowers/specs/2026-09-25-brain-battle-design.md`, mock-ups and answers in `docs/FRONTEND.md`). Home,
+    `docs/history/superpowers/specs/2026-09-25-brain-battle-design.md`, mock-ups and answers in `docs/history/FRONTEND.md`). Home,
     character select (skins are the players), track select, the race, results, and Records. The user approved the
     spec's seven open calls:
     - **Wrong moves** count the executed move, a fallback included; a death with no surviving move is "trapped".
@@ -317,7 +317,7 @@
 47. **fly2 is the better pure fly** (2026-09-25). On 100 fresh v2 seeds 1400–1499 (`runs/20260925-163957`), never used
     by either fly's calibration, fly2 scored 79.45 rows against fly's 66.02: +13.4 (95% interval 5.3 to 21.6), 63
     wins / 4 ties / 33 losses, `bakeoff bench` verdict "fly2 ahead". A third of fly2's deaths are dodges into a gap.
-48. **fly3, the trained fly** (the user, 2026-09-25; design `docs/superpowers/specs/2026-09-25-fly3-design.md`). Track 2
+48. **fly3, the trained fly** (the user, 2026-09-25; design `docs/history/superpowers/specs/2026-09-25-fly3-design.md`). Track 2
     of decision 41, a separate player labelled *trained*; decision 2 still binds `fly` and `fly2`. The user chose:
     - **Purpose: science first, then the page.** It answers "does the fly's wiring help a learner play?"; fly3 is
       offered in the lobby and the tournament only if it beats its no-brain control.
@@ -362,7 +362,7 @@
 
 53. **Phase 6 is a study, not a tournament** (the user, 2026-09-28: "get rid of the whole tournament idea ... this
     should now turn into a research project where we're seeing what performs best at cost and speed"). Design:
-    `docs/superpowers/specs/2026-09-28-study-design.md`. The user chose:
+    `docs/history/superpowers/specs/2026-09-28-study-design.md`. The user chose:
     - **Held-out seeds 100–199** (game v2); the free players play all 100, Claude Haiku's five skins the first 15
       (at most 23.85 USD, capped; the user buys about 25 USD of API credit), GLM Flash's five the first 15 only if
       its free tier fails under 2% of decisions over at least 5 practice tracks.
@@ -411,7 +411,13 @@
     `--max-requests` (default 0: replay the cache only), and the page's confirmation covers Jev as it does Claude
     Haiku. `UNCAPPED` is empty; the machinery for an uncapped player stays. Replaces decision 50.
 
-Where we are and what comes next: `docs/NEXT.md`.
+59. **The docs are tidied into one history folder** (the user, 2026-09-30: "we have a lot of docs. Let's clean up
+    and consolidate"). The build record moves, unchanged, into `docs/history/`: the specs, plans and mock-ups, and
+    `NEXT.md`, `UPDATES.md`, `FRONTEND.md` and `REFERENCE.md`. `STEP_RECORD.md` and `REPLAY_DATA.md` become one
+    `docs/FORMATS.md`. The index of the docs is a section of the root README, replacing `docs/README.md`. No other
+    document is removed; `docs/research/` stays where it is.
+
+The build record, including the running notes (`docs/history/NEXT.md`), is in `docs/history/`.
 
 ## Prior art to reuse
 

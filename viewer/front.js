@@ -22,7 +22,7 @@
     "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", ".BBBBBBBBBBBBBBBBBBBBBBBBBBBB", ".BBBBBBBBBBBBBBBBBBBBBBBBBBBB",
     "..BBBBBBBBBBBBBBBBBBBBBBBBBB", "...BBBBBBBBBBBBBBBBBBBBBBBB", ".....BBBBBBBBBBBBBBBBBBBBBB",
     ".................BBBBBBBBBBB", "..................BBBBBBBBB", "....................BBB", "....................BBB"];
-  const ACCENT = "#7AA2F7"; // --accent: the brain is the one use of blue that is not the cursor (docs/FRONTEND.md)
+  const ACCENT = "#7AA2F7"; // --accent: the brain is the one use of blue that is not the cursor (docs/history/FRONTEND.md)
 
   const front = {
     screen: "home", from: "home", state: null, sel: Select.make(roster, []), seed: null, armed: false, refusal: null,

@@ -1,6 +1,6 @@
 """fly2, the second pure fly: the same untrained wiring as fly, a richer input and a readout of its steering neurons.
 
-Design: docs/superpowers/specs/2026-09-24-fly2-design.md (decisions 41 and 42). The fly's own part is the wiring
+Design: docs/history/superpowers/specs/2026-09-24-fly2-design.md (decisions 41 and 42). The fly's own part is the wiring
 and the model, which cells get input and which cells are read. OURS, and labelled as ours everywhere:
 - the input mapping (bakeoff/fly/channels.py): which gaps drive which cells, and how hard;
 - the readout: turn = (right - left) of the mapping's steering neurons, jump = the Giant Fiber's mean;

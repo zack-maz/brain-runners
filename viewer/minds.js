@@ -226,7 +226,7 @@
     return answer && typeof answer.noul === "number" ? 1 - answer.noul : null;
   }
 
-  // What a question-set player was told (docs/superpowers/specs/2026-09-21-jev-family-design.md): the read tiles as a
+  // What a question-set player was told (docs/history/superpowers/specs/2026-09-21-jev-family-design.md): the read tiles as a
   // grid (darker = more sure it is a gap), each move's yes/no answers as bars, or the Choice it made.
   function readGrid(answers) {
     const tiles = Object.keys(answers).map((id) => /^tile_r(\d+)_(c|l\d+|r\d+)$/.exec(id)).filter(Boolean).map((m) => ({

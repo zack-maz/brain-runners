@@ -363,7 +363,7 @@ no interval below five tracks, and says how many of its verdicts chance alone wo
   <li><span class="label">Phase 5 · the demo</span>5a <code>jev_step1</code>; 5b the demo player in your brand's
   look; 5c going live. Merged 2026-09-21.</li>
   <li><span class="label">Update 1 · game v2</span>Named game versions; v2 is 150 rows and gets hard by row 100.
-  First of ten updates that come before the tournament (<code>docs/UPDATES.md</code>).</li>
+  First of ten updates that come before the tournament (<code>docs/history/UPDATES.md</code>).</li>
   <li><span class="label">Update 2a · the Jev family</span>Three more ways to ask Jev (<code>jev_guided</code>,
   <code>jev_step2</code>, <code>jev_map</code>) and a Claude Haiku twin for each. Built, reviewed, and its
   paid runs are done.</li>
@@ -399,7 +399,7 @@ no interval below five tracks, and says how many of its verdicts chance alone wo
 
 <h2 id="next">7. What's next</h2>
 
-<p><strong>The ten updates</strong> of <code>docs/UPDATES.md</code> (decision 20) are done, bar one: the game got
+<p><strong>The ten updates</strong> of <code>docs/history/UPDATES.md</code> (decision 20) are done, bar one: the game got
 harder sooner (v2), Jev gained three more ways of being asked and two rival models, the fly's richer-input idea was
 probed and stopped, the benchmark was built, and the page became the tool that runs everything. What is left is
 <strong>GLM Flash's remaining four tracks</strong>, parked until its free tier stops refusing. Then the whole
@@ -702,10 +702,10 @@ and the run ends <code>aborted</code> or <code>budget_exhausted</code> only when
 <p>Each record mixes two moments: what the player saw when deciding (<code>row, lane, senses, looming,
 questions</code>) and what happened after (<code>answers, chosen_action, executed_action, solver_action, alive,
 rows_survived, death_cause, latency_ms, usage, cache_hit, info</code>). The full track is logged once per seed.
-Contract: <code>docs/STEP_RECORD.md</code>.</p>
+Contract: <code>docs/FORMATS.md</code>.</p>
 
 <p><code>bakeoff/replay.py</code> merges several run directories into one replay object
-(<code>docs/REPLAY_DATA.md</code>): tracks, episodes lined up by row, landing tiles, the scoreboard and whether its
+(<code>docs/FORMATS.md</code>): tracks, episodes lined up by row, landing tiles, the scoreboard and whether its
 means are a fair comparison. <code>bakeoff/view.py</code> embeds that object, the JavaScript and the two fonts
 in one HTML file that never loads anything from the network.</p>
 
@@ -762,10 +762,10 @@ does arithmetic the Python does not.</p>
     <tr><td><code>viewer/</code></td><td>the demo player (plain JS, no build step) and its tests</td></tr>
     <tr><td><code>docs/calibration/</code></td><td>the fly's frozen tuning and first scoreboard</td></tr>
     <tr><td><code>docs/DECISIONS.md</code></td><td>every decision, in order</td></tr>
-    <tr><td><code>docs/NEXT.md</code></td><td>where things stand and what comes next</td></tr>
-    <tr><td><code>docs/UPDATES.md</code></td><td>the ten updates between phase 5 and the tournament</td></tr>
+    <tr><td><code>docs/history/NEXT.md</code></td><td>the running state while it was built (the last decisions say where things stand now)</td></tr>
+    <tr><td><code>docs/history/UPDATES.md</code></td><td>the ten updates between phase 5 and the tournament</td></tr>
     <tr><td><code>docs/COSTS.md</code></td><td>measured costs and what each paid run showed</td></tr>
-    <tr><td><code>docs/superpowers/</code></td><td>the five binding design specs and one plan per phase or update</td></tr>
+    <tr><td><code>docs/history/superpowers/</code></td><td>the five binding design specs and one plan per phase or update</td></tr>
     <tr><td><code>runs/</code>, <code>.cache/</code>, <code>data/</code></td><td>recorded runs, cached answers, fly model data (all git-ignored)</td></tr>
   </tbody>
 </table>

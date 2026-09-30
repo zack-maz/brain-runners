@@ -1,5 +1,5 @@
 """The results of one recorded run, for the Brain Battle results screen
-(docs/superpowers/specs/2026-09-25-brain-battle-design.md, section E). Reads files only, spends nothing.
+(docs/history/superpowers/specs/2026-09-25-brain-battle-design.md, section E). Reads files only, spends nothing.
 
 One entry per player of the run: the report's row (`summarize`), how each of its tracks ended, the
 benchmark's time per row, and a cost estimate of live requests times the page's price per request. The

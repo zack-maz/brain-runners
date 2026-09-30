@@ -2,7 +2,7 @@
 
 A run records its rules in meta.json; runs of different games never share a scoreboard. v1 is the game
 phases 1 to 5 were played on; v2 is shorter and gets hard sooner, so the players separate earlier
-(docs/superpowers/specs/2026-09-21-game-v2-design.md)."""
+(docs/history/superpowers/specs/2026-09-21-game-v2-design.md)."""
 
 from __future__ import annotations
 

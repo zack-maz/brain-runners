@@ -1,5 +1,5 @@
 """The Brain Battle roster: the characters, their skins, and what each skin is called and looks like
-(docs/superpowers/specs/2026-09-25-brain-battle-design.md, section A; colours from docs/FRONTEND.md).
+(docs/history/superpowers/specs/2026-09-25-brain-battle-design.md, section A; colours from docs/history/FRONTEND.md).
 
 A skin is a player: the character is who plays, the skin is how (a question set and its rule, a fly's
 input, a yardstick). Every registered player is exactly one skin, and a test keeps it so. The page gets
@@ -25,7 +25,7 @@ SETS = (
                    "and the planner are ours."),
 )
 # per model, one look per set in the order above: plain is the character's own colour; guided green, step1
-# yellow, step2 red, map black with its eyes (or visor) lit blue, which the user chose (docs/FRONTEND.md)
+# yellow, step2 red, map black with its eyes (or visor) lit blue, which the user chose (docs/history/FRONTEND.md)
 SET_LOOKS = {
     "jev": ({"color": "#B9BEC4"}, {"color": "#5FA35A"}, {"color": "#E6B422"}, {"color": "#B8404F"},
             {"color": "#1E2227", "inks": {"V": "#7AA2F7"}}),
