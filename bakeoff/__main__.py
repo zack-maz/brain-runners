@@ -6,6 +6,7 @@ import argparse
 import json
 import sys
 import time
+import webbrowser
 from pathlib import Path
 
 from bakeoff.clients.core import DEFAULT_CACHE_DIR, DiskCache, RequestBudget
@@ -91,6 +92,7 @@ def _parser() -> argparse.ArgumentParser:
                       help="play at once with --players on --seed, as before; without it the page opens in the "
                            "Brain Runners home and starts the run when you say so")
     live.add_argument("--port", type=int, default=8000, help="the page is served on 127.0.0.1 only (default port 8000)")
+    live.add_argument("--open", action="store_true", help="open the page in the browser once it is served")
     live.add_argument("--no-wait", action="store_true",
                       help="do not wait for a browser before the run, and do not keep serving after it")
     return parser
@@ -169,7 +171,10 @@ def _live(args) -> int:
         except ValueError as e:
             print(e, file=sys.stderr)
             return 2
-        print(f"watch: http://{HOST}:{server.server_address[1]}/", flush=True)
+        url = f"http://{HOST}:{server.server_address[1]}/"
+        print(f"watch: {url}", flush=True)
+        if args.open:
+            webbrowser.open(url)
         if args.start:
             return _play_now(session, seed, names, args)
         print(f"the page runs the show: pick a track and the players there (Ctrl-C to stop). "

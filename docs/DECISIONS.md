@@ -417,6 +417,12 @@
     `docs/FORMATS.md`. The index of the docs is a section of the root README, replacing `docs/README.md`. No other
     document is removed; `docs/research/` stays where it is.
 
+60. **One command opens Brain Runners** (the user, 2026-09-30: "make it easier to launch the home page. script is
+    too confusing"). `uv run brain-runners` (`bakeoff/launch.py`, a `[project.scripts]` entry point) fetches the
+    study's runs when they are missing (free, 7 MB; a failed download is said and the page opens anyway), then runs
+    `bakeoff live --open` from the clone's root, which opens the page in the browser. Every `live` flag passes
+    through; `python -m bakeoff live` is unchanged and opens no browser unless given `--open`.
+
 The build record, including the running notes (`docs/history/NEXT.md`), is in `docs/history/`.
 
 ## Prior art to reuse

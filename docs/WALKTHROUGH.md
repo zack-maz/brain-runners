@@ -141,6 +141,9 @@ some verdicts arrive by chance, and the notes count how many.
 uv run python -m bakeoff live --port 8765
 ```
 
+`uv run brain-runners` (decision 60) is the short way in: it fetches the study's runs if they are missing, then
+runs `live --open` from the clone's root, which opens the page in the browser; every flag below passes through.
+
 This opens **Brain Runners** (called Brain Battle until decision 51, Brain Run until decision 57), the front of the live page: the command binds the port and sets the money ceiling, the
 browser does the rest. Open the address it prints: the home screen leads to the character select (who plays), the
 track select (which track, and what it can cost at worst), the run, and the results, which open by themselves when
@@ -152,7 +155,7 @@ without restarting the command. Records holds everything played before. Ctrl-C s
 | `--port N` | serve on `127.0.0.1:N` only (default 8000) |
 | `--start` | play the command line's own run at once: the page opens on the run screen, and the first decision waits for a browser |
 | `--seed N`, `--players a,b` | the runners the character select opens with and the track the track select opens on (and what `--start` plays); without them, the demo's three (`fly,jev_step1,haiku_plain`) on track 1001 |
-| `--max-requests N` | the ceiling for the **whole session**, per capped paid player (Claude Haiku, GLM Flash) — the page can never raise it; Jev has none |
+| `--max-requests N` | the ceiling for the **whole session**, per paid player (Jev, Claude Haiku, GLM Flash; decision 58) — the page can never raise it |
 | `--max-rows`, `--game`, `--lookahead`, `--window`, `--cache`, `--out`, `--held-out` | as in `run` |
 | `--no-wait` | do not wait for a browser and do not keep serving afterwards (needs `--start`) |
 
