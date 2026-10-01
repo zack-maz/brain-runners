@@ -69,9 +69,29 @@
     ignore the track (<span data-stat="always_jump mean_rows"></span> for always jumping). They cost nothing but are
     the slowest of the free players: <span data-stat="fly2 s_per_decision_median"></span> per decision, simulated on
     this laptop, against <span data-stat="jev_step2 s_per_decision_median"></span> for Jev (Claude Haiku took
-    <span data-stat="haiku_step2 s_per_decision_median"></span> for step 2). On the
-    rows-for-cost chart fly2 sits on the frontier beside the two best Jev players.</p>
-  <p>To be written: the frontiers and the named scores (rows per cent, rows per second).</p>
+    <span data-stat="haiku_step2 s_per_decision_median"></span> for step 2).</p>
+  <p><strong>The frontiers.</strong> A frontier is the players no other player beats on both axes at once: more
+    rows for less money, or for less time a decision (the two trade-off charts on the Charts screen; the bots are
+    there for scale and never on one). For rows against cost it holds three: <code>jev_step2</code>,
+    <code>jev_step1</code> and <code>fly2</code>, the free player that runs furthest, bots aside. For rows against time it holds
+    three Jev players: <code>jev_step2</code>, <code>jev_step1</code> and <code>jev_guided</code>. No Claude Haiku
+    player is on either: each one is beaten on both axes by a Jev player. A frontier compares each player's own
+    mean, so Claude Haiku's points rest on its <span data-stat="haiku_step1 seeds"></span> tracks against Jev's
+    <span data-stat="jev_step1 seeds"></span>.</p>
+  <p><strong>Two named scores</strong> put each trade-off in one number, as extras beside the charts, never the
+    verdict. Rows per cent is mean rows over a track's cost in cents: <code>jev_step2</code>
+    <span data-stat="jev_step2 rows_per_cent"></span> and <code>jev_step1</code>
+    <span data-stat="jev_step1 rows_per_cent"></span> against
+    <span data-stat="haiku_step1 rows_per_cent"></span> for <code>haiku_step1</code> and
+    <span data-stat="haiku_plain rows_per_cent"></span> for <code>haiku_plain</code>, Claude Haiku's highest; the
+    flies and the bots are free, so they have none. Rows per second is mean rows over the seconds a track's
+    decisions took: <code>jev_guided</code> <span data-stat="jev_guided rows_per_second"></span>,
+    <code>jev_step2</code> <span data-stat="jev_step2 rows_per_second"></span>, <code>fly2</code>
+    <span data-stat="fly2 rows_per_second"></span> and <code>haiku_step1</code>
+    <span data-stat="haiku_step1 rows_per_second"></span>. A ratio rewards being cheap or quick as much as running
+    far: <code>jev_guided</code> leads rows per second while running fewer rows than <code>jev_step2</code>, and
+    <code>haiku_plain</code> leads Claude Haiku's rows per cent while running the fewest of its rows. That is why
+    the scores sit beside the charts rather than replace them.</p>
 
   <h2>What is ours</h2>
   <ul>
