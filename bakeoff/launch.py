@@ -17,8 +17,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def fetch_study_runs() -> list[str]:
-    from scripts.study_data import fetch
+    from scripts.study_data import RUNS_DIR, STUDY_RUNS, fetch
 
+    if not all((RUNS_DIR / name / "meta.json").is_file() for name in STUDY_RUNS):
+        print("downloading the study's recorded runs (7 MB, free, only this once)...", flush=True)
     return fetch()
 
 
