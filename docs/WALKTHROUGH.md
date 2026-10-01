@@ -141,6 +141,9 @@ some verdicts arrive by chance, and the notes count how many.
 uv run python -m bakeoff live --port 8765
 ```
 
+`uv run brain-runners` (decision 60) is the short way in: it fetches the study's runs if they are missing, then
+runs `live --open` from the clone's root, which opens the page in the browser; every flag below passes through.
+
 This opens **Brain Runners** (called Brain Battle until decision 51, Brain Run until decision 57), the front of the live page: the command binds the port and sets the money ceiling, the
 browser does the rest. Open the address it prints: the home screen leads to the character select (who plays), the
 track select (which track, and what it can cost at worst), the run, and the results, which open by themselves when

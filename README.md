@@ -45,10 +45,9 @@ not TypeSafe's, Anthropic's or the fly's. The write-up lists them.
 ## Run it yourself
 
     uv sync                                          # Python 3.13, https://docs.astral.sh/uv/
-    uv run python -m scripts.study_data fetch        # the study's recorded runs (7 MB), free
-    uv run python -m bakeoff live                    # open the address it prints
+    uv run brain-runners                             # opens Brain Runners in your browser
 
-That opens Brain Runners with the study loaded: Records, Charts, the Writeup and every recorded run to watch
+The first time, it downloads the study's recorded runs (7 MB, free). That opens Brain Runners with the study loaded: Records, Charts, the Writeup and every recorded run to watch
 again. Playing a new run with the bots is free. For the other minds:
 
 - **Jev and Claude Haiku** use your own API keys, in a `.env` file. Every paid mind has a hard cap on requests,
