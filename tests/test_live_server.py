@@ -282,3 +282,31 @@ def test_a_keyless_record_answers_with_a_500_and_a_reason_not_a_dropped_connecti
     log.write_text(json.dumps({"player": "solver", "seed": 1001}) + "\n")  # parses; no "row"
     status, body = payload(httpd, "GET", f"/results?run={started['run_id']}")
     assert status == 500 and body["ok"] is False and "cannot read that run" in body["error"]
+
+
+def test_a_page_that_hangs_up_before_its_answer_is_dropped_quietly(server, capsys, monkeypatch):
+    """A reload while the charts are being worked out: the answer has nowhere to go, and the terminal is not
+    filled with tracebacks for it (nor with a 500 sent down the same closed connection)."""
+    import socket
+    import struct
+    import threading
+
+    httpd, session = server
+    asked, release = threading.Event(), threading.Event()
+
+    def slow_charts(scope=None):
+        asked.set()
+        release.wait(5)
+        return {"bench": None, "why": "x" * 200_000}  # bigger than a socket buffer: the write must fail
+
+    monkeypatch.setattr(session, "charts", slow_charts)
+    sock = socket.create_connection(("127.0.0.1", httpd.server_address[1]), timeout=5)
+    port = httpd.server_address[1]
+    sock.sendall(f"GET /charts HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\n{TOKEN_HEADER}: tok-123\r\n\r\n".encode())
+    assert asked.wait(5)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 0))  # close with a reset
+    sock.close()
+    release.set()
+    threading.Event().wait(0.5)  # the handler thread writes, fails and finishes
+    assert "Traceback" not in capsys.readouterr().err
+    assert get(httpd, "/state")[0].status == 200  # and it keeps serving

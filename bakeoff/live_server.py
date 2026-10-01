@@ -154,6 +154,8 @@ def serve(page: str | None, session: LiveSession, port: int = 8000) -> Threading
                 out = session.results(wanted) if self._route == "/results" else session.replay(wanted)
             except LobbyError as e:  # a request this route does not answer, not a run it cannot read
                 return self._json({"ok": False, "error": str(e)}, status=400)
+            except ConnectionError:  # the page hung up: there is no one to tell, least of all with a 500
+                raise
             except (OSError, ValueError) as e:
                 return self._json({"ok": False, "error": f"cannot read that run: {e}"}, status=500)
             except Exception as e:  # a record that parses but is not one of ours: still a reason, not a hangup
@@ -194,6 +196,12 @@ def serve(page: str | None, session: LiveSession, port: int = 8000) -> Threading
                     self.wfile.flush()
             except (BrokenPipeError, ConnectionResetError):
                 pass  # the page was closed
+
+        def handle(self) -> None:
+            try:
+                super().handle()
+            except ConnectionError:  # a page reloaded or closed before its answer: nothing to report
+                pass
 
         def log_message(self, format, *args):  # noqa: A002
             pass  # the terminal belongs to the run's own output
