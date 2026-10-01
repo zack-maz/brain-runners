@@ -1,6 +1,6 @@
 """Compartment-resolved paths from the FlyWire viewer's split edgelist (read-only). Direct and 2-hop, input type (left) -> DN."""
 import numpy as np, pandas as pd, pyarrow.feather as f, pyarrow.compute as pc, pyarrow as pa
-FW = "/Users/zackmaz/Documents/PROJECTS/LEARN/flywire/brain/"
+FW = "/Users/zackmaz/Documents/PROJECTS/LEARN/flywire/motg-flywire/"
 ann = pd.read_csv(FW + "data/raw/neuron_annotations.tsv", sep="\t", usecols=["root_id","cell_type","side","super_class"], low_memory=False)
 ann["rid"] = ann.root_id.astype(str)
 t_of = dict(zip(ann.rid, ann.cell_type.fillna("?"))); s_of = dict(zip(ann.rid, ann.side.fillna("?")))

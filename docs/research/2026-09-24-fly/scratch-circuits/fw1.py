@@ -1,6 +1,6 @@
-"""FlyWire viewer data (read-only): neuropils per type, flow rank, modules. Source: ~/Documents/PROJECTS/LEARN/flywire/brain."""
+"""FlyWire viewer data (read-only): neuropils per type, flow rank, modules. Source: ~/Documents/PROJECTS/LEARN/flywire/motg-flywire."""
 import json, numpy as np, pandas as pd, pyarrow.parquet as pq
-FW = "/Users/zackmaz/Documents/PROJECTS/LEARN/flywire/brain/"
+FW = "/Users/zackmaz/Documents/PROJECTS/LEARN/flywire/motg-flywire/"
 ann = pd.read_csv(FW + "data/raw/neuron_annotations.tsv", sep="\t", usecols=["root_id","cell_type","side","super_class"], low_memory=False)
 N = len(ann)
 rank = np.frombuffer(open(FW + "public/data/flow_rank.bin","rb").read(), np.uint8)

@@ -24,7 +24,7 @@ no tracked file touched. Scratch scripts and raw outputs: `scratch-circuits/` in
 
 Sources for numbers:
 - **"Shiu"** = the model's own `Connectivity_783.parquet`: signed synapse counts, each divided by the postsynaptic cell's total input. This is ground truth for what the simulation will do.
-- **"FlyWire tool"** = the user's viewer project `~/Documents/PROJECTS/LEARN/flywire/brain`, read-only: `fafb_783_split_edgelist.feather` (compartments), `neuron_neuropil_counts.parquet`, `flow_rank.bin`, `groupings.*`.
+- **"FlyWire tool"** = the user's viewer project `~/Documents/PROJECTS/LEARN/flywire/motg-flywire`, read-only: `fafb_783_split_edgelist.feather` (compartments), `neuron_neuropil_counts.parquet`, `flow_rank.bin`, `groupings.*`.
 - **"surface"** = `calibration/response_surface.json` (8 trials per cell, 100 ms, real brain, measured at phase 2).
 
 ---
@@ -458,6 +458,6 @@ URLs were fetched by the literature sub-agent through Europe PMC, PMC or publish
 
 **Local data**
 - FlyWire v783 annotations and the Shiu model data in `data/`.
-- The user's FlyWire viewer data (CC BY-NC 4.0) in `~/Documents/PROJECTS/LEARN/flywire/brain/data/raw` and `public/data`.
+- The user's FlyWire viewer data (CC BY-NC 4.0) in `~/Documents/PROJECTS/LEARN/flywire/motg-flywire/data/raw` and `public/data`.
 - `calibration/response_surface.json`.
 - Spikes 01 and 03 (branches `spike/fly-steering`, `spike/fly-bands`).

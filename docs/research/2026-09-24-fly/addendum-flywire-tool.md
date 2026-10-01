@@ -1,6 +1,6 @@
 # Addendum (from the user, 2026-09-24): use the FlyWire viewer project as a mapping tool
 
-The user asks that you use `/Users/zackmaz/Documents/PROJECTS/LEARN/flywire/brain` ("Visualising Fruit Fly Neurons",
+The user asks that you use `/Users/zackmaz/Documents/PROJECTS/LEARN/flywire/motg-flywire` ("Visualising Fruit Fly Neurons",
 the user's own FlyWire 783 viewer; read its README.md) to help map neurons and synapses. Read-only: do not modify it.
 
 What it has that our Shiu data does not:
