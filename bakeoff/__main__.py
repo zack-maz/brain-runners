@@ -172,8 +172,8 @@ def _live(args) -> int:
         except ValueError as e:
             print(e, file=sys.stderr)
             return 2
-        # the charts take seconds to work out: start now, so Charts and the Writeup open at once
-        threading.Thread(target=_warm_charts, args=(session,), daemon=True).start()
+        if not args.start:  # the charts take seconds to work out: start now, so Charts and the Writeup open at once
+            threading.Thread(target=_warm_charts, args=(session,), daemon=True).start()
         url = f"http://{HOST}:{server.server_address[1]}/"
         print(f"watch: {url}", flush=True)
         if args.open:
@@ -188,11 +188,15 @@ def _live(args) -> int:
 
 
 def _warm_charts(session) -> None:
+    """Works the charts out before the page asks, unless a run has begun: its decisions are timed, and this would
+    share the process with them."""
     for scope in ("held_out", "all"):
+        if session.run is not None:
+            return
         try:
             session.charts(scope)
-        except Exception:  # the page asks again and says why
-            return
+        except Exception as e:  # the page asks again and says why
+            print(f"charts not worked out ahead ({scope}): {e}", file=sys.stderr)
 
 
 def _play_now(session, seed: int, names: list[str], args) -> int:

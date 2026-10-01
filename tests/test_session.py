@@ -4,6 +4,7 @@ Free players only, so nothing here touches a provider."""
 
 import json
 import threading
+import time
 
 import pytest
 
@@ -388,10 +389,16 @@ def test_two_pages_asking_at_once_share_one_working_out(tmp_path, monkeypatch):
     monkeypatch.setattr("bakeoff.charts.charts_of", slow)
     lobby = session(tmp_path)
     answers = []
-    threads = [threading.Thread(target=lambda: answers.append(lobby.charts())) for _ in range(2)]
-    for t in threads:
-        t.start()
+    first = threading.Thread(target=lambda: answers.append(lobby.charts()))
+    first.start()
+    for _ in range(500):  # the first is inside the working out, holding the lock
+        if calls:
+            break
+        time.sleep(0.01)
+    second = threading.Thread(target=lambda: answers.append(lobby.charts()))
+    second.start()
+    time.sleep(0.1)  # the second is waiting for the first, not working it out again
     gate.set()
-    for t in threads:
-        t.join(5)
+    first.join(5)
+    second.join(5)
     assert answers == [{"n": 1}, {"n": 1}] and len(calls) == 1

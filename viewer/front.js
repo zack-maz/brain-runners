@@ -399,7 +399,7 @@
   $("ours-toggle").addEventListener("click", () => setOurs($("ours-panel").hidden));
   $("ours-close").addEventListener("click", () => setOurs(false));
 
-  // Scoring every recorded step can take a while the first time: the screen says so rather than stay empty.
+  // Scoring every recorded step can take a while after a run: the screen says so rather than stay empty or stale.
   function waiting(id) {
     $(id).hidden = false;
     $(id).classList.replace("warn", "muted");
@@ -411,7 +411,7 @@
   // head on top, the benchmark's tables and trade-off charts below them, drawn by the one renderer (bench_view.js).
   async function openCharts() {
     show("charts");
-    if (!front.charts) waiting("charts-why");
+    waiting("charts-why");
     const { ok, body } = await control("/charts");
     front.charts = ok ? body : { why: body.error || "the charts could not be read", bench: null };
     const chips = ok ? Records.chips(front.charts, roster) : [];
@@ -447,7 +447,7 @@
   // citation that ends in `all`.
   async function openWriteup() {
     show("writeup");
-    if (!front.writeup) waiting("writeup-why");
+    waiting("writeup-why");
     const [text, held, all] = await Promise.all([control("/writeup"), control("/charts?scope=held_out"), control("/charts")]);
     front.writeup = text.ok ? text.body : { html: null, why: text.body.error || "the writeup could not be read" };
     const scoped = (r) => (r.ok ? r.body : { bench: null, why: r.body.error || "the charts could not be read" });
