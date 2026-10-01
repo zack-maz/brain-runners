@@ -155,7 +155,7 @@ without restarting the command. Records holds everything played before. Ctrl-C s
 | `--port N` | serve on `127.0.0.1:N` only (default 8000) |
 | `--start` | play the command line's own run at once: the page opens on the run screen, and the first decision waits for a browser |
 | `--seed N`, `--players a,b` | the runners the character select opens with and the track the track select opens on (and what `--start` plays); without them, the demo's three (`fly,jev_step1,haiku_plain`) on track 1001 |
-| `--max-requests N` | the ceiling for the **whole session**, per capped paid player (Claude Haiku, GLM Flash) — the page can never raise it; Jev has none |
+| `--max-requests N` | the ceiling for the **whole session**, per paid player (Jev, Claude Haiku, GLM Flash; decision 58) — the page can never raise it |
 | `--max-rows`, `--game`, `--lookahead`, `--window`, `--cache`, `--out`, `--held-out` | as in `run` |
 | `--no-wait` | do not wait for a browser and do not keep serving afterwards (needs `--start`) |
 

@@ -11,9 +11,11 @@ import os
 import sys
 from pathlib import Path
 
+from bakeoff.__main__ import _parser
 from bakeoff.__main__ import main as bakeoff_main
 
 ROOT = Path(__file__).resolve().parents[1]
+PATH_FLAGS = ("--out", "--cache")  # the user's own paths stay relative to where they typed the command
 
 
 def fetch_study_runs() -> list[str]:
@@ -24,8 +26,23 @@ def fetch_study_runs() -> list[str]:
     return fetch()
 
 
+def _absolute_paths(argv: list[str], cwd: Path) -> list[str]:
+    """`--out x` and `--out=x` with x made absolute against cwd, so the chdir to the root does not move them."""
+    out = []
+    for i, arg in enumerate(argv):
+        flag, eq, value = arg.partition("=")
+        if eq and flag in PATH_FLAGS:
+            arg = f"{flag}={cwd / value}"
+        elif i and argv[i - 1] in PATH_FLAGS:
+            arg = str(cwd / arg)
+        out.append(arg)
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
+    _parser().parse_args(["live", "--open", *argv])  # --help and a mistyped flag answer before any download
+    argv = _absolute_paths(argv, Path.cwd())
     os.chdir(ROOT)
     try:
         problems = fetch_study_runs()

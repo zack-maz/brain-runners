@@ -47,8 +47,9 @@ not TypeSafe's, Anthropic's or the fly's. The write-up lists them.
     uv sync                                          # Python 3.13, https://docs.astral.sh/uv/
     uv run brain-runners                             # opens Brain Runners in your browser
 
-The first time, it downloads the study's recorded runs (7 MB, free). That opens Brain Runners with the study loaded: Records, Charts, the Writeup and every recorded run to watch
-again. Playing a new run with the bots is free. For the other minds:
+The first time, it downloads the study's recorded runs (7 MB, free), so Brain Runners opens with the study loaded:
+Records, Charts, the Writeup and every recorded run to watch again. Playing a new run with the bots is free. For
+the other minds:
 
 - **Jev and Claude Haiku** use your own API keys, in a `.env` file. Every paid mind has a hard cap on requests,
   and the page shows the worst case and asks before it spends.

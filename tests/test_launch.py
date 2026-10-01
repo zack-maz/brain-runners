@@ -11,7 +11,8 @@ from bakeoff.__main__ import _parser
 
 
 @pytest.fixture
-def calls(monkeypatch):
+def calls(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)  # restored afterwards: launch.main moves the process to the root
     seen = {"live": [], "fetch": 0}
 
     def fake_fetch():
@@ -23,8 +24,7 @@ def calls(monkeypatch):
     return seen
 
 
-def test_it_fetches_the_study_then_opens_the_page_from_the_repository_root(calls, tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)  # started from anywhere inside or outside the clone
+def test_it_fetches_the_study_then_opens_the_page_from_the_repository_root(calls):
     assert launch.main([]) == 0
     assert calls["fetch"] == 1
     assert calls["live"] == [(["live", "--open"], str(Path(launch.__file__).resolve().parents[1]))]
@@ -33,6 +33,18 @@ def test_it_fetches_the_study_then_opens_the_page_from_the_repository_root(calls
 def test_flags_pass_through_to_live(calls):
     assert launch.main(["--max-requests", "150", "--port", "8001"]) == 0
     assert calls["live"][0][0] == ["live", "--open", "--max-requests", "150", "--port", "8001"]
+
+
+def test_the_users_own_paths_stay_relative_to_where_the_command_was_typed(calls, tmp_path):
+    assert launch.main(["--out", "mine", "--cache=c"]) == 0
+    assert calls["live"][0][0] == ["live", "--open", "--out", str(tmp_path / "mine"), f"--cache={tmp_path / 'c'}"]
+
+
+def test_help_and_bad_flags_answer_before_any_download(calls):
+    for argv in (["--help"], ["--no-such-flag"]):
+        with pytest.raises(SystemExit):
+            launch.main(argv)
+    assert calls["fetch"] == 0 and not calls["live"]
 
 
 def test_a_failed_fetch_is_said_but_the_page_still_opens(calls, capsys):

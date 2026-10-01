@@ -28,8 +28,8 @@ again, **Charts** has the study's numbers, **Writeup** the write-up. Ctrl-C stop
 `bakeoff live` works here too (`uv run brain-runners --help`), e.g. `--port 8001` if 8000 is taken.
 `uv run python -m bakeoff live` is the same server without the download and without opening the browser.
 
-The three bots (solver, random, always jump) play for free, and until you add keys and a cap (step 4) or the fly
-data (step 5) they are the runners the page picks for you. `docs/WALKTHROUGH.md` explains every screen.
+The three bots (solver, random, always jump) play for free, and until you add keys (step 3) and a cap (step 4) or
+the fly data (step 5) they are the runners the page picks for you. `docs/WALKTHROUGH.md` explains every screen.
 
 ## 3. Your keys
 
