@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import threading
 import time
 import webbrowser
 from pathlib import Path
@@ -171,6 +172,8 @@ def _live(args) -> int:
         except ValueError as e:
             print(e, file=sys.stderr)
             return 2
+        # the charts take seconds to work out: start now, so Charts and the Writeup open at once
+        threading.Thread(target=_warm_charts, args=(session,), daemon=True).start()
         url = f"http://{HOST}:{server.server_address[1]}/"
         print(f"watch: {url}", flush=True)
         if args.open:
@@ -182,6 +185,14 @@ def _live(args) -> int:
         return _serve_until_interrupted(session)
     finally:
         _shutdown(server, session)
+
+
+def _warm_charts(session) -> None:
+    for scope in ("held_out", "all"):
+        try:
+            session.charts(scope)
+        except Exception:  # the page asks again and says why
+            return
 
 
 def _play_now(session, seed: int, names: list[str], args) -> int:
