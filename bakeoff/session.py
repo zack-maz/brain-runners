@@ -9,6 +9,7 @@ at a time. The page asks it what can be run (`state`), starts a run (`start`) an
 from __future__ import annotations
 
 import json
+import os
 import re
 import secrets
 import threading
@@ -128,6 +129,19 @@ def played_before(out_root: Path | str, game_version: str) -> dict[str, list[int
     return {player: sorted(seeds) for player, seeds in played.items()}
 
 
+def _files_under(root: Path) -> tuple:
+    """Every file under `root` with its size and time of change: what the charts were worked out from."""
+    out = []
+    for folder, _, names in sorted(os.walk(root)):
+        for name in sorted(names):
+            try:
+                stat = os.stat(os.path.join(folder, name))
+            except FileNotFoundError:  # removed while we looked: it is not there
+                continue
+            out.append((folder, name, stat.st_size, stat.st_mtime_ns))
+    return tuple(out)
+
+
 class LiveSession:
     """The command's ceiling and the page's lobby. Thread-safe: the run loop is a thread of its own."""
 
@@ -152,6 +166,8 @@ class LiveSession:
         self.finished: list[LiveRun] = []
         self._thread: threading.Thread | None = None
         self._lock = threading.Lock()
+        self._charts: dict[str, tuple[tuple, dict]] = {}  # scope -> (what --out held, the charts of it)
+        self._charts_lock = threading.Lock()  # one working out at a time; who waits gets its answer
 
     # ---- what can be run ---------------------------------------------------------------------
     @property
@@ -343,7 +359,14 @@ class LiveSession:
 
         if scope not in (None, "all", "held_out"):
             raise LobbyError(f'no scope "{scope}": it is "all" or "held_out"')
-        return charts_of(self.out_root, self.rules, HELD_OUT if scope == "held_out" else None)
+        scope = scope or "all"
+        with self._charts_lock:  # scoring every recorded step takes seconds: done again only when --out changed
+            held = _files_under(self.out_root)
+            cached = self._charts.get(scope)
+            if cached is None or cached[0] != held:
+                cached = (held, charts_of(self.out_root, self.rules, HELD_OUT if scope == "held_out" else None))
+                self._charts[scope] = cached
+            return cached[1]
 
     def writeup(self) -> dict:
         """The Writeup page's text (bakeoff/writeup.py), read from docs/ each time, so an edit shows on reload."""

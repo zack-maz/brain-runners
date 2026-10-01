@@ -4,6 +4,7 @@ Free players only, so nothing here touches a provider."""
 
 import json
 import threading
+import time
 
 import pytest
 
@@ -358,3 +359,46 @@ def test_a_fly_without_its_data_says_how_to_get_it_instead_of_failing_at_run(tmp
     assert lobby.why_not("solver", 1001) is None
     with pytest.raises(LobbyError, match="fetch_fly_data"):
         lobby.check(1001, ["fly", "solver"])
+
+
+def test_the_charts_are_worked_out_once_until_a_run_changes(tmp_path, monkeypatch):
+    """Scoring every recorded step takes seconds, so the page's Charts and Writeup reuse the last answer while
+    nothing under --out has changed: a run that is played, or a file added or grown, works them out again."""
+    calls = []
+    monkeypatch.setattr("bakeoff.charts.charts_of", lambda out_root, rules, tracks=None: calls.append(tracks) or {"n": len(calls)})
+    lobby = session(tmp_path)
+    assert lobby.charts() == lobby.charts() == {"n": 1}
+    assert lobby.charts("held_out") == lobby.charts("held_out") == {"n": 2}  # each scope its own
+    assert lobby.charts("all") == {"n": 1}  # "all" is the default scope
+    play(lobby)
+    assert lobby.charts() == {"n": 3}
+    steps = next((tmp_path / "runs").glob("*/solver.jsonl"))
+    steps.write_text(steps.read_text() + "\n")
+    assert lobby.charts() == {"n": 4}
+    assert len(calls) == 4
+
+
+def test_two_pages_asking_at_once_share_one_working_out(tmp_path, monkeypatch):
+    calls, gate = [], threading.Event()
+
+    def slow(out_root, rules, tracks=None):
+        calls.append(tracks)
+        gate.wait(5)
+        return {"n": len(calls)}
+
+    monkeypatch.setattr("bakeoff.charts.charts_of", slow)
+    lobby = session(tmp_path)
+    answers = []
+    first = threading.Thread(target=lambda: answers.append(lobby.charts()))
+    first.start()
+    for _ in range(500):  # the first is inside the working out, holding the lock
+        if calls:
+            break
+        time.sleep(0.01)
+    second = threading.Thread(target=lambda: answers.append(lobby.charts()))
+    second.start()
+    time.sleep(0.1)  # the second is waiting for the first, not working it out again
+    gate.set()
+    first.join(5)
+    second.join(5)
+    assert answers == [{"n": 1}, {"n": 1}] and len(calls) == 1
