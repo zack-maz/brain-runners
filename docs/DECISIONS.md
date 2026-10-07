@@ -423,6 +423,15 @@
     `bakeoff live --open` from the clone's root, which opens the page in the browser. Every `live` flag passes
     through; `python -m bakeoff live` is unchanged and opens no browser unless given `--open`.
 
+61. **The motg.dev preview shows all five characters, GLM Flash included** (the user, 2026-10-06: "Get a replay
+    with all 5 players, including GLM. Stitch that to the end of a video of the launch screen, character selection
+    screen, and track selection screen ... Use Cap to record"). A 9.6 s clip on the project page: the home screen,
+    the runner select (Fly · Sideways, Jev · Step 2, Haiku · Step 1, GLM Flash · Step 2, Bot · Solver), track 1001 and
+    the run to its results, the front at 4× and the run at 12×. GLM Flash is on screen though it is not in the
+    study (decision 56): the clip shows the game, not the study's results. Track 1001 because every paid answer on it
+    is in the cache, so the take cost nothing. Recorded with Cap from a scripted take; the recipe lives with the
+    website (`BRAND/website/media-src/brain-runners/`). The page's Explained and stack wait for the user's words.
+
 The build record, including the running notes (`docs/history/NEXT.md`), is in `docs/history/`.
 
 ## Prior art to reuse

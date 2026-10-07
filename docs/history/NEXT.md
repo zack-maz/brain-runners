@@ -3,14 +3,15 @@
 This file is rewritten whenever the state changes. What the user has decided stays in `docs/DECISIONS.md`
 (numbered, only ever added to); measured runs and money are in `docs/COSTS.md`.
 
-## Now (2026-09-30)
+## Now (2026-10-07)
 
 **The study is done and the project is released as Brain Runners** (decision 57): the public repository
 `zack-maz/brain-runners`, MIT, with `README.md`, `docs/SETUP.md` for running it with one's own keys, the study's
 runs as a Release download (`scripts/study_data.py`), and a project page on motg.dev. The study's runs: every free
 player on held-out tracks 100–199, Claude Haiku ×4 on 100–114 for 5.09 USD (decision 54); GLM Flash qualified but
 left out (decision 56); Jev capped like every paid player again (decision 58). Left: the Writeup's frontiers and
-named scores, and the user's own words in it; the demo video for motg.dev; the X post.
+named scores, and the user's own words in it; the user's words on the motg.dev page; the X post. The preview
+video is on the motg.dev page (decision 61, 2026-10-07).
 
 Everything below is the record of how it got here.
 
