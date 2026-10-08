@@ -224,7 +224,7 @@
 
 /* ---- writeup ------------------------------------------------------------------------------------ */
 #front .writeup-tabs { padding: 0; margin-bottom: 4px; }
-#front .writeup-body { max-width: 880px; padding: 22px 24px 26px; }
+#front .writeup-body { max-width: 808px; padding: 22px 24px 26px; }
 @media (max-width: 720px) { #front .writeup-body { padding: 14px 12px 18px; } }
 #front .writeup-body h2 { font: 400 var(--size-label)/1.4 var(--font-mono); letter-spacing: var(--tracking-label);
   text-transform: uppercase; color: var(--muted); margin: 28px 0 8px; }

@@ -4,24 +4,27 @@
    focus. Mono for short labels only. At 375px wide nothing scrolls the page sideways: a wide table scrolls in its
    own .scroll. */
 
-.writeup { display: block; color: var(--text); font-family: var(--font-body); font-size: 16px; line-height: 1.6;
-  min-width: 0; }
+/* one reading column: prose, figures and tables share its width, so their edges line up */
+.writeup { --writeup-column: 760px; display: block; color: var(--text); font-family: var(--font-body); font-size: 17px;
+  line-height: 1.65; min-width: 0; }
 .writeup *, .writeup *::before, .writeup *::after { box-sizing: border-box; }
-.writeup > section { display: flex; flex-direction: column; gap: 16px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.writeup > section { display: flex; flex-direction: column; gap: 20px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.writeup > section > * { width: 100%; max-width: var(--writeup-column); }
 .writeup > section[hidden] { display: none; }
-.writeup p { margin: 0; max-width: var(--measure); text-wrap: pretty; }
+.writeup p { margin: 0; text-wrap: pretty; }
 .writeup strong { color: var(--bright); font-weight: 500; }
 .writeup code { font-family: var(--font-mono); font-size: 13px; color: var(--bright); }
 .writeup .note { color: var(--muted); font-size: 14px; }
 .writeup .label { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
   color: var(--muted); }
 .writeup .num { font-variant-numeric: tabular-nums; color: var(--bright); }
-.writeup ul.facts { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; max-width: var(--measure); }
+.writeup ul.facts { list-style: disc; margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+.writeup ul.facts li::marker { color: var(--muted); }
 .writeup :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
 /* figures and their captions */
-.writeup figure { margin: 4px 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; max-width: 800px; }
-.writeup figcaption { font-size: 14px; color: var(--muted); max-width: var(--measure); }
+.writeup figure { margin: 12px 0; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.writeup figcaption { font-size: 14px; color: var(--muted); }
 .writeup figcaption .label { color: var(--warn); margin-right: 8px; }
 .writeup .fig-body { min-width: 0; }
 .writeup [data-fig="rows-ci"] > .fig-body, .writeup [data-fig="jev-vs-haiku"] > .fig-body,
@@ -109,7 +112,6 @@
 .writeup .wf-cbar .wf-of { text-align: right; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
 
 /* Fig. 5: rows against cost and time */
-.writeup [data-fig="cost-time"] { max-width: 100%; }
 .writeup .wf-two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
 .writeup svg.wf-chart { width: 100%; height: auto; display: block; overflow: visible; }
 .writeup svg text { font-family: var(--font-mono); font-size: 11px; fill: var(--muted); }
@@ -126,7 +128,7 @@
 
 /* tables: the static ones and Table 7 */
 .writeup .scroll { overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
-.writeup table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+.writeup table { border-collapse: collapse; width: 100%; font-size: 14px; line-height: 1.5; font-variant-numeric: tabular-nums; }
 .writeup th { text-align: left; font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
   color: var(--muted); font-weight: 400; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--line-strong); white-space: nowrap; }
 .writeup td { padding: 8px 12px 8px 0; border-bottom: 1px solid var(--hairline); white-space: nowrap; color: var(--text);
@@ -159,6 +161,7 @@
 }
 
 @media (max-width: 720px) {
+  .writeup { font-size: 16px; line-height: 1.6; }
   .writeup .wf-two { grid-template-columns: minmax(0, 1fr); }
   .writeup .wf-glance { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .writeup .wf-board .wf-row, .writeup .wf-axis, .writeup .wf-duel-row { grid-template-columns: minmax(96px, 128px) minmax(0, 1fr) 44px; gap: 8px; }
