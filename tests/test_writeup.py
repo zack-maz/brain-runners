@@ -30,7 +30,7 @@ def test_the_writeup_is_zacks_two_tabs_with_known_figure_slots_only():
     for key in FIG_KEYS:
         assert re.search(rf'<figure data-fig="{key}"><div class="fig-body">.*?</div><figcaption>', html, re.DOTALL), key
     for n in range(1, 7):
-        assert f'<span class="label">Table {n}</span>' in html
+        assert f'<span class="label">table {n}</span>' in html
     assert "<script" not in html and "<style" not in html
     for player, field, _ in stats_in(html):  # data-stat still works for whoever uses it
         assert player in REGISTRY and field in STAT_FIELDS

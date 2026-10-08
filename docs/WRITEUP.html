@@ -16,7 +16,7 @@
       <li>A player sees 6 rows and 3 lanes either side: 42 tiles, as JSON.</li>
     </ul>
     <figure class="table">
-      <figcaption><span class="label">Table 1</span>The players</figcaption>
+      <figcaption><span class="label">table 1</span>the players</figcaption>
       <div class="scroll"><table class="defs">
         <thead><tr><th>player</th><th>skins</th><th>what it is</th><th>cost</th></tr></thead>
         <tbody>
@@ -28,7 +28,7 @@
       </table></div>
     </figure>
     <figure class="table">
-      <figcaption><span class="label">Table 2</span>Method of delivery</figcaption>
+      <figcaption><span class="label">table 2</span>method of delivery</figcaption>
         <div class="scroll"><table class="defs">
         <thead><tr><th>setting</th><th>Jev</th><th>Claude Haiku</th></tr></thead>
         <tbody>
@@ -39,7 +39,7 @@
       </table></div>
     </figure>
     <figure class="table">
-      <figcaption><span class="label">Table 3</span>Pre-processing</figcaption>
+      <figcaption><span class="label">table 3</span>pre-processing</figcaption>
       <div class="scroll"><table class="defs">
         <thead><tr><th>set</th><th>what is asked</th><th>how the answer becomes a move</th></tr></thead>
         <tbody>
@@ -53,7 +53,7 @@
     </figure>
     <p>Neurons talk in spikes, and firing rate (Hz) is how quickly that neuron spikes. The brain has no eyes or legs, so neurons need to be grouped into “adapters” for each function. The “input” represents the eyes and converts tile gaps into neuron spikes. The closer the gap, the faster the firing rate. The “output mapping” correlates grouped output neuron firing into a single move. Here’s how the fly is set up:</p>
     <figure class="table">
-      <figcaption><span class="label">Table 4</span>Fly neuron groups</figcaption>
+      <figcaption><span class="label">table 4</span>fly neuron groups</figcaption>
       <div class="scroll"><table class="defs">
         <thead><tr><th>group</th><th>neurons</th><th>what it does</th></tr></thead>
         <tbody>
@@ -68,7 +68,7 @@
       </table></div>
     </figure>
     <figure class="table">
-      <figcaption><span class="label">Table 5</span>The wiring</figcaption>
+      <figcaption><span class="label">table 5</span>the wiring</figcaption>
       <div class="scroll"><table class="defs wiring">
         <thead><tr><th>part</th><th>Fly · looming</th><th>Fly · sideways</th></tr></thead>
         <tbody>
@@ -122,7 +122,7 @@
     <p class="note">Note: Steering neurons fire away from a threat and turn the fly towards that direction. A gap on the left activates the
       left eye, so the right-hand steering neurons fire, and the runner moves right.</p>
     <figure class="table">
-      <figcaption><span class="label">Table 6</span>Fixed numbers</figcaption>
+      <figcaption><span class="label">table 6</span>fixed numbers</figcaption>
       <div class="scroll"><table class="defs wiring">
         <thead><tr><th>setting</th><th>Fly · looming</th><th>Fly · sideways</th><th>what it means</th></tr></thead>
         <tbody>
@@ -139,15 +139,15 @@
     <p>Fly1 squeezes everything it sees into one number per eye. Both eyes are equally triggered by a gap straight ahead, so it never knows which way to dodge. Its fallback is to jump with no information on where that jump lands. Fly2 was given a ‘sideways’ channel. Gaps in the side lanes now go to different sets of eye cells. Gaps ahead and gaps to the side are no longer processed the same.</p>
   </section>
   <section data-tab="results" aria-label="Results">
-    <figure data-fig="new"><div class="fig-body"><p class="placeholder">New figure: to come.</p></div><figcaption>New figure, to be explained</figcaption></figure>
-    <figure data-fig="rows"><div class="fig-body"></div><figcaption><span class="label">Fig. 1</span>Rows survived (/150)</figcaption></figure>
-    <figure data-fig="rows-ci"><div class="fig-body"></div><figcaption><span class="label">Fig. 2</span>Rows survived (95%)</figcaption></figure>
+    <figure data-fig="new"><div class="fig-body"><p class="placeholder">New figure: to come.</p></div><figcaption>new figure, to be explained</figcaption></figure>
+    <figure data-fig="rows"><div class="fig-body"></div><figcaption><span class="label">fig. 1</span>rows survived (/150)</figcaption></figure>
+    <figure data-fig="rows-ci"><div class="fig-body"></div><figcaption><span class="label">fig. 2</span>rows survived (95%)</figcaption></figure>
     <p>Jev-step-2 performed the best. While Jev-step-2 beat Jev-step-1, the trend of adding questions didn’t continue to improve success. My best guess: Jev-map processes ~1,823 tile reads per track. Notably, Jev-map never missed gaps if they were in his current lane, and there weren’t any gaps in other lanes. When there were gaps in other lanes, false positives jumped up from 11% to 62%. Jev-step-1 and Jev-step-2 didn’t suffer from this problem. This leads me to believe that Jev-map is failing because of 2 possible reasons: (1) framing of the question and/or (2) 42 tiles processed at once.</p>
-    <figure data-fig="jev-vs-haiku"><div class="fig-body"></div><figcaption><span class="label">Fig. 3</span>Jev vs Haiku</figcaption></figure>
+    <figure data-fig="jev-vs-haiku"><div class="fig-body"></div><figcaption><span class="label">fig. 3</span>jev vs haiku</figcaption></figure>
     <p>Why Haiku-plain wins: “Which move?” is actually two questions in one: (1) what tile am I landing on and (2) is that tile a gap. Jev is built for typed questions. The ‘Choice’ result carries little information. Jev-plain chose to stay in place on 374/415 rows. On moves that weren’t 100% safe, Jev-plain made a fatal decision 25% of the time compared to 8% from Haiku-plain. The evidence shows a general model can combine that view into one answer. When Jev is given narrow questions, like in the other skins (barring Jev-map), it performs much better.</p>
-    <figure data-fig="finished"><div class="fig-body"></div><figcaption><span class="label">Fig. 4</span>Tracks finished</figcaption></figure>
-    <figure data-fig="cost-time"><div class="fig-body"></div><figcaption><span class="label">Fig. 5</span>Rows against cost and time</figcaption></figure>
-    <figure data-fig="scores"><div class="fig-body"></div><figcaption><span class="label">Table 7</span>Cost and speed per player</figcaption></figure>
+    <figure data-fig="finished"><div class="fig-body"></div><figcaption><span class="label">fig. 4</span>tracks finished</figcaption></figure>
+    <figure data-fig="cost-time"><div class="fig-body"></div><figcaption><span class="label">fig. 5</span>rows against cost and time</figcaption></figure>
+    <figure data-fig="scores"><div class="fig-body"></div><figcaption><span class="label">table 7</span>cost and speed per player</figcaption></figure>
     <p>The question mattered more than the model. The sets that worked best compartmentalized the question. The model judges one thing at a time aka “would this move land on a gap?” Jev-plain forces all judgements into a single ‘Choice’ result. Haiku can fold them into one answer.</p>
     <p>Jev-step-2 vs Haiku-step-2: 43x cheaper and 10x faster. Jev-step-1 and Jev-step-2 are the frontiers; no brain comes close to beating them on rows, price, and time when considered together.</p>
     <p>The fly performed better than expected for no cost at all. It struggled choosing where to land. The Giant Fiber is an escape reflex, so the wiring had no idea if its landing spot was safe. It only knew that it was running away.</p>
