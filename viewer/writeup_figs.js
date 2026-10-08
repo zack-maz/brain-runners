@@ -10,7 +10,7 @@
   // STUDY_PAIR_FIELDS; a test keeps the three equal)
   const PLAYER_FIELDS = ["player", "seeds", "mean_rows", "ci_low", "ci_high", "median_rows", "finished",
     "usd_per_track", "cost_basis", "s_per_decision_median", "rows_per_cent", "rows_per_second", "failed_rate",
-    "ranked", "yardstick", "frontier_cost", "frontier_speed"];
+    "ranked", "yardstick", "frontier_cost", "frontier_speed", "icon"];
   const PAIR_FIELDS = ["a", "b", "common_seeds", "mean_diff", "ci_low", "ci_high", "wins", "ties", "losses",
     "mean_a_shared", "mean_b_shared"];
   // the slots this draws
@@ -85,33 +85,56 @@
     return (pairs.find((q) => q.set === wanted) || pairs[0] || {}).set || null;
   }
 
+  // A player's skin as a pixel icon (bakeoff.writeup.icon_of: its sprite's rows and the colour of each ink),
+  // drawn as SVG with each run of one colour in a row as one rect. Only #RRGGBB colours are drawn.
+  const HEX = /^#[0-9A-Fa-f]{6}$/;
+  function iconSvg(icon) {
+    if (!icon || !Array.isArray(icon.rows) || !icon.rows.length) return "";
+    const palette = icon.palette || {};
+    const width = Math.max(...icon.rows.map((r) => String(r).length));
+    let rects = "";
+    icon.rows.forEach((row, y) => {
+      row = String(row);
+      for (let x = 0; x < row.length;) {
+        const ink = row[x];
+        let end = x + 1;
+        while (end < row.length && row[end] === ink) end++;
+        const colour = palette[ink];
+        if (ink !== "." && HEX.test(colour)) {
+          rects += '<rect x="' + x + '" y="' + y + '" width="' + (end - x) + '" height="1" fill="' + colour + '"/>';
+        }
+        x = end;
+      }
+    });
+    return '<svg class="wf-icon" viewBox="0 0 ' + width + " " + icon.rows.length + '" shape-rendering="crispEdges" aria-hidden="true">' +
+      rects + "</svg>";
+  }
+
   // ---- the figures, as HTML ------------------------------------------------------------------------
   const focusClass = (p, focus) => (p.player === focus ? " focus" : "") + (p.yardstick ? " bot" : "");
   const pressed = (p, focus) => 'aria-pressed="' + (p.player === focus) + '"';
 
-  // The leaderboard, as at the end of a Mario Kart race: the three best minds on a podium (2nd, 1st, 3rd from the
-  // left), then everyone else in order. The bots are not racing: they sit in the list at their place, unnumbered,
-  // for scale.
+  // The leaderboard, as at the end of a Mario Kart race: the three best on a podium (2nd, 1st, 3rd from the left),
+  // then everyone else in order, the bots ranked like anyone, each with its skin's icon.
   function ordinal(n) {
     const teen = n % 100 >= 11 && n % 100 <= 13;
     return n + (teen ? "th" : ["th", "st", "nd", "rd"][n % 10] || "th");
   }
   function standings(study) {
-    let place = 0;
-    return byMean(study).map((p) => ({ p, place: p.yardstick ? null : ++place }));
+    return byMean(study).map((p, i) => ({ p, place: i + 1 }));
   }
   function leaderboardHtml(study, focus) {
     const all = standings(study);
-    const top = all.filter((s) => s.place && s.place <= 3);
+    const top = all.slice(0, 3);
     const step = ({ p, place }) =>
       '<button type="button" class="wf-step wf-place-' + place + focusClass(p, focus) + '" data-player="' + esc(p.player) + '" ' + pressed(p, focus) + ">" +
-      '<span class="wf-who">' + esc(nameOf(p.player)) + "</span>" +
+      '<span class="wf-who">' + esc(nameOf(p.player)) + "</span>" + iconSvg(p.icon) +
       '<span class="wf-n">' + fmt.rows(p.mean_rows) + '<span class="wf-of"> / ' + MAX + "</span></span>" +
       '<span class="wf-block"><span class="wf-pos">' + ordinal(place) + "</span></span></button>";
     const podium = [top[1], top[0], top[2]].filter(Boolean).map(step).join("");
-    const rest = all.filter((s) => !(s.place && s.place <= 3)).map(({ p, place }) =>
+    const rest = all.slice(3).map(({ p, place }) =>
       '<li><button type="button" class="wf-standing' + focusClass(p, focus) + '" data-player="' + esc(p.player) + '" ' + pressed(p, focus) + ">" +
-      '<span class="wf-pos">' + (place ? ordinal(place) : "–") + "</span>" +
+      '<span class="wf-pos">' + ordinal(place) + "</span>" + iconSvg(p.icon) +
       '<span class="wf-who">' + esc(nameOf(p.player)) + (p.yardstick ? ' <span class="wf-tag">bot, for scale</span>' : "") + "</span>" +
       '<span class="wf-tracks">' + p.seeds + '<span class="wf-unit"> tracks</span></span>'  +
       '<span class="wf-n">' + fmt.rows(p.mean_rows) + "</span></button></li>").join("");
@@ -306,7 +329,7 @@
     return state;
   }
 
-  const api = { PLAYER_FIELDS, PAIR_FIELDS, KEYS, esc, nameOf, fmt, glance, ordinal, standings, leaderboardHtml, pairsOf, leadOf, focusOf, setOf,
+  const api = { PLAYER_FIELDS, PAIR_FIELDS, KEYS, esc, nameOf, fmt, glance, ordinal, iconSvg, standings, leaderboardHtml, pairsOf, leadOf, focusOf, setOf,
     rowsHtml, boardHtml, pairHtml, finishedHtml, scatterSvg, costTimeHtml, scoresHtml, figures, mount };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.WriteupFigs = api;

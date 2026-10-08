@@ -54,18 +54,38 @@ test("numbers are formatted once, the free and the estimated said so", () => {
   assert.equal(Figs.fmt.secs(null), "–");
 });
 
-test("the leaderboard puts the three best minds on a podium, 2nd 1st 3rd, then everyone else in order", () => {
+test("the leaderboard ranks everyone, bots too: the best three on a podium, 2nd 1st 3rd, then the rest in order", () => {
   assert.deepEqual(Figs.standings(SMALL).map(({ p, place }) => [p.player, place]),
-    [["solver", null], ["jev_step2", 1], ["fly2", 2], ["haiku_plain", 3], ["jev_plain", 4], ["random", null]]);
+    [["solver", 1], ["jev_step2", 2], ["fly2", 3], ["haiku_plain", 4], ["jev_plain", 5], ["random", 6]]);
   const html = Figs.leaderboardHtml(SMALL, "jev_step2");
   const [podium, list] = html.split('<ol class="wf-standings">');
-  assert.deepEqual([...podium.matchAll(/data-player="([a-z0-9_]+)"/g)].map((m) => m[1]), ["fly2", "jev_step2", "haiku_plain"]);
-  assert.match(podium, /wf-place-1 focus" data-player="jev_step2"[\s\S]*?<span class="wf-pos">1st<\/span>/);
-  assert.deepEqual([...list.matchAll(/data-player="([a-z0-9_]+)"/g)].map((m) => m[1]), ["solver", "jev_plain", "random"]);
-  assert.match(list, /<span class="wf-pos">4th<\/span><span class="wf-who">Jev · plain<\/span>/);
-  assert.match(list, /<span class="wf-pos">–<\/span><span class="wf-who">Bot · Solver <span class="wf-tag">bot, for scale<\/span>/);
+  assert.deepEqual([...podium.matchAll(/data-player="([a-z0-9_]+)"/g)].map((m) => m[1]), ["jev_step2", "solver", "fly2"]);
+  assert.match(podium, /wf-place-2 focus" data-player="jev_step2"[\s\S]*?<span class="wf-pos">2nd<\/span>/);
+  assert.deepEqual([...list.matchAll(/data-player="([a-z0-9_]+)"/g)].map((m) => m[1]), ["haiku_plain", "jev_plain", "random"]);
+  assert.match(list, /<span class="wf-pos">6th<\/span><span class="wf-who">Bot · Random <span class="wf-tag">bot, for scale<\/span>/);
+  assert.doesNotMatch(html, /–/);
+  // the icons: under the name on the podium, left of the name in the list
+  const real = Figs.leaderboardHtml(STUDY, "jev_step2");
+  assert.match(real, /<span class="wf-who">Jev · step-2<\/span><svg class="wf-icon"/);
+  assert.match(real, /<span class="wf-pos">4th<\/span><svg class="wf-icon"[^]*?<\/svg><span class="wf-who">/);
   assert.deepEqual([1, 2, 3, 4, 11, 12, 13, 21, 22, 101, 111].map(Figs.ordinal),
     ["1st", "2nd", "3rd", "4th", "11th", "12th", "13th", "21st", "22nd", "101st", "111th"]);
+});
+
+test("each player's icon is its skin as viewer/sprites.js paints it standing still", () => {
+  const Sprites = require("../sprites.js");
+  for (const p of STUDY.players) {
+    const { icon } = p;
+    const mine = [];
+    icon.rows.forEach((row, y) => [...row].forEach((ink, x) => { if (ink !== ".") mine.push({ x, y, ink: icon.palette[ink] }); }));
+    assert.deepEqual(mine, Sprites.pixels(icon.sprite, { color: icon.color, inks: icon.inks }), p.player);
+    const svg = Figs.iconSvg(icon);
+    assert.match(svg, /^<svg class="wf-icon" viewBox="0 0 \d+ \d+" shape-rendering="crispEdges"/);
+  }
+  assert.equal(Figs.iconSvg(null), "");
+  const evil = Figs.iconSvg({ rows: ["ab"], palette: { a: '"><script>', b: "#FFFFFF" } });
+  assert.doesNotMatch(evil, /script/);
+  assert.match(evil, /<rect x="1" y="0" width="1" height="1" fill="#FFFFFF"\/>/);
 });
 
 test("Fig. 1 shows the reference, the best of each mind and chance", () => {

@@ -12,10 +12,13 @@ from the network, so a source that would (a `src=` or `href=` to `http:`, `https
 
 from __future__ import annotations
 
+import json
 import re
+from functools import cache
 from pathlib import Path
 
 DOCS = Path(__file__).resolve().parent.parent / "docs"
+SPRITES = DOCS.parent / "viewer" / "sprites.js"
 WRITEUP = DOCS / "WRITEUP.html"
 STUDY = DOCS / "STUDY.json"
 
@@ -37,7 +40,7 @@ NETWORK = re.compile(r"""\b(?:src|href)\s*=\s*["']?\s*(?:https?:|//)""", re.IGNO
 # what the figures read of the benchmark (bench.benchmark), and nothing else: docs/STUDY.json is exactly this
 STUDY_PLAYER_FIELDS = ("player", "seeds", "mean_rows", "ci_low", "ci_high", "median_rows", "finished",
                        "usd_per_track", "cost_basis", "s_per_decision_median", "rows_per_cent", "rows_per_second",
-                       "failed_rate", "ranked", "yardstick", "frontier_cost", "frontier_speed")
+                       "failed_rate", "ranked", "yardstick", "frontier_cost", "frontier_speed", "icon")
 STUDY_PAIR_FIELDS = ("a", "b", "common_seeds", "mean_diff", "ci_low", "ci_high", "wins", "ties", "losses",
                      "mean_a_shared", "mean_b_shared")
 # GLM Flash left the study (decision 56): its stopped held-out run is in the charts, never in the study's numbers
@@ -117,6 +120,41 @@ def _twin(pair: dict) -> dict | None:
     return {key: pair[key] for key in STUDY_PAIR_FIELDS}
 
 
+@cache
+def _sprite_tables() -> dict:
+    """viewer/sprites.js' GRIDS, INKS and BODY, read out of the file: the drawings stay the viewer's alone."""
+    js = re.sub(r"//[^\n]*", "", SPRITES.read_text(encoding="utf-8"))
+    tables = {}
+    for name in ("GRIDS", "INKS", "BODY"):
+        literal = re.search(rf"const {name} = (\{{.*?\}});", js, re.DOTALL).group(1)
+        literal = re.sub(r"([{,]\s*)([A-Za-z_]\w*)\s*:", r'\1"\2":', literal)
+        tables[name] = json.loads(re.sub(r",(\s*[}\]])", r"\1", literal))
+    return tables
+
+
+def icon_of(player: str) -> dict:
+    """A player's skin as a still pixel icon: {sprite, color, inks} (its look, bakeoff/roster.py) and {rows,
+    palette}, the sprite's grid and the colour of each cell ink in it, as viewer/sprites.js' `pixels` paints it
+    standing still with no gauge (a visor's slit in one ink). viewer/writeup_figs.js draws it; a test keeps it equal
+    to `Sprites.pixels`."""
+    from bakeoff.roster import ROSTER
+
+    look = next(({"sprite": c["sprite"], "color": s["color"], "inks": dict(s["inks"])}
+                 for c in ROSTER for s in c["skins"] if s["player"] == player),
+                {"sprite": "block", "color": None, "inks": {}})
+    t = _sprite_tables()
+    sprite = look["sprite"] if look["sprite"] in t["GRIDS"] else "block"
+    own = dict(look["inks"])
+    if look["color"]:
+        own[t["BODY"][sprite]] = look["color"]
+    rows = t["GRIDS"][sprite]
+    palette = {ink: own.get(ink, t["INKS"].get(ink)) for ink in sorted({c for row in rows for c in row} - {"."})}
+    if sprite == "visor":  # no gauge: the slit in the skin's own V ink, or the visor's body colour
+        slit = own.get("V") or own.get(t["BODY"][sprite]) or t["INKS"][t["BODY"][sprite]]
+        palette["V"] = palette["v"] = slit
+    return {**look, "sprite": sprite, "rows": rows, "palette": palette}
+
+
 def in_study(player: str) -> bool:
     """Whether a player is one of the study's: Jev, Claude Haiku, the flies and the bots (decision 56)."""
     return not player.startswith(LEFT_OUT)
@@ -138,5 +176,6 @@ def study_of(charts: dict) -> dict | None:
         return None
     pairs = [twin for twin in map(_twin, bench["pairs"]) if twin]
     pairs.sort(key=lambda q: TWIN_SETS.index(q["a"][4:]))
-    return {"players": [{key: p.get(key) for key in STUDY_PLAYER_FIELDS} for p in bench["players"]],
+    return {"players": [{**{key: p.get(key) for key in STUDY_PLAYER_FIELDS}, "icon": icon_of(p["player"])}
+                        for p in bench["players"]],
             "pairs": pairs, "notes": list(bench["notes"])}

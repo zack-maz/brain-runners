@@ -447,9 +447,10 @@
 63. **The Writeup's Results opens on a leaderboard** (the user, 2026-10-08: "a Mario Kart style leaderboard with a
     podium for top 3 then a list in order of everyone else"). The placeholder slot `new` becomes
     `data-fig="leaderboard"`, drawn by `viewer/writeup_figs.js` from the study's numbers: the three best minds by mean
-    rows on a podium (2nd, 1st, 3rd), then the rest in order with how many tracks each ran. The bots race for no
-    place: they sit unnumbered in the list at their mean, for scale. motg.dev/runners needs no change, since it
-    mounts every slot the module knows.
+    rows on a podium (2nd, 1st, 3rd), then the rest in order with how many tracks each ran. Every player is ranked,
+    the bots too (so the solver is 1st), and each wears its skin: a pixel icon under its name on the podium and to
+    the left of it in the list. `docs/STUDY.json` carries each player's icon (`icon`: its sprite's rows and the
+    colour of each ink, from `viewer/sprites.js` and `bakeoff/roster.py`), so motg.dev/runners needs no change.
 
 The build record, including the running notes (`docs/history/NEXT.md`), is in `docs/history/`.
 

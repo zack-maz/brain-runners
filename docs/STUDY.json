@@ -17,7 +17,27 @@
    "ranked": true,
    "yardstick": true,
    "frontier_cost": false,
-   "frontier_speed": false
+   "frontier_speed": false,
+   "icon": {
+    "sprite": "bot",
+    "color": "#7AA2F7",
+    "inks": {},
+    "rows": [
+     ".zzzzz.",
+     ".zkzkz.",
+     ".zzzzz.",
+     ".zzzzz.",
+     "..zzz..",
+     "zzzzzzz",
+     "z.zzz.z",
+     "..z.z..",
+     "..z.z.."
+    ],
+    "palette": {
+     "k": "#1A0E0A",
+     "z": "#7AA2F7"
+    }
+   }
   },
   {
    "player": "jev_step2",
@@ -36,7 +56,29 @@
    "ranked": true,
    "yardstick": false,
    "frontier_cost": true,
-   "frontier_speed": true
+   "frontier_speed": true,
+   "icon": {
+    "sprite": "visor",
+    "color": "#B8404F",
+    "inks": {},
+    "rows": [
+     ".jjjjj.",
+     "jjjjjjj",
+     "jVVVvvj",
+     "jjjjjjj",
+     ".jjjjj.",
+     "..jjj..",
+     ".jjjjj.",
+     ".jjjjj.",
+     ".j...j.",
+     ".j...j."
+    ],
+    "palette": {
+     "V": "#B8404F",
+     "j": "#B8404F",
+     "v": "#B8404F"
+    }
+   }
   },
   {
    "player": "jev_step1",
@@ -55,7 +97,29 @@
    "ranked": true,
    "yardstick": false,
    "frontier_cost": true,
-   "frontier_speed": true
+   "frontier_speed": true,
+   "icon": {
+    "sprite": "visor",
+    "color": "#E6B422",
+    "inks": {},
+    "rows": [
+     ".jjjjj.",
+     "jjjjjjj",
+     "jVVVvvj",
+     "jjjjjjj",
+     ".jjjjj.",
+     "..jjj..",
+     ".jjjjj.",
+     ".jjjjj.",
+     ".j...j.",
+     ".j...j."
+    ],
+    "palette": {
+     "V": "#E6B422",
+     "j": "#E6B422",
+     "v": "#E6B422"
+    }
+   }
   },
   {
    "player": "haiku_step1",
@@ -74,7 +138,26 @@
    "ranked": true,
    "yardstick": false,
    "frontier_cost": false,
-   "frontier_speed": false
+   "frontier_speed": false,
+   "icon": {
+    "sprite": "chat",
+    "color": "#E6B422",
+    "inks": {},
+    "rows": [
+     ".ooooooo.",
+     ".ooooooo.",
+     ".okoookoo",
+     "ooooooooo",
+     ".ooooooo.",
+     ".ooooooo.",
+     ".o.o.o.o.",
+     ".o.o.o.o."
+    ],
+    "palette": {
+     "k": "#1A0E0A",
+     "o": "#E6B422"
+    }
+   }
   },
   {
    "player": "jev_guided",
@@ -93,7 +176,29 @@
    "ranked": true,
    "yardstick": false,
    "frontier_cost": false,
-   "frontier_speed": true
+   "frontier_speed": true,
+   "icon": {
+    "sprite": "visor",
+    "color": "#5FA35A",
+    "inks": {},
+    "rows": [
+     ".jjjjj.",
+     "jjjjjjj",
+     "jVVVvvj",
+     "jjjjjjj",
+     ".jjjjj.",
+     "..jjj..",
+     ".jjjjj.",
+     ".jjjjj.",
+     ".j...j.",
+     ".j...j."
+    ],
+    "palette": {
+     "V": "#5FA35A",
+     "j": "#5FA35A",
+     "v": "#5FA35A"
+    }
+   }
   },
   {
    "player": "haiku_step2",
@@ -112,7 +217,26 @@
    "ranked": true,
    "yardstick": false,
    "frontier_cost": false,
-   "frontier_speed": false
+   "frontier_speed": false,
+   "icon": {
+    "sprite": "chat",
+    "color": "#B8404F",
+    "inks": {},
+    "rows": [
+     ".ooooooo.",
+     ".ooooooo.",
+     ".okoookoo",
+     "ooooooooo",
+     ".ooooooo.",
+     ".ooooooo.",
+     ".o.o.o.o.",
+     ".o.o.o.o."
+    ],
+    "palette": {
+     "k": "#1A0E0A",
+     "o": "#B8404F"
+    }
+   }
   },
   {
    "player": "haiku_guided",
@@ -131,7 +255,26 @@
    "ranked": true,
    "yardstick": false,
    "frontier_cost": false,
-   "frontier_speed": false
+   "frontier_speed": false,
+   "icon": {
+    "sprite": "chat",
+    "color": "#5FA35A",
+    "inks": {},
+    "rows": [
+     ".ooooooo.",
+     ".ooooooo.",
+     ".okoookoo",
+     "ooooooooo",
+     ".ooooooo.",
+     ".ooooooo.",
+     ".o.o.o.o.",
+     ".o.o.o.o."
+    ],
+    "palette": {
+     "k": "#1A0E0A",
+     "o": "#5FA35A"
+    }
+   }
   },
   {
    "player": "fly2",
@@ -150,7 +293,30 @@
    "ranked": true,
    "yardstick": false,
    "frontier_cost": true,
-   "frontier_speed": false
+   "frontier_speed": false,
+   "icon": {
+    "sprite": "fly",
+    "color": "#F7768E",
+    "inks": {
+     "e": "#AEB4BA"
+    },
+    "rows": [
+     "..ee.ee..",
+     "...bbb...",
+     ".w.bbb.w.",
+     "ww.bbb.ww",
+     "wwwbbbwww",
+     "ww.bbb.ww",
+     ".w.bbb.w.",
+     "...b.b...",
+     "..b...b.."
+    ],
+    "palette": {
+     "b": "#3A4046",
+     "e": "#AEB4BA",
+     "w": "#F7768E"
+    }
+   }
   },
   {
    "player": "fly",
@@ -169,7 +335,28 @@
    "ranked": true,
    "yardstick": false,
    "frontier_cost": false,
-   "frontier_speed": false
+   "frontier_speed": false,
+   "icon": {
+    "sprite": "fly",
+    "color": "#AEB4BA",
+    "inks": {},
+    "rows": [
+     "..ee.ee..",
+     "...bbb...",
+     ".w.bbb.w.",
+     "ww.bbb.ww",
+     "wwwbbbwww",
+     "ww.bbb.ww",
+     ".w.bbb.w.",
+     "...b.b...",
+     "..b...b.."
+    ],
+    "palette": {
+     "b": "#3A4046",
+     "e": "#F7768E",
+     "w": "#AEB4BA"
+    }
+   }
   },
   {
    "player": "haiku_plain",
@@ -188,7 +375,26 @@
    "ranked": true,
    "yardstick": false,
    "frontier_cost": false,
-   "frontier_speed": false
+   "frontier_speed": false,
+   "icon": {
+    "sprite": "chat",
+    "color": "#D97757",
+    "inks": {},
+    "rows": [
+     ".ooooooo.",
+     ".ooooooo.",
+     ".okoookoo",
+     "ooooooooo",
+     ".ooooooo.",
+     ".ooooooo.",
+     ".o.o.o.o.",
+     ".o.o.o.o."
+    ],
+    "palette": {
+     "k": "#1A0E0A",
+     "o": "#D97757"
+    }
+   }
   },
   {
    "player": "jev_map",
@@ -207,7 +413,31 @@
    "ranked": true,
    "yardstick": false,
    "frontier_cost": false,
-   "frontier_speed": false
+   "frontier_speed": false,
+   "icon": {
+    "sprite": "visor",
+    "color": "#1E2227",
+    "inks": {
+     "V": "#7AA2F7"
+    },
+    "rows": [
+     ".jjjjj.",
+     "jjjjjjj",
+     "jVVVvvj",
+     "jjjjjjj",
+     ".jjjjj.",
+     "..jjj..",
+     ".jjjjj.",
+     ".jjjjj.",
+     ".j...j.",
+     ".j...j."
+    ],
+    "palette": {
+     "V": "#7AA2F7",
+     "j": "#1E2227",
+     "v": "#7AA2F7"
+    }
+   }
   },
   {
    "player": "always_jump",
@@ -226,7 +456,27 @@
    "ranked": true,
    "yardstick": true,
    "frontier_cost": false,
-   "frontier_speed": false
+   "frontier_speed": false,
+   "icon": {
+    "sprite": "bot",
+    "color": "#E8EBED",
+    "inks": {},
+    "rows": [
+     ".zzzzz.",
+     ".zkzkz.",
+     ".zzzzz.",
+     ".zzzzz.",
+     "..zzz..",
+     "zzzzzzz",
+     "z.zzz.z",
+     "..z.z..",
+     "..z.z.."
+    ],
+    "palette": {
+     "k": "#1A0E0A",
+     "z": "#E8EBED"
+    }
+   }
   },
   {
    "player": "jev_plain",
@@ -245,7 +495,29 @@
    "ranked": true,
    "yardstick": false,
    "frontier_cost": false,
-   "frontier_speed": false
+   "frontier_speed": false,
+   "icon": {
+    "sprite": "visor",
+    "color": "#B9BEC4",
+    "inks": {},
+    "rows": [
+     ".jjjjj.",
+     "jjjjjjj",
+     "jVVVvvj",
+     "jjjjjjj",
+     ".jjjjj.",
+     "..jjj..",
+     ".jjjjj.",
+     ".jjjjj.",
+     ".j...j.",
+     ".j...j."
+    ],
+    "palette": {
+     "V": "#B9BEC4",
+     "j": "#B9BEC4",
+     "v": "#B9BEC4"
+    }
+   }
   },
   {
    "player": "random",
@@ -264,7 +536,27 @@
    "ranked": true,
    "yardstick": true,
    "frontier_cost": false,
-   "frontier_speed": false
+   "frontier_speed": false,
+   "icon": {
+    "sprite": "bot",
+    "color": "#8A9097",
+    "inks": {},
+    "rows": [
+     ".zzzzz.",
+     ".zkzkz.",
+     ".zzzzz.",
+     ".zzzzz.",
+     "..zzz..",
+     "zzzzzzz",
+     "z.zzz.z",
+     "..z.z..",
+     "..z.z.."
+    ],
+    "palette": {
+     "k": "#1A0E0A",
+     "z": "#8A9097"
+    }
+   }
   }
  ],
  "pairs": [

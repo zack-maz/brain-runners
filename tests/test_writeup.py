@@ -8,7 +8,7 @@ import pytest
 
 from bakeoff.players import REGISTRY
 from bakeoff.writeup import (COMMENT, FIG_KEYS, STAT_FIELDS, STUDY, STUDY_PAIR_FIELDS, STUDY_PLAYER_FIELDS, TABS, WRITEUP,
-                             figs_in, in_study, stats_in, structure_why, study_charts, study_of, writeup_of)
+                             figs_in, icon_of, in_study, stats_in, structure_why, study_charts, study_of, writeup_of)
 from tests.test_bench import V2 as V2_BLOCK
 from tests.test_bench import episode
 from tests.test_replay import write_run
@@ -127,6 +127,16 @@ def test_the_study_is_the_held_out_charts_cut_to_what_the_figures_read(tmp_path)
     assert any("21 pairs" in note for note in study["notes"])  # the study's 7 players, not GLM Flash's 8th
     assert study["notes"] and all(isinstance(n, str) for n in study["notes"])
     assert study_of({"bench": None, "why": "nothing yet"}) is None
+
+
+def test_a_players_icon_is_its_skin_from_the_roster():
+    from bakeoff.roster import ROSTER
+    for character in ROSTER:
+        for skin in character["skins"]:
+            icon = icon_of(skin["player"])
+            assert (icon["sprite"], icon["color"], icon["inks"]) == (character["sprite"], skin["color"], skin["inks"])
+            assert set(icon["palette"]) == {c for row in icon["rows"] for c in row} - {"."}
+    assert icon_of("nobody")["sprite"] == "block"
 
 
 def test_the_committed_study_is_in_the_shape_the_figures_read():
