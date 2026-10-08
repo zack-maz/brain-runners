@@ -135,7 +135,7 @@
     const rest = all.slice(3).map(({ p, place }) =>
       '<li><button type="button" class="wf-standing' + focusClass(p, focus) + '" data-player="' + esc(p.player) + '" ' + pressed(p, focus) + ">" +
       '<span class="wf-pos">' + ordinal(place) + "</span>" + iconSvg(p.icon) +
-      '<span class="wf-who">' + esc(nameOf(p.player)) + (p.yardstick ? ' <span class="wf-tag">bot, for scale</span>' : "") + "</span>" +
+      '<span class="wf-who">' + nameOf(p.player).split(" · ").map((part) => '<span class="wf-part">' + esc(part) + "</span>").join(" · ") + (p.yardstick ? ' <span class="wf-tag">bot, for scale</span>' : "") + "</span>" +
       '<span class="wf-tracks">' + p.seeds + '<span class="wf-unit"> tracks</span></span>'  +
       '<span class="wf-n">' + fmt.rows(p.mean_rows) + "</span></button></li>").join("");
     return '<div class="wf-podium">' + podium + "</div>" + '<ol class="wf-standings">' + rest + "</ol>";

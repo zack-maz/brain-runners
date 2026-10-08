@@ -62,7 +62,7 @@ test("the leaderboard ranks everyone, bots too: the best three on a podium, 2nd 
   assert.deepEqual([...podium.matchAll(/data-player="([a-z0-9_]+)"/g)].map((m) => m[1]), ["jev_step2", "solver", "fly2"]);
   assert.match(podium, /wf-place-2 focus" data-player="jev_step2"[\s\S]*?<span class="wf-pos">2nd<\/span>/);
   assert.deepEqual([...list.matchAll(/data-player="([a-z0-9_]+)"/g)].map((m) => m[1]), ["haiku_plain", "jev_plain", "random"]);
-  assert.match(list, /<span class="wf-pos">6th<\/span><span class="wf-who">Bot · Random <span class="wf-tag">bot, for scale<\/span>/);
+  assert.match(list, /<span class="wf-pos">6th<\/span><span class="wf-who"><span class="wf-part">Bot<\/span> · <span class="wf-part">Random<\/span> <span class="wf-tag">bot, for scale<\/span>/);
   assert.doesNotMatch(html, /–/);
   // the icons: under the name on the podium, left of the name in the list
   const real = Figs.leaderboardHtml(STUDY, "jev_step2");
