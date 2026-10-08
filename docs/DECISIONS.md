@@ -452,6 +452,15 @@
     the left of it in the list. `docs/STUDY.json` carries each player's icon (`icon`: its sprite's rows and the
     colour of each ink, from `viewer/sprites.js` and `bakeoff/roster.py`), so motg.dev/runners needs no change.
 
+64. **The Writeup as Zack edited it on the page** (the user, 2026-10-08). The first tab is called Background; its id
+    stays `competitors`, so the contract of decision 62 holds, and motg.dev/runners names each tab by its section's
+    `aria-label`. Fig. 2 (rows survived with 95% intervals) is left out of Results (`viewer/writeup_figs.js` still
+    draws `rows-ci` for a slot that asks); the other figures keep their numbers. Every table and figure caption is
+    lowercase. The setup list, Tables 1 and 2 and Table 5's group rows (input, output mapping, move order) are Zack's
+    wording; Table 5 no longer has its "what is the fly's / not ours" rows, so in the writeup what is ours is said by
+    the tables themselves, and in Brain Runners by Records' "What is ours". Prose, figures and tables share one 760px
+    column. The page went to motg.dev/runners from the website's `main` (merge `b8b5bae`).
+
 The build record, including the running notes (`docs/history/NEXT.md`), is in `docs/history/`.
 
 ## Prior art to reuse
