@@ -72,7 +72,7 @@
       <div class="scroll"><table class="defs wiring">
         <thead><tr><th>part</th><th>Fly · looming</th><th>Fly · sideways</th></tr></thead>
         <tbody>
-          <tr class="group"><td colspan="3">input: what the brain is shown</td></tr>
+          <tr class="group"><td colspan="3">input</td></tr>
           <tr><td>channels</td><td>2: left eye, right eye</td><td>3: left, centre, right</td></tr>
           <tr><td>eye cells</td><td><code>LPLC2 + LC4</code> in each eye</td><td>centre: <code>LPLC2 + LC4</code> in both eyes<br>sides: <code>LPLC4 + LC22</code> in that eye</td></tr>
           <tr><td>lanes each channel sees</td>
@@ -97,14 +97,14 @@
           <tr><td>e.g. gap 2 rows ahead, 1 lane left</td>
             <td><math><mfrac><mn>250</mn><msup><mn>2</mn><mn>3</mn></msup></mfrac><mo>≈</mo><mn>31</mn></math> → 25 Hz to the left eye</td>
             <td><math><mfrac><mn>250</mn><msup><mn>2</mn><mn>2</mn></msup></mfrac><mo>=</mo><mn>62.5</mn></math> → 100 Hz to the left channel</td></tr>
-          <tr class="group"><td colspan="3">output mapping: what the brain's output is taken to mean</td></tr>
+          <tr class="group"><td colspan="3">output mapping</td></tr>
           <tr><td>turn signal <math><mi>T</mi></math></td>
             <td><math display="block"><mi>T</mi><mo>=</mo><msub><mrow><mo>(</mo><mi>DNa01</mi><mo>+</mo><mi>DNb01</mi><mo>)</mo></mrow><mtext>right</mtext></msub><mo>−</mo><msub><mrow><mo>(</mo><mo>…</mo><mo>)</mo></mrow><mtext>left</mtext></msub></math></td>
             <td><math display="block"><mi>T</mi><mo>=</mo><msub><mrow><mo>(</mo><mi>DNa02</mi><mo>+</mo><mi>DNa01</mi><mo>+</mo><mi>DNg13</mi><mo>)</mo></mrow><mtext>right</mtext></msub><mo>−</mo><msub><mrow><mo>(</mo><mo>…</mo><mo>)</mo></mrow><mtext>left</mtext></msub></math></td></tr>
           <tr><td>jump signal <math><mi>G</mi></math></td>
             <td colspan="2"><math display="block"><mi>G</mi><mo>=</mo><mfrac><mrow><msub><mi>DNp01</mi><mtext>left</mtext></msub><mo>+</mo><msub><mi>DNp01</mi><mtext>right</mtext></msub></mrow><mn>2</mn></mfrac></math>
               Giant Fiber's average across both sides, for both flies</td></tr>
-          <tr class="group"><td colspan="3">the move: what the runner does, checked in order</td></tr>
+          <tr class="group"><td colspan="3">move order</td></tr>
           <tr><td>1st check</td>
             <td><math><mi>G</mi><mo>&gt;</mo><mn>200</mn></math> Hz → jump</td>
             <td><math><mo>|</mo><mi>T</mi><mo>|</mo><mo>&gt;</mo><mn>40</mn></math> Hz → right if <math><mi>T</mi></math> is positive, left if negative</td></tr>
