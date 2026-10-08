@@ -2,7 +2,7 @@
      motg.dev/runners. Its shape is a contract the website depends on (bakeoff/writeup.py checks it): one
      <article class="writeup"> holding two sections, data-tab="competitors" then data-tab="results"; every figure
      the page draws is an empty <figure data-fig="KEY"> that viewer/writeup_figs.js fills from docs/STUDY.json's
-     numbers (KEY one of new, rows, rows-ci, jev-vs-haiku, finished, cost-time, scores); no script, no style (each
+     numbers (KEY one of leaderboard, rows, rows-ci, jev-vs-haiku, finished, cost-time, scores); no script, no style (each
      host brings viewer/writeup.css and its own tabs), and no src= or href= to the network. Numbers in the prose are
      typed (decision 62); <span data-stat="PLAYER FIELD"></span> still works for whoever wants one filled. -->
 <article class="writeup">
@@ -139,7 +139,7 @@
     <p>Fly1 squeezes everything it sees into one number per eye. Both eyes are equally triggered by a gap straight ahead, so it never knows which way to dodge. Its fallback is to jump with no information on where that jump lands. Fly2 was given a ‘sideways’ channel. Gaps in the side lanes now go to different sets of eye cells. Gaps ahead and gaps to the side are no longer processed the same.</p>
   </section>
   <section data-tab="results" aria-label="Results">
-    <figure data-fig="new"><div class="fig-body"><p class="placeholder">New figure: to come.</p></div><figcaption>new figure, to be explained</figcaption></figure>
+    <figure data-fig="leaderboard"><div class="fig-body"></div><figcaption>leaderboard: mean rows survived (/150)</figcaption></figure>
     <figure data-fig="rows"><div class="fig-body"></div><figcaption><span class="label">fig. 1</span>rows survived (/150)</figcaption></figure>
     <figure data-fig="rows-ci"><div class="fig-body"></div><figcaption><span class="label">fig. 2</span>rows survived (95%)</figcaption></figure>
     <p>Jev-step-2 performed the best. While Jev-step-2 beat Jev-step-1, the trend of adding questions didn’t continue to improve success. My best guess: Jev-map processes ~1,823 tile reads per track. Notably, Jev-map never missed gaps if they were in his current lane, and there weren’t any gaps in other lanes. When there were gaps in other lanes, false positives jumped up from 11% to 62%. Jev-step-1 and Jev-step-2 didn’t suffer from this problem. This leads me to believe that Jev-map is failing because of 2 possible reasons: (1) framing of the question and/or (2) 42 tiles processed at once.</p>

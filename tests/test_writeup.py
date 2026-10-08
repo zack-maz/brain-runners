@@ -24,9 +24,9 @@ def test_the_writeup_is_zacks_two_tabs_with_known_figure_slots_only():
     assert re.findall(r'<section data-tab="([a-z]+)" aria-label="([A-Za-z]+)">', html) == [
         ("competitors", "Competitors"), ("results", "Results")]
     assert html.count('<article class="writeup">') == 1
-    # every generated figure once, in Zack's order, all of them on Results; `new` first
-    assert figs_in(html) == ["new", "rows", "rows-ci", "jev-vs-haiku", "finished", "cost-time", "scores"]
-    assert html.index('data-tab="results"') < html.index('data-fig="new"')
+    # every generated figure once, in Zack's order, all of them on Results; the leaderboard first
+    assert figs_in(html) == ["leaderboard", "rows", "rows-ci", "jev-vs-haiku", "finished", "cost-time", "scores"]
+    assert html.index('data-tab="results"') < html.index('data-fig="leaderboard"')
     for key in FIG_KEYS:
         assert re.search(rf'<figure data-fig="{key}"><div class="fig-body">.*?</div><figcaption>', html, re.DOTALL), key
     for n in range(1, 7):

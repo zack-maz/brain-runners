@@ -31,10 +31,10 @@ test("the fields the figures read are the ones bakeoff/writeup.py cuts the study
   for (const q of STUDY.pairs) assert.deepEqual(Object.keys(q).sort(), [...Figs.PAIR_FIELDS].sort());
 });
 
-test("every figure slot of docs/WRITEUP.html is one this draws, or the static new one", () => {
+test("every figure slot of docs/WRITEUP.html is one this draws, in order", () => {
   const html = fs.readFileSync(path.join(REPO, "docs", "WRITEUP.html"), "utf8").replace(/<!--[\s\S]*?-->/g, "");
   const keys = [...html.matchAll(/data-fig="([^"]*)"/g)].map((m) => m[1]);
-  assert.deepEqual(keys.filter((k) => k !== "new"), Figs.KEYS);
+  assert.deepEqual(keys, Figs.KEYS);
 });
 
 test("players are named as the write-up names them", () => {
@@ -52,6 +52,20 @@ test("numbers are formatted once, the free and the estimated said so", () => {
   assert.equal(Figs.fmt.pct(0.74), "74%");
   assert.equal(Figs.fmt.score(374.1), "374");
   assert.equal(Figs.fmt.secs(null), "–");
+});
+
+test("the leaderboard puts the three best minds on a podium, 2nd 1st 3rd, then everyone else in order", () => {
+  assert.deepEqual(Figs.standings(SMALL).map(({ p, place }) => [p.player, place]),
+    [["solver", null], ["jev_step2", 1], ["fly2", 2], ["haiku_plain", 3], ["jev_plain", 4], ["random", null]]);
+  const html = Figs.leaderboardHtml(SMALL, "jev_step2");
+  const [podium, list] = html.split('<ol class="wf-standings">');
+  assert.deepEqual([...podium.matchAll(/data-player="([a-z0-9_]+)"/g)].map((m) => m[1]), ["fly2", "jev_step2", "haiku_plain"]);
+  assert.match(podium, /wf-place-1 focus" data-player="jev_step2"[\s\S]*?<span class="wf-pos">1st<\/span>/);
+  assert.deepEqual([...list.matchAll(/data-player="([a-z0-9_]+)"/g)].map((m) => m[1]), ["solver", "jev_plain", "random"]);
+  assert.match(list, /<span class="wf-pos">4th<\/span><span class="wf-who">Jev · plain<\/span>/);
+  assert.match(list, /<span class="wf-pos">–<\/span><span class="wf-who">Bot · Solver <span class="wf-tag">bot, for scale<\/span>/);
+  assert.deepEqual([1, 2, 3, 4, 11, 12, 13, 21, 22, 101, 111].map(Figs.ordinal),
+    ["1st", "2nd", "3rd", "4th", "11th", "12th", "13th", "21st", "22nd", "101st", "111th"]);
 });
 
 test("Fig. 1 shows the reference, the best of each mind and chance", () => {
@@ -128,8 +142,8 @@ function fakeRoot(keys) {
   };
 }
 
-test("mount fills every slot but new, and a second mount replaces the first", () => {
-  const root = fakeRoot(["new", "rows", "rows-ci", "jev-vs-haiku", "finished", "cost-time", "scores"]);
+test("mount fills every slot it knows, leaves any other alone, and a second mount replaces the first", () => {
+  const root = fakeRoot(["someone-elses", "leaderboard", "rows", "rows-ci", "jev-vs-haiku", "finished", "cost-time", "scores"]);
   root.slots[0].body.innerHTML = "the placeholder";
   Figs.mount(root, STUDY);
   assert.equal(root.slots[0].body.innerHTML, "the placeholder");

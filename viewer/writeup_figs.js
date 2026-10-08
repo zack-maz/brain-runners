@@ -1,4 +1,4 @@
-// The Writeup's figures (decision 62): every `<figure data-fig="KEY">` of docs/WRITEUP.html is an empty slot this
+// The Writeup's figures (decisions 62, 63): every `<figure data-fig="KEY">` of docs/WRITEUP.html is an empty slot this
 // fills from the study's numbers, `{players, pairs, notes}` (docs/STUDY.json, or bakeoff.writeup.study_of's answer
 // in Brain Runners). One code for both hosts: Brain Runners' Writeup screen and motg.dev/runners. Click a player in
 // any figure to follow it (blue marks that one player everywhere); the chips of Fig. 3 pick the question set. It
@@ -13,8 +13,8 @@
     "ranked", "yardstick", "frontier_cost", "frontier_speed"];
   const PAIR_FIELDS = ["a", "b", "common_seeds", "mean_diff", "ci_low", "ci_high", "wins", "ties", "losses",
     "mean_a_shared", "mean_b_shared"];
-  // the slots this draws; `new` is the static placeholder the source carries itself
-  const KEYS = ["rows", "rows-ci", "jev-vs-haiku", "finished", "cost-time", "scores"];
+  // the slots this draws
+  const KEYS = ["leaderboard", "rows", "rows-ci", "jev-vs-haiku", "finished", "cost-time", "scores"];
   const MAX = 150;
   const FIRST_FOCUS = "jev_step2";
 
@@ -88,6 +88,35 @@
   // ---- the figures, as HTML ------------------------------------------------------------------------
   const focusClass = (p, focus) => (p.player === focus ? " focus" : "") + (p.yardstick ? " bot" : "");
   const pressed = (p, focus) => 'aria-pressed="' + (p.player === focus) + '"';
+
+  // The leaderboard, as at the end of a Mario Kart race: the three best minds on a podium (2nd, 1st, 3rd from the
+  // left), then everyone else in order. The bots are not racing: they sit in the list at their place, unnumbered,
+  // for scale.
+  function ordinal(n) {
+    const teen = n % 100 >= 11 && n % 100 <= 13;
+    return n + (teen ? "th" : ["th", "st", "nd", "rd"][n % 10] || "th");
+  }
+  function standings(study) {
+    let place = 0;
+    return byMean(study).map((p) => ({ p, place: p.yardstick ? null : ++place }));
+  }
+  function leaderboardHtml(study, focus) {
+    const all = standings(study);
+    const top = all.filter((s) => s.place && s.place <= 3);
+    const step = ({ p, place }) =>
+      '<button type="button" class="wf-step wf-place-' + place + focusClass(p, focus) + '" data-player="' + esc(p.player) + '" ' + pressed(p, focus) + ">" +
+      '<span class="wf-who">' + esc(nameOf(p.player)) + "</span>" +
+      '<span class="wf-n">' + fmt.rows(p.mean_rows) + '<span class="wf-of"> / ' + MAX + "</span></span>" +
+      '<span class="wf-block"><span class="wf-pos">' + ordinal(place) + "</span></span></button>";
+    const podium = [top[1], top[0], top[2]].filter(Boolean).map(step).join("");
+    const rest = all.filter((s) => !(s.place && s.place <= 3)).map(({ p, place }) =>
+      '<li><button type="button" class="wf-standing' + focusClass(p, focus) + '" data-player="' + esc(p.player) + '" ' + pressed(p, focus) + ">" +
+      '<span class="wf-pos">' + (place ? ordinal(place) : "–") + "</span>" +
+      '<span class="wf-who">' + esc(nameOf(p.player)) + (p.yardstick ? ' <span class="wf-tag">bot, for scale</span>' : "") + "</span>" +
+      '<span class="wf-tracks">' + p.seeds + '<span class="wf-unit"> tracks</span></span>'  +
+      '<span class="wf-n">' + fmt.rows(p.mean_rows) + "</span></button></li>").join("");
+    return '<div class="wf-podium">' + podium + "</div>" + '<ol class="wf-standings">' + rest + "</ol>";
+  }
 
   function rowsHtml(study, focus) {
     return '<div class="wf-glance">' + glance(study).map(({ p, note }) =>
@@ -225,7 +254,7 @@
       return Object.fromEntries(KEYS.map((k) => [k, '<p class="why">No numbers to draw yet.</p>']));
     }
     const focus = focusOf(study, state.focus), set = setOf(study, state.set);
-    return { rows: rowsHtml(study, focus), "rows-ci": boardHtml(study, focus), "jev-vs-haiku": pairHtml(study, set),
+    return { leaderboard: leaderboardHtml(study, focus), rows: rowsHtml(study, focus), "rows-ci": boardHtml(study, focus), "jev-vs-haiku": pairHtml(study, set),
       finished: finishedHtml(study, focus), "cost-time": costTimeHtml(study, focus), scores: scoresHtml(study, focus) };
   }
 
@@ -277,7 +306,7 @@
     return state;
   }
 
-  const api = { PLAYER_FIELDS, PAIR_FIELDS, KEYS, esc, nameOf, fmt, glance, pairsOf, leadOf, focusOf, setOf,
+  const api = { PLAYER_FIELDS, PAIR_FIELDS, KEYS, esc, nameOf, fmt, glance, ordinal, standings, leaderboardHtml, pairsOf, leadOf, focusOf, setOf,
     rowsHtml, boardHtml, pairHtml, finishedHtml, scatterSvg, costTimeHtml, scoresHtml, figures, mount };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.WriteupFigs = api;

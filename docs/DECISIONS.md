@@ -444,6 +444,13 @@
     but is no longer required. The draft's Table 7 ("Jev, asked five ways"), its survival curve and its long prose
     are left out. Replaces the Claude-drafted Writeup of decision 53.
 
+63. **The Writeup's Results opens on a leaderboard** (the user, 2026-10-08: "a Mario Kart style leaderboard with a
+    podium for top 3 then a list in order of everyone else"). The placeholder slot `new` becomes
+    `data-fig="leaderboard"`, drawn by `viewer/writeup_figs.js` from the study's numbers: the three best minds by mean
+    rows on a podium (2nd, 1st, 3rd), then the rest in order with how many tracks each ran. The bots race for no
+    place: they sit unnumbered in the list at their mean, for scale. motg.dev/runners needs no change, since it
+    mounts every slot the module knows.
+
 The build record, including the running notes (`docs/history/NEXT.md`), is in `docs/history/`.
 
 ## Prior art to reuse

@@ -19,9 +19,9 @@ DOCS = Path(__file__).resolve().parent.parent / "docs"
 WRITEUP = DOCS / "WRITEUP.html"
 STUDY = DOCS / "STUDY.json"
 
-# the two tabs, in order, and every figure slot viewer/writeup_figs.js knows (`new` is a static placeholder)
+# the two tabs, in order, and every figure slot viewer/writeup_figs.js fills
 TABS = ("competitors", "results")
-FIG_KEYS = ("new", "rows", "rows-ci", "jev-vs-haiku", "finished", "cost-time", "scores")
+FIG_KEYS = ("leaderboard", "rows", "rows-ci", "jev-vs-haiku", "finished", "cost-time", "scores")
 
 # the benchmark's per-player numbers a write-up may cite (bench.player_numbers); viewer/writeup.js formats them
 STAT_FIELDS = ("mean_rows", "ci_low", "ci_high", "median_rows", "seeds", "finished", "usd_per_track", "price_usd",
