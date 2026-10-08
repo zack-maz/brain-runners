@@ -32,6 +32,7 @@
     charts: null, pair: [], // the charts on screen, and the two players compared
     writeup: null, // the write-up on screen: {html, source, draft, why}
     writeupCharts: null, // the numbers it cites: {held_out, all}, GET /charts' answer for each scope
+    writeupTab: "competitors", // the subtab on screen (decision 62)
   };
 
   async function control(path, options) {
@@ -442,6 +443,8 @@
 
   // ---- writeup ------------------------------------------------------------------------------------
   // docs/WRITEUP.html as it is now (GET /writeup): the repository's own words, shown as written, never a log's.
+  // Its two sections are the two subtabs, Competitors and Results (decision 62), and its figures are drawn by
+  // WriteupFigs from the study's numbers over the held-out tracks, which come with the text (`study`).
   // Its numbers are filled from the charts, fetched with it so they are the numbers of the moment: over the held-out
   // tracks (GET /charts?scope=held_out), which its Method promises, and over every track (GET /charts) for a
   // citation that ends in `all`.
@@ -466,12 +469,22 @@
     const body = $("writeup-body");
     body.hidden = !writeup.html;
     body.innerHTML = writeup.html || "";
+    $("writeup-tabs").hidden = !writeup.html;
+    for (const section of body.querySelectorAll("section[data-tab]")) {
+      section.id = "writeup-panel-" + section.dataset.tab;
+      section.setAttribute("role", "tabpanel");
+      section.setAttribute("aria-labelledby", "writeup-tab-" + section.dataset.tab);
+      section.tabIndex = 0;
+    }
+    showWriteupTab(front.writeupTab);
+    if (writeup.html) WriteupFigs.mount(body, writeup.study || null);
     const scopes = front.writeupCharts || {};
     const range = (scopes.held_out && scopes.held_out.held_out) || (scopes.all && scopes.all.held_out); // the server's HELD_OUT
     $("writeup-scope").textContent = writeup.html && range ? Writeup.scopeLine(scopes.held_out, range) : "";
     const spans = [...body.querySelectorAll("[data-stat]")];
-    $("writeup-numbers-why").innerHTML = Writeup.numbersWhy(scopes, spans.map((span) => span.dataset.stat))
-      .map((why) => '<p class="warn">' + Minds.esc(why) + "</p>").join("");
+    const whys = Writeup.numbersWhy(scopes, spans.map((span) => span.dataset.stat));
+    if (writeup.html && !writeup.study) whys.push("Figures: " + (writeup.study_why || "no numbers over the held-out tracks."));
+    $("writeup-numbers-why").innerHTML = whys.map((why) => '<p class="warn">' + Minds.esc(why) + "</p>").join("");
     for (const span of spans) {
       const out = Writeup.statText(scopes, span.dataset.stat);
       span.textContent = out.text;
@@ -480,7 +493,33 @@
     }
   }
 
+  // the subtab on screen: its button selected and in the Tab order, its section shown, the other hidden
+  function showWriteupTab(wanted) {
+    front.writeupTab = Writeup.tabOf(wanted);
+    for (const button of document.querySelectorAll("[data-writeup-tab]")) {
+      const on = button.dataset.writeupTab === front.writeupTab;
+      button.setAttribute("aria-selected", String(on));
+      button.setAttribute("aria-controls", "writeup-panel-" + button.dataset.writeupTab);
+      button.tabIndex = on ? 0 : -1;
+    }
+    for (const section of $("writeup-body").querySelectorAll("section[data-tab]")) {
+      section.hidden = section.dataset.tab !== front.writeupTab;
+    }
+  }
+
   $("open-writeup").addEventListener("click", openWriteup);
+  $("writeup-tabs").addEventListener("click", (event) => {
+    const tab = event.target.closest("[data-writeup-tab]");
+    if (tab) showWriteupTab(tab.dataset.writeupTab);
+  });
+  $("writeup-tabs").addEventListener("keydown", (event) => {
+    const next = Writeup.tabStep(front.writeupTab, event.key);
+    if (!next) return;
+    event.preventDefault();
+    event.stopPropagation(); // the arrows are the strip's, not the screen's
+    showWriteupTab(next);
+    $("writeup-tab-" + next).focus();
+  });
   $("leaderboard").addEventListener("click", (event) => { // two rows make a pair: a third starts a new one
     const row = event.target.closest("button[data-player]");
     if (!row) return;

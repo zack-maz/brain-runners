@@ -1,119 +1,156 @@
-<!-- The Writeup page's source (decision 53): a fragment of HTML, shown in Brain Run's Writeup screen as it is, so
-     only this repository's own words go here, never text from a log. A number is never typed: it is a span the
-     page fills from the Charts numbers, <span data-stat="PLAYER FIELD"></span>, with FIELD one of
-     bakeoff/writeup.py's STAT_FIELDS. It is over the held-out tracks 100 to 199, as the Method says; add "all",
-     <span data-stat="PLAYER FIELD all"></span>, to cite every recorded track instead. The page loads nothing from
-     the network, so a src= or href= attribute to http:, https: or // is refused and the page shows why instead
-     (the check covers those two attributes only). While Claude drafts it, the article says data-draft="true";
-     the user rewrites it later in their own words and removes that. -->
-<article data-draft="true">
-  <h2>The question</h2>
-  <p>Which mind runs the tunnel furthest for what it costs and for how long it thinks: Jev, Claude Haiku, an
-    untrained fruit-fly connectome (two ways of feeding it), and three bots for scale.</p>
-
-  <h2>Method</h2>
-  <p>Every player ran the held-out tracks 100 to 199 of game v2: 150 rows each, getting harder until full
-    difficulty at row 100. No player was tuned on them and none had played them before the study. A player sees
-    six rows ahead and three lanes either side, and each row it stays, moves left or right, or jumps.</p>
-  <ul>
-    <li><strong>The free players ran all of them</strong>: the five Jev players
-      (<span data-stat="jev_step2 seeds"></span> tracks each), the two flies and the three bots.</li>
-    <li><strong>Claude Haiku ran the first 15</strong> (100 to 114), within a 10 USD budget (the cap keeps the worst case under it), with four
-      of its five question sets. The map set was left out: it is the priciest, and its Jev twin is among the weakest
-      players (decision 54).</li>
-    <li><strong>GLM Flash</strong> passed its free-tier trial on practice tracks (under 2% failed decisions on every
-      question set) but was left out of the held-out runs: at up to 18 seconds a decision on its free tier, they
-      would have taken most of a day (decision 56).</li>
-  </ul>
-  <p>Every comparison between two players uses only the tracks both ran, so anything about Claude Haiku rests on
-    its <span data-stat="haiku_step2 seeds"></span> tracks and free against free on
-    <span data-stat="jev_step2 seeds"></span>. A mean is given with its 95% interval over tracks.</p>
-  <p>Cost is every decision at the listed price per request, answers replayed from the cache included, so a replay
-    never looks cheaper. Claude Haiku's prices are measured; Jev's are an estimate, since its provider does not bill
-    per request and costs this project nothing (decision 50). The flies, the bots and GLM Flash's free tier cost
-    nothing. Speed is the median time a live decision took.</p>
-
-  <h2>Results</h2>
-  <p><strong>The best Jev player nearly matches the solver.</strong> <code>jev_step2</code> ran
-    <span data-stat="jev_step2 mean_rows"></span> rows on average
-    (<span data-stat="jev_step2 ci_low"></span> to <span data-stat="jev_step2 ci_high"></span>) and finished
-    <span data-stat="jev_step2 finished"></span> of the tracks, against the solver's
-    <span data-stat="solver mean_rows"></span>. It took <span data-stat="jev_step2 s_per_decision_median"></span>
-    per decision at an estimated <span data-stat="jev_step2 usd_per_track"></span> per track.</p>
-  <p><strong>How the questions are asked matters more than it seemed.</strong> The same Jev ran
-    <span data-stat="jev_step2 mean_rows"></span> rows with eight pointed questions two moves ahead,
-    <span data-stat="jev_step1 mean_rows"></span> with four one move ahead,
-    <span data-stat="jev_guided mean_rows"></span> with one guided question,
-    <span data-stat="jev_map mean_rows"></span> reading a map of every tile and
-    <span data-stat="jev_plain mean_rows"></span> asked only "which move?", which is about where a coin lands
-    (<span data-stat="random mean_rows"></span>).</p>
-  <p><strong>Claude Haiku, same questions.</strong> <code>haiku_step2</code>
-    <span data-stat="haiku_step2 mean_rows"></span> rows, <code>haiku_step1</code>
-    <span data-stat="haiku_step1 mean_rows"></span>, <code>haiku_guided</code>
-    <span data-stat="haiku_guided mean_rows"></span>, <code>haiku_plain</code>
-    <span data-stat="haiku_plain mean_rows"></span>, at <span data-stat="haiku_step2 usd_per_track"></span>,
-    <span data-stat="haiku_step1 usd_per_track"></span>, <span data-stat="haiku_guided usd_per_track"></span> and
-    <span data-stat="haiku_plain usd_per_track"></span> per track, and
-    <span data-stat="haiku_step2 s_per_decision_median"></span> per decision for <code>haiku_step2</code>.</p>
-  <p><strong>Against its Jev twin, on the tracks both ran</strong> (the head to head on the Charts screen): with the
-    three question sets that point at the tiles (guided, step 1, step 2) Jev ran further on the same questions, each time with a
-    95% interval above zero, though for step 1 and step 2 only just. Asked only "which move?", Claude Haiku ran
-    further than Jev. Jev also answered several times faster
-    (<span data-stat="jev_step1 s_per_decision_median"></span> against
-    <span data-stat="haiku_step1 s_per_decision_median"></span> for step 1) at an estimated fraction of the
-    price. These rest on <span data-stat="haiku_step1 seeds"></span> tracks, and among this many pairs a few
-    verdicts are expected by chance alone, so the narrow ones are an indication, not a result.</p>
-  <p><strong>The flies.</strong> Untrained, the fly ran <span data-stat="fly mean_rows"></span> rows and fly2,
-    fed a sideways channel of ours, <span data-stat="fly2 mean_rows"></span>
-    (<span data-stat="fly2 ci_low"></span> to <span data-stat="fly2 ci_high"></span>), both well above the bots that
-    ignore the track (<span data-stat="always_jump mean_rows"></span> for always jumping). They cost nothing but are
-    the slowest of the free players: <span data-stat="fly2 s_per_decision_median"></span> per decision, simulated on
-    this laptop, against <span data-stat="jev_step2 s_per_decision_median"></span> for Jev (Claude Haiku took
-    <span data-stat="haiku_step2 s_per_decision_median"></span> for step 2).</p>
-  <p><strong>The frontiers.</strong> A frontier is the players no other player beats on both axes at once: more
-    rows for less money, or for less time per decision (the two trade-off charts on the Charts screen; the bots are
-    there for scale and never on one). For rows against cost it holds three: <code>jev_step2</code>,
-    <code>jev_step1</code> and <code>fly2</code>, the free player that runs furthest, bots aside. For rows against time it holds
-    three Jev players: <code>jev_step2</code>, <code>jev_step1</code> and <code>jev_guided</code>. No Claude Haiku
-    player is on either: <code>jev_step2</code> runs further than each of them, for less money and less time per
-    decision. A frontier compares each player's own
-    mean, so Claude Haiku's points rest on its <span data-stat="haiku_step1 seeds"></span> tracks against Jev's
-    <span data-stat="jev_step1 seeds"></span>.</p>
-  <p><strong>Two named scores</strong> put each trade-off in one number, as extras beside the charts, never the
-    verdict. Rows per cent is mean rows over a track's cost in cents: <code>jev_step2</code>
-    <span data-stat="jev_step2 rows_per_cent"></span> and <code>jev_step1</code>
-    <span data-stat="jev_step1 rows_per_cent"></span> against
-    <span data-stat="haiku_step1 rows_per_cent"></span> for <code>haiku_step1</code> and
-    <span data-stat="haiku_plain rows_per_cent"></span> for <code>haiku_plain</code>, Claude Haiku's highest; the
-    flies and the bots are free, so they have none. Rows per second is mean rows over the seconds a track's
-    decisions took: <code>jev_guided</code> <span data-stat="jev_guided rows_per_second"></span>,
-    <code>jev_step1</code> <span data-stat="jev_step1 rows_per_second"></span>, <code>jev_step2</code> <span data-stat="jev_step2 rows_per_second"></span>, <code>fly2</code>
-    <span data-stat="fly2 rows_per_second"></span> and <code>haiku_step1</code>
-    <span data-stat="haiku_step1 rows_per_second"></span>. Both are close to a price per row: a track's cost and time
-    grow with the rows it runs, so running far barely moves either score, and a player that asks less each row
-    scores well however soon it falls. <code>jev_guided</code> has the highest rows per second while running fewer
-    rows than <code>jev_step2</code>, and <code>haiku_plain</code> has Claude Haiku's highest rows per cent while
-    running the fewest of its rows. That is why the scores sit beside the charts rather than replace them.</p>
-
-  <h2>What is ours</h2>
-  <ul>
-    <li><strong>Every question and every rule.</strong> The wording of each question set and the code that turns
-      the answers into a move are this project's, not TypeSafe's or Anthropic's. Plain asks "which move?" once;
-      guided asks one question naming the tile each move lands on; step 1 asks four yes/no questions (would this
-      move land on a gap?) and code picks the least likely; step 2 asks eight, two moves ahead, and code takes the
-      lowest combined risk; map asks about every visible tile and code plans a path.</li>
-    <li><strong>What differs between a Jev player and its Claude Haiku twin</strong> besides the model: Claude Haiku
-      is also given a briefing of the rules (Jev's yes/no questions carry only the question, except in the guided
-      set); Jev answers each question separately, while Claude Haiku writes all its answers in one reply; and
-      Claude Haiku's probability is a number it states.</li>
-    <li><strong>The flies' input, read-out and thresholds.</strong> The wiring is the real fly's, untrained. How a
-      gap becomes input to its eye (looming), which neurons are read as a turn or a jump, and the thresholds are
-      ours. The fly's thresholds were fixed on game v1 practice tracks and never retuned; fly2's sideways channel
-      and its numbers were fixed on practice tracks too, never on the held-out ones.</li>
-    <li><strong>The solver</strong> searches what every player can see, not the whole track: a gap just out of
-      sight can trap it, which is why it did not finish every track.</li>
-  </ul>
-
-  <h2>Opinions and thoughts</h2>
-  <p>Kept apart from the analysis, and the user's to write.</p>
+<!-- The Writeup (decisions 53 and 62): Zack's words, shown as written in Brain Runners' Writeup screen and on
+     motg.dev/runners. Its shape is a contract the website depends on (bakeoff/writeup.py checks it): one
+     <article class="writeup"> holding two sections, data-tab="competitors" then data-tab="results"; every figure
+     the page draws is an empty <figure data-fig="KEY"> that viewer/writeup_figs.js fills from docs/STUDY.json's
+     numbers (KEY one of new, rows, rows-ci, jev-vs-haiku, finished, cost-time, scores); no script, no style (each
+     host brings viewer/writeup.css and its own tabs), and no src= or href= to the network. Numbers in the prose are
+     typed (decision 62); <span data-stat="PLAYER FIELD"></span> still works for whoever wants one filled. -->
+<article class="writeup">
+  <section data-tab="competitors" aria-label="Competitors">
+    <p>Jev vs Haiku vs an untrained fruit fly connectome vs a baseline bot. Each competitor has a ‘skin’, which is the method of pre-processing inputs before actually calling the model.</p>
+    <p class="note">Note: Haiku ran 15 tracks while Jev ran 100 tracks and Jev’s price is estimated through the pricing model, so comparison is a lead and not a verdict.</p>
+    <p>I was curious to know which brain could succeed the most in a simple game and how that translates to money and time. I also wanted to know whether Jev could hold its own against a small general chat model, and whether the fruit fly brain connectome (without training) could compete at all. The setup:</p>
+    <ul class="facts">
+      <li>A ring of 12 lanes. Edges wrap.</li>
+      <li>150 rows. Rows 0-4 are solid floor. A lane’s chance of a gap rises from 4% to 16% by row 100. Gaps grow to 3 lanes wide. Every track is seeded and has at least one survivable path. Every player runs on the same tracks.</li>
+      <li>For each row, a runner can stay, move left or right, or jump. Landing on a gap ends the run.</li>
+      <li>A player sees 6 rows and 3 lanes either side: 42 tiles, as JSON.</li>
+    </ul>
+    <figure class="table">
+      <figcaption><span class="label">Table 1</span>The players</figcaption>
+      <div class="scroll"><table class="defs">
+        <thead><tr><th>player</th><th>sets</th><th>what it is</th><th>cost</th></tr></thead>
+        <tbody>
+          <tr><td>Jev</td><td>plain, guided, step-1, step-2, map</td><td>TypeSafe's System One model, <code>jev-latest</code>. answers typed questions with a probability or a choice.</td><td>estimated per request</td></tr>
+          <tr><td>Claude Haiku</td><td>plain, guided, step-1, step-2</td><td><code>claude-haiku-4-5-20251001</code>, asked the same questions, answering in one JSON reply.</td><td>measured per request</td></tr>
+          <tr><td>Fly</td><td>looming, sideways</td><td>Shiu et al.'s whole-brain model on the FlyWire v783 connectome, simulated in Brian2. untrained.</td><td>free</td></tr>
+          <tr><td>Bots</td><td>Solver, Random, Always jump</td><td>simple rules for scale; the solver searches what a player can see. never compared as minds.</td><td>free</td></tr>
+        </tbody>
+      </table></div>
+    </figure>
+    <figure class="table">
+      <figcaption><span class="label">Table 2</span>Method of delivery</figcaption>
+        <div class="scroll"><table class="defs">
+        <thead><tr><th>setting</th><th>Jev</th><th>Claude Haiku</th></tr></thead>
+        <tbody>
+          <tr><td>model</td><td><code>jev-latest</code> (TypeSafe SDK)</td><td><code>claude-haiku-4-5-20251001</code> (Anthropic SDK)</td></tr>
+          <tr><td>requests per row</td><td>1, holding every question of the set</td><td>1, one reply holding every answer</td></tr>
+          <tr><td>answers</td><td>typed: a probability per yes/no question, or a choice. answered in parallel; no answer sees another.</td><td>a JSON object enforced by a schema. probabilities are numbers it states. answers are written in order and can see each other.</td></tr>
+        </tbody>
+      </table></div>
+    </figure>
+    <figure class="table">
+      <figcaption><span class="label">Table 3</span>Pre-processing</figcaption>
+      <div class="scroll"><table class="defs">
+        <thead><tr><th>set</th><th>what is asked</th><th>how the answer becomes a move</th></tr></thead>
+        <tbody>
+          <tr><td>plain</td><td>"Which move?" once</td><td>the move named</td></tr>
+          <tr><td>guided</td><td>one choice; each option names the tile it lands on</td><td>the move chosen</td></tr>
+          <tr><td>step-1</td><td>4 yes/no: would this move land on a gap?</td><td>lowest probability, rounded to 2 places; ties stay, left, right, jump</td></tr>
+          <tr><td>step-2</td><td>step-1's 4, plus 4: would it leave the runner trapped?</td><td>lowest P(gap) + (1 − P(gap)) · P(trapped)</td></tr>
+          <tr><td>map</td><td>42 yes/no, one per visible tile</td><td>tiles above 0.5 are gaps; the solver plans on that picture</td></tr>
+        </tbody>
+      </table></div>
+    </figure>
+    <p>Neurons talk in spikes, and firing rate (Hz) is how quickly that neuron spikes. The brain has no eyes or legs, so neurons need to be grouped into “adapters” for each function. The “input” represents the eyes and converts tile gaps into neuron spikes. The closer the gap, the faster the firing rate. The “output mapping” correlates grouped output neuron firing into a single move. Here’s how the fly is set up:</p>
+    <figure class="table">
+      <figcaption><span class="label">Table 4</span>Fly neuron groups</figcaption>
+      <div class="scroll"><table class="defs">
+        <thead><tr><th>group</th><th>neurons</th><th>what it does</th></tr></thead>
+        <tbody>
+          <tr><td>eye neurons</td><td><code>LPLC2, LC4, LPLC4, LC22</code></td><td>these groups are cells in the fly’s visual system that react to
+            something rushing towards it aka a “looming” threat. in the game, this signal means there is a gap ahead.</td></tr>
+          <tr><td>steering neurons</td><td><code>DNa01, DNa02, DNb01, DNg13</code></td><td>these groups are cells that carry the “turn” commands
+            from the brain to the body. when the right-hand signals fire more than the left-hand ones, that indicates the player to turn right.
+            vice versa for left.</td></tr>
+          <tr><td>Giant Fiber</td><td><code>DNp01</code></td><td>this signal represents the fly’s escape neurons. when it fires hard enough,
+            the fly jumps.</td></tr>
+        </tbody>
+      </table></div>
+    </figure>
+    <figure class="table">
+      <figcaption><span class="label">Table 5</span>The wiring</figcaption>
+      <div class="scroll"><table class="defs wiring">
+        <thead><tr><th>part</th><th>Fly · looming</th><th>Fly · sideways</th></tr></thead>
+        <tbody>
+          <tr class="group"><td colspan="3">input: what the brain is shown</td></tr>
+          <tr><td>channels</td><td>2: left eye, right eye</td><td>3: left, centre, right</td></tr>
+          <tr><td>eye cells</td><td><code>LPLC2 + LC4</code> in each eye</td><td>centre: <code>LPLC2 + LC4</code> in both eyes<br>sides: <code>LPLC4 + LC22</code> in that eye</td></tr>
+          <tr><td>lanes each channel sees</td>
+            <td><div class="lanes" role="img" aria-label="Lanes −3 to −1 feed the left eye, lane 0 feeds both eyes, lanes +1 to +3 feed the right eye">
+              <span>L</span><span>L</span><span>L</span><span class="me">L R</span><span>R</span><span>R</span><span>R</span>
+              <i>−3</i><i>−2</i><i>−1</i><i>0</i><i>+1</i><i>+2</i><i>+3</i></div>
+              a gap straight ahead drives both eyes equally</td>
+            <td><div class="lanes" role="img" aria-label="Lanes −3 to −1 feed the left channel, lane 0 the centre, lanes +1 to +3 the right">
+              <span>L</span><span>L</span><span>L</span><span class="me">C</span><span>R</span><span>R</span><span>R</span>
+              <i>−3</i><i>−2</i><i>−1</i><i>0</i><i>+1</i><i>+2</i><i>+3</i></div>
+              a gap ahead and a gap to the side reach different cells</td></tr>
+          <tr><td>signal from gaps</td>
+            <td><math display="block"><mi>rate</mi><mo>=</mo><munder><mo>∑</mo><mtext>gaps</mtext></munder><mfrac><mn>250</mn><msup><mi>d</mi><mn>3</mn></msup></mfrac><mtext>&#8202;Hz</mtext></math>
+              a gap twice as far counts ⅛ as much</td>
+            <td><math display="block"><mi>rate</mi><mo>=</mo><munder><mo>∑</mo><mtext>gaps</mtext></munder><mfrac><mn>250</mn><msup><mi>d</mi><mn>2</mn></msup></mfrac><mtext>&#8202;Hz</mtext></math>
+              a gap twice as far counts ¼ as much</td></tr>
+          <tr><td>where</td><td colspan="2"><math><mi>d</mi></math> is how many rows ahead the gap is (1 to 6); each channel adds up every gap in the lanes it sees</td></tr>
+          <tr><td>cap and rounding</td><td>at most 250 Hz, rounded to the nearest 25 Hz</td><td>at most 500 Hz, rounded to the nearest 100 Hz, so a centre gap and a side gap can add up</td></tr>
+          <tr><td>e.g. gap 1 row ahead, own lane</td>
+            <td><math><mfrac><mn>250</mn><msup><mn>1</mn><mn>3</mn></msup></mfrac><mo>=</mo><mn>250</mn></math> → 250 Hz to both eyes</td>
+            <td><math><mfrac><mn>250</mn><msup><mn>1</mn><mn>2</mn></msup></mfrac><mo>=</mo><mn>250</mn></math> → 300 Hz to the centre</td></tr>
+          <tr><td>e.g. gap 2 rows ahead, 1 lane left</td>
+            <td><math><mfrac><mn>250</mn><msup><mn>2</mn><mn>3</mn></msup></mfrac><mo>≈</mo><mn>31</mn></math> → 25 Hz to the left eye</td>
+            <td><math><mfrac><mn>250</mn><msup><mn>2</mn><mn>2</mn></msup></mfrac><mo>=</mo><mn>62.5</mn></math> → 100 Hz to the left channel</td></tr>
+          <tr class="group"><td colspan="3">output mapping: what the brain's output is taken to mean</td></tr>
+          <tr><td>turn signal <math><mi>T</mi></math></td>
+            <td><math display="block"><mi>T</mi><mo>=</mo><msub><mrow><mo>(</mo><mi>DNa01</mi><mo>+</mo><mi>DNb01</mi><mo>)</mo></mrow><mtext>right</mtext></msub><mo>−</mo><msub><mrow><mo>(</mo><mo>…</mo><mo>)</mo></mrow><mtext>left</mtext></msub></math></td>
+            <td><math display="block"><mi>T</mi><mo>=</mo><msub><mrow><mo>(</mo><mi>DNa02</mi><mo>+</mo><mi>DNa01</mi><mo>+</mo><mi>DNg13</mi><mo>)</mo></mrow><mtext>right</mtext></msub><mo>−</mo><msub><mrow><mo>(</mo><mo>…</mo><mo>)</mo></mrow><mtext>left</mtext></msub></math></td></tr>
+          <tr><td>jump signal <math><mi>G</mi></math></td>
+            <td colspan="2"><math display="block"><mi>G</mi><mo>=</mo><mfrac><mrow><msub><mi>DNp01</mi><mtext>left</mtext></msub><mo>+</mo><msub><mi>DNp01</mi><mtext>right</mtext></msub></mrow><mn>2</mn></mfrac></math>
+              Giant Fiber's average across both sides, for both flies</td></tr>
+          <tr class="group"><td colspan="3">the move: what the runner does, checked in order</td></tr>
+          <tr><td>1st check</td>
+            <td><math><mi>G</mi><mo>&gt;</mo><mn>200</mn></math> Hz → jump</td>
+            <td><math><mo>|</mo><mi>T</mi><mo>|</mo><mo>&gt;</mo><mn>40</mn></math> Hz → right if <math><mi>T</mi></math> is positive, left if negative</td></tr>
+          <tr><td>2nd check</td>
+            <td><math><mi>T</mi><mo>&gt;</mo><mn>0</mn></math> → right; <math><mi>T</mi><mo>&lt;</mo><mn>0</mn></math> → left</td>
+            <td><math><mi>G</mi><mo>&gt;</mo><mn>175</mn></math> Hz → jump</td></tr>
+          <tr><td>otherwise</td><td>stay</td><td>stay</td></tr>
+          <tr class="group"><td colspan="3">what is the fly's</td></tr>
+          <tr><td>not ours</td><td colspan="2">the wiring and the model; which kind of cell is a looming detector, a steering neuron or Giant Fiber;
+            and which way each steering neuron turns the fly. each player's input and output mapping are built on these. everything else in this
+            table is ours.</td></tr>
+        </tbody>
+      </table></div>
+    </figure>
+    <p class="note">Note: Steering neurons fire away from a threat and turn the fly towards that direction. A gap on the left activates the
+      left eye, so the right-hand steering neurons fire, and the runner moves right.</p>
+    <figure class="table">
+      <figcaption><span class="label">Table 6</span>Fixed numbers</figcaption>
+      <div class="scroll"><table class="defs wiring">
+        <thead><tr><th>setting</th><th>Fly · looming</th><th>Fly · sideways</th><th>what it means</th></tr></thead>
+        <tbody>
+          <tr><td>gain</td><td>50, 100, 150, <strong>250</strong></td><td>100, <strong>250</strong>, 500</td><td class="mean">the strength of the signal that a gap is approaching</td></tr>
+          <tr><td>falloff</td><td>1, 2, <strong>3</strong>, 4</td><td><strong>2</strong>, 3, 4</td><td class="mean">the speed of decay of the gap signal in relation to distance</td></tr>
+          <tr><td>turn threshold</td><td><strong>0</strong>, 10, 20, 30, 40, 60 Hz</td><td>0, 10, 20, <strong>40</strong> Hz</td><td class="mean">what <math><mi>T</mi></math> must pass before the runner moves left or right</td></tr>
+          <tr><td>jump threshold</td><td>75 to 250 Hz in steps of 25; <strong>200</strong></td><td>100 to 300 Hz in steps of 25; <strong>175</strong></td><td class="mean">what <math><mi>G</mi></math> must pass before the runner jumps</td></tr>
+          <tr><td>settings tried</td>
+            <td><math><mn>4</mn><mo>×</mo><mn>4</mn><mo>×</mo><mn>6</mn><mo>×</mo><mn>8</mn><mo>=</mo><mn>768</mn></math></td>
+            <td><math><mn>3</mn><mo>×</mo><mn>3</mn><mo>×</mo><mn>4</mn><mo>×</mo><mn>9</mn><mo>=</mo><mn>324</mn></math></td><td></td></tr>
+        </tbody>
+      </table></div>
+    </figure>
+    <p>Fly1 squeezes everything it sees into one number per eye. Both eyes are equally triggered by a gap straight ahead, so it never knows which way to dodge. Its fallback is to jump with no information on where that jump lands. Fly2 was given a ‘sideways’ channel. Gaps in the side lanes now go to different sets of eye cells. Gaps ahead and gaps to the side are no longer processed the same.</p>
+  </section>
+  <section data-tab="results" aria-label="Results">
+    <figure data-fig="new"><div class="fig-body"><p class="placeholder">New figure: to come.</p></div><figcaption>New figure, to be explained</figcaption></figure>
+    <figure data-fig="rows"><div class="fig-body"></div><figcaption><span class="label">Fig. 1</span>Rows survived (/150)</figcaption></figure>
+    <figure data-fig="rows-ci"><div class="fig-body"></div><figcaption><span class="label">Fig. 2</span>Rows survived (95%)</figcaption></figure>
+    <p>Jev-step-2 performed the best. While Jev-step-2 beat Jev-step-1, the trend of adding questions didn’t continue to improve success. My best guess: Jev-map processes ~1,823 tile reads per track. Notably, Jev-map never missed gaps if they were in his current lane, and there weren’t any gaps in other lanes. When there were gaps in other lanes, false positives jumped up from 11% to 62%. Jev-step-1 and Jev-step-2 didn’t suffer from this problem. This leads me to believe that Jev-map is failing because of 2 possible reasons: (1) framing of the question and/or (2) 42 tiles processed at once.</p>
+    <figure data-fig="jev-vs-haiku"><div class="fig-body"></div><figcaption><span class="label">Fig. 3</span>Jev vs Haiku</figcaption></figure>
+    <p>Why Haiku-plain wins: “Which move?” is actually two questions in one: (1) what tile am I landing on and (2) is that tile a gap. Jev is built for typed questions. The ‘Choice’ result carries little information. Jev-plain chose to stay in place on 374/415 rows. On moves that weren’t 100% safe, Jev-plain made a fatal decision 25% of the time compared to 8% from Haiku-plain. The evidence shows a general model can combine that view into one answer. When Jev is given narrow questions, like in the other skins (barring Jev-map), it performs much better.</p>
+    <figure data-fig="finished"><div class="fig-body"></div><figcaption><span class="label">Fig. 4</span>Tracks finished</figcaption></figure>
+    <figure data-fig="cost-time"><div class="fig-body"></div><figcaption><span class="label">Fig. 5</span>Rows against cost and time</figcaption></figure>
+    <figure data-fig="scores"><div class="fig-body"></div><figcaption><span class="label">Table 7</span>Cost and speed per player</figcaption></figure>
+    <p>The question mattered more than the model. The sets that worked best compartmentalized the question. The model judges one thing at a time aka “would this move land on a gap?” Jev-plain forces all judgements into a single ‘Choice’ result. Haiku can fold them into one answer.</p>
+    <p>Jev-step-2 vs Haiku-step-2: 43x cheaper and 10x faster. Jev-step-1 and Jev-step-2 are the frontiers; no brain comes close to beating them on rows, price, and time when considered together.</p>
+    <p>The fly performed better than expected for no cost at all. It struggled choosing where to land. The Giant Fiber is an escape reflex, so the wiring had no idea if its landing spot was safe. It only knew that it was running away.</p>
+  </section>
 </article>

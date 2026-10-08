@@ -432,6 +432,18 @@
     is in the cache, so the take cost nothing. Recorded with Cap from a scripted take; the recipe lives with the
     website (`BRAND/website/media-src/brain-runners/`). The page's Explained and stack wait for the user's words.
 
+62. **The Writeup is Zack's, in two subtabs, one source for two hosts** (the user, 2026-10-07). `docs/WRITEUP.html`
+    becomes Competitors and Results, Zack's copy as he wrote it (three typos fixed), with Tables 1–6 from his draft
+    artifact and seven figure slots (`data-fig`: `new`, `rows`, `rows-ci`, `jev-vs-haiku`, `finished`,
+    `cost-time`, `scores`) that `viewer/writeup_figs.js` fills, styled by `viewer/writeup.css`. The same three files
+    serve Brain Runners' Writeup screen and motg.dev/runners, so the source's shape is a contract the website
+    depends on (`bakeoff/writeup.py` checks it). Their numbers are `docs/STUDY.json`, `{players, pairs, notes}` over
+    the held-out tracks 100–199 for the study's players only (GLM Flash left out, decision 56), written by
+    `uv run python -m bakeoff study-json` (free) through the code the Writeup screen uses. Numbers in the prose are
+    typed: this supersedes decision 53's "a number is never typed" rule for the Writeup; `data-stat` still works
+    but is no longer required. The draft's Table 7 ("Jev, asked five ways"), its survival curve and its long prose
+    are left out. Replaces the Claude-drafted Writeup of decision 53.
+
 The build record, including the running notes (`docs/history/NEXT.md`), is in `docs/history/`.
 
 ## Prior art to reuse

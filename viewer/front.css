@@ -223,11 +223,13 @@
 #front .charts-box section + section { margin-top: 32px; }
 
 /* ---- writeup ------------------------------------------------------------------------------------ */
-#front .writeup-body { max-width: var(--measure); padding: 18px 24px 22px; }
+#front .writeup-tabs { padding: 0; margin-bottom: 4px; }
+#front .writeup-body { max-width: 880px; padding: 22px 24px 26px; }
+@media (max-width: 720px) { #front .writeup-body { padding: 14px 12px 18px; } }
 #front .writeup-body h2 { font: 400 var(--size-label)/1.4 var(--font-mono); letter-spacing: var(--tracking-label);
   text-transform: uppercase; color: var(--muted); margin: 28px 0 8px; }
 #front .writeup-body h2:first-child { margin-top: 0; }
-#front .writeup-body p { color: var(--text); margin: 0 0 12px; }
+#front .writeup .wf-chip { font-family: var(--font-mono); } /* #front button sets the body font */
 #front .writeup-body [data-stat] { color: var(--bright); font-family: var(--font-mono); }
 #front .writeup-body [data-stat].bad { color: var(--bad); }
 #front .board-box { width: 660px; flex: none; display: flex; flex-direction: column; gap: 4px; padding: 14px 18px 12px; }

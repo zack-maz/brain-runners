@@ -123,6 +123,7 @@ def test_pairs_say_who_is_ahead_only_when_the_interval_excludes_zero():
     assert (p["common_seeds"], p["wins"], p["ties"], p["losses"], p["verdict"]) == (5, 5, 0, 0, "a ahead")
     assert p["mean_diff"] == 54.0 and p["ci_low"] == pytest.approx(45.907, abs=1e-3) and p["seeds_needed"] == 5
     assert pair_numbers(b, a)["verdict"] == "a ahead"
+    assert (p["mean_a_shared"], p["mean_b_shared"]) == (104.0, 50.0)  # each one's mean on the tracks both ran
     close = pair_numbers(episodes_of(*[("a", s, r) for s, r in enumerate([100, 80, 100, 80, 100])]),
                          episodes_of(*[("b", s, r) for s, r in enumerate([90, 85, 90, 85, 90])]))
     assert close["verdict"] == "can't tell yet" and close["mean_diff"] == 4.0
@@ -134,6 +135,7 @@ def test_pairs_say_who_is_ahead_only_when_the_interval_excludes_zero():
     assert (tied["ties"], tied["verdict"], tied["seeds_needed"]) == (5, "can't tell yet", None)
     apart = pair_numbers(episodes_of(("a", 1, 30)), episodes_of(("b", 2, 40)))
     assert (apart["common_seeds"], apart["mean_diff"], apart["verdict"]) == (0, None, "too few tracks (0)")
+    assert (apart["mean_a_shared"], apart["mean_b_shared"]) == (None, None)
 
 
 def test_the_benchmark_ranks_players_pairs_them_and_lists_what_it_left_out(tmp_path):

@@ -68,3 +68,23 @@ test("every field the Python side allows is one this side formats", () => {
   const listed = py.match(/STAT_FIELDS = \(([^)]*)\)/)[1].match(/"([a-z_]+)"/g).map((s) => s.slice(1, -1));
   assert.deepEqual(Object.keys(Writeup.FIELDS).sort(), listed.sort());
 });
+
+test("the Writeup opens on Competitors, and the arrow keys, Home and End move between its two tabs", () => {
+  assert.deepEqual(Writeup.TABS, ["competitors", "results"]);
+  assert.equal(Writeup.tabOf(undefined), "competitors");
+  assert.equal(Writeup.tabOf("results"), "results");
+  assert.equal(Writeup.tabOf("charts"), "competitors");
+  assert.equal(Writeup.tabStep("competitors", "ArrowRight"), "results");
+  assert.equal(Writeup.tabStep("results", "ArrowRight"), "competitors");
+  assert.equal(Writeup.tabStep("competitors", "ArrowLeft"), "results");
+  assert.equal(Writeup.tabStep("results", "Home"), "competitors");
+  assert.equal(Writeup.tabStep("competitors", "End"), "results");
+  assert.equal(Writeup.tabStep("competitors", "Enter"), null);
+});
+
+test("the tabs are the sections of docs/WRITEUP.html, in its order", () => {
+  const fs = require("node:fs");
+  const html = fs.readFileSync(require("node:path").join(__dirname, "..", "..", "docs", "WRITEUP.html"), "utf8")
+    .replace(/<!--[\s\S]*?-->/g, "");
+  assert.deepEqual([...html.matchAll(/<section data-tab="([a-z]+)"/g)].map((m) => m[1]), Writeup.TABS);
+});

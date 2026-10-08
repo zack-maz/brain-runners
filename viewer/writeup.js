@@ -56,7 +56,22 @@
       (n ? n + " scored so far" : "none scored yet") + "); one cited over every recorded track says so when pointed at.";
   }
 
-  const api = { FIELDS, SCOPES, scopeOf, statText, numbersWhy, scopeLine };
+  // The Writeup's two subtabs (decision 62), in the order docs/WRITEUP.html holds its sections: the one asked for
+  // when it is one, otherwise Competitors. Arrow keys move along the strip and wrap; Home and End go to its ends.
+  const TABS = ["competitors", "results"];
+  function tabOf(wanted) {
+    return TABS.includes(wanted) ? wanted : TABS[0];
+  }
+  function tabStep(current, key) {
+    const at = TABS.indexOf(tabOf(current));
+    if (key === "ArrowRight") return TABS[(at + 1) % TABS.length];
+    if (key === "ArrowLeft") return TABS[(at - 1 + TABS.length) % TABS.length];
+    if (key === "Home") return TABS[0];
+    if (key === "End") return TABS[TABS.length - 1];
+    return null;
+  }
+
+  const api = { FIELDS, SCOPES, scopeOf, statText, numbersWhy, scopeLine, TABS, tabOf, tabStep };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Writeup = api;
 })(typeof window !== "undefined" ? window : globalThis);

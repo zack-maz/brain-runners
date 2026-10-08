@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="viewer.css">
 <link rel="stylesheet" href="bench.css">
 <link rel="stylesheet" href="front.css">
+<link rel="stylesheet" href="writeup.css">
 </head>
 <body>
 <header class="top">
@@ -146,13 +147,17 @@
   </div>
   <div class="panel charts-box" id="charts-bench"></div>
 </section>
-<section id="screen-writeup" class="screen writeup" hidden aria-label="Writeup">
+<section id="screen-writeup" class="screen writeup-screen" hidden aria-label="Writeup">
   <div class="screen-head"><button type="button" class="back label" data-back>&lsaquo; Home</button>
     <h2 class="shout big">WRITEUP</h2><span class="label warn" id="writeup-draft" hidden>Draft &middot; Claude's, to be rewritten</span></div>
   <p class="warn" id="writeup-why" hidden></p>
+  <div class="tabs writeup-tabs" id="writeup-tabs" role="tablist" aria-label="The writeup" hidden>
+    <button type="button" class="label" role="tab" id="writeup-tab-competitors" data-writeup-tab="competitors" aria-selected="true">Competitors</button>
+    <button type="button" class="label" role="tab" id="writeup-tab-results" data-writeup-tab="results" aria-selected="false" tabindex="-1">Results</button>
+  </div>
   <p class="muted small" id="writeup-scope"></p>
   <div id="writeup-numbers-why"></div>
-  <div id="writeup-body" class="panel writeup-body prose"></div>
+  <div id="writeup-body" class="panel writeup-body"></div>
   <p class="muted small" id="writeup-source"></p>
 </section>
 </div>
@@ -316,6 +321,7 @@
 <script src="results.js"></script>
 <script src="records.js"></script>
 <script src="writeup.js"></script>
+<script src="writeup_figs.js"></script>
 <script src="front.js"></script>
 <script src="app.js"></script>
 </body>

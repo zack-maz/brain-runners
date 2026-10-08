@@ -237,7 +237,8 @@ def player_numbers(episodes: list[Episode], max_rows: int, stopped: list[Episode
 def pair_numbers(a: list[Episode], b: list[Episode]) -> dict:
     """A against B on the tracks both completed: per track, A's rows minus B's, and a paired t interval."""
     rows_b = {e.seed: e.rows for e in b}
-    diffs = [e.rows - rows_b[e.seed] for e in a if e.seed in rows_b]
+    shared = [(e.rows, rows_b[e.seed]) for e in a if e.seed in rows_b]
+    diffs = [ra - rb for ra, rb in shared]
     ci = _t_interval(diffs)
     mean = float(np.mean(diffs)) if diffs else None
     name_a, name_b = a[0].player, b[0].player
@@ -257,7 +258,10 @@ def pair_numbers(a: list[Episode], b: list[Episode]) -> dict:
     return {"a": name_a, "b": name_b, "common_seeds": len(diffs), "mean_diff": mean,
             "ci_low": ci[0] if ci else None, "ci_high": ci[1] if ci else None,
             "wins": sum(d > 0 for d in diffs), "ties": sum(d == 0 for d in diffs), "losses": sum(d < 0 for d in diffs),
-            "verdict": verdict, "seeds_needed": needed}
+            "verdict": verdict, "seeds_needed": needed,
+            # each one's mean rows on the tracks both ran, so the pair can be drawn as two bars
+            "mean_a_shared": float(np.mean([ra for ra, _ in shared])) if shared else None,
+            "mean_b_shared": float(np.mean([rb for _, rb in shared])) if shared else None}
 
 
 JEV_PRICE_NOTE = "Jev's USD per track is an estimate (about 0.00003 USD a request, docs/COSTS.md); what it really costs depends on your TypeSafe plan."
