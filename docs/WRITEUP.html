@@ -18,12 +18,12 @@
     <figure class="table">
       <figcaption><span class="label">Table 1</span>The players</figcaption>
       <div class="scroll"><table class="defs">
-        <thead><tr><th>player</th><th>sets</th><th>what it is</th><th>cost</th></tr></thead>
+        <thead><tr><th>player</th><th>skins</th><th>what it is</th><th>cost</th></tr></thead>
         <tbody>
-          <tr><td>Jev</td><td>plain, guided, step-1, step-2, map</td><td>TypeSafe's System One model, <code>jev-latest</code>. answers typed questions with a probability or a choice.</td><td>estimated per request</td></tr>
-          <tr><td>Claude Haiku</td><td>plain, guided, step-1, step-2</td><td><code>claude-haiku-4-5-20251001</code>, asked the same questions, answering in one JSON reply.</td><td>measured per request</td></tr>
-          <tr><td>Fly</td><td>looming, sideways</td><td>Shiu et al.'s whole-brain model on the FlyWire v783 connectome, simulated in Brian2. untrained.</td><td>free</td></tr>
-          <tr><td>Bots</td><td>Solver, Random, Always jump</td><td>simple rules for scale; the solver searches what a player can see. never compared as minds.</td><td>free</td></tr>
+          <tr><td>Jev</td><td>plain, guided, step-1, step-2, map</td><td>TypeSafe's System One model, <code>jev-latest</code></td><td>estimated per request</td></tr>
+          <tr><td>Claude Haiku</td><td>plain, guided, step-1, step-2</td><td><code>claude-haiku-4-5-20251001</code></td><td>measured per request</td></tr>
+          <tr><td>Fly</td><td>looming, sideways</td><td>Shiu et al.'s whole-brain model on the FlyWire v783 connectome, simulated in Brian2</td><td>free</td></tr>
+          <tr><td>Bots</td><td>Solver, Random, Always jump</td><td>simple baselines</td><td>free</td></tr>
         </tbody>
       </table></div>
     </figure>
@@ -34,7 +34,7 @@
         <tbody>
           <tr><td>model</td><td><code>jev-latest</code> (TypeSafe SDK)</td><td><code>claude-haiku-4-5-20251001</code> (Anthropic SDK)</td></tr>
           <tr><td>requests per row</td><td>1, holding every question of the set</td><td>1, one reply holding every answer</td></tr>
-          <tr><td>answers</td><td>typed: a probability per yes/no question, or a choice. answered in parallel; no answer sees another.</td><td>a JSON object enforced by a schema. probabilities are numbers it states. answers are written in order and can see each other.</td></tr>
+          <tr><td>answers</td><td>typed: a probability per yes/no question, or a choice. answered in parallel. answers can’t see each other.</td><td>a JSON object. probabilities are stated numbers. answers are written in order and can see each other.</td></tr>
         </tbody>
       </table></div>
     </figure>
