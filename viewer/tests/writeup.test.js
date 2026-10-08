@@ -69,7 +69,7 @@ test("every field the Python side allows is one this side formats", () => {
   assert.deepEqual(Object.keys(Writeup.FIELDS).sort(), listed.sort());
 });
 
-test("the Writeup opens on Competitors, and the arrow keys, Home and End move between its two tabs", () => {
+test("the Writeup opens on Background, and the arrow keys, Home and End move between its two tabs", () => {
   assert.deepEqual(Writeup.TABS, ["competitors", "results"]);
   assert.equal(Writeup.tabOf(undefined), "competitors");
   assert.equal(Writeup.tabOf("results"), "results");

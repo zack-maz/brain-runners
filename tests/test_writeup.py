@@ -22,7 +22,7 @@ def test_the_writeup_is_zacks_two_tabs_with_known_figure_slots_only():
     assert out["why"] is None and out["draft"] is False and out["source"] == "WRITEUP.html"
     html = COMMENT.sub("", WRITEUP.read_text())  # the header comment shows the contract's syntax
     assert re.findall(r'<section data-tab="([a-z]+)" aria-label="([A-Za-z]+)">', html) == [
-        ("competitors", "Competitors"), ("results", "Results")]
+        ("competitors", "Background"), ("results", "Results")]
     assert html.count('<article class="writeup">') == 1
     # every generated figure once, in Zack's order, all of them on Results; the leaderboard first
     assert figs_in(html) == ["leaderboard", "rows", "jev-vs-haiku", "finished", "cost-time", "scores"]

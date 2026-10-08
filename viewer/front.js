@@ -443,7 +443,7 @@
 
   // ---- writeup ------------------------------------------------------------------------------------
   // docs/WRITEUP.html as it is now (GET /writeup): the repository's own words, shown as written, never a log's.
-  // Its two sections are the two subtabs, Competitors and Results (decision 62), and its figures are drawn by
+  // Its two sections are the two subtabs, Background (id competitors) and Results (decision 62), and its figures are drawn by
   // WriteupFigs from the study's numbers over the held-out tracks, which come with the text (`study`).
   // Its numbers are filled from the charts, fetched with it so they are the numbers of the moment: over the held-out
   // tracks (GET /charts?scope=held_out), which its Method promises, and over every track (GET /charts) for a

@@ -57,7 +57,7 @@
   }
 
   // The Writeup's two subtabs (decision 62), in the order docs/WRITEUP.html holds its sections: the one asked for
-  // when it is one, otherwise Competitors. Arrow keys move along the strip and wrap; Home and End go to its ends.
+  // when it is one, otherwise Background (competitors). Arrow keys move along the strip and wrap; Home and End go to its ends.
   const TABS = ["competitors", "results"];
   function tabOf(wanted) {
     return TABS.includes(wanted) ? wanted : TABS[0];
