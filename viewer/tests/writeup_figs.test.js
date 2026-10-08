@@ -31,10 +31,11 @@ test("the fields the figures read are the ones bakeoff/writeup.py cuts the study
   for (const q of STUDY.pairs) assert.deepEqual(Object.keys(q).sort(), [...Figs.PAIR_FIELDS].sort());
 });
 
-test("every figure slot of docs/WRITEUP.html is one this draws, in order", () => {
+test("every figure slot of docs/WRITEUP.html is one this draws, in its order", () => {
   const html = fs.readFileSync(path.join(REPO, "docs", "WRITEUP.html"), "utf8").replace(/<!--[\s\S]*?-->/g, "");
   const keys = [...html.matchAll(/data-fig="([^"]*)"/g)].map((m) => m[1]);
-  assert.deepEqual(keys, Figs.KEYS);
+  assert.deepEqual(keys, Figs.KEYS.filter((k) => keys.includes(k))); // fig. 2, rows-ci, is drawn but not shown
+  assert.ok(keys.every((k) => Figs.KEYS.includes(k)));
 });
 
 test("players are named as the write-up names them", () => {
