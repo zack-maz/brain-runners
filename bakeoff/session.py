@@ -369,10 +369,26 @@ class LiveSession:
             return cached[1]
 
     def writeup(self) -> dict:
-        """The Writeup page's text (bakeoff/writeup.py), read from docs/ each time, so an edit shows on reload."""
+        """The Writeup page's text (bakeoff/writeup.py), read from docs/ each time, so an edit shows on reload, with
+        the numbers its figures are drawn from (`study`)."""
         from bakeoff.writeup import writeup_of
 
-        return writeup_of()
+        return {**writeup_of(), **self.study()}
+
+    def study(self) -> dict:
+        """{study, study_why}: the Writeup figures' numbers over the held-out tracks (bakeoff.writeup.study_of), by
+        the code `bakeoff study-json` writes docs/STUDY.json with, so the two never differ in shape. Worked out once
+        per state of --out, like the charts."""
+        from bakeoff.writeup import study_charts, study_of  # numpy: only when asked
+
+        with self._charts_lock:
+            held = _files_under(self.out_root)
+            cached = self._charts.get("study")
+            if cached is None or cached[0] != held:
+                cached = (held, study_charts(self.out_root, self.rules))
+                self._charts["study"] = cached
+        study = study_of(cached[1])
+        return {"study": study, "study_why": None if study else cached[1]["why"]}
 
     def find(self, run_id: str | None) -> LiveRun | None:
         """The run with this id, whether it is still going or already closed; without an id, the

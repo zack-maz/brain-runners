@@ -85,3 +85,11 @@ def test_a_stopped_episode_counts_in_failed_and_stopped_but_in_no_other_number(t
     # of the crashed run's, which no stop names
     assert out["bench"]["incomplete"] == [{"player": "glm_plain", "seed": 1002, "run_id": "20260928-090041", "rows": 4}]
     assert out["tracks"] == [1001, 1001] and out["track_count"] == 1  # a stopped track is not a scored one
+
+
+def test_charts_may_keep_some_players_only_as_if_no_other_had_played(tmp_path):
+    write_run(tmp_path, "20260928-090020", episode("fly", 100, 4) + episode("glm_plain", 100, 9)
+              + episode("glm_plain", 101, 9), {"game": V2_BLOCK})
+    out = charts_of(tmp_path, V2, HELD_OUT, keep=lambda p: not p.startswith("glm_"))
+    assert [p["player"] for p in out["bench"]["players"]] == ["fly"] and out["track_count"] == 1
+    assert charts_of(tmp_path, V2, HELD_OUT, keep=lambda p: False)["bench"] is None

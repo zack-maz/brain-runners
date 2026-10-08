@@ -1,0 +1,626 @@
+{
+ "players": [
+  {
+   "player": "solver",
+   "seeds": 100,
+   "mean_rows": 149.16,
+   "ci_low": 147.9726185332949,
+   "ci_high": 150.0,
+   "median_rows": 150.0,
+   "finished": 0.98,
+   "usd_per_track": 0.0,
+   "cost_basis": "free",
+   "s_per_decision_median": null,
+   "rows_per_cent": null,
+   "rows_per_second": null,
+   "failed_rate": 0.0,
+   "ranked": true,
+   "yardstick": true,
+   "frontier_cost": false,
+   "frontier_speed": false,
+   "icon": {
+    "sprite": "bot",
+    "color": "#7AA2F7",
+    "inks": {},
+    "rows": [
+     ".zzzzz.",
+     ".zkzkz.",
+     ".zzzzz.",
+     ".zzzzz.",
+     "..zzz..",
+     "zzzzzzz",
+     "z.zzz.z",
+     "..z.z..",
+     "..z.z.."
+    ],
+    "palette": {
+     "k": "#1A0E0A",
+     "z": "#7AA2F7"
+    }
+   }
+  },
+  {
+   "player": "jev_step2",
+   "seeds": 100,
+   "mean_rows": 139.09,
+   "ci_low": 134.60621597398813,
+   "ci_high": 143.57378402601188,
+   "median_rows": 150.0,
+   "finished": 0.74,
+   "usd_per_track": 0.0037209,
+   "cost_basis": "estimate",
+   "s_per_decision_median": 0.10567250000895001,
+   "rows_per_cent": 373.807412185224,
+   "rows_per_second": 9.409200891583328,
+   "failed_rate": 0.0009675078610013706,
+   "ranked": true,
+   "yardstick": false,
+   "frontier_cost": true,
+   "frontier_speed": true,
+   "icon": {
+    "sprite": "visor",
+    "color": "#B8404F",
+    "inks": {},
+    "rows": [
+     ".jjjjj.",
+     "jjjjjjj",
+     "jVVVvvj",
+     "jjjjjjj",
+     ".jjjjj.",
+     "..jjj..",
+     ".jjjjj.",
+     ".jjjjj.",
+     ".j...j.",
+     ".j...j."
+    ],
+    "palette": {
+     "V": "#B8404F",
+     "j": "#B8404F",
+     "v": "#B8404F"
+    }
+   }
+  },
+  {
+   "player": "jev_step1",
+   "seeds": 100,
+   "mean_rows": 116.69,
+   "ci_low": 110.46864901481936,
+   "ci_high": 122.91135098518063,
+   "median_rows": 119.5,
+   "finished": 0.36,
+   "usd_per_track": 0.0032346,
+   "cost_basis": "estimate",
+   "s_per_decision_median": 0.10233916601282544,
+   "rows_per_cent": 360.7555802881346,
+   "rows_per_second": 9.447869940421892,
+   "failed_rate": 0.0006492301984789464,
+   "ranked": true,
+   "yardstick": false,
+   "frontier_cost": true,
+   "frontier_speed": true,
+   "icon": {
+    "sprite": "visor",
+    "color": "#E6B422",
+    "inks": {},
+    "rows": [
+     ".jjjjj.",
+     "jjjjjjj",
+     "jVVVvvj",
+     "jjjjjjj",
+     ".jjjjj.",
+     "..jjj..",
+     ".jjjjj.",
+     ".jjjjj.",
+     ".j...j.",
+     ".j...j."
+    ],
+    "palette": {
+     "V": "#E6B422",
+     "j": "#E6B422",
+     "v": "#E6B422"
+    }
+   }
+  },
+  {
+   "player": "haiku_step1",
+   "seeds": 15,
+   "mean_rows": 106.8,
+   "ci_low": 84.28825188611827,
+   "ci_high": 129.31174811388172,
+   "median_rows": 107.0,
+   "finished": 0.3333333333333333,
+   "usd_per_track": 0.10573333333333333,
+   "cost_basis": "listed",
+   "s_per_decision_median": 0.8801327499968465,
+   "rows_per_cent": 10.100882723833545,
+   "rows_per_second": 1.0065580411943003,
+   "failed_rate": 0.0031525851197982345,
+   "ranked": true,
+   "yardstick": false,
+   "frontier_cost": false,
+   "frontier_speed": false,
+   "icon": {
+    "sprite": "chat",
+    "color": "#E6B422",
+    "inks": {},
+    "rows": [
+     ".ooooooo.",
+     ".ooooooo.",
+     ".okoookoo",
+     "ooooooooo",
+     ".ooooooo.",
+     ".ooooooo.",
+     ".o.o.o.o.",
+     ".o.o.o.o."
+    ],
+    "palette": {
+     "k": "#1A0E0A",
+     "o": "#E6B422"
+    }
+   }
+  },
+  {
+   "player": "jev_guided",
+   "seeds": 100,
+   "mean_rows": 104.05,
+   "ci_low": 97.47116187225197,
+   "ci_high": 110.62883812774803,
+   "median_rows": 103.0,
+   "finished": 0.16,
+   "usd_per_track": 0.0033672000000000007,
+   "cost_basis": "estimate",
+   "s_per_decision_median": 0.1012846040102886,
+   "rows_per_cent": 309.0104537894986,
+   "rows_per_second": 10.84945454872231,
+   "failed_rate": 0.0014255167498218105,
+   "ranked": true,
+   "yardstick": false,
+   "frontier_cost": false,
+   "frontier_speed": true,
+   "icon": {
+    "sprite": "visor",
+    "color": "#5FA35A",
+    "inks": {},
+    "rows": [
+     ".jjjjj.",
+     "jjjjjjj",
+     "jVVVvvj",
+     "jjjjjjj",
+     ".jjjjj.",
+     "..jjj..",
+     ".jjjjj.",
+     ".jjjjj.",
+     ".j...j.",
+     ".j...j."
+    ],
+    "palette": {
+     "V": "#5FA35A",
+     "j": "#5FA35A",
+     "v": "#5FA35A"
+    }
+   }
+  },
+  {
+   "player": "haiku_step2",
+   "seeds": 15,
+   "mean_rows": 100.2,
+   "ci_low": 84.96453084786313,
+   "ci_high": 115.43546915213687,
+   "median_rows": 90.0,
+   "finished": 0.06666666666666667,
+   "usd_per_track": 0.15893333333333334,
+   "cost_basis": "listed",
+   "s_per_decision_median": 1.019433333494817,
+   "rows_per_cent": 6.304530201342281,
+   "rows_per_second": 0.9049596871178563,
+   "failed_rate": 0.0,
+   "ranked": true,
+   "yardstick": false,
+   "frontier_cost": false,
+   "frontier_speed": false,
+   "icon": {
+    "sprite": "chat",
+    "color": "#B8404F",
+    "inks": {},
+    "rows": [
+     ".ooooooo.",
+     ".ooooooo.",
+     ".okoookoo",
+     "ooooooooo",
+     ".ooooooo.",
+     ".ooooooo.",
+     ".o.o.o.o.",
+     ".o.o.o.o."
+    ],
+    "palette": {
+     "k": "#1A0E0A",
+     "o": "#B8404F"
+    }
+   }
+  },
+  {
+   "player": "haiku_guided",
+   "seeds": 15,
+   "mean_rows": 79.33333333333333,
+   "ci_low": 63.98829390686068,
+   "ci_high": 94.67837275980598,
+   "median_rows": 72.0,
+   "finished": 0.0,
+   "usd_per_track": 0.07097999999999999,
+   "cost_basis": "listed",
+   "s_per_decision_median": 0.6731332910130732,
+   "rows_per_cent": 11.176857330703486,
+   "rows_per_second": 1.3758981131817694,
+   "failed_rate": 0.0,
+   "ranked": true,
+   "yardstick": false,
+   "frontier_cost": false,
+   "frontier_speed": false,
+   "icon": {
+    "sprite": "chat",
+    "color": "#5FA35A",
+    "inks": {},
+    "rows": [
+     ".ooooooo.",
+     ".ooooooo.",
+     ".okoookoo",
+     "ooooooooo",
+     ".ooooooo.",
+     ".ooooooo.",
+     ".o.o.o.o.",
+     ".o.o.o.o."
+    ],
+    "palette": {
+     "k": "#1A0E0A",
+     "o": "#5FA35A"
+    }
+   }
+  },
+  {
+   "player": "fly2",
+   "seeds": 100,
+   "mean_rows": 76.17,
+   "ci_low": 68.81432851261674,
+   "ci_high": 83.52567148738326,
+   "median_rows": 71.5,
+   "finished": 0.05,
+   "usd_per_track": 0.0,
+   "cost_basis": "free",
+   "s_per_decision_median": 0.6938008129945956,
+   "rows_per_cent": null,
+   "rows_per_second": 1.4854225304111448,
+   "failed_rate": 0.0,
+   "ranked": true,
+   "yardstick": false,
+   "frontier_cost": true,
+   "frontier_speed": false,
+   "icon": {
+    "sprite": "fly",
+    "color": "#F7768E",
+    "inks": {
+     "e": "#AEB4BA"
+    },
+    "rows": [
+     "..ee.ee..",
+     "...bbb...",
+     ".w.bbb.w.",
+     "ww.bbb.ww",
+     "wwwbbbwww",
+     "ww.bbb.ww",
+     ".w.bbb.w.",
+     "...b.b...",
+     "..b...b.."
+    ],
+    "palette": {
+     "b": "#3A4046",
+     "e": "#AEB4BA",
+     "w": "#F7768E"
+    }
+   }
+  },
+  {
+   "player": "fly",
+   "seeds": 100,
+   "mean_rows": 64.99,
+   "ci_low": 60.50365753794154,
+   "ci_high": 69.47634246205844,
+   "median_rows": 66.0,
+   "finished": 0.0,
+   "usd_per_track": 0.0,
+   "cost_basis": "free",
+   "s_per_decision_median": 0.6741615000064485,
+   "rows_per_cent": null,
+   "rows_per_second": 1.6059640683722594,
+   "failed_rate": 0.0,
+   "ranked": true,
+   "yardstick": false,
+   "frontier_cost": false,
+   "frontier_speed": false,
+   "icon": {
+    "sprite": "fly",
+    "color": "#AEB4BA",
+    "inks": {},
+    "rows": [
+     "..ee.ee..",
+     "...bbb...",
+     ".w.bbb.w.",
+     "ww.bbb.ww",
+     "wwwbbbwww",
+     "ww.bbb.ww",
+     ".w.bbb.w.",
+     "...b.b...",
+     "..b...b.."
+    ],
+    "palette": {
+     "b": "#3A4046",
+     "e": "#F7768E",
+     "w": "#AEB4BA"
+    }
+   }
+  },
+  {
+   "player": "haiku_plain",
+   "seeds": 15,
+   "mean_rows": 45.46666666666667,
+   "ci_low": 33.855202522493094,
+   "ci_high": 57.07813081084024,
+   "median_rows": 50.0,
+   "finished": 0.0,
+   "usd_per_track": 0.02788,
+   "cost_basis": "listed",
+   "s_per_decision_median": 0.7715324999880977,
+   "rows_per_cent": 16.307986609277858,
+   "rows_per_second": 1.1811331857978171,
+   "failed_rate": 0.0,
+   "ranked": true,
+   "yardstick": false,
+   "frontier_cost": false,
+   "frontier_speed": false,
+   "icon": {
+    "sprite": "chat",
+    "color": "#D97757",
+    "inks": {},
+    "rows": [
+     ".ooooooo.",
+     ".ooooooo.",
+     ".okoookoo",
+     "ooooooooo",
+     ".ooooooo.",
+     ".ooooooo.",
+     ".o.o.o.o.",
+     ".o.o.o.o."
+    ],
+    "palette": {
+     "k": "#1A0E0A",
+     "o": "#D97757"
+    }
+   }
+  },
+  {
+   "player": "jev_map",
+   "seeds": 100,
+   "mean_rows": 42.49,
+   "ci_low": 38.89387470022009,
+   "ci_high": 46.086125299779916,
+   "median_rows": 42.0,
+   "finished": 0.0,
+   "usd_per_track": 0.0052164,
+   "cost_basis": "estimate",
+   "s_per_decision_median": 0.11163116651005112,
+   "rows_per_cent": 81.45464304884595,
+   "rows_per_second": 7.345967821644605,
+   "failed_rate": 0.001610305958132045,
+   "ranked": true,
+   "yardstick": false,
+   "frontier_cost": false,
+   "frontier_speed": false,
+   "icon": {
+    "sprite": "visor",
+    "color": "#1E2227",
+    "inks": {
+     "V": "#7AA2F7"
+    },
+    "rows": [
+     ".jjjjj.",
+     "jjjjjjj",
+     "jVVVvvj",
+     "jjjjjjj",
+     ".jjjjj.",
+     "..jjj..",
+     ".jjjjj.",
+     ".jjjjj.",
+     ".j...j.",
+     ".j...j."
+    ],
+    "palette": {
+     "V": "#7AA2F7",
+     "j": "#1E2227",
+     "v": "#7AA2F7"
+    }
+   }
+  },
+  {
+   "player": "always_jump",
+   "seeds": 100,
+   "mean_rows": 32.56,
+   "ci_low": 29.006504637272016,
+   "ci_high": 36.11349536272799,
+   "median_rows": 33.0,
+   "finished": 0.0,
+   "usd_per_track": 0.0,
+   "cost_basis": "free",
+   "s_per_decision_median": null,
+   "rows_per_cent": null,
+   "rows_per_second": null,
+   "failed_rate": 0.0,
+   "ranked": true,
+   "yardstick": true,
+   "frontier_cost": false,
+   "frontier_speed": false,
+   "icon": {
+    "sprite": "bot",
+    "color": "#E8EBED",
+    "inks": {},
+    "rows": [
+     ".zzzzz.",
+     ".zkzkz.",
+     ".zzzzz.",
+     ".zzzzz.",
+     "..zzz..",
+     "zzzzzzz",
+     "z.zzz.z",
+     "..z.z..",
+     "..z.z.."
+    ],
+    "palette": {
+     "k": "#1A0E0A",
+     "z": "#E8EBED"
+    }
+   }
+  },
+  {
+   "player": "jev_plain",
+   "seeds": 100,
+   "mean_rows": 25.26,
+   "ci_low": 22.10762459293461,
+   "ci_high": 28.412375407065394,
+   "median_rows": 22.0,
+   "finished": 0.0,
+   "usd_per_track": 0.0010024,
+   "cost_basis": "estimate",
+   "s_per_decision_median": 0.10932995800976641,
+   "rows_per_cent": 251.99521149241818,
+   "rows_per_second": 7.888616476748268,
+   "failed_rate": 0.0003990422984836393,
+   "ranked": true,
+   "yardstick": false,
+   "frontier_cost": false,
+   "frontier_speed": false,
+   "icon": {
+    "sprite": "visor",
+    "color": "#B9BEC4",
+    "inks": {},
+    "rows": [
+     ".jjjjj.",
+     "jjjjjjj",
+     "jVVVvvj",
+     "jjjjjjj",
+     ".jjjjj.",
+     "..jjj..",
+     ".jjjjj.",
+     ".jjjjj.",
+     ".j...j.",
+     ".j...j."
+    ],
+    "palette": {
+     "V": "#B9BEC4",
+     "j": "#B9BEC4",
+     "v": "#B9BEC4"
+    }
+   }
+  },
+  {
+   "player": "random",
+   "seeds": 100,
+   "mean_rows": 22.35,
+   "ci_low": 19.53727638374935,
+   "ci_high": 25.162723616250652,
+   "median_rows": 19.0,
+   "finished": 0.0,
+   "usd_per_track": 0.0,
+   "cost_basis": "free",
+   "s_per_decision_median": null,
+   "rows_per_cent": null,
+   "rows_per_second": null,
+   "failed_rate": 0.0,
+   "ranked": true,
+   "yardstick": true,
+   "frontier_cost": false,
+   "frontier_speed": false,
+   "icon": {
+    "sprite": "bot",
+    "color": "#8A9097",
+    "inks": {},
+    "rows": [
+     ".zzzzz.",
+     ".zkzkz.",
+     ".zzzzz.",
+     ".zzzzz.",
+     "..zzz..",
+     "zzzzzzz",
+     "z.zzz.z",
+     "..z.z..",
+     "..z.z.."
+    ],
+    "palette": {
+     "k": "#1A0E0A",
+     "z": "#8A9097"
+    }
+   }
+  }
+ ],
+ "pairs": [
+  {
+   "a": "jev_step1",
+   "b": "haiku_step1",
+   "common_seeds": 15,
+   "mean_diff": 29.4,
+   "ci_low": 2.118837927976749,
+   "ci_high": 56.68116207202325,
+   "wins": 9,
+   "ties": 4,
+   "losses": 2,
+   "mean_a_shared": 136.2,
+   "mean_b_shared": 106.8
+  },
+  {
+   "a": "jev_step2",
+   "b": "haiku_step2",
+   "common_seeds": 15,
+   "mean_diff": 28.0,
+   "ci_low": 1.2588907565256626,
+   "ci_high": 54.74110924347434,
+   "wins": 11,
+   "ties": 1,
+   "losses": 3,
+   "mean_a_shared": 128.2,
+   "mean_b_shared": 100.2
+  },
+  {
+   "a": "jev_guided",
+   "b": "haiku_guided",
+   "common_seeds": 15,
+   "mean_diff": 32.6,
+   "ci_low": 4.868795546738845,
+   "ci_high": 60.33120445326116,
+   "wins": 12,
+   "ties": 0,
+   "losses": 3,
+   "mean_a_shared": 111.93333333333334,
+   "mean_b_shared": 79.33333333333333
+  },
+  {
+   "a": "jev_plain",
+   "b": "haiku_plain",
+   "common_seeds": 15,
+   "mean_diff": -17.2,
+   "ci_low": -25.711289158691365,
+   "ci_high": -8.688710841308634,
+   "wins": 1,
+   "ties": 3,
+   "losses": 11,
+   "mean_a_shared": 28.266666666666666,
+   "mean_b_shared": 45.46666666666667
+  }
+ ],
+ "notes": [
+  "Time comes from live decisions only: a cache hit records none.",
+  "Intervals are 95% t intervals over tracks (for a pair, of the per-track differences). Below 5 tracks there is no interval and no verdict.",
+  "Rows stop at the finish line, so a player that finishes most tracks is understated and two finishers tie.",
+  "Tracks needed: how many tracks would give an 80% chance of a verdict if the difference and its spread stayed as seen so far. An estimate, not a promise.",
+  "USD per track counts every decision at the listed price (measured, rounded up), cached answers included, so a replay never looks cheaper. GLM Flash's free tier, the flies and the bots cost nothing.",
+  "A frontier is the players no other beats on both axes: more rows for less money, or for less time. It names no single winner; the bots are there for scale and are never on it, nor is a player with fewer than 5 tracks.",
+  "91 pairs are compared at 95% each: even with no real differences about 4.5 of them would show a verdict by chance. Read a single verdict as a lead, not a result.",
+  "Jev's USD per track is an estimate (about 0.00003 USD a request, docs/COSTS.md); what it really costs depends on your TypeSafe plan."
+ ]
+}

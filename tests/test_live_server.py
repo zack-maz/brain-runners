@@ -253,7 +253,8 @@ def test_what_was_recorded_is_served_behind_the_token(server):
     assert status == 200 and held_out["scope"] == "held_out" and held_out["bench"] is None
     assert payload(httpd, "GET", "/charts?scope=practice")[0] == 400
     status, writeup = payload(httpd, "GET", "/writeup")
-    assert status == 200 and writeup["draft"] is True and "<article" in writeup["html"]
+    assert status == 200 and writeup["draft"] is False and '<article class="writeup">' in writeup["html"]
+    assert writeup["study"] is None and writeup["study_why"]  # track 1001 is not a held-out one
     for path in (f"/results?run={run_id}", f"/replay?run={run_id}", "/records", "/charts", "/writeup"):
         assert get(httpd, path, token=None)[0].status == 403
         assert get(httpd, path, token="wrong")[0].status == 403

@@ -9,6 +9,7 @@ and which. The Writeup asks for the held-out tracks alone (`tracks=HELD_OUT`), s
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 
 from bakeoff.bench import Source, benchmark, load
@@ -33,12 +34,20 @@ def _merged(sources: list[Source], stopped: list[Source]) -> list[Source]:
     return [Source(run_dir, episodes=pairs) for run_dir, pairs in episodes.items()]
 
 
-def charts_of(out_root: Path | str, rules: Rules, tracks: tuple[int, int] | None = None) -> dict:
+def _kept(sources: list[Source], keep: Callable[[str], bool]) -> list[Source]:
+    """The sources with only the episodes of the players `keep` takes, and none left empty."""
+    kept = [Source(s.run_dir, s.players, frozenset((p, seed) for p, seed in s.episodes if keep(p))) for s in sources]
+    return [s for s in kept if s.episodes]
+
+
+def charts_of(out_root: Path | str, rules: Rules, tracks: tuple[int, int] | None = None,
+              keep: Callable[[str], bool] | None = None) -> dict:
     """{game, max_rows, scope, tracks, track_count, held_out, bench (bench.benchmark's numbers, or None), why,
     left_out, unreadable, tuned_on, tuned_tracks}. Like `benchmark_of`, it answers with a reason instead of
     failing. `tracks` narrows it to those seeds (first and last): `HELD_OUT` is the scope "held_out", None is "all".
     In the answer, `tracks` is the first and last track scored and `track_count` how many different ones;
-    `tuned_tracks` is, per frozen player, how many of its tracks here are ones its numbers were fitted on."""
+    `tuned_tracks` is, per frozen player, how many of its tracks here are ones its numbers were fitted on. `keep`, when
+    given, scores only the players it takes, as if no other had played (the Writeup's study, decision 62)."""
     about = {"held_out": list(HELD_OUT), "tuned_on": TUNED_ON,
              "scope": "all" if tracks is None else "held_out" if tuple(tracks) == HELD_OUT else "tracks"}
     out_root = Path(out_root)
@@ -46,6 +55,8 @@ def charts_of(out_root: Path | str, rules: Rules, tracks: tuple[int, int] | None
         return {"game": rules.version, "max_rows": rules.max_rows, "tracks": None, "track_count": 0, "bench": None,
                 "why": "no run has been recorded yet.", "left_out": 0, "unreadable": [], "tuned_tracks": {}, **about}
     sources, left_out, unreadable, stopped = pick(out_root, rules, tracks)
+    if keep is not None:
+        sources, stopped = _kept(sources, keep), _kept(stopped, keep)
     seeds = {seed for source in sources for _, seed in source.episodes}
     tuned = {player: sum(1 for source in sources for p, seed in source.episodes if p == player and lo <= seed <= hi)
              for player, (lo, hi) in TUNED_ON.items()}

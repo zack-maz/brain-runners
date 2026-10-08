@@ -20,6 +20,7 @@ from bakeoff.replay import build_replay, empty_replay
 from bakeoff.runner import RunAborted, Runner
 from bakeoff.session import FIRST_PRACTICE_SEED, LiveSession, LobbyError
 from bakeoff.view import render_html
+from bakeoff.writeup import STUDY as STUDY_JSON
 
 CAPPED = tuple(name for name in PAID if name not in UNCAPPED)
 UNCAPPED_HELP = (f"{', '.join(UNCAPPED)} play without a cap, counted and priced" if UNCAPPED
@@ -73,6 +74,11 @@ def _parser() -> argparse.ArgumentParser:
                        help="the page to write (default bench.html); the numbers go next to it as .json")
     bench.add_argument("--pair", action="append", default=[], metavar="A,B",
                        help="show only these pairs in the terminal (repeatable); the page shows every pair")
+    study = sub.add_parser("study-json", help="write the Writeup's figure numbers over the held-out tracks "
+                                              "(docs/STUDY.json) from the recorded runs; spends nothing")
+    study.add_argument("--out", default="runs", help="the run directories' root (default runs)")
+    study.add_argument("--output", default=str(STUDY_JSON), help="the file to write (default docs/STUDY.json)")
+    _add_game_arguments(study)
     live = sub.add_parser("live", help="play one track in real time and watch it in the browser (loopback only); "
                                        "the run is recorded like any other")
     live.add_argument("--players", help=f"comma-separated; available: {sorted(REGISTRY)}. Without it the page "
@@ -190,11 +196,11 @@ def _live(args) -> int:
 def _warm_charts(session) -> None:
     """Works the charts out before the page asks, unless a run has begun: its decisions are timed, and this would
     share the process with them."""
-    for scope in ("held_out", "all"):
+    for scope in ("held_out", "all", "study"):
         if session.run is not None:
             return
         try:
-            session.charts(scope)
+            session.study() if scope == "study" else session.charts(scope)
         except Exception as e:  # the page asks again and says why
             print(f"charts not worked out ahead ({scope}): {e}", file=sys.stderr)
 
@@ -309,6 +315,31 @@ def _bench(args) -> int:
     return 0
 
 
+def _study_json(args) -> int:
+    """docs/STUDY.json: the held-out charts cut to what the Writeup's figures read, by the code the Writeup screen
+    uses (bakeoff.writeup.study_of), so motg.dev/runners draws the same numbers as Brain Runners."""
+    from bakeoff.writeup import study_charts, study_of
+
+    try:
+        rules = _rules(args)
+    except ValueError as e:
+        print(e, file=sys.stderr)
+        return 2
+    charts = study_charts(args.out, rules)
+    study = study_of(charts)
+    if study is None:
+        print(f"no numbers over the held-out tracks: {charts['why']}", file=sys.stderr)
+        return 2
+    try:
+        Path(args.output).write_text(json.dumps(study, indent=1) + "\n", encoding="utf-8")
+    except OSError as e:
+        print(f"cannot write {e.filename}: {e.strerror}", file=sys.stderr)
+        return 2
+    print(f"study: {args.output} ({len(study['players'])} players, {len(study['pairs'])} pairs, "
+          f"{charts['track_count']} tracks)")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if getattr(args, "max_requests", 0) < 0:  # checked here: a lineup of Jev alone builds no capped budget to refuse it
@@ -316,6 +347,8 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     if args.command == "bench":
         return _bench(args)
+    if args.command == "study-json":
+        return _study_json(args)
     if args.command == "report":
         try:
             _print_report(args.run_dir)

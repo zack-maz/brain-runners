@@ -432,6 +432,35 @@
     is in the cache, so the take cost nothing. Recorded with Cap from a scripted take; the recipe lives with the
     website (`BRAND/website/media-src/brain-runners/`). The page's Explained and stack wait for the user's words.
 
+62. **The Writeup is Zack's, in two subtabs, one source for two hosts** (the user, 2026-10-07). `docs/WRITEUP.html`
+    becomes Competitors and Results, Zack's copy as he wrote it (three typos fixed), with Tables 1–6 from his draft
+    artifact and seven figure slots (`data-fig`: `new`, `rows`, `rows-ci`, `jev-vs-haiku`, `finished`,
+    `cost-time`, `scores`) that `viewer/writeup_figs.js` fills, styled by `viewer/writeup.css`. The same three files
+    serve Brain Runners' Writeup screen and motg.dev/runners, so the source's shape is a contract the website
+    depends on (`bakeoff/writeup.py` checks it). Their numbers are `docs/STUDY.json`, `{players, pairs, notes}` over
+    the held-out tracks 100–199 for the study's players only (GLM Flash left out, decision 56), written by
+    `uv run python -m bakeoff study-json` (free) through the code the Writeup screen uses. Numbers in the prose are
+    typed: this supersedes decision 53's "a number is never typed" rule for the Writeup; `data-stat` still works
+    but is no longer required. The draft's Table 7 ("Jev, asked five ways"), its survival curve and its long prose
+    are left out. Replaces the Claude-drafted Writeup of decision 53.
+
+63. **The Writeup's Results opens on a leaderboard** (the user, 2026-10-08: "a Mario Kart style leaderboard with a
+    podium for top 3 then a list in order of everyone else"). The placeholder slot `new` becomes
+    `data-fig="leaderboard"`, drawn by `viewer/writeup_figs.js` from the study's numbers: the three best minds by mean
+    rows on a podium (2nd, 1st, 3rd), then the rest in order with how many tracks each ran. Every player is ranked,
+    the bots too (so the solver is 1st), and each wears its skin: a pixel icon under its name on the podium and to
+    the left of it in the list. `docs/STUDY.json` carries each player's icon (`icon`: its sprite's rows and the
+    colour of each ink, from `viewer/sprites.js` and `bakeoff/roster.py`), so motg.dev/runners needs no change.
+
+64. **The Writeup as Zack edited it on the page** (the user, 2026-10-08). The first tab is called Background; its id
+    stays `competitors`, so the contract of decision 62 holds, and motg.dev/runners names each tab by its section's
+    `aria-label`. Fig. 2 (rows survived with 95% intervals) is left out of Results (`viewer/writeup_figs.js` still
+    draws `rows-ci` for a slot that asks); the other figures keep their numbers. Every table and figure caption is
+    lowercase. The setup list, Tables 1 and 2 and Table 5's group rows (input, output mapping, move order) are Zack's
+    wording; Table 5 no longer has its "what is the fly's / not ours" rows, so in the writeup what is ours is said by
+    the tables themselves, and in Brain Runners by Records' "What is ours". Prose, figures and tables share one 760px
+    column. The page went to motg.dev/runners from the website's `main` (merge `b8b5bae`).
+
 The build record, including the running notes (`docs/history/NEXT.md`), is in `docs/history/`.
 
 ## Prior art to reuse
